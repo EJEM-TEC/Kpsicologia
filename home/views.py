@@ -2,7 +2,9 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.views import LoginView, PasswordResetView, PasswordChangeView, PasswordResetConfirmView
 from home.forms import RegistrationForm, LoginForm, UserPasswordResetForm, UserSetPasswordForm, UserPasswordChangeForm
 from django.contrib.auth import logout
-
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import Usuario
 # Create your views here.
 
 # Pages
@@ -24,6 +26,9 @@ def rtl(request):
 
 def profile(request):
   return render(request, 'pages/profile.html', { 'segment': 'profile' })
+
+def users(request):
+  return render(request, 'pages/page_user.html', {'segment': 'user'})
 
 
 # Authentication
@@ -61,3 +66,9 @@ class UserPasswordResetConfirmView(PasswordResetConfirmView):
 class UserPasswordChangeView(PasswordChangeView):
   template_name = 'accounts/password_change.html'
   form_class = UserPasswordChangeForm
+
+# e aqui
+#@login_required -> tirar o comando depois que o login estiver pronto
+def lista_usuarios(request):
+  users = users.objects.all()
+  return render(request, 'users/page_user.html', {'usuarios': users})

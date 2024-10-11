@@ -10,6 +10,7 @@ urlpatterns = [
     path('vr/', views.vr, name='vr'),
     path('rtl/', views.rtl, name='rtl'),
     path('profile/', views.profile, name='profile'),
+    path('users/', views.users, name='users'),
 
     # Authentication
     path('accounts/login/', views.UserLoginView.as_view(), name='login'),
