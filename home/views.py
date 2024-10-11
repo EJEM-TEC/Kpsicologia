@@ -5,6 +5,7 @@ from django.contrib.auth import logout
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from .models import Usuario
+# from .models import User
 # Create your views here.
 
 # Pages
@@ -27,8 +28,9 @@ def rtl(request):
 def profile(request):
   return render(request, 'pages/profile.html', { 'segment': 'profile' })
 
-def users(request):
-  return render(request, 'pages/page_user.html', {'segment': 'user'})
+
+#def users(request):
+#  return render(request, 'pages/page_user.html', {'segment': 'user'})
 
 
 # Authentication
@@ -72,3 +74,41 @@ class UserPasswordChangeView(PasswordChangeView):
 def lista_usuarios(request):
   users = users.objects.all()
   return render(request, 'users/page_user.html', {'usuarios': users})
+
+def users(request):
+    novo_user = Usuario()
+    
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        idade = request.POST.get('idade')
+        email = request.POST.get('email')
+        cargo = request.POST.get('cargo')
+        telefone = request.POST.get('telefone')  # Verifique se isso está no seu formulário HTML
+        rg = request.POST.get('rg')
+        
+        # Verificação dos campos obrigatórios
+        if not username or not email or not idade or not telefone:
+            return render(request, 'pages/page_user.html', {
+                'error': 'Por favor, preencha todos os campos obrigatórios!',
+                'users': Usuario.objects.all()
+            })
+        
+        try:
+            novo_user.username = username
+            novo_user.idade = int(idade)
+            novo_user.email = email
+            novo_user.cargo = cargo
+            novo_user.telefone = telefone
+            novo_user.rg = rg
+            novo_user.save()
+            
+            return redirect('users')
+        except ValueError:
+            return render(request, 'pages/page_user.html', {
+                'error': 'Idade deve ser um número!',
+                'users': Usuario.objects.all()
+            })
+    
+    users = Usuario.objects.all()
+    
+    return render(request, 'pages/page_user.html', {'users': users})

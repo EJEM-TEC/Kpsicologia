@@ -2,55 +2,47 @@
 {% load static %}
 
 {% block content %}
-<div>
-    <div class="lista_users">
+<div class="container">
+    <form method="POST" action="{% url 'users' %}">
+        {% csrf_token %}
         <div class="campos">
-        <!-- colocar uma borada nessa div -->
-            <!-- para inserção de usuários -->
             <h1>Inserção de usuários</h1>
-            <!-- terminar 11/10 -->
-                <form method="GET">
-                   
-                    <label for="username">Nome:</label>
-                    <input type="text" id="username" name="username" required>
+            <label for="username">Nome:</label>
+            <input type="text" id="username" name="username" required>
 
-                    <label for="number">Idade:</label>
-                    <input type="number" id="idade" name="idade" required>
+            <label for="number">Idade:</label>
+            <input type="number" id="idade" name="idade" required>
 
-                    <label for="email"> E-mail:</label>
-                    <input type="email" id="email" name="email" required>
+            <label for="email"> E-mail:</label>
+            <input type="email" id="email" name="email" required>
 
-                    <label for="cargo">Cargo:</label>
-                    <input type="text" id="cargo" name="cargo" required>
+            <label for="cargo">Cargo:</label>
+            <input type="text" id="cargo" name="cargo" required>
 
-                    <label for="telefone">Telefone:</label>
-                    <input type="number" id="Telefone" name="Telefone" required>
+            <label for="telefone">Telefone:</label>
+            <input type="number" id="telefone" name="telefone" required>
 
-                    <label for="number">RG:</label>
-                    <input type="number" id="RG" name="RG" required> 
+            <label for="number">RG:</label>
+            <input type="number" id="rg" name="rg" required> 
 
-                    <div class="cadastrar">
-                        <button>Cadastrar</button>
-                    </div>
-
-                    <style>
-                        .campos {
-                            width: 35%;
-                            border: 1px solid #f4f4f4;
-                        }
-                        .cadastrar{
-                            width: auto;
-                            padding-top: 10px;
-                            padding-bottom: 10px;
-                            border: 1px solid #f4f4f4;
-                        }
-                    </style>
-                </form>
+            <button type="submit" class="cadastrar">Cadastrar</button>
+        </form>
+            <style>
+            .campos {
+                width: 35%;
+                border: 1px solid #f4f4f4;
+            }
+            .cadastrar{
+                width: auto;
+                padding-top: 10px;
+                padding-bottom: 10px;
+                border: 1px solid #000000;
+            }
+            </style>
         </div>
-        <h1>Página de usuários</h1>
-        <!-- lista de usuários que vão atualizando conforme usuários forem cadastrados -->
-         <!-- lista dentro de um for loop -->
-         <table>
+        <div>
+            <h1>Página de usuários</h1>
+            <table>
             <style>
                 table {
                     width: 100%;
@@ -70,41 +62,40 @@
                     border: 1px solid #f4f4f4;
                 }
             </style>
-             <thead>
-                 <tr>
-                     <th>id</th>
-                     <th>nome</th>
-                     <th>idade</th>
-                     <th>email</th>
-                     <th>cargo</th>
-                     <th>telefone</th>
-                     <th>RG</th>
-                 </tr>
-             </thead>
-             <tbody>
-                 {% for user in users %}
-                 <tr>
-                     <td>{{ user.id }}</td>
-                     <td>{{ user.nome }}</td>
-                     <td>{{ user.idade }}</td>
-                     <td>{{ user.email }}</td>
-                     <td>{{ user.cargo }}</td>
-                     <td >{{ user.telefone }}</td>
-                     <td>{{ user.RG }}</td>
-                     <td>
-                        <button>Editar</button>
-                        <button>Deletar</button>
-                    </td>
-                 </tr>
-                 {% empty %}
-                 <tr>
-                     <td colspan="15">Nenhum usuário encontrado.</td>
-                 </tr>
-                 {% endfor %}
-             </tbody>
-         </table>
-     </body>
-    </div>
+            <thead>
+                <tr>
+                    <th>id</th>
+                    <th>nome</th>
+                    <th>idade</th>
+                    <th>email</th>
+                    <th>cargo</th>
+                    <th>telefone</th>
+                    <th>RG</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.id_usuario}}</td>
+                <td>{{ user.username}}</td>
+                <td>{{ user.idade}}</td>
+                <td>{{ user.email}}</td>
+                <td>{{ user.cargo}}</td>
+                <td >{{ user.telefone}}</td>
+                <td>{{ user.rg}}</td>
+                <td>
+                    <button>Editar</button>
+                    <button>Deletar</button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="15">Nenhum usuário encontrado.</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+            </table>
+        </div>
 </div>
 
 
