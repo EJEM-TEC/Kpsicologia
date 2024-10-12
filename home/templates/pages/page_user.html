@@ -2,103 +2,151 @@
 {% load static %}
 
 {% block content %}
-<div class="container">
-    <form method="POST" action="{% url 'users' %}">
-        {% csrf_token %}
-        <div class="campos">
-            <h1>Inserção de usuários</h1>
-            <label for="username">Nome:</label>
-            <input type="text" id="username" name="username" required>
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-4">
+                    <div class="card-header pb-0">
+                      <h6>Cadastrar Usuário</h6>
+                    </div>
+                    <div class="card-body p-4">
+                      <form method="POST" action="{% url 'users' %}">
+                        {% csrf_token %}
 
-            <label for="number">Idade:</label>
-            <input type="number" id="idade" name="idade" required>
+                        <div class="row">
+                            <div class="col-md-6">
+                              <div class="form-group">
+                                <label for="username">Nome</label>
+                                <input type="text" class="form-control" id="username" name="username" required>
+                              </div>
+                            </div>
+                            <div class="col-md-6">
+                              <div class="form-group">
+                                <label for="idade">Idade</label>
+                                <input type="number" class="form-control" id="idade" name="idade" required>
+                              </div>
+                            </div>
+                        </div>
 
-            <label for="email"> E-mail:</label>
-            <input type="email" id="email" name="email" required>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="email"> E-mail</label>
+                                    <input type="email"class="form-control" id="email" name="email" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="cargo">Cargo</label>
+                                    <select class="form-control" id="cargo" name="cargo">
+                                      <option value="administrador">Administrador</option>
+                                      <option value="secretaria">Secretária</option>
+                                      <option value="psicologa">Psicóloga</option>
+                                    </select>
+                                  </div>
+                            </div>
+                            
+                        </div>
 
-            <label for="cargo">Cargo:</label>
-            <input type="text" id="cargo" name="cargo" required>
+                        <div class="row">
+                            <div class="col-md-6">
+                              <div class="form-group">
+                                <label for="telefone">Telefone</label>
+                                <input type="number" class="form-control" id="telefone" name="telefone" required>
+                              </div>
+                            </div>
+                            <div class="col-md-6">
+                              <div class="form-group">
+                                <label for="number">RG</label>
+                                <input type="number" class="form-control" id="rg" name="rg" required> 
+                              </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-center gap-4">
+                                    <button type="submit" class="btn btn-primary">Registrar</button>
+                                    <button type="reset" class="btn btn-secondary">Resetar</button>
+                                </div>
+                            </div>
+                        </div> 
+                      </form>
+                    </div>
+                  </div>
 
-            <label for="telefone">Telefone:</label>
-            <input type="number" id="telefone" name="telefone" required>
+            </div>
 
-            <label for="number">RG:</label>
-            <input type="number" id="rg" name="rg" required> 
-
-            <button type="submit" class="cadastrar">Cadastrar</button>
-        </form>
-            <style>
-            .campos {
-                width: 35%;
-                border: 1px solid #f4f4f4;
-            }
-            .cadastrar{
-                width: auto;
-                padding-top: 10px;
-                padding-bottom: 10px;
-                border: 1px solid #000000;
-            }
-            </style>
         </div>
-        <div>
-            <h1>Página de usuários</h1>
-            <table>
-            <style>
-                table {
-                    width: 100%;
-                    border-collapse: collapse;
-                }
-                th, td {
-                    padding: 10px;
-                    border: 1px solid #000000;
-                    text-align: center;
-                }
-                th {
-                    background-color: #ffffff;
-                }
-                .lista_users{
-                    width: 95%;
-                    padding: 10px;
-                    border: 1px solid #f4f4f4;
-                }
-            </style>
-            <thead>
-                <tr>
-                    <th>id</th>
-                    <th>nome</th>
-                    <th>idade</th>
-                    <th>email</th>
-                    <th>cargo</th>
-                    <th>telefone</th>
-                    <th>RG</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for user in users %}
-            <tr>
-                <td>{{ user.id_usuario}}</td>
-                <td>{{ user.username}}</td>
-                <td>{{ user.idade}}</td>
-                <td>{{ user.email}}</td>
-                <td>{{ user.cargo}}</td>
-                <td >{{ user.telefone}}</td>
-                <td>{{ user.rg}}</td>
-                <td>
-                    <button>Editar</button>
-                    <button>Deletar</button>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="15">Nenhum usuário encontrado.</td>
-            </tr>
-            {% endfor %}
-            </tbody>
-            </table>
+        <div class="row">
+            <div class="col-12">
+
+                <div class="card mb-4">
+                    <div class="card-header pb-0">
+                      <h6>Usuários cadastrados</h6>
+                    </div>
+                    <div class="card-body px-0 pt-0 pb-2">
+                      <div class="table-responsive p-0">
+                        <table class="table align-items-center mb-0">
+                          <thead>
+                            <tr>
+                              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Usuário</th>
+                              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ">Idade</th>
+                              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Cargo</th>
+                              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Telefone</th>
+                              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">RG</th>
+                              <th class="text-secondary opacity-7">Ações</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                           {% for user in users %}
+                            <tr>
+                              <td class="align-middle">
+                                <div class="d-flex px-2 py-1 border-primary justify-content-center">
+                                  <div class="d-flex flex-column justify-content-center">
+                                    <h6 class="mb-0 text-sm text-center">{{user.username}}</h6>
+                                    <p class="text-xs text-secondary mb-0 text-center">{{user.email}}</p>
+                                  </div>
+                                </div>
+                              </td>
+                              <td class="align-middle text-center">
+                                <p class="text-xs font-weight-bold mb-0 ">{{user.idade}}</p>
+                              </td>
+                              <td class="align-middle text-center text-sm">
+                                <span class="badge badge-sm bg-gradient-success">{{user.cargo}}</span>
+                              </td>
+                              <td class="align-middle text-center">
+                                <span class="text-secondary text-xs font-weight-bold">{{user.telefone}}</span>
+                              </td>
+                              <td class="align-middle text-center">
+                                <a href="javascript:;" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
+                                    {{user.rg}}
+                                </a>
+                              </td>
+                              <td class="align-middle">
+                                <a href="javascript:;" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
+                                  Editar
+                                </a>
+                                <a href="javascript:;" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
+                                    Remover
+                                </a>
+                              </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td>
+                                    <p class="text-secondary font-weight-bold text-xs">
+                                        Nenhum usuário encontrado.
+                                    </p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+
+            </div>
+
         </div>
-</div>
-
-
-{% include "includes/footer.html" %}
 
 {% endblock content %}
