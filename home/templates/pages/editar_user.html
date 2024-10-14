@@ -2,32 +2,42 @@
 {% load static %}
 
 {% block content %}
-<h1> Editar Usuário</h1>
-<div>
-    <div>
-        <form method="POST">
-            <label for="username">Nome:</label>
-                <input type="text" id="username" name="username" required>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Usuário</title>
+</head>
+<body>
+    <h1>Editar Usuário</h1>
+    
+    {% if error %}
+    <p style="color: red;">{{ error }}</p>
+    {% endif %}
+    
+    <form method="POST">
+        {% csrf_token %}
+        <label for="username">Nome de usuário:</label>
+        <input type="text" id="username" name="username" value="{{ user.username }}" required><br><br>
 
-                <label for="number">Idade:</label>
-                <input type="number" id="idade" name="idade" required>
+        <label for="idade">Idade:</label>
+        <input type="number" id="idade" name="idade" value="{{ user.idade }}" required><br><br>
 
-                <label for="email"> E-mail:</label>
-                <input type="email" id="email" name="email" required>
+        <label for="cargo">Cargo:</label>
+        <input type="text" id="cargo" name="cargo" value="{{ user.cargo }}" required><br><br>
 
-                <label for="cargo">Cargo:</label>
-                <input type="text" id="cargo" name="cargo" required>
+        <label for="telefone">Telefone:</label>
+        <input type="text" id="telefone" name="telefone" value="{{ user.telefone }}" required><br><br>
 
-                <label for="telefone">Telefone:</label>
-                <input type="number" id="Telefone" name="Telefone" required>
+        <label for="rg">RG:</label>
+        <input type="text" id="rg" name="rg" value="{{ user.rg }}" required><br><br>
 
-                <label for="number">RG:</label>
-                <input type="number" id="RG" name="RG" required>
-                
-                <button type="submit"> Salvar Edição</button>
-        </form>
-    </div>
-</div>
+        <button type="submit">Salvar</button>
+    </form>
+
+    <a href="{% url 'page_user' %}">Voltar</a>
+</body>
+</html>
 {% include "includes/footer.html" %}
 
 {% endblock content %}

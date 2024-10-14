@@ -1,0 +1,26 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deletar Usuário</title>
+</head>
+<body>
+    <h1>Deletar Usuário</h1>
+    
+    <p>Tem certeza de que deseja deletar o usuário <strong>{{ user.username }}</strong>?</p>
+    
+    <form method="POST">
+        {% csrf_token %}
+        <button type="submit">Sim, deletar</button>
+        <a href="{% url 'page_user' %}">Cancelar</a>
+    </form>
+</body>
+</html>
+
+{% include "includes/footer.html" %}
+
+{% endblock_ content %}

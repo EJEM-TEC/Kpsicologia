@@ -163,4 +163,35 @@ def login(request):
             login_django(request, user)
             return redirect('index')
         return HttpResponse("Usuário ou senha inválidos")
+    
+def editar_user(request, id_usuario):
+    user = get_object_or_404(User, id=id_usuario)
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        idade = request.POST.get('idade')
+        cargo = request.POST.get('cargo')
+        telefone = request.POST.get('telefone')
+        rg = request.POST.get('rg')
+
+        if username and idade and cargo and telefone and rg:
+            user.username = username
+            user.idade = idade
+            user.cargo = cargo
+            user.telefone = telefone
+            user.rg = rg
+            user.save()
+            return redirect("page_user")
+        else:
+            return render(request, "editar_user.html", {'user': user, 'error': 'Preencha todos os campos.'})
+
+    return render(request, "editar_user.html", {'user': user})
+
+def deletar_user(request, tarefa_id):
+    user= get_object_or_404(User, id=id_usuario)
+
+    if request.method == 'POST':
+        user.delete()
+        return redirect("page_user")
+
+    return render(request, "deletar_user.html", {'user': user})
 
