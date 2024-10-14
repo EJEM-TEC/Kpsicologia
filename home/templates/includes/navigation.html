@@ -19,7 +19,7 @@
           <li class="nav-item d-flex align-items-center">
 
             {% if request.user.is_superuser %}
-            <a href="{% url 'admin:logout' %}" class="nav-link text-body font-weight-bold px-0">
+            <a href="{% url 'logout' %}" class="nav-link text-body font-weight-bold px-0">
             {% else %}
             <a href="{% url 'logout' %}" class="nav-link text-body font-weight-bold px-0">
             {% endif %}

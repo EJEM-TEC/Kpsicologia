@@ -3,9 +3,15 @@ from django.contrib.auth.views import LoginView, PasswordResetView, PasswordChan
 from home.forms import RegistrationForm, LoginForm, UserPasswordResetForm, UserSetPasswordForm, UserPasswordChangeForm
 from django.contrib.auth import logout, authenticate, login as auth_login
 from django.contrib.auth.decorators import login_required, user_passes_test
+from rolepermissions.roles import assign_role
+from rolepermissions.decorators import has_role_decorator
 from django.contrib.auth.models import User, Group
 from django.http import HttpResponse
 from .models import Usuario
+from rolepermissions.roles import assign_role, get_user_roles, RolesManager
+from rolepermissions.exceptions import RoleDoesNotExist
+from django.contrib.auth.models import Group
+from django.contrib.auth import authenticate, login as login_django
 
 # Páginas Simples
 def index(request):
@@ -72,10 +78,10 @@ def register(request):
     return render(request, 'accounts/register.html', context)
 
 # Logout
-@login_required(login_url='/accounts/login/')
-def logout_view(request):
-    logout(request)
-    return redirect('/accounts/login/')
+# @login_required(login_url='/accounts/login/')
+# def logout_view(request):
+#     logout(request)
+#     return redirect('/accounts/login/')
 
 # Gerenciamento de senhas
 class UserPasswordResetView(PasswordResetView):
@@ -97,44 +103,64 @@ def lista_usuarios(request):
     users = Usuario.objects.all()
     return render(request, 'users/page_user.html', {'usuarios': users})
 
-# Função para cadastrar ou listar usuários
-@login_required(login_url='/accounts/login/')
-@user_passes_test(is_admin)
-
+@login_required(login_url='/')
+@has_role_decorator('administrador')
 def users(request):
-    novo_user = Usuario()
+
+    users = User.objects.all()
     
     if request.method == 'POST':
         username = request.POST.get('username')
-        idade = request.POST.get('idade')
         email = request.POST.get('email')
         cargo = request.POST.get('cargo')
-        telefone = request.POST.get('telefone')  # Verifique se isso está no seu formulário HTML
-        rg = request.POST.get('rg')
-        
-        # Verificação dos campos obrigatórios
-        if not username or not email or not idade or not telefone:
-            return render(request, 'pages/page_user.html', {
-                'error': 'Por favor, preencha todos os campos obrigatórios!',
-                'users': Usuario.objects.all()
-            })
-        
+        senha = request.POST.get('password')
+
         try:
-            novo_user.username = username
-            novo_user.idade = int(idade)
-            novo_user.email = email
-            novo_user.cargo = cargo
-            novo_user.telefone = telefone
-            novo_user.rg = rg
-            novo_user.save()
-            
+            # Verifique se o usuário já existe
+            user = User.objects.filter(username=username).first()
+
+            if user:
+                return HttpResponse("Já existe um usuário com esse nome")
+
+            # Criando um novo usuário
+            user = User.objects.create_user(username=username, email=email, password=senha)
+
+            # Associando o usuário ao grupo correspondente
+            group, created = Group.objects.get_or_create(name=cargo)
+            user.groups.add(group)
+
+            # Salva o usuário
+            user.save()
+
+            # Tenta atribuir um role
+            try:
+                assign_role(user, cargo)
+            except RoleDoesNotExist:
+                return HttpResponse(f"O cargo {cargo} não existe. Verifique os cargos disponíveis.")
+
             return redirect('users')
+
         except ValueError:
             return render(request, 'pages/page_user.html', {
                 'error': 'Idade deve ser um número!',
-                'users': Usuario.objects.all()
+                'users': User.objects.all()
             })
     
-    users = Usuario.objects.all()
-    
     return render(request, 'pages/page_user.html', {'users': users})
+
+def login(request):
+    if request.user.is_authenticated:
+        # Se o usuário já estiver autenticado, redirecione para a página inicial
+        return redirect('index')
+
+    if request.method == "GET":
+        return render(request, 'accounts/login.html')
+    else:
+        username = request.POST.get('username')
+        senha = request.POST.get('senha')
+        user = authenticate(username=username, password=senha)
+        if user:
+            login_django(request, user)
+            return redirect('index')
+        return HttpResponse("Usuário ou senha inválidos")
+

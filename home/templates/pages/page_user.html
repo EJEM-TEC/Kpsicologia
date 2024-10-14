@@ -21,19 +21,14 @@
                             </div>
                             <div class="col-md-6">
                               <div class="form-group">
-                                <label for="idade">Idade</label>
-                                <input type="number" class="form-control" id="idade" name="idade" required>
+                                  <label for="email"> E-mail</label>
+                                  <input type="email"class="form-control" id="email" name="email" required>
                               </div>
-                            </div>
+                          </div>
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="email"> E-mail</label>
-                                    <input type="email"class="form-control" id="email" name="email" required>
-                                </div>
-                            </div>
+                            
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="cargo">Cargo</label>
@@ -45,30 +40,29 @@
                                   </div>
                             </div>
                             
-                        </div>
+                            <div class="col-md-6">
+                              <div class="form-group">
+                                <label for="password">Senha</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                              </div>
+                            </div>
 
-                        <div class="row">
-                            <div class="col-md-6">
-                              <div class="form-group">
-                                <label for="telefone">Telefone</label>
-                                <input type="number" class="form-control" id="telefone" name="telefone" required>
-                              </div>
-                            </div>
-                            <div class="col-md-6">
-                              <div class="form-group">
-                                <label for="number">RG</label>
-                                <input type="number" class="form-control" id="rg" name="rg" required> 
-                              </div>
-                            </div>
+                            
                         </div>
                         <div class="row">
-                            <div class="col-12">
-                                <div class="d-flex justify-content-center gap-4">
-                                    <button type="submit" class="btn btn-primary">Registrar</button>
-                                    <button type="reset" class="btn btn-secondary">Resetar</button>
-                                </div>
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <label for="Confirmpassword">Confirmar senha</label>
+                              <input type="password" class="form-control" id="Confirmpassword" required>
                             </div>
-                        </div> 
+                          </div>
+                          <div class="col-md-6">
+                            <div class="d-flex justify-content-center gap-4 align-middle">
+                                <button type="submit" class="btn btn-primary">Registrar</button>
+                                <button type="reset" class="btn btn-secondary">Resetar</button>
+                            </div>
+                        </div>
+                      </div> 
                       </form>
                     </div>
                   </div>
@@ -89,10 +83,8 @@
                           <thead>
                             <tr>
                               <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Usuário</th>
-                              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ">Idade</th>
+                              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ">Email</th>
                               <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Cargo</th>
-                              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Telefone</th>
-                              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">RG</th>
                               <th class="text-secondary opacity-7">Ações</th>
                             </tr>
                           </thead>
@@ -103,23 +95,20 @@
                                 <div class="d-flex px-2 py-1 border-primary justify-content-center">
                                   <div class="d-flex flex-column justify-content-center">
                                     <h6 class="mb-0 text-sm text-center">{{user.username}}</h6>
-                                    <p class="text-xs text-secondary mb-0 text-center">{{user.email}}</p>
                                   </div>
                                 </div>
                               </td>
                               <td class="align-middle text-center">
-                                <p class="text-xs font-weight-bold mb-0 ">{{user.idade}}</p>
+                                <p class="text-xs font-weight-bold mb-0 ">{{user.email}}</p>
                               </td>
                               <td class="align-middle text-center text-sm">
-                                <span class="badge badge-sm bg-gradient-success">{{user.cargo}}</span>
-                              </td>
-                              <td class="align-middle text-center">
-                                <span class="text-secondary text-xs font-weight-bold">{{user.telefone}}</span>
-                              </td>
-                              <td class="align-middle text-center">
-                                <a href="javascript:;" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
-                                    {{user.rg}}
-                                </a>
+                                    {% if user.groups.all %}
+                                    {% for group in user.groups.all %}
+                                    <span class="badge badge-sm bg-gradient-success">{{ group.name }}</span>{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                <span class="badge badge-sm bg-gradient-success">Nenhum grupo</span>
+                                {% endif %}
                               </td>
                               <td class="align-middle">
                                 <a href="javascript:;" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
@@ -150,3 +139,21 @@
         </div>
 
 {% endblock content %}
+
+{% block scripts %}
+
+<script>
+
+function validateForm() {
+      var password = document.getElementById('password').value;
+      var confirmPassword = document.getElementById('Confirmpassword').value;
+      if (password !== confirmPassword) {
+        alert('As senhas não coincidem.');
+        return false;
+      }
+      return true;
+    }
+
+</script>
+
+{% endblock scripts %}
