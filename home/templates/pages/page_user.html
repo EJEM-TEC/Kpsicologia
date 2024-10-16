@@ -111,10 +111,10 @@
                                 {% endif %}
                               </td>
                               <td class="align-middle">
-                                <a href="javascript:;" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
+                                <a href="{% url 'update_user' user_id=user.id %}" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
                                   Editar
                                 </a>
-                                <a href="javascript:;" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
+                                <a href="{% url 'delete_user' user_id=user.id %}" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
                                     Remover
                                 </a>
                               </td>

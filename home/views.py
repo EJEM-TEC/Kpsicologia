@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.views import LoginView, PasswordResetView, PasswordChangeView, PasswordResetConfirmView
 from home.forms import RegistrationForm, LoginForm, UserPasswordResetForm, UserSetPasswordForm, UserPasswordChangeForm
 from django.contrib.auth import logout, authenticate, login as auth_login
@@ -154,7 +154,7 @@ def login(request):
         return redirect('index')
 
     if request.method == "GET":
-        return render(request, 'accounts/login.html')
+        return render(request, 'accounts/login1.html')
     else:
         username = request.POST.get('username')
         senha = request.POST.get('senha')
@@ -164,8 +164,8 @@ def login(request):
             return redirect('index')
         return HttpResponse("Usuário ou senha inválidos")
     
-def editar_user(request, id_usuario):
-    user = get_object_or_404(User, id=id_usuario)
+def update_user(request, user_id):
+    user = get_object_or_404(User, id=user_id)
     if request.method == 'POST':
         username = request.POST.get('username')
         idade = request.POST.get('idade')
@@ -180,20 +180,20 @@ def editar_user(request, id_usuario):
             user.telefone = telefone
             user.rg = rg
             user.save()
-            return redirect("page_user")
+            return redirect("users")
         else:
-            return render(request, "editar_user.html", {'user': user, 'error': 'Preencha todos os campos.'})
+            return render(request, "pages/editar_user.html", {'user': user, 'error': 'Preencha todos os campos.'})
 
-    return render(request, "editar_user.html", {'user': user})
+    return render(request, "pages/editar_user.html", {'user': user})
 
-def deletar_user(request, tarefa_id):
-    user= get_object_or_404(User, id=id_usuario)
+def delete_user(request, user_id):
+    user= get_object_or_404(User, id=user_id)
 
     if request.method == 'POST':
         user.delete()
-        return redirect("page_user")
+        return redirect("users")
 
-    return render(request, "deletar_user.html", {'user': user})
+    return render(request, "pages/deletar_user.html", {'user': user})
 
 def criar_atendimento(request):
     pass
