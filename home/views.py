@@ -7,7 +7,7 @@ from rolepermissions.roles import assign_role
 from rolepermissions.decorators import has_role_decorator
 from django.contrib.auth.models import User, Group
 from django.http import HttpResponse
-from .models import Usuario
+from .models import Usuario, Unidade
 from rolepermissions.roles import assign_role, get_user_roles, RolesManager
 from rolepermissions.exceptions import RoleDoesNotExist
 from django.contrib.auth.models import Group
@@ -194,4 +194,49 @@ def deletar_user(request, tarefa_id):
         return redirect("page_user")
 
     return render(request, "deletar_user.html", {'user': user})
+
+def criar_atendimento(request):
+    pass
+
+# Listagem de unidades (somente administradores podem acessar)
+@login_required(login_url='/accounts/login/')
+@user_passes_test(is_admin)
+def lista_unidades(request):
+    unis = Unidade.objects.all()
+    return render(request, 'unis/page_unidades.html', {'unidades': unis})
+
+@login_required(login_url='/')
+@has_role_decorator('administrador')
+def unis(request):
+
+    unidades = Unidade.objects.all()
+    
+    if request.method == 'POST':
+        nome_unidade = request.POST.get('nome_unidade')
+        endereco_unidade = request.POST.get('endereco_unidade')
+        CEP_unidade = request.POST.get('CEP_unidade')
+
+        try:
+            # Verifique se a unidade já existe
+            uni = Unidade.objects.filter(nome_unidade=nome_unidade).first()
+
+            if uni:
+                return HttpResponse("Já existe uma unidade com esse nome")
+
+            # Criando uma nova unidade
+            uni = Unidade.objects.create(nome_unidade=nome_unidade, endereco_unidade=endereco_unidade, CEP_unidade=CEP_unidade)
+
+
+            # Salva a unidade
+            uni.save()
+
+
+        except ValueError:
+            return render(request, 'pages/page_unidades.html', {
+                'error': 'CEP deve ser um número!',
+                'unis': Unidade.objects.all()
+            })
+    
+    return render(request, 'pages/page_unidades.html', {'unis': unidades})
+
 

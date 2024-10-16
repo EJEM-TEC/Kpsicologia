@@ -8,7 +8,7 @@
 build/
 venv
 /staticfiles/
-
+Kpsicologia
 #src
 *.sqlite*
 

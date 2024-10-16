@@ -1,0 +1,131 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-4">
+                    <div class="card-header pb-0">
+                      <h6>Criação de Unidades de Atendimento</h6>
+                    </div>
+                    <div class="card-body p-4">
+                      <form method="POST" action="{% url 'unidade_atendimento' %}"> 
+                        {% csrf_token %}
+
+                        <div class="row">
+                            <div class="col-md-6">
+                              <div class="form-group">
+                                <label for="nome_unidade">Nome da Unidade de Atendimento</label>
+                                <input type="text" class="form-control" id="nome_unidade" name="nome_unidade" required>
+                              </div>
+                            </div>
+                            <div class="col-md-6">
+                              <div class="form-group">
+                                  <label for="endereco_unidade">Endereço da Unidade de Atendimento</label>
+                                  <input type="endereco_unidade"class="form-control" id="endereco_unidade" name="endereco_unidade" required>
+                              </div>
+                          </div>
+                        </div>
+                        <div class="row">                            
+                            <div class="col-md-6">
+                              <div class="form-group">
+                                <label for="CEP_unidade">CEP</label>
+                                <input type="CEP_unidade" class="form-control" id="CEP_unidade" name="CEP_unidade" required>
+                              </div>
+                            </div>
+                            <div class="col-md-6">
+                              <div class="d-flex justify-content-center gap-4 align-middle">
+                                <button type="submit" class="btn btn-primary">Registrar</button>
+                                <button type="reset" class="btn btn-secondary">Resetar</button>
+                            </div>
+                            </div>
+                        </div>
+                      </div> 
+                      </form>
+                    </div>
+                  </div>
+
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col-12">
+
+                <div class="card mb-4">
+                    <div class="card-header pb-0">
+                      <h6>Unidades de Atendimento cadastradas</h6>
+                    </div>
+                    <div class="card-body px-0 pt-0 pb-2">
+                      <div class="table-responsive p-0">
+                        <table class="table align-items-center mb-0">
+                          <thead>
+                            <tr>
+                              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Unidades de Atendimento</th>
+                              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ">Endereço</th>
+                              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">CEP</th>
+                              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ações</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                           {% for uni in unis %}
+                            <tr>
+                              <td class="align-middle">
+                                <div class="d-flex px-2 py-1 border-primary justify-content-center">
+                                  <div class="d-flex flex-column justify-content-center">
+                                    <h6 class="mb-0 text-sm text-center">{{uni.nome_unidade}}</h6>
+                                  </div>
+                                </div>
+                              </td>
+                              <td class="align-middle text-center">
+                                <p class="text-xs font-weight-bold mb-0 ">{{uni.endereco_unidade}}</p>
+                              </td>
+                              <td class="align-middle text-center">
+                                <p class="text-xs font-weight-bold mb-0 ">{{uni.CEP_unidade}}</p>
+                              </td>
+                              <td class="align-middle">
+                                <a href="#" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit uni">
+                                  Editar
+                                </a>
+                                <a href="#" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit uni">
+                                    Remover
+                                </a>
+                              </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td>
+                                    <p class="text-secondary font-weight-bold text-xs">
+                                        Nenhuma unidade de atendimento encontrada.
+                                    </p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+
+            </div>
+
+        </div>
+
+{% endblock content %}
+
+{% block scripts %}
+
+<script>
+
+function validateForm() {
+      var password = document.getElementById('password').value;
+      var confirmPassword = document.getElementById('Confirmpassword').value;
+      if (password !== confirmPassword) {
+        alert('As senhas não coincidem.');
+        return false;
+      }
+      return true;
+    }
+
+</script>
+
+{% endblock scripts %}
