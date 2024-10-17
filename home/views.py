@@ -7,11 +7,12 @@ from rolepermissions.roles import assign_role
 from rolepermissions.decorators import has_role_decorator
 from django.contrib.auth.models import User, Group
 from django.http import HttpResponse
-from .models import Usuario
+from .models import Usuario, Sala
 from rolepermissions.roles import assign_role, get_user_roles, RolesManager
 from rolepermissions.exceptions import RoleDoesNotExist
 from django.contrib.auth.models import Group
 from django.contrib.auth import authenticate, login as login_django
+
 
 # Páginas Simples
 def index(request):
@@ -82,6 +83,32 @@ def register(request):
 # def logout_view(request):
 #     logout(request)
 #     return redirect('/accounts/login/')
+
+@login_required(login_url='/accounts/login/')
+@user_passes_test(is_admin)
+def sala(request):
+    if request.method == 'POST':
+        id_sala = request.POST.get('id_sala')
+        cor_sala = request.POST.get('cor_sala')
+        numero_sala = request.POST.get('numero_sala')
+        codigo_sala = request.POST.get('codigo_sala')
+        id_unidade = request.POST.get('id_unidade')
+         # Verifique se a unidade existe
+        unidade = get_object_or_404(Unidade, id=id_unidade)
+        try:
+            Sala.objects.create(
+                cor_sala=cor_sala,
+                numero_sala=numero_sala,
+                codigo_sala=codigo_sala,
+                id_unidade=id_unidade
+             )
+            return redirect('sala')  # Ou qualquer outra lógica após a criação
+        except Exception as e:
+            print(f"Erro ao criar sala: {e}") 
+
+    salas = Sala.objects.all()
+
+    return render(request, 'sala.html', {'salas': salas})
 
 # Gerenciamento de senhas
 class UserPasswordResetView(PasswordResetView):

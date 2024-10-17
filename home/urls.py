@@ -2,7 +2,8 @@ from django.urls import path
 from home import views
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.views import LogoutView
-
+from . import views
+from .models import Sala
 
 urlpatterns = [
     path('', views.login, name='login1'),
@@ -13,6 +14,7 @@ urlpatterns = [
     path('rtl/', views.rtl, name='rtl'),
     path('profile/', views.profile, name='profile'),
     path('users/', views.users, name='users'),
+    path('sala/', views.Sala, name='sala'),
     path('logout/', LogoutView.as_view(), name="logout"),
     path('users/<int:user_id>/delete/', views.delete_user, name='delete_user'),
     path('users/<int:user_id>/update/', views.update_user, name='update_user'),

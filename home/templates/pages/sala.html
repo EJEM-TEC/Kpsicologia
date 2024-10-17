@@ -1,0 +1,60 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+<h1>Cadastrar Sala</h1>
+<div>
+    <div>
+        <form method="POST" action="{% url 'sala' %}">
+            {% csrf_token %}
+            <label for="cor_sala">Cor:</label>
+            <input type="text" id="cor_sala" name="cor_sala" required>
+            <br>
+            <label for="numero_sala">Número:</label>
+            <input type="number" id="numero_sala" name="numero_sala" required>
+            <br>
+            <label for="codigo_sala">Código:</label>
+            <input id="codigo_sala" name="codigo_sala" required>
+            <br>
+            <label for="id_unidade"> ID Unidade:</label>
+            <input type="number" id="id_unidade" name="id_unidade" required>
+            <br>
+            <button type="submit" class ="botao">Salvar Sala</button>
+        </form>
+    </div>
+    <h1>Salas Cadastradas</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ID sala</th>
+                <th>Código da Sala</th>
+                <th>Cor da sala</th>
+                <th>Número da sala</th>
+                <th>ID da unidade</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sala in salas %}
+            <form method="POST">
+                {% csrf_token %}
+                <tr>
+                    <td>{{ sala.id_sala }}</td>
+                    <td>{{ sala.cor_sala }}</td>
+                    <td>{{ sala.numero_sala }}</td>
+                    <td>{{ sala.codigo_sala }}</td>
+                    <td>{{ sala.id_unidade.id }} - {{ sala.id_unidade.nome }}</td>
+                    <td>
+                        <button>Editar</a></button>
+                        <button>Deletar</button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6">Nenhuma sala encontrada.</td>
+                </tr>
+            </form>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock content %}
