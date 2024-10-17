@@ -18,6 +18,8 @@ urlpatterns = [
     path('unidades_atendimento/', views.unis, name='unidade_atendimento'),
     path("users/<int:user_id>/delete/", views.delete_user, name="delete_user"),
     path("users/<int:user_id>/update/", views.update_user, name="update_user"),
+    path("unidades_atendimento/<int:unidade_id>/update/", views.update_uni, name="update_unidade"),
+    path("unidades_atendimento/<int:unidade_id>/delete/", views.delete_uni, name="delete_unidade"),
 
     # Authentication
     #path('accounts/login/', views.UserLoginView.as_view(), name='login'),

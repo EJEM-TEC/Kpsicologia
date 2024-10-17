@@ -60,10 +60,10 @@
                         <table class="table align-items-center mb-0">
                           <thead>
                             <tr>
-                              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Unidades de Atendimento</th>
+                              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nome da Unidade de Atendimento</th>
                               <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ">Endereço</th>
                               <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">CEP</th>
-                              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ações</th>
+                              <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ações</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -83,10 +83,10 @@
                                 <p class="text-xs font-weight-bold mb-0 ">{{uni.CEP_unidade}}</p>
                               </td>
                               <td class="align-middle">
-                                <a href="#" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit uni">
+                                <a href="{% url 'update_unidade' unidade_id=uni.id_unidade %}" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Edit uni">
                                   Editar
                                 </a>
-                                <a href="#" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit uni">
+                                <a href="{% url 'delete_unidade' unidade_id=uni.id_unidade %}" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Delete uni">
                                     Remover
                                 </a>
                               </td>
@@ -94,7 +94,7 @@
                             {% empty %}
                             <tr>
                                 <td>
-                                    <p class="text-secondary font-weight-bold text-xs">
+                                    <p class="text-secondary font-weight-bold text-xs text-center">
                                         Nenhuma unidade de atendimento encontrada.
                                     </p>
                                 </td>
@@ -111,21 +111,3 @@
         </div>
 
 {% endblock content %}
-
-{% block scripts %}
-
-<script>
-
-function validateForm() {
-      var password = document.getElementById('password').value;
-      var confirmPassword = document.getElementById('Confirmpassword').value;
-      if (password !== confirmPassword) {
-        alert('As senhas não coincidem.');
-        return false;
-      }
-      return true;
-    }
-
-</script>
-
-{% endblock scripts %}

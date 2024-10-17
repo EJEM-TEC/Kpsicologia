@@ -1,0 +1,17 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+
+    <h1>Deletar Unidade</h1>
+    
+    <p>Tem certeza de que deseja deletar a unidade <strong>{{ unidade.nome_unidade }}</strong>?</p>
+    
+    <form method="POST">
+        {% csrf_token %}
+        <button type="submit" class="btn bg-gradient-primary">Deletar</button>
+        <button type="button" class="btn bg-gradient-secondary"><a href="{% url 'unidade_atendimento' %}">Cancelar</a></button>
+    </form>
+
+
+{% endblock content %}

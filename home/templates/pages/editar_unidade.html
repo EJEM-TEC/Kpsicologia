@@ -1,0 +1,52 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+              <h6>Editar Unidade</h6>
+            </div>
+            <div class="card-body p-4">
+              <form method="POST" action="{% url 'update_user' user_id=user.id %}">
+                {% csrf_token %}
+
+                <div class="row">
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <label for="nome_unidade">Nome da Unidade de Atendimento</label>
+                          <input type="text" class="form-control" id="nome_unidade" name="nome_unidade" value="{{unidade.nome_unidade}}" required>
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="endereco_unidade">Endereço da Unidade de Atendimento</label>
+                            <input type="endereco_unidade"class="form-control" id="endereco_unidade" name="endereco_unidade" value="{{unidade.endereco_unidade}}" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">                   
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="CEP_unidade">CEP</label>
+                      <input type="CEP_unidade" class="form-control" id="CEP_unidade" name="CEP_unidade" value="{{unidade.CEP_unidade}}" required>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="d-flex justify-content-center gap-4 align-middle">
+                      <button type="submit" class="btn btn-primary">Atualizar</button>
+                      <button type="reset" class="btn btn-secondary">Resetar</button>
+                  </div>
+                  </div>                   
+                </div>
+              </form>
+            </div>
+          </div>
+
+    </div>
+
+</div>
+
+{% endblock content %}

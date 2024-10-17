@@ -222,6 +222,10 @@ def unis(request):
 
             if uni:
                 return HttpResponse("Já existe uma unidade com esse nome")
+            
+            print(nome_unidade)
+            print(endereco_unidade)
+            print(CEP_unidade)
 
             # Criando uma nova unidade
             uni = Unidade.objects.create(nome_unidade=nome_unidade, endereco_unidade=endereco_unidade, CEP_unidade=CEP_unidade)
@@ -239,4 +243,29 @@ def unis(request):
     
     return render(request, 'pages/page_unidades.html', {'unis': unidades})
 
+def update_uni(request, unidade_id):
+    unidade = get_object_or_404(Unidade, id_unidade=unidade_id)
+    if request.method == 'POST':
+        nome_unidade = request.POST.get('nome_unidade')
+        endereco_unidade = request.POST.get('endereco_unidade')
+        CEP_unidade = request.POST.get('CEP_unidade')
 
+        if nome_unidade and endereco_unidade and CEP_unidade:
+            unidade.nome_unidade = nome_unidade
+            unidade.endereco_unidade = endereco_unidade
+            unidade.CEP_unidade = CEP_unidade
+            unidade.save()
+            return redirect("unidade_atendimento")
+        else:
+            return render(request, "pages/editar_unidade.html", {'unidade': unidade, 'error': 'Preencha todos os campos.'})
+
+    return render(request, "pages/editar_unidade.html", {'unidade': unidade})
+
+def delete_uni(request, unidade_id):
+    unidade= get_object_or_404(Unidade, id_unidade=unidade_id)
+
+    if request.method == 'POST':
+        unidade.delete()
+        return redirect("unidade_atendimento")
+
+    return render(request, "pages/deletar_unidade.html", {'unidade': unidade})
