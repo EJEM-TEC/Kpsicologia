@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404, render, redirect
-from django.contrib.auth.views import LoginView, PasswordResetView, PasswordChangeView, PasswordResetConfirmView
-from home.forms import RegistrationForm, LoginForm, UserPasswordResetForm, UserSetPasswordForm, UserPasswordChangeForm
+from django.contrib.auth.views import PasswordResetView, PasswordChangeView, PasswordResetConfirmView
+from home.forms import RegistrationForm, UserPasswordResetForm, UserSetPasswordForm, UserPasswordChangeForm
 from django.contrib.auth import logout, authenticate, login as login_django
 from django.contrib.auth.decorators import login_required, user_passes_test
 from rolepermissions.roles import assign_role
@@ -8,15 +8,14 @@ from rolepermissions.decorators import has_role_decorator
 from django.contrib.auth.models import User, Group
 from django.http import HttpResponse
 from .models import Usuario, Unidade
-from rolepermissions.roles import assign_role, get_user_roles, RolesManager
+from rolepermissions.roles import assign_role
 from rolepermissions.exceptions import RoleDoesNotExist
 from django.contrib.auth.models import Group
 from django.contrib.auth import authenticate, login as login_django
-from django.contrib.auth.views import LogoutView
 from django.urls import reverse
-from django.views import View
 
 # Páginas Simples
+@login_required(login_url='login1')
 def index(request):
     return render(request, 'pages/index.html', { 'segment': 'index' })
 
@@ -47,17 +46,17 @@ def is_user(user):
     return user.groups.filter(name='usuario').exists()
 
 # Login com redirecionamento baseado no tipo de usuário
-class UserLoginView(LoginView):
-    template_name = 'accounts/login.html'
-    form_class = LoginForm
+# class UserLoginView(LoginView):
+#     template_name = 'accounts/login.html'
+#     form_class = LoginForm
 
-    # Redireciona o usuário com base no tipo (administrador ou comum)
-    def form_valid(self, form):
-        auth_login(self.request, form.get_user())
-        if is_admin(self.request.user):
-            return redirect('/admin_dashboard/')  # Redireciona administradores para o painel administrativo
-        else:
-            return redirect('/profile/')  # Redireciona usuários comuns para a página de perfil
+#     # Redireciona o usuário com base no tipo (administrador ou comum)
+#     def form_valid(self, form):
+#         auth_login(self.request, form.get_user())
+#         if is_admin(self.request.user):
+#             return redirect('/admin_dashboard/')  # Redireciona administradores para o painel administrativo
+#         else:
+#             return redirect('/profile/')  # Redireciona usuários comuns para a página de perfil
 
 # Registro de usuário (somente administradores podem cadastrar novos usuários)
 @login_required(login_url='/accounts/login/')
@@ -106,7 +105,7 @@ def lista_usuarios(request):
     users = Usuario.objects.all()
     return render(request, 'users/page_user.html', {'usuarios': users})
 
-@login_required(login_url='/')
+@login_required(login_url='login1')
 @has_role_decorator('administrador')
 def users(request):
 
@@ -167,6 +166,7 @@ def login(request):
             return redirect('index')
         return HttpResponse("Usuário ou senha inválidos")
     
+@login_required(login_url='login1')
 def update_user(request, user_id):
     user = get_object_or_404(User, id=user_id)
     if request.method == 'POST':
@@ -189,6 +189,7 @@ def update_user(request, user_id):
 
     return render(request, "pages/editar_user.html", {'user': user})
 
+@login_required(login_url='login1')
 def delete_user(request, user_id):
     user= get_object_or_404(User, id=user_id)
 
@@ -208,7 +209,7 @@ def lista_unidades(request):
     unis = Unidade.objects.all()
     return render(request, 'unis/page_unidades.html', {'unidades': unis})
 
-@login_required(login_url='/')
+@login_required(login_url='login1')
 @has_role_decorator('administrador')
 def unis(request):
 
@@ -246,6 +247,7 @@ def unis(request):
     
     return render(request, 'pages/page_unidades.html', {'unis': unidades})
 
+@login_required(login_url='login1')
 def update_uni(request, unidade_id):
     unidade = get_object_or_404(Unidade, id_unidade=unidade_id)
     if request.method == 'POST':
@@ -264,6 +266,7 @@ def update_uni(request, unidade_id):
 
     return render(request, "pages/editar_unidade.html", {'unidade': unidade})
 
+@login_required(login_url='login1')
 def delete_uni(request, unidade_id):
     unidade= get_object_or_404(Unidade, id_unidade=unidade_id)
 
@@ -277,6 +280,7 @@ def delete_uni(request, unidade_id):
 #         logout(request)
 #         return redirect('login1')  # Redireciona para a página de login ou outra página de sua escolha
 
+@login_required(login_url='login1')
 def logout_user(request):
     # Realiza o logout do usuário
     logout(request)
