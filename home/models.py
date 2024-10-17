@@ -13,17 +13,16 @@ class Usuario(models.Model):
 
     def __str__(self):
         return self.nome
-
+    
 class Unidade(models.Model):
     id_unidade = models.AutoField(primary_key=True)
     nome_unidade = models.CharField(max_length=100)
     endereco_unidade = models.CharField(max_length=100)
-    CEP_unidade = models.PositiveIntegerField()
+    CEP_unidade = models.IntegerField()
 
     def __str__(self):
-        return self.nome    
+        return self.nome   
     
-
 class Sala(models.Model):
     id_sala = models.AutoField(primary_key=True)
     cor_sala =  models.CharField(max_length=100)
