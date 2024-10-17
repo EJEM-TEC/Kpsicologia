@@ -160,8 +160,12 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-LOGIN_URL = '/login1.html/'  # Certifique-se de que está apontando para a página de login correta
-LOGIN_REDIRECT_URL = '/index.html/'
+LOGIN_URL = ''  # Certifique-se de que está apontando para a página de login correta
+LOGIN_REDIRECT_URL = 'index'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 ROLEPERMISSIONS_MODULE = "core.roles"
-SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Ou outra engine de sessão
+CSRF_COOKIE_SECURE = False  # Apenas para desenvolvimento
+SESSION_COOKIE_SECURE = False  # Apenas para desenvolvimento
+
+
