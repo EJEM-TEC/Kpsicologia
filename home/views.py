@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.views import LoginView, PasswordResetView, PasswordChangeView, PasswordResetConfirmView
 from home.forms import RegistrationForm, LoginForm, UserPasswordResetForm, UserSetPasswordForm, UserPasswordChangeForm
-from django.contrib.auth import logout, authenticate, login as auth_login
+from django.contrib.auth import logout, authenticate, login as login_django
 from django.contrib.auth.decorators import login_required, user_passes_test
 from rolepermissions.roles import assign_role
 from rolepermissions.decorators import has_role_decorator
@@ -160,7 +160,7 @@ def login(request):
         senha = request.POST.get('senha')
         user = authenticate(username=username, password=senha)
         if user:
-            auth_login(request, user)
+            login_django(request, user)
             return redirect('index')
         return HttpResponse("Usuário ou senha inválidos")
     
