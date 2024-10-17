@@ -12,6 +12,9 @@ from rolepermissions.roles import assign_role, get_user_roles, RolesManager
 from rolepermissions.exceptions import RoleDoesNotExist
 from django.contrib.auth.models import Group
 from django.contrib.auth import authenticate, login as login_django
+from django.contrib.auth.views import LogoutView
+from django.urls import reverse
+from django.views import View
 
 # Páginas Simples
 def index(request):
@@ -269,3 +272,13 @@ def delete_uni(request, unidade_id):
         return redirect("unidade_atendimento")
 
     return render(request, "pages/deletar_unidade.html", {'unidade': unidade})
+
+# def logout_user(request):
+#         logout(request)
+#         return redirect('login1')  # Redireciona para a página de login ou outra página de sua escolha
+
+def logout_user(request):
+    # Realiza o logout do usuário
+    logout(request)
+    # Redireciona para a página de login após o logout
+    return redirect(reverse('login1'))
