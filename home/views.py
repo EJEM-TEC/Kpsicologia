@@ -87,29 +87,62 @@ def register(request):
 @login_required(login_url='login1')
 @has_role_decorator('administrador')
 def sala(request):
+    salas = Sala.objects.all()
+
     if request.method == 'POST':
-        # id_sala = request.POST.get('id_sala')
         cor_sala = request.POST.get('cor_sala')
         numero_sala = request.POST.get('numero_sala')
         codigo_sala = request.POST.get('codigo_sala')
         id_unidade = request.POST.get('id_unidade')
-         # Verifique se a unidade existe
+
+        # Verifique se a unidade existe
         unidade = get_object_or_404(Unidade, id_unidade=id_unidade)
+
         try:
+            # Crie a sala com os dados fornecidos
             Sala.objects.create(
                 cor_sala=cor_sala,
                 numero_sala=numero_sala,
                 codigo_sala=codigo_sala,
-                id_unidade=id_unidade
-             )
-            return redirect('sala')  # Ou qualquer outra lógica após a criação
+                id_unidade=unidade  # Use a instância da unidade
+            )
+            return redirect('sala')  # Redirecionar após a criação
         except Exception as e:
-            print(f"Erro ao criar sala: {e}") 
-        sala.save()
-
-    salas = Sala.objects.all()
+            print(f"Erro ao criar sala: {e}")
 
     return render(request, 'pages/sala.html', {'salas': salas})
+
+
+
+@login_required(login_url='login1')
+def update_sala(request, id_sala):
+    sala = get_object_or_404(Sala, id_sala=id_sala)
+    if request.method == 'POST':
+        cor_sala = request.POST.get('cor_sala')
+        numero_sala = request.POST.get('numero_sala')
+        codigo_sala = request.POST.get('codigo_sala')
+
+        if nome_unidade and endereco_unidade and CEP_unidade:
+            cor_sala = cor_sala
+            numero_sala = numero_sala
+            codigo_sala = numero_sala
+            unidade.save()
+            return redirect("sala")
+        else:
+            return render(request, "pages/editar_sala.html", {'sala': sala, 'error': 'Preencha todos os campos.'})
+
+    return render(request, "pages/editar_sala.html", {'sala': sala})
+
+
+@login_required(login_url='login1')
+def delete_sala(request, id_sala):
+    sala= get_object_or_404(Sala, id_sala=id_sala)
+
+    if request.method == 'POST':
+        sala.delete()
+        return redirect("sala")
+
+    return render(request, "pages/deletar_sala.html", {'sala': sala})
 
 # Gerenciamento de senhas
 class UserPasswordResetView(PasswordResetView):

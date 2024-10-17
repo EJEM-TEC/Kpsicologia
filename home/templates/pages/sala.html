@@ -12,7 +12,7 @@
               <form method="POST" action="{% url 'salas' %}">
                 {% csrf_token %}
 
-                <div class="column">
+                <div id="container">
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -35,7 +35,7 @@
                         <div class="col-md-12">
                             <div class="form-group">
                                 <label for="id_unidade">ID da unidade</label>
-                                <input type="text" class="form-control text-end" id="id_unidade" name="id_unidade" required>
+                                <input type="text" class="form-control text-start" id="id_unidade" name="id_unidade" required>
                             </div>
                         </div>
                     </div>
