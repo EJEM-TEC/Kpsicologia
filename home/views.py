@@ -160,7 +160,7 @@ def login(request):
         senha = request.POST.get('senha')
         user = authenticate(username=username, password=senha)
         if user:
-            login_django(request, user)
+            auth_login(request, user)
             return redirect('index')
         return HttpResponse("Usuário ou senha inválidos")
     
