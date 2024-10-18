@@ -9,6 +9,8 @@ build/
 venv
 /staticfiles/
 Kpsicologia
+soft-ui-dashboard-django
+inv
 #src
 *.sqlite*
 

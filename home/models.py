@@ -21,4 +21,14 @@ class Unidade(models.Model):
     CEP_unidade = models.IntegerField()
 
     def __str__(self):
-        return self.nome
+        return self.nome   
+    
+class Sala(models.Model):
+    id_sala = models.AutoField(primary_key=True)
+    cor_sala =  models.CharField(max_length=100)
+    numero_sala = models.PositiveIntegerField()
+    codigo_sala =  models.CharField(max_length=100)
+    id_unidade = models.ForeignKey(Unidade, on_delete=models.CASCADE, related_name='salas')
+
+    def __str__(self):
+        return f"Sala {self.numero_sala} - {self.cor_sala}"
