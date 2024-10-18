@@ -156,7 +156,7 @@ def login(request):
         return redirect('index')
 
     if request.method == "GET":
-        return render(request, 'accounts/login1.html')
+        return render(request, 'accounts/login1.html', {'segment': 'login1'})
     else:
         username = request.POST.get('username')
         senha = request.POST.get('senha')

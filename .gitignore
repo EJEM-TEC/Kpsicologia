@@ -13,3 +13,4 @@ Kpsicologia
 *.sqlite*
 
 .env
+.vercel
