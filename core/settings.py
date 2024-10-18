@@ -166,8 +166,8 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 LOGOUT_REDIRECT_URL = 'login1'
-LOGIN_URL = 'login1'  # Certifique-se de que está apontando para a página de login correta
-LOGIN_REDIRECT_URL = 'index'
+# LOGIN_URL = 'login1'  # Certifique-se de que está apontando para a página de login correta
+# LOGIN_REDIRECT_URL = '/index'
 
 
 
