@@ -9,45 +9,42 @@
               <h6>Editar Sala</h6>
             </div>
             <div class="card-body p-4">
-              <form method="POST" action="{% url 'update_sala' id_sala=sala.id %}">
-                {% csrf_token %}
-
-                <div class="column">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="cor_sala">Cor da sala</label>
-                                <input type="text" class="form-control" id="cor_sala" name="cor_sala" required>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="numero_sala"> Número da sala</label>
-                                <input type="text"class="form-control" id="numero_sala" name="numero_sala" required>
-                        </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="codigo_sala">Código da Sala</label>
-                                <input type="text" class="form-control text-start" id="codigo_sala" name="codigo_sala" required>
+                <form method="POST" action="{% url 'update_sala' id_sala=sala.id_sala %}">
+                    {% csrf_token %}
+                        <div class="row">
+                              <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="numero_sala">Número da sala</label>
+                                    <input type="text"class="form-control" id="numero_sala" name="numero_sala" value="{{sala.numero_sala}}" required>
                             </div>
                             </div>
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="id_unidade">ID da unidade</label>
-                                <input type="text" class="form-control text-end" id="id_unidade" name="id_unidade" required>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="cor_sala">Cor da sala</label>
+                                    <input type="text" class="form-control" id="cor_sala" name="cor_sala" value="{{sala.cor_sala}}" required>
+                                </div>
                             </div>
+                          </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="id_unidade">Unidade</label>
+                                    <select class="form-control" id="id_unidade" name="id_unidade" required>
+                                      {% for unidade in unidades %}
+                                      <option value="{{unidade.id_unidade}}">{{ unidade.nome_unidade }}</option>
+                                      {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                              <div class="col-md-6">
+                                <div class="d-flex justify-content-center gap-4 align-middle">
+                                  <button type="submit" class="btn bg-gradient-primary">Atualizar</button>
+                                  <button type="reset" class="btn bg-gradient-secondary">Resetar</button>
+                                </div>
+                              </div>
                         </div>
                     </div>
-                </div>
-                  <div class="col-md-6">
-                    <div class="d-flex justify-content-center gap-4 align-middle">
-                      <button type="submit" class="btn btn-primary">Atualizar</button>
-                      <button type="reset" class="btn btn-secondary">Resetar</button>
-                  </div>
-                  </div>                   
-                </div>
-              </form>
+                  </form>
             </div>
           </div>
 

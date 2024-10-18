@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.views import PasswordResetView, PasswordChangeView, PasswordResetConfirmView
+from django.urls import reverse
 from home.forms import RegistrationForm, UserPasswordResetForm, UserSetPasswordForm, UserPasswordChangeForm
 from django.contrib.auth import logout, authenticate, login as login_django
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -36,11 +37,11 @@ def profile(request):
 
 # Funções de autenticação
 
-# Função para verificar se o usuário é administrador
+# # Função para verificar se o usuário é administrador
 def is_admin(user):
     return user.groups.filter(name='administrador').exists()
 
-# Função para verificar se o usuário é usuário comum
+# # Função para verificar se o usuário é usuário comum
 def is_user(user):
     return user.groups.filter(name='usuario').exists()
 
@@ -58,41 +59,23 @@ def is_user(user):
 #             return redirect('/profile/')  # Redireciona usuários comuns para a página de perfil
 
 # Registro de usuário (somente administradores podem cadastrar novos usuários)
-@login_required(login_url='/accounts/login/')
-@user_passes_test(is_admin)
-def register(request):
-    if request.method == 'POST':
-        form = RegistrationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            group_name = request.POST.get('group')  # Define o tipo de usuário (administrador ou usuário comum)
-            group, created = Group.objects.get_or_create(name=group_name)
-            user.groups.add(group)
-            print('Conta criada com sucesso!')
-            return redirect('/accounts/login/')
-        else:
-            print("Falha no cadastro!")
-    else:
-        form = RegistrationForm()
-
-    context = { 'form': form }
-    return render(request, 'accounts/register.html', context)
+# s
 
 # Logout
-# @login_required(login_url='/accounts/login/')
-# def logout_view(request):
-#     logout(request)
-#     return redirect('/accounts/login/')
+@login_required(login_url='/accounts/login/')
+def logout_view(request):
+    logout(request)
+    return redirect('/accounts/login/')
 
 @login_required(login_url='login1')
 @has_role_decorator('administrador')
 def sala(request):
     salas = Sala.objects.all()
+    unidades = Unidade.objects.all()
 
     if request.method == 'POST':
         cor_sala = request.POST.get('cor_sala')
         numero_sala = request.POST.get('numero_sala')
-        codigo_sala = request.POST.get('codigo_sala')
         id_unidade = request.POST.get('id_unidade')
 
         # Verifique se a unidade existe
@@ -103,35 +86,37 @@ def sala(request):
             Sala.objects.create(
                 cor_sala=cor_sala,
                 numero_sala=numero_sala,
-                codigo_sala=codigo_sala,
                 id_unidade=unidade  # Use a instância da unidade
             )
-            return redirect('sala')  # Redirecionar após a criação
+            return redirect('salas')  # Redirecionar após a criação
         except Exception as e:
             print(f"Erro ao criar sala: {e}")
 
-    return render(request, 'pages/sala.html', {'salas': salas})
+    return render(request, 'pages/salas.html', {'salas': salas, 'unidades': unidades})
 
 
 
 @login_required(login_url='login1')
 def update_sala(request, id_sala):
     sala = get_object_or_404(Sala, id_sala=id_sala)
+    unidades = Unidade.objects.all()
     if request.method == 'POST':
         cor_sala = request.POST.get('cor_sala')
         numero_sala = request.POST.get('numero_sala')
-        codigo_sala = request.POST.get('codigo_sala')
+        id_unidade = request.POST.get('id_unidade')
 
-        if nome_unidade and endereco_unidade and CEP_unidade:
-            cor_sala = cor_sala
-            numero_sala = numero_sala
-            codigo_sala = numero_sala
-            unidade.save()
+        if cor_sala and numero_sala:
+
+            sala.cor_sala = cor_sala
+            sala.numero_sala = numero_sala
+            sala.id_unidade = id_unidade
+
+            sala.save()
             return redirect("sala")
         else:
             return render(request, "pages/editar_sala.html", {'sala': sala, 'error': 'Preencha todos os campos.'})
 
-    return render(request, "pages/editar_sala.html", {'sala': sala})
+    return render(request, "pages/editar_sala.html", {'sala': sala, 'unidades': unidades})
 
 
 @login_required(login_url='login1')
@@ -157,12 +142,12 @@ class UserPasswordChangeView(PasswordChangeView):
     template_name = 'accounts/password_change.html'
     form_class = UserPasswordChangeForm
 
-# Listagem de usuários (somente administradores podem acessar)
-@login_required(login_url='/accounts/login/')
-@user_passes_test(is_admin)
-def lista_usuarios(request):
-    users = Usuario.objects.all()
-    return render(request, 'users/page_user.html', {'usuarios': users})
+# # Listagem de usuários (somente administradores podem acessar)
+# @login_required(login_url='/accounts/login/')
+# @user_passes_test(is_admin)
+# def lista_usuarios(request):
+#     users = Usuario.objects.all()
+#     return render(request, 'users/page_user.html', {'usuarios': users})
 
 @login_required(login_url='login1')
 @has_role_decorator('administrador')
@@ -230,18 +215,19 @@ def update_user(request, user_id):
     user = get_object_or_404(User, id=user_id)
     if request.method == 'POST':
         username = request.POST.get('username')
-        idade = request.POST.get('idade')
+        email = request.POST.get('email')
         cargo = request.POST.get('cargo')
-        telefone = request.POST.get('telefone')
-        rg = request.POST.get('rg')
-
-        if username and idade and cargo and telefone and rg:
+        senha = request.POST.get('password')
+        
+        if username and email and cargo and senha:
+            
             user.username = username
-            user.idade = idade
-            user.cargo = cargo
-            user.telefone = telefone
-            user.rg = rg
+            user.email = email
+            user.senha = senha
+
             user.save()
+
+            assign_role(user, cargo)
             return redirect("users")
         else:
             return render(request, "pages/editar_user.html", {'user': user, 'error': 'Preencha todos os campos.'})
@@ -261,12 +247,12 @@ def delete_user(request, user_id):
 def criar_atendimento(request):
     pass
 
-# Listagem de unidades (somente administradores podem acessar)
-@login_required(login_url='/accounts/login/')
-@user_passes_test(is_admin)
-def lista_unidades(request):
-    unis = Unidade.objects.all()
-    return render(request, 'unis/page_unidades.html', {'unidades': unis})
+# # Listagem de unidades (somente administradores podem acessar)
+# @login_required(login_url='/accounts/login/')
+# @user_passes_test(is_admin)
+# def lista_unidades(request):
+#     unis = Unidade.objects.all()
+#     return render(request, 'unis/page_unidades.html', {'unidades': unis})
 
 @login_required(login_url='login1')
 @has_role_decorator('administrador')
@@ -334,10 +320,6 @@ def delete_uni(request, unidade_id):
         return redirect("unidade_atendimento")
 
     return render(request, "pages/deletar_unidade.html", {'unidade': unidade})
-
-# def logout_user(request):
-#         logout(request)
-#         return redirect('login1')  # Redireciona para a página de login ou outra página de sua escolha
 
 @login_required(login_url='login1')
 def logout_user(request):

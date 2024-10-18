@@ -5,12 +5,12 @@
 
     <h1>Deletar Sala</h1>
     
-    <p>Tem certeza de que deseja deletar a sala?</p>
+    <p>Tem certeza de que deseja deletar a sala {{sala.numero_sala}}</p>
     
     <form method="POST">
         {% csrf_token %}
         <button type="submit" class="btn bg-gradient-primary">Deletar</button>
-        <button type="button" class="btn bg-gradient-secondary"><a href="{% url 'sala' %}">Cancelar</a></button>
+        <button type="button" class="btn bg-gradient-secondary"><a href="{% url 'salas' %}">Cancelar</a></button>
     </form>
 
 
