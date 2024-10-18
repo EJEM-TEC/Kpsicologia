@@ -30,7 +30,7 @@ if not SECRET_KEY:
 # Render Deployment Code
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ['15.228.58.61', 'localhost', '127.0.0.1']
 
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:    
