@@ -135,21 +135,21 @@ AUTH_PASSWORD_VALIDATORS = [
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-        },
-    },
-}
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'handlers': {
+#         'console': {
+#             'class': 'logging.StreamHandler',
+#         },
+#     },
+#     'loggers': {
+#         'django': {
+#             'handlers': ['console'],
+#             'level': 'DEBUG',
+#         },
+#     },
+# }
 
 
 
@@ -181,11 +181,11 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 SECURE_SSL_REDIRECT = False
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-#ROLEPERMISSIONS_MODULE = "core.roles"
+ROLEPERMISSIONS_MODULE = "core.roles"
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 CSRF_COOKIE_SECURE = False
 SESSION_COOKIE_SECURE = False
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/index'
 LOGOUT_REDIRECT_URL = '/'
 # LOGIN_URL = 'login1'  # Certifique-se de que está apontando para a página de login correta
 # LOGIN_REDIRECT_URL = '/index'

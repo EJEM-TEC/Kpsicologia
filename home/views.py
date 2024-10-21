@@ -105,14 +105,17 @@ def update_sala(request, id_sala):
         numero_sala = request.POST.get('numero_sala')
         id_unidade = request.POST.get('id_unidade')
 
+        # Verifique se a unidade existe
+        unidade = get_object_or_404(Unidade, id_unidade=id_unidade)
+
         if cor_sala and numero_sala:
 
             sala.cor_sala = cor_sala
             sala.numero_sala = numero_sala
-            sala.id_unidade = id_unidade
+            sala.id_unidade = unidade
 
             sala.save()
-            return redirect("sala")
+            return redirect("salas")
         else:
             return render(request, "pages/editar_sala.html", {'sala': sala, 'error': 'Preencha todos os campos.'})
 
@@ -125,7 +128,7 @@ def delete_sala(request, id_sala):
 
     if request.method == 'POST':
         sala.delete()
-        return redirect("sala")
+        return redirect("salas")
 
     return render(request, "pages/deletar_sala.html", {'sala': sala})
 
