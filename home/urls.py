@@ -23,4 +23,6 @@ urlpatterns = [
     path("unidades_atendimento/<int:unidade_id>/delete/", views.delete_uni, name="delete_unidade"),
     path("salas/<int:id_sala>/update/", views.update_sala, name="update_sala"),
     path("salas/<int:id_sala>/delete/", views.delete_sala, name="delete_sala"),
+    path('perfil_usuario/', views.perfil, name='perfil_usuario'),
+    path('perfil_usuario/<int:user_id>/editar_perfil/', views.update_profile, name='editar_perfil'),    
 ]

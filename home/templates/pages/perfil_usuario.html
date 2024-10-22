@@ -1,0 +1,62 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+        <div class="row">
+          <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header pb-0">
+                  <h6>Perfil</h6>
+                </div>
+                <div class="card-body p-4">
+                  <form method="POST" action="{% url 'perfil_usuario' %}"> 
+                    {% csrf_token %}
+                    <div class="card-body px-0 pt-0 pb-2">
+                      <div class="table-responsive p-0">
+                        <table class="table align-items-center mb-0">
+                          <tbody>
+                            <div class="row">
+                                <div class="col-md-6">
+                                  <div class="form-group">
+                                      <label for="username">Nome</label>
+                                      <h6 class="mb-0 text-sm text-center">{{ user.username }}</h6>
+                                  </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                  <div class="form-group">
+                                      <label for="email">Email</label>
+                                      <h6 class="mb-0 text-sm text-center">{{ user.email }}</h6>
+                                  </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="cargo">Cargo</label>
+                                        <td class="align-middle">
+                                            {% if user.groups.all %}
+                                            {% for group in user.groups.all %}
+                                            <span class="badge badge-sm bg-gradient-success">{{ group.name }}</span>{% if not forloop.last %}, {% endif %}
+                                            {% endfor %}
+                                        {% else %}
+                                        <span class="badge badge-sm bg-gradient-success">Nenhum grupo</span>
+                                        {% endif %}
+                                        </td>                                  
+                                    </div>
+                                </div>
+                            </div>
+                          </tbody>
+                        </table>
+                        <a   href="{% url 'editar_perfil' user_id=user.id %}"class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="editar_perfil">
+                            Editar
+                        </a>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+            </div>
+          </div>
+        </div>
+{% endblock content %}

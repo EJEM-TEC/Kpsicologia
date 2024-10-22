@@ -13,6 +13,8 @@ from rolepermissions.roles import assign_role, get_user_roles, RolesManager
 from rolepermissions.exceptions import RoleDoesNotExist
 from django.contrib.auth.models import Group
 from django.contrib.auth import authenticate, login as login_django
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import update_session_auth_hash
 
 # Páginas Simples
 @login_required(login_url='login1')
@@ -326,7 +328,64 @@ def delete_uni(request, unidade_id):
 
 @login_required(login_url='login1')
 def logout_user(request):
-    # Realiza o logout do usuário
+    # Realiza o logout do usuário  
     logout(request)
     # Redireciona para a página de login após o logout
     return redirect(reverse('login1'))
+
+
+@login_required(login_url='login1')
+def perfil(request):
+    user = request.user
+    return render(request, 'pages/perfil_usuario.html', {'user': user})
+    # if request.method == 'POST':
+    #     username = request.POST.get('username')
+    #     email = request.POST.get('email')
+    #     cargo = request.POST.get('cargo')
+
+@login_required
+def editar_perfil(request, user_id):
+    user= get_object_or_404(User, id=user_id)
+    if request.method == 'POST':
+        form = EditProfileForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            email = form.cleaned_data['email']
+            new_password = form.cleaned_data['new_password']
+
+            request.user.name = username
+            request.user.email = email
+
+            if new_password:
+                request.user.set_password(new_password)
+
+            request.user.save()
+            return redirect('perfil_usuario')  # Redirecionar para a página de perfil
+    else:
+        form = EditProfileForm(initial={'name': request.user.name, 'email': request.user.email})
+
+    return render(request, 'pages/editar_perfil.html', {'form': form})
+
+
+@login_required(login_url='login1')
+def update_profile(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        senha = request.POST.get('password')
+        
+        if username and email and senha:
+            
+            user.username = username
+            user.email = email
+            user.senha = senha
+
+            user.save()
+
+            return redirect("users")
+        else:
+            return render(request, "pages/editar_perfil.html", {'user': user, 'error': 'Preencha todos os campos.'})
+
+    return render(request, "pages/editar_perfil.html", {'user': user})
+

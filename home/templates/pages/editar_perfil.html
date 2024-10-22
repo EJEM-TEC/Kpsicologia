@@ -1,0 +1,77 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+              <h6>Editar Usuário</h6>
+            </div>
+            <div class="card-body p-4">
+              <form method="POST" action="{% url 'editar_perfil' user_id=user.id %}">
+                {% csrf_token %}
+
+                <div class="row">
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label for="username">Nome</label>
+                        <input type="text" class="form-control" id="username" name="username" required value="{{user.username}}">
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-group">
+                          <label for="email"> E-mail</label>
+                          <input type="email"class="form-control" id="email" name="email" required value="{{user.email}}">
+                      </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="password">Senha</label>
+                      <input type="password" class="form-control" id="password" name="password" placeholder="***********" required> 
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="Confirmpassword">Confirmar senha</label>
+                      <input type="password" class="form-control" id="Confirmpassword" placeholder="***********" required>
+                    </div>
+                  </div>
+                </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="d-flex justify-content-center gap-4 align-middle">
+                        <button type="submit" class="btn btn-primary">Atualizar</button>
+                    </div>
+                </div>
+              </div> 
+              </form>
+            </div>
+          </div>
+
+    </div>
+
+</div>
+
+{% endblock content %}
+
+{% block scripts %}
+
+<script>
+
+function validateForm() {
+      var password = document.getElementById('password').value;
+      var confirmPassword = document.getElementById('Confirmpassword').value;
+      if (password !== confirmPassword) {
+        alert('As senhas não coincidem.');
+        return false;
+      }
+      return true;
+    }
+
+</script>
+
+{% endblock scripts %}

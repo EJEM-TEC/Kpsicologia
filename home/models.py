@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django import forms
 # Create your models here.
 # aqui
 class Usuario(models.Model):
@@ -71,3 +72,4 @@ class Consulta(models.Model):
     sala_atendimento = models.ForeignKey(Sala, on_delete=models.CASCADE)
     paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+
