@@ -166,36 +166,25 @@ def users(request):
         cargo = request.POST.get('cargo')
         senha = request.POST.get('password')
 
-        try:
-            # Verifique se o usuário já existe
-            user = User.objects.filter(username=username).first()
-
-            if user:
-                return HttpResponse("Já existe um usuário com esse nome")
+        user = User.objects.filter(username=username).first()
+        if user:
+            return HttpResponse("Já existe um usuário com esse nome")
 
             # Criando um novo usuário
-            user = User.objects.create_user(username=username, email=email, password=senha)
+        user = User.objects.create_user(username=username, email=email, password=senha)
 
             # Associando o usuário ao grupo correspondente
-            group, created = Group.objects.get_or_create(name=cargo)
-            user.groups.add(group)
+        group, created = Group.objects.get_or_create(name=cargo)
+        user.groups.add(group)
 
             # Salva o usuário
-            user.save()
+        user.save()
 
-            # Tenta atribuir um role
-            try:
-                assign_role(user, cargo)
-            except RoleDoesNotExist:
-                return HttpResponse(f"O cargo {cargo} não existe. Verifique os cargos disponíveis.")
+        assign_role(user, cargo)
+            
+        return redirect('users')
 
-            return redirect('users')
-
-        except ValueError:
-            return render(request, 'pages/page_user.html', {
-                'error': 'Idade deve ser um número!',
-                'users': User.objects.all()
-            })
+        
     
     return render(request, 'pages/page_user.html', {'users': users})
 
@@ -464,3 +453,11 @@ def delete_consulta(request, consulta_id):
         return redirect('lista_consultas')
 
     return render(request, 'pages/deletar_consulta.html', {'consulta': consulta})
+
+def psicologa(request):
+    cargo = 'psicologa'
+    # user = Usuario.objects.filter(cargo=cargo_desejado).select_related('user')
+    # user = Usuario.objects.filter(cargo='psicologa')
+
+    psicologas = Usuario.objects.filter(cargo=cargo)
+    return render(request, 'pages/psicologa.html', {'users': psicologas})

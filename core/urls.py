@@ -40,5 +40,6 @@ urlpatterns = [
     path("salas/<int:id_sala>/update/", views.update_sala, name="update_sala"),
     path("salas/<int:id_sala>/delete/", views.delete_sala, name="delete_sala"),
     path('perfil_usuario/', views.perfil, name='perfil_usuario'),
-    path('perfil_usuario/<int:user_id>/editar_perfil/', views.update_profile, name='editar_perfil'),   
+    path('perfil_usuario/<int:user_id>/editar_perfil/', views.update_profile, name='editar_perfil'),
+    path('psicologa/', views.psicologa, name='psicologa'),   
 ]
