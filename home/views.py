@@ -8,7 +8,7 @@ from rolepermissions.roles import assign_role
 from rolepermissions.decorators import has_role_decorator
 from django.contrib.auth.models import User, Group
 from django.http import HttpResponse
-from .models import Usuario, Unidade, Sala
+from .models import Usuario, Consulta, Unidade, Sala
 from rolepermissions.roles import assign_role, get_user_roles, RolesManager
 from rolepermissions.exceptions import RoleDoesNotExist
 from django.contrib.auth.models import Group
@@ -389,3 +389,78 @@ def update_profile(request, user_id):
 
     return render(request, "pages/editar_perfil.html", {'user': user})
 
+
+
+@login_required(login_url='login1')
+@has_role_decorator('administrador')
+def lista_consultas(request):
+    consultas = Consulta.objects.all()
+    return render(request, 'pages/page_consultas.html', {'consultas': consultas})
+
+@login_required(login_url='login1')
+@has_role_decorator('administrador')
+def create_consulta(request):
+    if request.method == 'POST':
+        numero_consulta = request.POST.get('numero_consulta')
+        nome_cliente = request.POST.get('nome_cliente')
+        nome_psicologo = request.POST.get('nome_psicologo')
+        data_consulta = request.POST.get('data_consulta')
+        horario_consulta = request.POST.get('horario_consulta')
+        sala_atendimento = request.POST.get('sala_atendimento')
+        unidade_atendimento = request.POST.get('unidade_atendimento')
+
+        # Verifica se a consulta já existe
+        consulta_existente = Consulta.objects.filter(numero_consulta=numero_consulta).first()
+        if consulta_existente:
+            return HttpResponse("Já existe uma consulta com esse número")
+
+        # Criando uma nova consulta
+        consulta = Consulta.objects.create(
+            numero_consulta=numero_consulta,
+            nome_cliente=nome_cliente,
+            nome_psicologo=nome_psicologo,
+            data_consulta=data_consulta,
+            horario_consulta=horario_consulta,
+            sala_atendimento=sala_atendimento,
+            unidade_atendimento_id=unidade_atendimento
+        )
+        consulta.save()
+
+    return redirect('lista_consultas')
+
+@login_required(login_url='login1')
+def update_consulta(request, consulta_id):
+    consulta = get_object_or_404(Consulta, id_consulta=consulta_id)
+
+    if request.method == 'POST':
+        numero_consulta = request.POST.get('numero_consulta')
+        nome_cliente = request.POST.get('nome_cliente')
+        nome_psicologo = request.POST.get('nome_psicologo')
+        data_consulta = request.POST.get('data_consulta')
+        horario_consulta = request.POST.get('horario_consulta')
+        sala_atendimento = request.POST.get('sala_atendimento')
+        unidade_atendimento = request.POST.get('unidade_atendimento')
+
+        # Atualiza os campos da consulta
+        consulta.numero_consulta = numero_consulta
+        consulta.nome_cliente = nome_cliente
+        consulta.nome_psicologo = nome_psicologo
+        consulta.data_consulta = data_consulta
+        consulta.horario_consulta = horario_consulta
+        consulta.sala_atendimento = sala_atendimento
+        consulta.unidade_atendimento_id = unidade_atendimento
+        consulta.save()
+
+        return redirect('lista_consultas')
+    
+    return render(request, 'pages/editar_consulta.html', {'consulta': consulta})
+
+@login_required(login_url='login1')
+def delete_consulta(request, consulta_id):
+    consulta = get_object_or_404(Consulta, id_consulta=consulta_id)
+
+    if request.method == 'POST':
+        consulta.delete()
+        return redirect('lista_consultas')
+
+    return render(request, 'pages/deletar_consulta.html', {'consulta': consulta})

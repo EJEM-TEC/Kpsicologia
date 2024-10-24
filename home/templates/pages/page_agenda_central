@@ -1,0 +1,133 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+                <h6>Criação de Consultas</h6>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="{% url 'agenda_central' %}">
+                    {% csrf_token %}
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="numero_consulta">Número da Consulta</label>
+                                <input type="text" class="form-control" id="numero_consulta" name="numero_consulta" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="nome_cliente">Nome do Cliente</label>
+                                <input type="text" class="form-control" id="nome_cliente" name="nome_cliente" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="nome_psicologo">Nome do Psicólogo</label>
+                                <input type="text" class="form-control" id="nome_psicologo" name="nome_psicologo" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="data_consulta">Data</label>
+                                <input type="date" class="form-control" id="data_consulta" name="data_consulta" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="horario_consulta">Horário</label>
+                                <input type="time" class="form-control" id="horario_consulta" name="horario_consulta" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="sala_atendimento">Sala de Atendimento</label>
+                                <input type="text" class="form-control" id="sala_atendimento" name="sala_atendimento" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="unidade_atendimento">Unidade de Atendimento</label>
+                                <select class="form-control" id="unidade_atendimento" name="unidade_atendimento" required>
+                                    <option value="">Selecione...</option>
+                                    {% for uni in unis %}
+                                        <option value="{{ uni.id_unidade }}">{{ uni.nome_unidade }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-center gap-4 align-middle">
+                                <button type="submit" class="btn btn-primary">Registrar</button>
+                                <button type="reset" class="btn btn-secondary">Resetar</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+                <h6>Consultas Cadastradas</h6>
+            </div>
+            <div class="card-body px-0 pt-0 pb-2">
+                <div class="table-responsive p-0">
+                    <table class="table align-items-center mb-0">
+                        <thead>
+                            <tr>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Número da Consulta</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nome do Cliente</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nome do Psicólogo</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Data</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Sala de Atendimento</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for consulta in consultas %}
+                            <tr>
+                                <td class="align-middle text-center">{{ consulta.numero_consulta }}</td>
+                                <td class="align-middle text-center">{{ consulta.nome_cliente }}</td>
+                                <td class="align-middle text-center">{{ consulta.nome_psicologo }}</td>
+                                <td class="align-middle text-center">{{ consulta.data_consulta }}</td>
+                                <td class="align-middle text-center">{{ consulta.horario_consulta }}</td>
+                                <td class="align-middle text-center">{{ consulta.sala_atendimento }}</td>
+                                <td class="align-middle">
+                                    <a href="{% url 'update_consulta' consulta_id=consulta.id_consulta %}" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Edit consulta">Editar</a>
+                                    <a href="{% url 'delete_consulta' consulta_id=consulta.id_consulta %}" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center">
+                                    <p class="text-secondary font-weight-bold text-xs">Nenhuma consulta encontrada.</p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
