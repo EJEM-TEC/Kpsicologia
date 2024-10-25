@@ -384,7 +384,7 @@ def update_profile(request, user_id):
 @has_role_decorator('administrador')
 def lista_consultas(request):
     consultas = Consulta.objects.all()
-    return render(request, 'pages/page_consultas.html', {'consultas': consultas})
+    return render(request, 'pages/page_agenda_central.html', {'consultas': consultas})
 
 @login_required(login_url='login1')
 @has_role_decorator('administrador')
