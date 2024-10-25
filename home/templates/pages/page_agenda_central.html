@@ -52,23 +52,18 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="sala_atendimento">Sala de Atendimento</label>
-                                <input type="text" class="form-control" id="sala_atendimento" name="sala_atendimento" required>
+                                <select class="form-control" id="sala_atendimento" name="sala_atendimento" required>
+                                    {% for sala in salas %}
+                                        <option value="{{ sala.id_sala }}">{{ sala.numero_sala }}</option>
+                                        {% empty %}
+                                        <option>"n vaiiiii"</option>
+                                    {% endfor %}
+                                </select>
                             </div>
                         </div>
                     </div>
 
                     <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="unidade_atendimento">Unidade de Atendimento</label>
-                                <select class="form-control" id="unidade_atendimento" name="unidade_atendimento" required>
-                                    <option value="">Selecione...</option>
-                                    {% for uni in unis %}
-                                        <option value="{{ uni.id_unidade }}">{{ uni.nome_unidade }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
                         <div class="col-md-6">
                             <div class="d-flex justify-content-center gap-4 align-middle">
                                 <button type="submit" class="btn btn-primary">Registrar</button>

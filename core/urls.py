@@ -41,7 +41,7 @@ urlpatterns = [
     path("salas/<int:id_sala>/delete/", views.delete_sala, name="delete_sala"),
     path('perfil_usuario/', views.perfil, name='perfil_usuario'),
     path('perfil_usuario/<int:user_id>/editar_perfil/', views.update_profile, name='editar_perfil'),   
-    path('agenda_central/', views.lista_consultas, name='agenda_central'),
+    path('agenda_central/', views.create_consulta, name='agenda_central'),
     #path('agenda_central/<int:user_id>/editar_agenda_central/'),
     #path('agenda_central/', lista_consultas, name='lista_consultas'),  # URL para listar consultas
     #path('consultas/novo/', create_consulta, name='create_consulta'),  # URL para criar nova consulta

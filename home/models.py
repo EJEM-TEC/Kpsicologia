@@ -43,13 +43,15 @@ class Paciente(models.Model):
 
 class ConfirmacaoConsulta(models.Model):
     dia_semana = models.CharField(max_length=100)
-    periodo_atendimento = models.CharField(max_length=100)
-    data = models.DateField()
+    periodo_atendimento = models.CharField(max_length=100) 
+    data = models.DateField() 
     horario_inicio = models.TimeField()
     horario_fim = models.TimeField()
-    forma_pagamento = models.CharField(max_length=100)
+    forma_pagamento = models.CharField(max_length=100) 
     valor = models.DecimalField(max_digits=10, decimal_places=2)
     observacoes = models.CharField(max_length=100)
+    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
 class Disponibilidade(models.Model):
     data = models.DateField()

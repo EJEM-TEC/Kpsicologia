@@ -400,6 +400,8 @@ def lista_consultas(request):
 @login_required(login_url='login1')
 @has_role_decorator('administrador')
 def create_consulta(request):
+    consultas = Consulta.objects.all()
+    salas_atendimento = Sala.objects.all()
     if request.method == 'POST':
         numero_consulta = request.POST.get('numero_consulta')
         nome_cliente = request.POST.get('nome_cliente')
@@ -425,8 +427,10 @@ def create_consulta(request):
             unidade_atendimento_id=unidade_atendimento
         )
         consulta.save()
+    #print(unidades)
+    return render(request, "pages/page_agenda_central.html", {'salas': salas_atendimento, 'consultas': consultas})
 
-    return redirect('lista_consultas')
+    # return redirect('lista_consultas')
 
 @login_required(login_url='login1')
 def update_consulta(request, consulta_id):
