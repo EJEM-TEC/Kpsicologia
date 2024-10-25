@@ -166,36 +166,25 @@ def users(request):
         cargo = request.POST.get('cargo')
         senha = request.POST.get('password')
 
-        try:
-            # Verifique se o usuário já existe
-            user = User.objects.filter(username=username).first()
-
-            if user:
-                return HttpResponse("Já existe um usuário com esse nome")
+        user = User.objects.filter(username=username).first()
+        if user:
+            return HttpResponse("Já existe um usuário com esse nome")
 
             # Criando um novo usuário
-            user = User.objects.create_user(username=username, email=email, password=senha)
+        user = User.objects.create_user(username=username, email=email, password=senha)
 
             # Associando o usuário ao grupo correspondente
-            group, created = Group.objects.get_or_create(name=cargo)
-            user.groups.add(group)
+        group, created = Group.objects.get_or_create(name=cargo)
+        user.groups.add(group)
 
             # Salva o usuário
-            user.save()
+        user.save()
 
-            # Tenta atribuir um role
-            try:
-                assign_role(user, cargo)
-            except RoleDoesNotExist:
-                return HttpResponse(f"O cargo {cargo} não existe. Verifique os cargos disponíveis.")
+        assign_role(user, cargo)
+            
+        return redirect('users')
 
-            return redirect('users')
-
-        except ValueError:
-            return render(request, 'pages/page_user.html', {
-                'error': 'Idade deve ser um número!',
-                'users': User.objects.all()
-            })
+        
     
     return render(request, 'pages/page_user.html', {'users': users})
 
@@ -343,28 +332,29 @@ def perfil(request):
     #     email = request.POST.get('email')
     #     cargo = request.POST.get('cargo')
 
-@login_required
-def editar_perfil(request, user_id):
-    user= get_object_or_404(User, id=user_id)
-    if request.method == 'POST':
-        form = EditProfileForm(request.POST)
-        if form.is_valid():
-            username = form.cleaned_data['username']
-            email = form.cleaned_data['email']
-            new_password = form.cleaned_data['new_password']
 
-            request.user.name = username
-            request.user.email = email
+# @login_required
+# def editar_perfil(request, user_id):
+#     user = get_object_or_404(User, id=user_id)
+#     if request.method == 'POST':
+#         form = EditProfileForm(request.POST)
+#         if form.is_valid():
+#             username = form.cleaned_data['username']
+#             email = form.cleaned_data['email']
+#             new_password = form.cleaned_data['new_password']
 
-            if new_password:
-                request.user.set_password(new_password)
+#             request.user.name = username
+#             request.user.email = email
 
-            request.user.save()
-            return redirect('perfil_usuario')  # Redirecionar para a página de perfil
-    else:
-        form = EditProfileForm(initial={'name': request.user.name, 'email': request.user.email})
+#             if new_password:
+#                 request.user.set_password(new_password)
 
-    return render(request, 'pages/editar_perfil.html', {'form': form})
+#             request.user.save()
+#             return redirect('perfil_usuario')  # Redirecionar para a página de perfil
+#     else:
+#         form = EditProfileForm(initial={'name': request.user.name, 'email': request.user.email})
+
+#     return render(request, 'pages/editar_perfil.html', {'form': form})
 
 
 @login_required(login_url='login1')
@@ -468,3 +458,26 @@ def delete_consulta(request, consulta_id):
         return redirect('lista_consultas')
 
     return render(request, 'pages/deletar_consulta.html', {'consulta': consulta})
+
+# def psicologa(request):
+#     # users = User.objects.all()
+#     cargo = 'psicologa'
+#     # user = Usuario.objects.filter(cargo=cargo_desejado).select_related('user')
+#     # user = Usuario.objects.filter(cargo='psicologa')
+
+#     psicologa = Usuario.objects.filter(cargo=cargo)
+#     return render(request, 'pages/psicologa.html', {'users': psicologa})
+
+
+def psicologa(request):
+
+    # Obtém o grupo 'psicologa' ou retorna 404 se não existir
+    grupo = get_object_or_404(Group, name="psicologa")
+    
+    # Filtra os usuários que pertencem ao grupo
+    usuarios = User.objects.filter(groups=grupo)
+    
+    # Serializa os dados (ajuste os campos conforme necessário)
+    data = [{"id": user.id, "username": user.username, "email": user.email} for user in usuarios]
+    
+    return render(request, 'pages/psicologa.html', {'users': data})
