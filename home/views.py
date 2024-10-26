@@ -8,7 +8,7 @@ from rolepermissions.roles import assign_role
 from rolepermissions.decorators import has_role_decorator
 from django.contrib.auth.models import User, Group
 from django.http import HttpResponse
-from .models import Usuario, Consulta, Unidade, Sala
+from .models import Usuario, Consulta, Unidade, Sala, Paciente
 from rolepermissions.roles import assign_role, get_user_roles, RolesManager
 from rolepermissions.exceptions import RoleDoesNotExist
 from django.contrib.auth.models import Group
@@ -392,33 +392,49 @@ def lista_consultas(request):
 def create_consulta(request):
     consultas = Consulta.objects.all()
     salas_atendimento = Sala.objects.all()
+
+    #Redenderização de psicólogas
+    
+    # Obtém o grupo 'psicologa' ou retorna 404 se não existir
+    grupo = get_object_or_404(Group, name="psicologa")
+    
+    # Filtra os usuários que pertencem ao grupo
+    usuarios = User.objects.filter(groups=grupo)
+    
+    # Serializa os dados (ajuste os campos conforme necessário)
+    psicologas = [{"id": user.id, "username": user.username, "email": user.email} for user in usuarios]
+
+
+    #Renderização dos pacientes
+    pacientes = Paciente.objects.all()
+
     if request.method == 'POST':
-        numero_consulta = request.POST.get('numero_consulta')
         nome_cliente = request.POST.get('nome_cliente')
         nome_psicologo = request.POST.get('nome_psicologo')
         data_consulta = request.POST.get('data_consulta')
         horario_consulta = request.POST.get('horario_consulta')
-        sala_atendimento = request.POST.get('sala_atendimento')
-        unidade_atendimento = request.POST.get('unidade_atendimento')
+        horario_consulta_fim = request.POST.get('horario_consulta_fim')
+        sala_atendimento_id = request.POST.get('sala_atendimento')
 
-        # Verifica se a consulta já existe
-        consulta_existente = Consulta.objects.filter(numero_consulta=numero_consulta).first()
-        if consulta_existente:
-            return HttpResponse("Já existe uma consulta com esse número")
 
+        sala_atendimento = get_object_or_404(Sala, id_sala=sala_atendimento_id)
+        paciente = get_object_or_404(Paciente, id=nome_cliente)
+        user = get_object_or_404(User, id=nome_psicologo)
+        
         # Criando uma nova consulta
         consulta = Consulta.objects.create(
-            numero_consulta=numero_consulta,
-            nome_cliente=nome_cliente,
-            nome_psicologo=nome_psicologo,
-            data_consulta=data_consulta,
-            horario_consulta=horario_consulta,
+            paciente=paciente,
+            user=user,
+            data=data_consulta,
+            horario_fim = horario_consulta_fim,
+            horario_inicio=horario_consulta,
             sala_atendimento=sala_atendimento,
-            unidade_atendimento_id=unidade_atendimento
         )
         consulta.save()
+
+        redirect('lista_consultas')
     #print(unidades)
-    return render(request, "pages/page_agenda_central.html", {'salas': salas_atendimento, 'consultas': consultas})
+    return render(request, "pages/page_agenda_central.html", {'salas': salas_atendimento, 'consultas': consultas, 'psicologas': psicologas,'pacientes': pacientes})
 
     # return redirect('lista_consultas')
 
@@ -481,3 +497,36 @@ def psicologa(request):
     data = [{"id": user.id, "username": user.username, "email": user.email} for user in usuarios]
     
     return render(request, 'pages/psicologa.html', {'users': data})
+
+
+@login_required(login_url='login1')
+@has_role_decorator('administrador')
+def pacientes(request):
+
+    pacientes = Paciente.objects.all()
+
+    if request.method == 'POST':
+        nome_paciente = request.POST.get('nome_paciente')
+        idade_paciente = request.POST.get('idade_paciente')
+        rg_paciente = request.POST.get('rg_paciente')
+        email_paciente = request.POST.get('email_paciente')
+        telefone_paciente = request.POST.get('telefone_paciente')
+        cpf_paciente = request.POST.get('cpf_paciente')
+
+
+        paciente = Paciente.objects.create(
+            nome = nome_paciente,
+            idade = idade_paciente,
+            rg = rg_paciente,
+            email = email_paciente,
+            telefone = telefone_paciente,
+            cpf = cpf_paciente
+        )
+
+        paciente.save()
+
+        redirect('pacientes')
+    
+    return render(request, 'pages/pacientes.html', {'pacientes': pacientes})
+
+    

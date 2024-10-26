@@ -34,14 +34,16 @@ class Sala(models.Model):
         return f"Sala {self.numero_sala} - {self.cor_sala}"
     
 class Paciente(models.Model):
+    id = models.AutoField(primary_key=True)
     nome = models.CharField(max_length=100)
-    idade = models.CharField(max_length=100)
-    rg = models.CharField(max_length=100)
+    idade = models.IntegerField()
+    rg = models.IntegerField()
     email = models.EmailField(max_length=100)
-    telefone = models.CharField(max_length=100)
-    cpf = models.CharField(max_length=100)
+    telefone = models.IntegerField()
+    cpf = models.IntegerField()
 
 class ConfirmacaoConsulta(models.Model):
+    id = models.AutoField(primary_key=True)
     dia_semana = models.CharField(max_length=100)
     periodo_atendimento = models.CharField(max_length=100) 
     data = models.DateField() 
@@ -54,19 +56,23 @@ class ConfirmacaoConsulta(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
 class Disponibilidade(models.Model):
+    id = models.AutoField(primary_key=True)
     data = models.DateField()
     hora_inicio = models.TimeField()
     hora_fim = models.TimeField()
 
 class PsicoConfirmarConsulta(models.Model):
+    id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     confirmacao_consulta = models.ForeignKey(ConfirmacaoConsulta, on_delete=models.CASCADE)
 
 class PsicoDisponibilidade(models.Model):
+    id = models.AutoField(primary_key=True)
     disponibilidade = models.ForeignKey(Disponibilidade, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
 class Consulta(models.Model):
+    id = models.AutoField(primary_key=True)
     data = models.DateField()
     horario_inicio = models.TimeField()
     horario_fim = models.TimeField()
