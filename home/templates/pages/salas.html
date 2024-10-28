@@ -20,8 +20,18 @@
                       </div>
                       <div class="col-md-6">
                           <div class="form-group">
-                              <label for="cor_sala">Cor da sala</label>
-                              <input type="text" class="form-control" id="cor_sala" name="cor_sala" required>
+                            <label for="cor_sala">Cor da Sala:</label>
+                            <select name="cor_sala" id="cor_sala">
+                                <option value="red">Vermelho</option>
+                                <option value="green">Verde</option>
+                                <option value="blue">Azul</option>
+                                <option value="black">Preto</option>
+                                <option value="white">Branco</option>
+                                <option value="gray">Cinza</option>
+                                <option value="yellow">Amarelo</option>
+                                <option value="cyan">Ciano</option>
+                                <option value="magenta">Magenta</option>
+                            </select>
                           </div>
                       </div>
                     </div>
@@ -77,8 +87,11 @@
                         </div>
                       </td>
                       <td class="align-middle text-center">
-                        <p class="text-xs font-weight-bold mb-0 ">{{sala.cor_sala}}</p>
-                      </td>
+                        <p class="mb-0" 
+                           style="color: {{ sala.cor_sala }}; font-weight: 900;">
+                            {{ sala.get_cor_sala_display }}
+                        </p>
+                    </td>
                       <td class="align-middle text-center">
                         <p class="text-xs font-weight-bold mb-0 ">{{sala.id_unidade.nome_unidade}}</p>
                       </td>

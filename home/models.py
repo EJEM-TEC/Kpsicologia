@@ -26,7 +26,21 @@ class Unidade(models.Model):
     
 class Sala(models.Model):
     id_sala = models.AutoField(primary_key=True)
-    cor_sala =  models.CharField(max_length=100)
+    cor_sala = models.CharField(
+        max_length=20,
+        choices=[
+            ('red', 'Vermelho'),
+            ('green', 'Verde'),
+            ('blue', 'Azul'),
+            ('black', 'Preto'),
+            ('white', 'Branco'),
+            ('gray', 'Cinza'),
+            ('yellow', 'Amarelo'),
+            ('cyan', 'Ciano'),
+            ('magenta', 'Magenta'),
+        ],
+        default='white'
+    )
     numero_sala = models.PositiveIntegerField()
     id_unidade = models.ForeignKey(Unidade, on_delete=models.CASCADE, related_name='salas')
 
