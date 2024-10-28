@@ -529,4 +529,44 @@ def pacientes(request):
     
     return render(request, 'pages/pacientes.html', {'pacientes': pacientes})
 
+@login_required(login_url='login1')
+@has_role_decorator('administrador')
+def editar_paciente(request, id_paciente):
+
+    paciente = get_object_or_404(Paciente, id=id_paciente)
+
+    if request.method == 'POST':
+        nome_paciente = request.POST.get('nome_paciente')
+        idade_paciente = request.POST.get('idade_paciente')
+        rg_paciente = request.POST.get('rg_paciente')
+        email_paciente = request.POST.get('email_paciente')
+        telefone_paciente = request.POST.get('telefone_paciente')
+        cpf_paciente = request.POST.get('cpf_paciente')
+
+        paciente.nome = nome_paciente;
+        paciente.rg = rg_paciente;
+        paciente.idade = idade_paciente;
+        paciente.email = email_paciente;
+        paciente.telefone = telefone_paciente;
+        paciente.cpf = cpf_paciente;
+        
+        paciente.save()
+
+        return redirect('pacientes')
+    
+    return render(request, 'pages/editar_paciente.html', {'paciente': paciente})
+
+
+@login_required(login_url='login1')
+@has_role_decorator('administrador')
+def deletar_paciente(request, id_paciente):
+
+    paciente = get_object_or_404(Paciente, id=id_paciente)
+
+    if request.method == 'POST':
+        paciente.delete()
+
+        return redirect('pacientes')
+    
+    return render(request, 'pages/deletar_paciente.html', {'paciente': paciente})
     

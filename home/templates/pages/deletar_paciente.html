@@ -1,0 +1,17 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+
+    <h1>Deletar Usuário</h1>
+    
+    <p>Tem certeza de que deseja deletar o paciente <strong>{{ paciente.nome }}</strong>?</p>
+    
+    <form method="POST">
+        {% csrf_token %}
+        <button type="submit" class="btn bg-gradient-primary">Deletar</button>
+        <button type="button" class="btn bg-gradient-secondary"><a href="{% url 'pacientes' %}">Cancelar</a></button>
+    </form>
+
+
+{% endblock content %}

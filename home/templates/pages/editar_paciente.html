@@ -1,0 +1,74 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+                <h6>Edição de Pacientes</h6>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="{% url 'update_paciente' id_paciente=paciente.id %}">
+                    {% csrf_token %}
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="nome_paciente">Nome</label>
+                                <input type="text" class="form-control" id="nome_paciente" name="nome_paciente" value="{{paciente.nome}}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="idade_paciente">Idade</label>
+                                <input type="number" class="form-control" id="idade_paciente" name="idade_paciente" value="{{paciente.idade}}" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="rg_paciente">RG</label>
+                                <input type="number" class="form-control" id="rg_paciente" name="rg_paciente" value="{{paciente.rg}}" required>      
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="email_paciente">E-mail</label>
+                                <input type="text" class="form-control" id="email_paciente" name="email_paciente" value="{{paciente.email}}" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="telefone_paciente">Telefone</label>
+                                <input type="number" class="form-control" id="telefone_paciente" name="telefone_paciente" value="{{paciente.telefone}}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="cpf_paciente">CPF</label>
+                                <input type="number" class="form-control" id="cpf_paciente" name="cpf_paciente" value="{{paciente.cpf}}" required>
+                            </div>
+                        </div>
+                        
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="d-flex justify-content-center gap-4 align-middle">
+                                <button type="submit" class="btn btn-primary">Editar</button>
+                                <button type="reset" class="btn btn-secondary">Resetar</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

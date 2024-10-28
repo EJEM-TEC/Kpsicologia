@@ -102,8 +102,8 @@
                                 <td class="align-middle text-center">{{ paciente.telefone }}</td>
                                 <td class="align-middle text-center">{{ paciente.cpf }}</td>
                                 <td class="align-middle">
-                                    <a href="#" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Edit consulta">Editar</a>
-                                    <a href="#" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
+                                    <a href="{% url 'update_paciente' id_paciente=paciente.id %}" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Edit consulta">Editar</a>
+                                    <a href="{% url 'delete_paciente' id_paciente=paciente.id %}" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
                                 </td>
                             </tr>
                         {% empty %}
