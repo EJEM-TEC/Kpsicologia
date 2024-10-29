@@ -299,9 +299,8 @@ def update_uni(request, unidade_id):
             unidade.endereco_unidade = endereco_unidade
             unidade.CEP_unidade = CEP_unidade
             unidade.save()
+            
             return redirect("unidade_atendimento")
-        else:
-            return render(request, "pages/editar_unidade.html", {'unidade': unidade, 'error': 'Preencha todos os campos.'})
 
     return render(request, "pages/editar_unidade.html", {'unidade': unidade})
 
@@ -440,7 +439,13 @@ def create_consulta(request):
 @login_required(login_url='login1')
 def update_consulta(request, id_consulta):
     consulta = get_object_or_404(Consulta, id_consulta=id_consulta)
-    # pacientes = Paciente.objects.all()
+    salas = Sala.objects.all()
+    pacientes = Paciente.objects.all()
+    grupo = get_object_or_404(Group, name="psicologa")
+    # Filtra os usuários que pertencem ao grupo
+    usuarios = User.objects.filter(groups=grupo)
+    # Serializa os dados (ajuste os campos conforme necessário)
+    psicologas = [{"id": user.id, "username": user.username, "email": user.email} for user in usuarios]
     # grupo = get_object_or_404(Group, name="psicologa")
 
     # usuarios = User.objects.filter(groups=grupo)
@@ -455,21 +460,25 @@ def update_consulta(request, id_consulta):
         numero_sala = request.POST.get('numero_sala')
         # unidade_atendimento = request.POST.get('unidade_atendimento')
 
+        sala_atendimento = get_object_or_404(Sala, id_sala=numero_sala)
+        paciente = get_object_or_404(Paciente, id=nome_paciente)
+        user = get_object_or_404(User, id=nome_psicologa)
+
         # Atualiza os campos da consulta
         # consulta.id_consulta = id_consulta
-        consulta.nome_paciente = nome_paciente
-        consulta.nome_psicologa = nome_psicologa
+        consulta.paciente = paciente
+        consulta.user = user
         consulta.data = data
         consulta.horario_inicio = horario_inicio
         consulta.horario_fim = horario_fim
         # consulta.horario_consulta = horario_consulta
-        consulta.numero_sala = numero_sala
+        consulta.sala_atendimento = sala_atendimento
         # consulta.unidade_atendimento_id = unidade_atendimento
         consulta.save()
 
         return redirect('lista_consultas')
     
-    return render(request, 'pages/editar_agenda_central.html', {'consulta': consulta})
+    return render(request, 'pages/editar_agenda_central.html', {'consulta': consulta, 'salas': salas, 'pacientes': pacientes, 'psicologas': psicologas})
 
 def page_agenda_central():
     return render('pages/editar_agenda_central.html')

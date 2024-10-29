@@ -24,8 +24,12 @@
 
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="nome_paciente">Nome do Paciente</label>
-                                <input type="text" class="form-control" id="nome_paciente" name="nome_paciente" value="{{ consulta.paciente.nome }}" required>
+                                <label for="nome_cliente">Nome do Pacientes</label>
+                                    <select class="form-control" id="nome_cliente" name="nome_cliente" required>
+                                      {% for paciente in pacientes %}
+                                      <option value="{{paciente.id}}">{{ paciente.nome }}</option>
+                                      {% endfor %}
+                                    </select>
                             </div>
                         </div>
                     </div>
@@ -34,7 +38,11 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="nome_psicologa">Nome do Psicóloga</label>
-                                <input type="text" class="form-control" id="nome_psicologa" name="nome_psicologa" value="{{ consulta.user }}" required>
+                                    <select class="form-control" id="nome_psicologa" name="nome_psicologa" required>
+                                      {% for psicologa in psicologas %}
+                                      <option value="{{psicologa.id}}">{{ psicologa.username }}</option>
+                                      {% endfor %}
+                                    </select>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -64,8 +72,12 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="sala_atendimento">Sala de Atendimento</label>
-                                <input type="text" class="form-control" id="sala_atendimento" name="sala_atendimento" value="{{ consulta.numero_sala }}" required>
+                                <label for="numero_sala">Salas</label>
+                                    <select class="form-control" id="numero_sala" name="numero_sala" required>
+                                      {% for sala in salas %}
+                                      <option value="{{sala.id_sala}}">{{ sala.numero_sala }}</option>
+                                      {% endfor %}
+                                    </select>
                             </div>
                         </div>
                         <!-- <div class="col-md-6"> -->
