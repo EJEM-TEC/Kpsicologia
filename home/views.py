@@ -362,17 +362,18 @@ def update_profile(request, user_id):
     if request.method == 'POST':
         username = request.POST.get('username')
         email = request.POST.get('email')
-        senha = request.POST.get('password')
+        password = request.POST.get('password')
         
-        if username and email and senha:
+        if username and email:
             
             user.username = username
             user.email = email
-            user.senha = senha
+            if password:
+                user.set_password = password
 
             user.save()
 
-            return redirect("users")
+            return redirect("perfil_usuario")
         else:
             return render(request, "pages/editar_perfil.html", {'user': user, 'error': 'Preencha todos os campos.'})
 
