@@ -47,8 +47,8 @@ urlpatterns = [
     # URLs para gerenciamento de consultas
     path('consultas/', views.create_consulta, name='lista_consultas'),  # URL para listar consultas
     #path('consultas/novo/', views.create_consulta, name='create_consulta'),  # URL para criar nova consulta
-    path('consultas/editar/<int:consulta_id>/', views.update_consulta, name='update_consulta'),  # URL para editar consulta
-    path('consultas/deletar/<int:consulta_id>/', views.delete_consulta, name='delete_consulta'),  # URL para deletar consulta
+    path('consultas/editar/<int:id_consulta>/', views.update_consulta, name='update_consulta'),  # URL para editar consulta
+    path('consultas/deletar/<int:id_consulta>/', views.delete_consulta, name='delete_consulta'),  # URL para deletar consulta
     path('pacientes/', views.pacientes, name='pacientes'),
     path('pacientes/<int:id_paciente>/editar', views.editar_paciente, name='update_paciente'),
     path('pacientes/<int:id_paciente>/deletar', views.deletar_paciente, name='delete_paciente'),
