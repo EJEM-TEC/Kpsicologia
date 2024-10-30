@@ -9,7 +9,7 @@
               <h6>Editar Unidade</h6>
             </div>
             <div class="card-body p-4">
-              <form method="POST" action="{% url 'update_user' user_id=user.id %}">
+              <form method="POST" action="{% url 'update_unidade' unidade_id=unidade.id_unidade %}">
                 {% csrf_token %}
 
                 <div class="row">
