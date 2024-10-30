@@ -52,6 +52,8 @@ urlpatterns = [
     path('pacientes/', views.pacientes, name='pacientes'),
     path('pacientes/<int:id_paciente>/editar', views.editar_paciente, name='update_paciente'),
     path('pacientes/<int:id_paciente>/deletar', views.deletar_paciente, name='delete_paciente'),
+    path('psicologas/confirmar/<int:id_usuario>/', views.confirma_consulta, name='confirma_consulta'),  # URL para confirmar consulta
+
     #path('agenda_central/<int:user_id>/editar_agenda_central/'),
     #path('agenda_central/', lista_consultas, name='lista_consultas'),  # URL para listar consultas
     #path('consultas/novo/', create_consulta, name='create_consulta'),  # URL para criar nova consulta

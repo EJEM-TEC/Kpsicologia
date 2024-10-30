@@ -8,7 +8,7 @@ from rolepermissions.roles import assign_role
 from rolepermissions.decorators import has_role_decorator
 from django.contrib.auth.models import User, Group
 from django.http import HttpResponse
-from .models import Usuario, Consulta, Unidade, Sala, Paciente
+from .models import Usuario, Consulta, Unidade, Sala, Paciente, ConfirmacaoConsulta
 from rolepermissions.roles import assign_role, get_user_roles, RolesManager
 from rolepermissions.exceptions import RoleDoesNotExist
 from django.contrib.auth.models import Group
@@ -379,6 +379,14 @@ def update_profile(request, user_id):
 
     return render(request, "pages/editar_perfil.html", {'user': user})
 
+def confirma_consulta(request, id_usuario):
+    consultas = ConfirmacaoConsulta.objects.filter(user_id=id_usuario)
+    #consultas = get_object_or_404(consultas, id=id_usuario)
+    return render(request, 'pages/confirma_consulta.html', {'consultas': consultas})
+    #grupo = get_object_or_404(Group, name="psicologa") Não
+    #usuarios = User.objects.filter(groups=grupo) N
+    #psicologas = [{"id": user.id, "username": user.username, "email": user.email} for user in usuarios] N
+    #
 
 
 @login_required(login_url='login1')
@@ -430,6 +438,21 @@ def create_consulta(request):
             horario_fim = horario_consulta_fim,
             horario_inicio=horario_consulta,
             sala_atendimento=sala_atendimento,
+        )
+
+        # Criando uma nova confirmação de consulta
+        consulta = ConfirmacaoConsulta.objects.create(
+            paciente=paciente,
+            user=user,
+            data=data_consulta,
+            horario_fim = horario_consulta_fim,
+            horario_inicio=horario_consulta,
+            sala_atendimento=sala_atendimento,
+            forma_pagamento="",
+            observacoes="",
+            valor=0.0,
+            dia_semana="",
+            confirmacao = ""
         )
         consulta.save()
 

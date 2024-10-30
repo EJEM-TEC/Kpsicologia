@@ -16,10 +16,10 @@
                                 <div class="card-body">
                                     <h5 class="text-white mb-0">{{ user.username }}</h5>
                                     <div class="d-flex mt-5">
-                                    <button class="btn btn-outline-white p-2 mb-0" type="button" data-bs-toggle="tooltip" data-bs-placement="top" disabled>
-                                        <a href="#" class="text-white">Acessar</a>
+                                    <button class="btn btn-outline-white p-2 mb-0" type="button" data-bs-toggle="tooltip" data-bs-placement="top">
+                                        <a href="{% url 'confirma_consulta' id_usuario=user.id %}" class="text-white">Acessar</a>
                                     </button>
-                                    </div>
+                                    </div> 
                                 </div>
                             </div>
                         </div>
