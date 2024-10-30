@@ -9,7 +9,7 @@
                   <h6>Perfil</h6>
                 </div>
                 <div class="card-body p-4">
-                  <form method="POST" action="{% url 'users' %}">
+                  <form method="POST" action="{% url 'perfil_usuario' %}">
                     {% csrf_token %}
 
                     <div class="row">
@@ -22,8 +22,8 @@
                     <div class="row">
                         <div class="col-md-12">
                           <div class="form-group">
-                            <label for="username">Email</label>
-                            <input type="text" class="form-control" id="username" name="username" value="{{user.email}}" disabled>
+                            <label for="email">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" value="{{user.email}}" disabled>
                           </div>
                         </div>                   
                     </div>

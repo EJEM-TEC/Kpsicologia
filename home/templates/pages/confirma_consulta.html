@@ -1,0 +1,62 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+                <h6>Consultas Cadastradas</h6>
+            </div>
+            <div class="card-body px-0 pt-0 pb-2">
+                <div class="table-responsive p-0">
+                    <table class="table align-items-center mb-0">
+                        <thead>
+                            <tr>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nome do Cliente</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nome do Psicólogo</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Data</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário de Início</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário de Fim</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Periodo de Atendimento</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Forma Pagamento</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Confirmação</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Observações</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for consulta in consultas %}
+                            <tr>
+                                <td class="align-middle text-center">{{ consulta.paciente.nome }}</td>
+                                <td class="align-middle text-center">{{ consulta.user }}</td>
+                                <td class="align-middle text-center">{{ consulta.data }}</td>
+                                <td class="align-middle text-center">{{ consulta.horario_inicio }}</td>
+                                <td class="align-middle text-center">{{ consulta.horario_fim }}</td>
+                                <td class="align-middle text-center">{{ consulta.sala_atendimento.numero_sala }}</td>
+                                <td class="align-middle text-center">{{ consulta.periodo_atendimento }}</td>
+                                <td class="align-middle text-center">{{ consulta.forma_pagamento }}</td>
+                                <td class="align-middle text-center">{{ consulta.valor }}</td>
+                                <td class="align-middle text-center">{{ consulta.confirmacao }}</td>
+                                <td class="align-middle text-center">{{ consulta.observacoes }}</td>
+                                <td class="align-middle">
+                                    <a  href="#" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Confirma consulta">Confirma</a>
+                                </td>
+                            </tr> 
+                        {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center">
+                                    <p class="text-secondary font-weight-bold text-xs">Nenhuma consulta encontrada.</p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

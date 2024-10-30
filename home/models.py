@@ -57,17 +57,19 @@ class Paciente(models.Model):
     cpf = models.IntegerField()
 
 class ConfirmacaoConsulta(models.Model):
-    id = models.AutoField(primary_key=True)
+    id_consulta = models.AutoField(primary_key=True)
     dia_semana = models.CharField(max_length=100)
     periodo_atendimento = models.CharField(max_length=100) 
     data = models.DateField() 
     horario_inicio = models.TimeField()
     horario_fim = models.TimeField()
+    confirmacao = models.CharField(max_length=100)
     forma_pagamento = models.CharField(max_length=100) 
     valor = models.DecimalField(max_digits=10, decimal_places=2)
     observacoes = models.CharField(max_length=100)
     paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    sala_atendimento = models.ForeignKey(Sala, on_delete=models.CASCADE)
 
 class Disponibilidade(models.Model):
     id = models.AutoField(primary_key=True)
@@ -86,7 +88,7 @@ class PsicoDisponibilidade(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
 class Consulta(models.Model):
-    id = models.AutoField(primary_key=True)
+    id_consulta = models.AutoField(primary_key=True)
     data = models.DateField()
     horario_inicio = models.TimeField()
     horario_fim = models.TimeField()

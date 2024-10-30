@@ -11,49 +11,39 @@
             <div class="card-body p-4">
               <form method="POST" action="{% url 'editar_perfil' user_id=user.id %}">
                 {% csrf_token %}
-
                 <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="username">Nome</label>
+                      <input type="text" class="form-control" id="username" name="username" value="{{user.username}}" required >
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="email"> E-mail</label>
+                      <input type="email"class="form-control" id="email" name="email" value="{{user.email}}" required>
+                    </div>
+                  </div>
+                  <div class="row">
                     <div class="col-md-6">
                       <div class="form-group">
-                        <label for="username">Nome</label>
-                        <input type="text" class="form-control" id="username" name="username" required value="{{user.username}}">
+                        <label for="new_password">Nova Senha</label>
+                        <input type="password" class="form-control" id="new_password" name="new_password" placeholder="*" required>
                       </div>
                     </div>
+                  </div>
+                  <div class="row">
                     <div class="col-md-6">
-                      <div class="form-group">
-                          <label for="email"> E-mail</label>
-                          <input type="email"class="form-control" id="email" name="email" required value="{{user.email}}">
+                      <div class="d-flex justify-content-center gap-4 align-middle">
+                          <button type="submit" class="btn btn-primary">Atualizar</button>
+                          <button type="reset" class="btn btn-secondary">Resetar</button>
                       </div>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col-md-6">
-                      <div class="form-group">
-                          <label for="new_password">Nova Senha</label>
-                          <input type="password" class="form-control" id="new_password" name="new_password" placeholder="***********" required>
-                      </div>
-                  {% comment %} </div>
-                  <div class="col-md-6">
-                      <div class="form-group">
-                          <label for="confirm_password">Confirmar Nova Senha</label>
-                          <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="***********" required>
-                      </div> {% endcomment %}
-                  </div>
-              </div>
-              
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="d-flex justify-content-center gap-4 align-middle">
-                        <button type="submit" class="btn btn-primary">Atualizar</button>
                     </div>
-                </div>
-              </div> 
+                  </div> 
               </form>
             </div>
           </div>
-
     </div>
-
 </div>
 
 {% endblock content %}

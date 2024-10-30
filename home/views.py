@@ -8,7 +8,7 @@ from rolepermissions.roles import assign_role
 from rolepermissions.decorators import has_role_decorator
 from django.contrib.auth.models import User, Group
 from django.http import HttpResponse
-from .models import Usuario, Consulta, Unidade, Sala, Paciente
+from .models import Usuario, Consulta, Unidade, Sala, Paciente, ConfirmacaoConsulta
 from rolepermissions.roles import assign_role, get_user_roles, RolesManager
 from rolepermissions.exceptions import RoleDoesNotExist
 from django.contrib.auth.models import Group
@@ -299,9 +299,8 @@ def update_uni(request, unidade_id):
             unidade.endereco_unidade = endereco_unidade
             unidade.CEP_unidade = CEP_unidade
             unidade.save()
+            
             return redirect("unidade_atendimento")
-        else:
-            return render(request, "pages/editar_unidade.html", {'unidade': unidade, 'error': 'Preencha todos os campos.'})
 
     return render(request, "pages/editar_unidade.html", {'unidade': unidade})
 
@@ -363,22 +362,31 @@ def update_profile(request, user_id):
     if request.method == 'POST':
         username = request.POST.get('username')
         email = request.POST.get('email')
-        senha = request.POST.get('password')
+        password = request.POST.get('password')
         
-        if username and email and senha:
+        if username and email:
             
             user.username = username
             user.email = email
-            user.senha = senha
+            if password:
+                user.set_password = password
 
             user.save()
 
-            return redirect("users")
+            return redirect("perfil_usuario")
         else:
             return render(request, "pages/editar_perfil.html", {'user': user, 'error': 'Preencha todos os campos.'})
 
     return render(request, "pages/editar_perfil.html", {'user': user})
 
+def confirma_consulta(request, id_usuario):
+    consultas = ConfirmacaoConsulta.objects.filter(user_id=id_usuario)
+    #consultas = get_object_or_404(consultas, id=id_usuario)
+    return render(request, 'pages/confirma_consulta.html', {'consultas': consultas})
+    #grupo = get_object_or_404(Group, name="psicologa") Não
+    #usuarios = User.objects.filter(groups=grupo) N
+    #psicologas = [{"id": user.id, "username": user.username, "email": user.email} for user in usuarios] N
+    #
 
 
 @login_required(login_url='login1')
@@ -392,6 +400,7 @@ def lista_consultas(request):
 def create_consulta(request):
     consultas = Consulta.objects.all()
     salas_atendimento = Sala.objects.all()
+    #usuarios = User.objects.filter(groups=grupo)
 
     #Redenderização de psicólogas
     
@@ -430,50 +439,84 @@ def create_consulta(request):
             horario_inicio=horario_consulta,
             sala_atendimento=sala_atendimento,
         )
+
+        # Criando uma nova confirmação de consulta
+        consulta = ConfirmacaoConsulta.objects.create(
+            paciente=paciente,
+            user=user,
+            data=data_consulta,
+            horario_fim = horario_consulta_fim,
+            horario_inicio=horario_consulta,
+            sala_atendimento=sala_atendimento,
+            forma_pagamento="",
+            observacoes="",
+            valor=0.0,
+            dia_semana="",
+            confirmacao = ""
+        )
         consulta.save()
 
-        redirect('lista_consultas')
+        return redirect('lista_consultas')
     #print(unidades)
     return render(request, "pages/page_agenda_central.html", {'salas': salas_atendimento, 'consultas': consultas, 'psicologas': psicologas,'pacientes': pacientes})
 
-    # return redirect('lista_consultas')
-
 @login_required(login_url='login1')
-def update_consulta(request, consulta_id):
-    consulta = get_object_or_404(Consulta, id_consulta=consulta_id)
+def update_consulta(request, id_consulta):
+    consulta = get_object_or_404(Consulta, id_consulta=id_consulta)
+    salas = Sala.objects.all()
+    pacientes = Paciente.objects.all()
+    grupo = get_object_or_404(Group, name="psicologa")
+    # Filtra os usuários que pertencem ao grupo
+    usuarios = User.objects.filter(groups=grupo)
+    # Serializa os dados (ajuste os campos conforme necessário)
+    psicologas = [{"id": user.id, "username": user.username, "email": user.email} for user in usuarios]
+    # grupo = get_object_or_404(Group, name="psicologa")
 
+    # usuarios = User.objects.filter(groups=grupo)
     if request.method == 'POST':
-        numero_consulta = request.POST.get('numero_consulta')
-        nome_cliente = request.POST.get('nome_cliente')
-        nome_psicologo = request.POST.get('nome_psicologo')
-        data_consulta = request.POST.get('data_consulta')
-        horario_consulta = request.POST.get('horario_consulta')
-        sala_atendimento = request.POST.get('sala_atendimento')
-        unidade_atendimento = request.POST.get('unidade_atendimento')
+        # id_consulta = request.POST.get('id_consulta')
+        nome_paciente = request.POST.get('nome_cliente')
+        nome_psicologa = request.POST.get('nome_psicologa')
+        data = request.POST.get('data')
+        horario_inicio = request.POST.get('horario_inicio')
+        horario_fim = request.POST.get('horario_fim')
+        # horario_consulta = request.POST.get('horario_consulta')
+        numero_sala = request.POST.get('numero_sala')
+        # unidade_atendimento = request.POST.get('unidade_atendimento')
+
+        sala_atendimento = get_object_or_404(Sala, id_sala=numero_sala)
+        paciente = get_object_or_404(Paciente, id=nome_paciente)
+        user = get_object_or_404(User, id=nome_psicologa)
 
         # Atualiza os campos da consulta
-        consulta.numero_consulta = numero_consulta
-        consulta.nome_cliente = nome_cliente
-        consulta.nome_psicologo = nome_psicologo
-        consulta.data_consulta = data_consulta
-        consulta.horario_consulta = horario_consulta
+        # consulta.id_consulta = id_consulta
+        consulta.paciente = paciente
+        consulta.user = user
+        consulta.data = data
+        consulta.horario_inicio = horario_inicio
+        consulta.horario_fim = horario_fim
+        # consulta.horario_consulta = horario_consulta
         consulta.sala_atendimento = sala_atendimento
-        consulta.unidade_atendimento_id = unidade_atendimento
+        # consulta.unidade_atendimento_id = unidade_atendimento
         consulta.save()
 
         return redirect('lista_consultas')
     
-    return render(request, 'pages/editar_consulta.html', {'consulta': consulta})
+    return render(request, 'pages/editar_agenda_central.html', {'consulta': consulta, 'salas': salas, 'pacientes': pacientes, 'psicologas': psicologas})
+
+def page_agenda_central():
+    return render('pages/editar_agenda_central.html')
 
 @login_required(login_url='login1')
-def delete_consulta(request, consulta_id):
-    consulta = get_object_or_404(Consulta, id_consulta=consulta_id)
+def delete_consulta(request, id_consulta):
+    consulta = get_object_or_404(Consulta, id_consulta=id_consulta)
 
     if request.method == 'POST':
         consulta.delete()
         return redirect('lista_consultas')
 
-    return render(request, 'pages/deletar_consulta.html', {'consulta': consulta})
+    return render(request, 'pages/deletar_agenda_central.html', {'consulta': consulta})
+
 
 # def psicologa(request):
 #     # users = User.objects.all()
