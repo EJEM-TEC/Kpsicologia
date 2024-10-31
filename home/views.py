@@ -383,11 +383,30 @@ def confirma_consulta(request, id_usuario):
     consultas = ConfirmacaoConsulta.objects.filter(user_id=id_usuario)
     #consultas = get_object_or_404(consultas, id=id_usuario)
     return render(request, 'pages/confirma_consulta.html', {'consultas': consultas})
-    #grupo = get_object_or_404(Group, name="psicologa") Não
-    #usuarios = User.objects.filter(groups=grupo) N
-    #psicologas = [{"id": user.id, "username": user.username, "email": user.email} for user in usuarios] N
-    #
 
+def editar_confirma_consulta(request, id_consulta):
+
+    consulta = get_object_or_404(ConfirmacaoConsulta, id_consulta=id_consulta)
+
+    if request.method == 'POST':
+        dia_semana = request.POST.get('dia_semana')
+        periodo_atendimento = request.POST.get('periodo_atendimento')
+        forma_pagamento = request.POST.get('forma_pagamento')
+        valor = request.POST.get('valor')
+        confirmacao = request.POST.get('confirmacao')
+        observacoes = request.POST.get('observacoes')
+
+        consulta.dia_semana = dia_semana
+        consulta.periodo_atendimento = periodo_atendimento
+        consulta.forma_pagamento = forma_pagamento
+        consulta.confirmacao =  confirmacao
+        consulta.valor = valor
+        consulta.observacoes = observacoes
+        consulta.save()
+
+        return redirect('confirma_consulta', id_usuario=consulta.user.id)
+
+    return render(request, 'pages/editar_confirma_consulta.html', {'consulta': consulta})
 
 @login_required(login_url='login1')
 @has_role_decorator('administrador')

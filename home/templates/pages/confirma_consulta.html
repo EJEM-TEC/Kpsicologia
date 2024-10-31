@@ -7,7 +7,7 @@
     <div class="col-12">
         <div class="card mb-4">
             <div class="card-header pb-0">
-                <h6>Consultas Cadastradas</h6>
+                <h6>Últimas consultas</h6>
             </div>
             <div class="card-body px-0 pt-0 pb-2">
                 <div class="table-responsive p-0">
@@ -19,12 +19,13 @@
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Data</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário de Início</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário de Fim</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Sala de Atendimento</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Periodo de Atendimento</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Forma Pagamento</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Confirmação</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ações</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Observações</th>
-                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ações</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -40,10 +41,11 @@
                                 <td class="align-middle text-center">{{ consulta.forma_pagamento }}</td>
                                 <td class="align-middle text-center">{{ consulta.valor }}</td>
                                 <td class="align-middle text-center">{{ consulta.confirmacao }}</td>
-                                <td class="align-middle text-center">{{ consulta.observacoes }}</td>
-                                <td class="align-middle">
-                                    <a  href="#" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Confirma consulta">Confirma</a>
+                                <td class="align-middle text-center">
+                                    <a href="{% url 'editar_confirma_consulta' id_consulta=consulta.id_consulta %}" class="text-secondary text-xs" data-toggle="tooltip" data-original-title="Confirma consulta">Editar</a>
                                 </td>
+                                <td class="align-middle text-center">{{ consulta.observacoes }}</td>
+                               
                             </tr> 
                         {% empty %}
                             <tr>
