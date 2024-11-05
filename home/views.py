@@ -8,13 +8,14 @@ from rolepermissions.roles import assign_role
 from rolepermissions.decorators import has_role_decorator
 from django.contrib.auth.models import User, Group
 from django.http import HttpResponse
-from .models import Usuario, Consulta, Unidade, Sala, Paciente, ConfirmacaoConsulta
+from .models import Usuario, Consulta, Unidade, Sala, Paciente, ConfirmacaoConsulta, Psicologo
 from rolepermissions.roles import assign_role, get_user_roles, RolesManager
 from rolepermissions.exceptions import RoleDoesNotExist
 from django.contrib.auth.models import Group
 from django.contrib.auth import authenticate, login as login_django
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import update_session_auth_hash
+from datetime import timedelta
 
 # Páginas Simples
 @login_required(login_url='login1')
@@ -537,29 +538,88 @@ def delete_consulta(request, id_consulta):
     return render(request, 'pages/deletar_agenda_central.html', {'consulta': consulta})
 
 
-# def psicologa(request):
-#     # users = User.objects.all()
-#     cargo = 'psicologa'
-#     # user = Usuario.objects.filter(cargo=cargo_desejado).select_related('user')
-#     # user = Usuario.objects.filter(cargo='psicologa')
+#"""def psicologa(request):
+    users = User.objects.all()
+    cargo = 'psicologa'
+    user = Usuario.objects.filter(cargo=cargo_desejado).select_related('user')
+    user = Usuario.objects.filter(cargo='psicologa')
 
-#     psicologa = Usuario.objects.filter(cargo=cargo)
-#     return render(request, 'pages/psicologa.html', {'users': psicologa})
-
+    psicologa = Usuario.objects.filter(cargo=cargo)
+    return render(request, 'pages/psicologa.html', {'users': psicologa})
+#"""
 
 def psicologa(request):
+    if request.method == 'POST':
+        nome = request.POST.get('nome')
+        tempo_consulta = request.POST.get('tempo_consulta')
+        consultas_por_dia = request.POST.get('consultas_por_dia')
+        horario_inicio = request.POST.get('horario_inicio')
+        cor = request.POST.get('cor')
+        tempo_consulta_horas = int(request.POST.get('tempo_consulta_horas', 0))
+        tempo_consulta_minutos = int(request.POST.get('tempo_consulta_minutos', 0))
+        tempo_consulta = timedelta(hours=tempo_consulta_horas, minutes=tempo_consulta_minutos)
+
+        psicologa = Psicologo.objects.create(
+            nome = nome,
+            tempo_consulta = tempo_consulta,
+            consultas_por_dia = consultas_por_dia,
+            horario_inicio = horario_inicio,
+            cor = cor,
+        )
+
+        psicologa.save()
+
+        redirect('psicologa')
 
     # Obtém o grupo 'psicologa' ou retorna 404 se não existir
-    grupo = get_object_or_404(Group, name="psicologa")
-    
-    # Filtra os usuários que pertencem ao grupo
-    usuarios = User.objects.filter(groups=grupo)
-    
+    psicologo = Psicologo.objects.all()
     # Serializa os dados (ajuste os campos conforme necessário)
-    data = [{"id": user.id, "username": user.username, "email": user.email} for user in usuarios]
-    
-    return render(request, 'pages/psicologa.html', {'users': data})
 
+    return render(request, 'pages/psicologa.html', {'psicologo': psicologo})
+
+def deletar_psicologo(request, psicologo_id):
+    psicologo = get_object_or_404(Psicologo, id=psicologo_id)
+    if request.method == "POST":
+        psicologo.delete()
+        return redirect('psicologa')
+    return render(request, 'pages/confirmar_excluir_psicologo.html', {'psicologo': psicologo})
+
+def editar_psicologo(request, psicologo_id):
+    psicologo = get_object_or_404(Psicologo, id=psicologo_id)
+
+    # Extraindo horas e minutos para o template
+    total_segundos = psicologo.tempo_consulta.total_seconds()
+    tempo_consulta_horas = int(total_segundos // 3600)
+    tempo_consulta_minutos = int((total_segundos % 3600) // 60)
+    horario_inicio = psicologo.horario_inicio.strftime('%H:%M') if psicologo.horario_inicio else ""
+
+    if request.method == 'POST':
+        nome = request.POST.get('nome')
+        tempo_consulta_horas = int(request.POST.get('tempo_consulta_horas', 0))
+        tempo_consulta_minutos = int(request.POST.get('tempo_consulta_minutos', 0))
+        tempo_consulta = timedelta(hours=tempo_consulta_horas, minutes=tempo_consulta_minutos)
+        
+        consultas_por_dia = request.POST.get('consultas_por_dia')
+        horario_inicio = request.POST.get('horario_inicio')
+        cor = request.POST.get('cor')
+
+        # Atualiza os campos do psicólogo
+        psicologo.nome = nome
+        psicologo.tempo_consulta = tempo_consulta
+        psicologo.consultas_por_dia = consultas_por_dia
+        psicologo.horario_inicio = horario_inicio
+        psicologo.cor = cor
+        psicologo.save()
+
+        # Redireciona para a página do psicólogo após editar
+        return redirect('psicologa')
+
+    return render(request, 'pages/editar_psicologo.html', {
+        'psicologo': psicologo,
+        'tempo_consulta_horas': tempo_consulta_horas,
+        'tempo_consulta_minutos': tempo_consulta_minutos,
+        'horario_inicio': horario_inicio,
+    })
 
 @login_required(login_url='login1')
 @has_role_decorator('administrador')

@@ -8,124 +8,23 @@
       <div class="col-6">
         <div>
           <h2>
-            Cadastrar Psicólogas
+            Excluir Psicologo
           </h2>
         </div>
       </div>
-    </div>
-    <form method="POST" action="{% url 'psicologa' %}">
-      {% csrf_token %}
-      <div class="row">
-        <div class="col-md-6">
-          <div class="form-group" style="margin-top: 32px;">
-            <input type="text" class="form-control" name="nome" placeholder="Nome da Psicóloga" maxlength="32" required>
+      <section class="section dashboard">
+        <div class="card">
+          <div class="card-body">
+            <form method="post"> {% csrf_token %}
+              <h5 class="card-title">Deletando o psicologo: {{ psicologo.nome }}</h5>
+              <p class="card-text">Tem certeza que quer deletar este psicologo?</p>
+              <p class="card-text"><button type="submit" class="btn btn-danger">Confirmar</button></p>
+              <p class="card-text"><a href="{% url 'psicologa'%}" class="btn btn-secondary">Cancelar</a></p>
+            </form>
           </div>
-        </div>
-        <div class="col-md-6">
-          <div class="form-group">
-            <!-- Entrada para a duração da consulta em horas e minutos -->
-            <label for="tempo_consulta_horas">Tempo de Consulta</label>
-            <div class="d-flex">
-              <input type="number" class="form-control me-2" name="tempo_consulta_horas" placeholder="Horas" min="0" value="0" required>
-              <input type="number" class="form-control" name="tempo_consulta_minutos" placeholder="Minutos" min="0" max="59" value="30" required>
-            </div>
-            <small class="form-text text-muted">Duração de cada consulta (ex: 0 horas e 30 minutos)</small>
-          </div>
-        </div>
-      </div>
+        </div><!-- End Card with titles, buttons, and links -->
+      </section>
       
-      <div class="row">
-        <div class="col-md-6">
-          <div class="form-group">
-            <input type="number" class="form-control" name="consultas_por_dia" placeholder="Número de Consultas por Dia" min="1" required>
-            <small class="form-text text-muted">Número máximo de consultas por dia</small>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="form-group">
-            <input type="time" class="form-control" name="horario_inicio" required>
-            <small class="form-text text-muted">Horário de início das consultas (ex: 09:00)</small>
-          </div>
-        </div>
-      </div>
-      
-      <div class="row">
-        <div class="col-md-6">
-          <div class="form-group">
-            <div class="input-group mb-4">
-              <span class="input-group-text"><i class="ni ni-palette"></i></span>
-              <input type="color" class="form-control" name="cor" required>
-              <small class="form-text text-muted">Escolha uma cor de identificação</small>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="form-group">
-            <button type="submit" class="btn btn-primary">Cadastrar Psicóloga</button>
-          </div>
-        </div>
-      </div>
-    </form>
-    
-    <div class="card">
-      <div class="table-responsive">
-        <table class="table align-items-center mb-0">
-          <thead>
-            <tr>
-              <th class="text-secondary text-xxs font-weight-bolder opacity-7">Nome</th>
-              <th class="text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Horario de inicio</th>
-              <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Consultas diarias</th>
-              <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Tempo de consulta</th>
-              <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Cor</th>
-              <th class="text-secondary opacity-7">Editar</th>
-              <th class="text-secondary opacity-7">Excluir</th>
-            </tr>
-          </thead>
-          <tbody>{% for psicologo in psicologo %}
-            <tr>
-              <td>
-                <div class="d-flex px-2 py-1">
-                  
-                  <div class="d-flex flex-column justify-content-center">
-                    <h6 class="mb-0 text-xs">{{psicologo.nome}}</h6>
-                    
-                  </div>
-                </div>
-              </td>
-              <td>
-                <p class="text-xs font-weight-bold mb-0">{{psicologo.horario_inicio}}</p>
-              </td>
-              <td>
-                <p class="text-xs font-weight-bold mb-0">{{psicologo.consultas_por_dia}}</p>
-              </td>
-              <td>
-                <span class="text-secondary text-xs font-weight-bold">{{psicologo.tempo_consulta}}</span>
-              </td>
-              <td>
-                <span style="display: inline-block; width: 12px; height: 12px; background-color: {{psicologo.cor}}; border-radius: 50%;"></span>
-              </td>
-              <td>
-                <span>
-                  <a href="{% url 'editar_psicologo' psicologo.id %}" class="btn btn-warning">
-                    <i class="bi bi-pencil-fill"></i>
-                  </a>
-            </span>
-          </td> 
-          <td>
-            <span>
-              <a href="{% url 'deletar_psicologo' psicologo.id %}" class="btn btn-danger">
-                <i class="bi bi-trash-fill"></i>
-              </a>
-        </span>
-      </td>
-
-            </tr>{%endfor%}
-    
-            
-          </tbody>
-        </table>
-      </div>
-    </div>
 
 {% endblock content %}
 
