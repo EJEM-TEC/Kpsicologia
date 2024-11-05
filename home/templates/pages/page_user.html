@@ -46,7 +46,6 @@
                                 <input type="password" class="form-control" id="password" name="password" required>
                               </div>
                             </div>
-
                             
                         </div>
                         <div class="row">
@@ -56,6 +55,7 @@
                               <input type="password" class="form-control" id="Confirmpassword" required>
                             </div>
                           </div>
+
                           <div class="col-md-6">
                             <div class="d-flex justify-content-center gap-4 align-middle">
                                 <button type="submit" class="btn btn-primary">Registrar</button>
@@ -101,6 +101,7 @@
                               <td class="align-middle text-center">
                                 <p class="text-xs font-weight-bold mb-0 ">{{user.email}}</p>
                               </td>
+                              
                               <td class="align-middle text-center text-sm">
                                     {% if user.groups.all %}
                                     {% for group in user.groups.all %}
