@@ -55,6 +55,9 @@ class Paciente(models.Model):
     email = models.EmailField(max_length=100)
     telefone = models.IntegerField()
     cpf = models.IntegerField()
+    periodo = models.CharField(max_length=100, default="semanal")
+
+
 
 class ConfirmacaoConsulta(models.Model):
     id_consulta = models.AutoField(primary_key=True)
