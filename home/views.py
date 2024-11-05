@@ -634,6 +634,7 @@ def pacientes(request):
         email_paciente = request.POST.get('email_paciente')
         telefone_paciente = request.POST.get('telefone_paciente')
         cpf_paciente = request.POST.get('cpf_paciente')
+        periodo_paciente = request.POST.get('periodo_paciente')
 
 
         paciente = Paciente.objects.create(
@@ -642,7 +643,8 @@ def pacientes(request):
             rg = rg_paciente,
             email = email_paciente,
             telefone = telefone_paciente,
-            cpf = cpf_paciente
+            cpf = cpf_paciente,
+            periodo = periodo_paciente
         )
 
         paciente.save()

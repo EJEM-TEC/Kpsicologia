@@ -59,6 +59,18 @@
                     </div>
 
                     <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="periodo_paciente">Período de atendimento</label>
+                                <select class="form-control" id="periodo_paciente" name="periodo_paciente">
+                                  <option value="semanal">Semanal</option>
+                                  <option value="quinzenal">Quinzenal</option>
+                                  <option value="nao_fixo">Sem horário fixo</option>
+                                </select>
+                              </div>
+                        </div>
+
+                    <div class="row">
                         <div class="col-md-12">
                             <div class="d-flex justify-content-center gap-4 align-middle">
                                 <button type="submit" class="btn btn-primary">Registrar</button>
@@ -98,6 +110,7 @@
                                 <td class="align-middle text-center">{{ paciente.nome }}</td>
                                 <td class="align-middle text-center">{{ paciente.idade }}</td>
                                 <td class="align-middle text-center">{{ paciente.rg }}</td>
+                                <td class="align-middle text-center">{{ paciente.periodo }}</td>
                                 <td class="align-middle text-center">{{ paciente.email }}</td>
                                 <td class="align-middle text-center">{{ paciente.telefone }}</td>
                                 <td class="align-middle text-center">{{ paciente.cpf }}</td>

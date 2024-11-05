@@ -21,6 +21,7 @@ class Unidade(models.Model):
     nome_unidade = models.CharField(max_length=100)
     endereco_unidade = models.CharField(max_length=100)
     CEP_unidade = models.IntegerField()
+    
 
     def __str__(self):
         return self.nome   
@@ -42,7 +43,9 @@ class Sala(models.Model):
         ],
         default='white'
     )
-    numero_sala = models.PositiveIntegerField()
+    #numero_sala = models.PositiveIntegerField()
+    numero_sala = models.CharField(max_length=100)
+
     id_unidade = models.ForeignKey(Unidade, on_delete=models.CASCADE, related_name='salas')
 
     def __str__(self):
@@ -56,6 +59,8 @@ class Paciente(models.Model):
     email = models.EmailField(max_length=100)
     telefone = models.IntegerField()
     cpf = models.IntegerField()
+    periodo = models.CharField(max_length=100, default="semanal")
+
 
 class ConfirmacaoConsulta(models.Model):
     id_consulta = models.AutoField(primary_key=True)
