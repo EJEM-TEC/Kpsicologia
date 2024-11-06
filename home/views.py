@@ -413,6 +413,21 @@ def lista_consultas(request):
 @has_role_decorator('administrador')
 def create_consulta(request):
     salas_atendimento = Sala.objects.all()
+    #usuarios = User.objects.filter(groups=grupo)
+
+    #Redenderização de psicólogas
+    
+    # Obtém o grupo 'psicologa' ou retorna 404 se não existir
+    grupo = get_object_or_404(Group, name="psicologa")
+    
+    # Filtra os usuários que pertencem ao grupo
+    usuarios = User.objects.filter(groups=grupo)
+    
+    # Serializa os dados (ajuste os campos conforme necessário)
+    psicologas = [{"id": user.id, "username": user.username, "email": user.email} for user in usuarios]
+
+
+    #Renderização dos pacientes
     pacientes = Paciente.objects.all()
     psicologas = Psicologo.objects.all(  )
 
@@ -428,11 +443,13 @@ def create_consulta(request):
         sala_atendimento = get_object_or_404(Sala, id_sala=sala_atendimento_id)
         paciente = get_object_or_404(Paciente, id=nome_cliente)
         user = get_object_or_404(User, id=nome_psicologo)
+        #psicologa= get_object_or_404(Psicologo, id=nome_psicologo)
         
         # Criando uma nova consulta
         consulta = Consulta.objects.create(
             paciente=paciente,
             user=user,
+            #psicologa=psicologa,
             data=data_consulta,
             horario_fim = horario_consulta_fim,
             horario_inicio=horario_consulta,
@@ -443,6 +460,7 @@ def create_consulta(request):
         consulta = ConfirmacaoConsulta.objects.create(
             paciente=paciente,
             user=user,
+            #psicologa=psicologa,
             data=data_consulta,
             horario_fim = horario_consulta_fim,
             horario_inicio=horario_consulta,
@@ -654,6 +672,7 @@ def editar_paciente(request, id_paciente):
         email_paciente = request.POST.get('email_paciente')
         telefone_paciente = request.POST.get('telefone_paciente')
         cpf_paciente = request.POST.get('cpf_paciente')
+        periodo_paciente = request.POST.get('periodo_paciente')
 
         paciente.nome = nome_paciente;
         paciente.rg = rg_paciente;
@@ -661,6 +680,7 @@ def editar_paciente(request, id_paciente):
         paciente.email = email_paciente;
         paciente.telefone = telefone_paciente;
         paciente.cpf = cpf_paciente;
+        paciente.periodo = periodo_paciente
         
         paciente.save()
 
