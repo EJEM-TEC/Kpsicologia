@@ -8,7 +8,7 @@ from rolepermissions.roles import assign_role
 from rolepermissions.decorators import has_role_decorator
 from django.contrib.auth.models import User, Group
 from django.http import HttpResponse
-from .models import Usuario, Consulta, Unidade, Sala, Paciente, ConfirmacaoConsulta, Psicologo
+from .models import Usuario, Consulta, Unidade, Sala, Paciente, ConfirmacaoConsulta, Psicologa, Disponibilidade, PsicoDisponibilidade
 from rolepermissions.roles import assign_role, get_user_roles, RolesManager
 from rolepermissions.exceptions import RoleDoesNotExist
 from django.contrib.auth.models import Group
@@ -538,17 +538,20 @@ def delete_consulta(request, id_consulta):
     return render(request, 'pages/deletar_agenda_central.html', {'consulta': consulta})
 
 
-#"""def psicologa(request):
-    users = User.objects.all()
-    cargo = 'psicologa'
-    user = Usuario.objects.filter(cargo=cargo_desejado).select_related('user')
-    user = Usuario.objects.filter(cargo='psicologa')
+# def psicologa(request):
+#     users = User.objects.all()
+#     cargo = 'psicologa'
+#     user = Usuario.objects.filter(cargo=cargo_desejado).select_related('user')
+#     user = Usuario.objects.filter(cargo='psicologa')
 
-    psicologa = Usuario.objects.filter(cargo=cargo)
-    return render(request, 'pages/psicologa.html', {'users': psicologa})
-#"""
+#     psicologa = Usuario.objects.filter(cargo=cargo)
+#     return render(request, 'pages/psicologa.html', {'users': psicologa})
+# 
 
 def psicologa(request):
+    
+    psicologos = Psicologa.objects.all()
+
     if request.method == 'POST':
         nome = request.POST.get('nome')
         tempo_consulta = request.POST.get('tempo_consulta')
@@ -559,7 +562,7 @@ def psicologa(request):
         tempo_consulta_minutos = int(request.POST.get('tempo_consulta_minutos', 0))
         tempo_consulta = timedelta(hours=tempo_consulta_horas, minutes=tempo_consulta_minutos)
 
-        psicologa = Psicologo.objects.create(
+        psicologa = Psicologa.objects.create(
             nome = nome,
             tempo_consulta = tempo_consulta,
             consultas_por_dia = consultas_por_dia,
@@ -572,20 +575,20 @@ def psicologa(request):
         redirect('psicologa')
 
     # Obtém o grupo 'psicologa' ou retorna 404 se não existir
-    psicologo = Psicologo.objects.all()
+    
     # Serializa os dados (ajuste os campos conforme necessário)
 
-    return render(request, 'pages/psicologa.html', {'psicologo': psicologo})
+    return render(request, 'pages/psicologa.html', {'psicologos': psicologos})
 
 def deletar_psicologo(request, psicologo_id):
-    psicologo = get_object_or_404(Psicologo, id=psicologo_id)
+    psicologo = get_object_or_404(Psicologa, id=psicologo_id)
     if request.method == "POST":
         psicologo.delete()
         return redirect('psicologa')
     return render(request, 'pages/confirmar_excluir_psicologo.html', {'psicologo': psicologo})
 
 def editar_psicologo(request, psicologo_id):
-    psicologo = get_object_or_404(Psicologo, id=psicologo_id)
+    psicologo = get_object_or_404(Psicologa, id=psicologo_id)
 
     # Extraindo horas e minutos para o template
     total_segundos = psicologo.tempo_consulta.total_seconds()
@@ -620,6 +623,7 @@ def editar_psicologo(request, psicologo_id):
         'tempo_consulta_minutos': tempo_consulta_minutos,
         'horario_inicio': horario_inicio,
     })
+
 
 @login_required(login_url='login1')
 @has_role_decorator('administrador')
@@ -693,4 +697,40 @@ def deletar_paciente(request, id_paciente):
         return redirect('pacientes')
     
     return render(request, 'pages/deletar_paciente.html', {'paciente': paciente})
+
+
+
+@login_required(login_url='login1')
+def psico_agenda(request, psicologo_id):
     
+    psicologo = get_object_or_404(Psicologa, id=psicologo_id)
+
+    psico_agendas = PsicoDisponibilidade.objects.filter(user_id=psicologo_id).select_for_update(
+        'dispobilidade_id'
+    )
+
+    agenda = [ps.disponibilidade_id for ps in psico_agendas]
+
+    if request.method == 'POST':
+
+        dia_semana = request.POST.get('dia_semana')
+        horario = request.POST.get('horario')
+    
+
+        novo_registro = Disponibilidade.objects.create(
+            dia_semana = dia_semana,
+            hora = horario,
+            livre_ocupado = 'Livre'
+        )
+
+        PsicoDisponibilidade.objects.create(
+            disponibilidade_id = novo_registro,
+            user_id = psicologo
+        )
+
+        return redirect('psico_agenda', psicologo_id=psicologo.id)
+
+    return render(request, 'pages/psico_agenda.html', {
+        'agendas': agenda,
+        'psicologo': psicologo
+    })
