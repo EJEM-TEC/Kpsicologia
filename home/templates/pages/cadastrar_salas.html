@@ -9,7 +9,7 @@
             <h6>Cadastrar Sala</h6>
           </div>
           <div class="card-body p-4">
-            <form method="POST" action="{% url 'salas' %}">
+            <form method="POST" action="{% url 'cadastrar_salas' %}">
               {% csrf_token %}
                   <div class="row">
                         <div class="col-md-6">
@@ -73,7 +73,8 @@
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Número da sala</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ">Cor da sala</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Unidade</th>
-                      <th class="text-secondary opacity-7">Ações</th>
+                      <th class="text-secondary opacity-7">Editar</th>
+                      <th class="text-secondary opacity-7">Excluir</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -95,11 +96,12 @@
                         <p class="text-xs font-weight-bold mb-0 ">{{sala.id_unidade.nome_unidade}}</p>
                       </td>
                       <td class="align-middle">
-                        <a href="{% url 'update_sala' id_sala=sala.id_sala %}" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
-                          Editar
-                        </a>
-                        <a href="{% url 'delete_sala' id_sala=sala.id_sala %}" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
-                            Remover
+                        <a href="{% url 'update_sala' id_sala=sala.id_sala %}" class="btn btn-warning" data-toggle="tooltip" data-original-title="Edit user">
+                          <i class="bi bi-pencil-fill"></i>
+                        </a> </td>
+                        <td>
+                        <a href="{% url 'delete_sala' id_sala=sala.id_sala %}" class="btn btn-danger" data-toggle="tooltip" data-original-title="Edit user">
+                          <i class="bi bi-trash-fill"></i>
                         </a>
                       </td>
                     </tr>

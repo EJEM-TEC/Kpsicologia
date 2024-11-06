@@ -63,7 +63,6 @@ class Paciente(models.Model):
 
 
 class ConfirmacaoConsulta(models.Model):
-    id_consulta = models.AutoField(primary_key=True)
     dia_semana = models.CharField(max_length=100)
     periodo_atendimento = models.CharField(max_length=100) 
     data = models.DateField() 
@@ -105,9 +104,6 @@ class PsicoDisponibilidade(models.Model):
 
 class Psicologo(models.Model):
     nome=models.CharField(max_length=32)
-    tempo_consulta = models.DurationField(help_text="Duração de cada consulta (ex: 00:30:00 para 30 minutos)")
-    consultas_por_dia = models.PositiveIntegerField(help_text="Número máximo de consultas por dia")
-    horario_inicio = models.TimeField(help_text="Horário de início das consultas (ex: 09:00)")
     cor = models.CharField(max_length=16)
     
     def __str__(self):
@@ -120,23 +116,4 @@ class Consulta(models.Model):
     repeticao = models.CharField(max_length=32)
     sala=models.ForeignKey(Sala, on_delete=models.CASCADE)
 
-    class Meta:
-        unique_together = ['psicologo', 'horario']
-
-    @staticmethod
-    def horarios_disponiveis(psicologo, data):
-        # Obtenha o horário de início e duração da consulta
-        horario_inicio = timezone.datetime.combine(data, psicologo.horario_inicio)
-        intervalo_consulta = psicologo.tempo_consulta
-        horarios_disponiveis = []
-
-        # Gere os horários com base no número de consultas e tempo de consulta
-        for i in range(psicologo.consultas_por_dia):
-            horario = horario_inicio + i * intervalo_consulta
-            if horario >= timezone.now():
-                horarios_disponiveis.append(horario)
-
-        # Filtre horários já ocupados
-        consultas = Consulta.objects.filter(psicologo=psicologo, horario__date=data)
-        horarios_ocupados = {consulta.horario for consulta in consultas}
-        return [horario for horario in horarios_disponiveis if horario not in horarios_ocupados]
+    

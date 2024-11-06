@@ -24,39 +24,7 @@
                             <input type="text" class="form-control" id="nome" name="nome" value="{{ psicologo.nome }}" required>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <!-- Entrada para a duração da consulta em horas e minutos -->
-                            <label for="tempo_consulta_horas">Tempo de Consulta</label>
-                            <div class="d-flex">
-                                <input type="number" class="form-control me-2" name="tempo_consulta_horas" placeholder="Horas" min="0" 
-                                    value="{{ tempo_consulta_horas }}" required>
-                                <input type="number" class="form-control" name="tempo_consulta_minutos" placeholder="Minutos" min="0" max="59" 
-                                    value="{{ tempo_consulta_minutos }}" required>
-                            </div>
-                            <small class="form-text text-muted">Duração de cada consulta (ex: 0 horas e 30 minutos)</small>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group" >
-                            <label for="tempo_consulta_horas">Consultas por dia</label>
-                            <input type="number" class="form-control" name="consultas_por_dia" placeholder="Número de Consultas por Dia" 
-                                min="1" value="{{ psicologo.consultas_por_dia }}" required>
-                            <small class="form-text text-muted">Número máximo de consultas por dia</small>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="horario_inicio">Horário de Início</label>
-                            <input type="time" class="form-control" name="horario_inicio" value="{{ horario_inicio }}" required>
-                            <small class="form-text text-muted">Horário de início das consultas (ex: 09:00)</small>
-                        </div>
-                    </div>
-                </div>
-                
+                    
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
