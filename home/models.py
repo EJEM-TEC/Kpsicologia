@@ -104,6 +104,7 @@ class PsicoDisponibilidade(models.Model):
     #user = models.ForeignKey(User, on_delete=models.CASCADE)
 
 class Psicologo(models.Model):
+    id = models.AutoField(primary_key=True)
     nome=models.CharField(max_length=32)
     tempo_consulta = models.DurationField(help_text="Duração de cada consulta (ex: 00:30:00 para 30 minutos)")
     consultas_por_dia = models.PositiveIntegerField(help_text="Número máximo de consultas por dia")
@@ -115,7 +116,7 @@ class Psicologo(models.Model):
     
 class Consulta(models.Model):
     psicologo = models.ForeignKey(Psicologo, on_delete=models.CASCADE)
-    Paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
+    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
     horario = models.DateTimeField()
     repeticao = models.CharField(max_length=32)
     sala=models.ForeignKey(Sala, on_delete=models.CASCADE)
