@@ -91,7 +91,7 @@ def cadastrar_sala(request):
                 numero_sala=numero_sala,
                 id_unidade=unidade  # Use a instância da unidade
             )
-            return redirect('salas')  # Redirecionar após a criação
+            return redirect('cadastrar_salas')  # Redirecionar após a criação
         except Exception as e:
             print(f"Erro ao criar sala: {e}")
 
@@ -116,7 +116,7 @@ def update_sala(request, id_sala):
             sala.id_unidade = unidade
 
             sala.save()
-            return redirect("salas")
+            return redirect("cadastrar_salas")
         else:
             return render(request, "pages/editar_sala.html", {'sala': sala, 'error': 'Preencha todos os campos.'})
 
@@ -129,7 +129,7 @@ def delete_sala(request, id_sala):
 
     if request.method == 'POST':
         sala.delete()
-        return redirect("salas")
+        return redirect("cadastrar_salas")
 
     return render(request, "pages/deletar_sala.html", {'sala': sala})
 
