@@ -6,7 +6,7 @@
     <div class="col-12">
         <div class="card mb-4">
             <div class="card-header pb-0">
-                <h6>Agenda de {{psicologa.nome}}</h6>
+                <h6>Agenda de {{psicologo.nome}}</h6>
             </div>
             <div class="card-body p-4">
                 <form method="POST" action="{% url 'psico_agenda' psicologo_id=psicologo.id  %}">
@@ -28,8 +28,8 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="idade_paciente">Horário</label>
-                                <input type="time" class="form-control" id="idade_paciente" name="horario" required>
+                                <label for="hora">Horário</label>
+                                <input type="time" class="form-control" id="idade_paciente" name="hora" required>
                             </div>
                         </div>
                     </div>
@@ -65,14 +65,15 @@
                         </thead>
                         <tbody>
                         {% for agenda in agendas %}
-                            {% if agenda.dia_semana == Segunda  %}
+                            {% if agenda.dia_semana == "Segunda"  %}
                             <tr>
                                 <td class="align-middle text-center">{{ agenda.hora }}</td>
                                 <td class="align-middle text-center">{{ agenda.livre_ocupado }}</td>
                                 <td class="align-middle">
-                                    <a href="#" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
+                                    <a href="{% url 'delete_psico_agenda' id_psicologo=psicologo.id id_horario=agenda.id %}" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
                                 </td>
                             </tr>
+                            {% endif %}
                         {% empty %}
                             <tr>
                                 <td colspan="7" class="text-center">
@@ -104,14 +105,15 @@
                         </thead>
                         <tbody>
                         {% for agenda in agendas %}
-                            {% if agenda.dia_semana == Terça  %}
+                            {% if agenda.dia_semana == "Terça"  %}
                             <tr>
                                 <td class="align-middle text-center">{{ agenda.hora }}</td>
                                 <td class="align-middle text-center">{{ agenda.livre_ocupado }}</td>
                                 <td class="align-middle">
-                                    <a href="#" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
+                                    <a href="{% url 'delete_psico_agenda' id_psicologo=psicologo.id id_horario=agenda.id %}" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
                                 </td>
                             </tr>
+                            {% endif %}
                         {% empty %}
                             <tr>
                                 <td colspan="7" class="text-center">
@@ -143,14 +145,15 @@
                         </thead>
                         <tbody>
                         {% for agenda in agendas %}
-                            {% if agenda.dia_semana == Quarta  %}
+                            {% if agenda.dia_semana == "Quarta"  %}
                             <tr>
                                 <td class="align-middle text-center">{{ agenda.hora }}</td>
                                 <td class="align-middle text-center">{{ agenda.livre_ocupado }}</td>
                                 <td class="align-middle">
-                                    <a href="#" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
+                                    <a href="{% url 'delete_psico_agenda' id_psicologo=psicologo.id id_horario=agenda.id %}" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
                                 </td>
                             </tr>
+                            {% endif %}
                         {% empty %}
                             <tr>
                                 <td colspan="7" class="text-center">
@@ -182,14 +185,55 @@
                         </thead>
                         <tbody>
                         {% for agenda in agendas %}
-                            {% if agenda.dia_semana == Quinta  %}
+                            {% if agenda.dia_semana == "Quinta"  %}
                             <tr>
                                 <td class="align-middle text-center">{{ agenda.hora }}</td>
                                 <td class="align-middle text-center">{{ agenda.livre_ocupado }}</td>
                                 <td class="align-middle">
-                                    <a href="#" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
+                                    <a href="{% url 'delete_psico_agenda' id_psicologo=psicologo.id id_horario=agenda.id %}" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
                                 </td>
                             </tr>
+                            {% endif %}
+                        {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center">
+                                    <p class="text-secondary font-weight-bold text-xs">Nenhuma consulta encontrada.</p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+                <h6>Sexta</h6>
+            </div>
+            <div class="card-body px-0 pt-0 pb-2">
+                <div class="table-responsive p-0">
+                    <table class="table align-items-center mb-0">
+                        <thead>
+                            <tr>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Situação</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Deletar</th>
+                        </thead>
+                        <tbody>
+                        {% for agenda in agendas %}
+                            {% if agenda.dia_semana == "Sexta"  %}
+                            <tr>
+                                <td class="align-middle text-center">{{ agenda.hora }}</td>
+                                <td class="align-middle text-center">{{ agenda.livre_ocupado }}</td>
+                                <td class="align-middle">
+                                    <a href="{% url 'delete_psico_agenda' id_psicologo=psicologo.id id_horario=agenda.id %}" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
+                                </td>
+                            </tr>
+                            {% endif %}
                         {% empty %}
                             <tr>
                                 <td colspan="7" class="text-center">
@@ -221,14 +265,15 @@
                         </thead>
                         <tbody>
                         {% for agenda in agendas %}
-                            {% if agenda.dia_semana == Sábado  %}
+                            {% if agenda.dia_semana == "Sábado"  %}
                             <tr>
                                 <td class="align-middle text-center">{{ agenda.hora }}</td>
                                 <td class="align-middle text-center">{{ agenda.livre_ocupado }}</td>
-                                <td class="align-middle">
-                                    <a href="#" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
+                                <td class="align-middle text-center">
+                                    <a href="{% url 'delete_psico_agenda' id_psicologo=psicologo.id id_horario=agenda.id %}" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
                                 </td>
                             </tr>
+                            {% endif %}
                         {% empty %}
                             <tr>
                                 <td colspan="7" class="text-center">

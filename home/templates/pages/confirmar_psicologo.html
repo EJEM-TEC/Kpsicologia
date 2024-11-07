@@ -8,41 +8,20 @@
       <div class="col-6">
         <div>
           <h2>
-            Editar Psicologo
+            Excluir Psicologo
           </h2>
         </div>
       </div>
       <section class="section dashboard">
         <div class="card">
           <div class="card-body">
-            <form method="POST">
-                {% csrf_token %}
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group" >
-                            <label for="nome" class="form-label">Nome da Psicóloga</label>
-                            <input type="text" class="form-control" id="nome" name="nome" value="{{ psicologo.nome }}" required>
-                        </div>
-                    </div>
-                    
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <div class="input-group mb-4">
-                                <span class="input-group-text"><i class="ni ni-palette"></i></span>
-                                <input type="color" class="form-control" name="cor" value="{{ psicologo.cor }}" required>
-                                <small class="form-text text-muted">Escolha uma cor de identificação</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-                        </div>
-                    </div>
-                </div>
+            <form method="post"> {% csrf_token %}
+              <h5 class="card-title">Deletando o psicologo: {{ psicologo.nome }}</h5>
+              <p class="card-text">Tem certeza que quer deletar este psicologo?</p>
+              <p class="card-text"><button type="submit" class="btn btn-danger">Confirmar</button></p>
+              <p class="card-text"><a href="{% url 'psicologa'%}" class="btn btn-secondary">Cancelar</a></p>
             </form>
-             </div>
+          </div>
         </div><!-- End Card with titles, buttons, and links -->
       </section>
       
@@ -163,6 +142,7 @@
             fill: true,
             data: [30, 90, 40, 140, 290, 290, 340, 230, 400],
             maxBarThickness: 6
+            
           },
         ],
       },
