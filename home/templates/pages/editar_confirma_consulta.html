@@ -9,8 +9,35 @@
                 <h6>Editar Consulta</h6>
             </div>
             <div class="card-body p-4">
-                <form method="POST" action="{% url 'editar_confirma_consulta' id_consulta=consulta.id_consulta %}">
+                <form method="POST" action="{% url 'editar_confirma_consulta' consulta_id=consulta.id_consulta %}">
                     {% csrf_token %}
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="paciente">Paciente</label>
+                                    <select class="form-control" id="forma_pagamento" name="paciente" required>
+                                        {% for paciente in pacientes %}
+                                      <option value="{{paciente.id}}">{{paciente.nome}}</option>
+                                    </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="valor">Data</label>
+                                <input type="date" class="form-control" id="valor" name="data" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="horario">Horário</label> 
+                                    <input type="time" class="form-control" id="horario" name="horario" required />
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="row">
                         <!-- <div class="col-md-6">
@@ -59,7 +86,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="valor">Valor</label>
-                                <input type="number" class="form-control" id="valor" name="valor" value="{{consulta.valor}}" required>
+                                <input type="number" class="form-control" id="valor" name="valor" required>
                             </div>
                         </div>
                     </div>

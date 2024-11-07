@@ -379,29 +379,81 @@ def update_profile(request, user_id):
     return render(request, "pages/editar_perfil.html", {'user': user})
 
 
-def editar_confirma_consulta(request, id_consulta):
+@login_required(login_url='login1')
+def confirma_consulta(request, psicologo_id):
 
-    consulta = get_object_or_404(ConfirmacaoConsulta, id_consulta=id_consulta)
+    psicologo = get_object_or_404(Psicologa, id=psicologo_id)
+    pacientes = Paciente.objects.all()
+    consultas = ConfirmacaoConsulta.objects.all()
 
     if request.method == 'POST':
+        data = request.POST.get('data')
+        paciente = request.POST.get('paciente')
         dia_semana = request.POST.get('dia_semana')
         periodo_atendimento = request.POST.get('periodo_atendimento')
         forma_pagamento = request.POST.get('forma_pagamento')
+        horario = request.POST.get('horario')
         valor = request.POST.get('valor')
         confirmacao = request.POST.get('confirmacao')
         observacoes = request.POST.get('observacoes')
 
+        paciente = get_object_or_404(Paciente, id=paciente)
+
+
+        confirma_consulta = ConfirmacaoConsulta.objects.create(
+            dia_semana = dia_semana,
+            data = data,
+            periodo_atendimento = periodo_atendimento,
+            forma_pagamento = forma_pagamento,
+            valor = valor,
+            confirmacao = confirmacao,
+            observacoes = observacoes,
+            psicologa = psicologo,
+            horario_inicio = horario,
+            paciente = paciente
+        )
+
+        confirma_consulta.save()
+
+        return redirect('psicologa')
+
+    return render(request, 'pages/confirma_consulta.html', {'pacientes': pacientes, 'psicologo': psicologo, 'consultas': consultas})
+
+@login_required(login_url='login1')
+def editar_confirma_consulta(request, id_consulta):
+
+    consulta = get_object_or_404(ConfirmacaoConsulta, id=id_consulta)
+    pacientes = Paciente.objects.all()
+   
+    if request.method == 'POST':
+
+        data = request.POST.get('data')
+        paciente = request.POST.get('paciente')
+        dia_semana = request.POST.get('dia_semana')
+        periodo_atendimento = request.POST.get('periodo_atendimento')
+        forma_pagamento = request.POST.get('forma_pagamento')
+        horario = request.POST.get('horario')
+        valor = request.POST.get('valor')
+        confirmacao = request.POST.get('confirmacao')
+        observacoes = request.POST.get('observacoes')
+
+        paciente = get_object_or_404(Paciente, id=paciente)
+
+        consulta.data = data
+        consulta.paciente = paciente
         consulta.dia_semana = dia_semana
         consulta.periodo_atendimento = periodo_atendimento
         consulta.forma_pagamento = forma_pagamento
-        consulta.confirmacao =  confirmacao
+        consulta.horario_inicio = horario
         consulta.valor = valor
+        consulta.confirmacao = confirmacao
         consulta.observacoes = observacoes
+
         consulta.save()
 
-        return redirect('confirma_consulta', id_usuario=consulta.user.id)
+        return redirect('psicologa')
 
-    return render(request, 'pages/editar_confirma_consulta.html', {'consulta': consulta})
+    return render(request, 'pages/editar_confirma_consulta.html', {'pacientes': pacientes, 'consulta': consulta})
 
 @login_required(login_url='login1')
 @has_role_decorator('administrador')
@@ -456,21 +508,6 @@ def create_consulta(request):
             sala_atendimento=sala_atendimento,
         )
 
-        # Criando uma nova confirmação de consulta
-        consulta = ConfirmacaoConsulta.objects.create(
-            paciente=paciente,
-            user=user,
-            #psicologa=psicologa,
-            data=data_consulta,
-            horario_fim = horario_consulta_fim,
-            horario_inicio=horario_consulta,
-            sala_atendimento=sala_atendimento,
-            forma_pagamento="",
-            observacoes="",
-            valor=0.0,
-            dia_semana="",
-            confirmacao = ""
-        )
         consulta.save()
 
         return redirect('lista_consultas')

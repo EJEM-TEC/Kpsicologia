@@ -51,6 +51,15 @@ class Sala(models.Model):
     def __str__(self):
         return f"Sala {self.numero_sala} - {self.cor_sala}"
     
+class Psicologa(models.Model):
+    nome=models.CharField(max_length=32)
+    cor = models.CharField(max_length=16)
+    email=models.CharField(max_length=100)
+    senha=models.CharField(max_length=100)
+    
+    def __str__(self):
+        return self.usuario.username
+    
 class Paciente(models.Model):
     id = models.AutoField(primary_key=True)
     nome = models.CharField(max_length=100)
@@ -67,23 +76,13 @@ class ConfirmacaoConsulta(models.Model):
     periodo_atendimento = models.CharField(max_length=100) 
     data = models.DateField() 
     horario_inicio = models.TimeField()
-    horario_fim = models.TimeField()
     confirmacao = models.CharField(max_length=100)
     forma_pagamento = models.CharField(max_length=100) 
     valor = models.DecimalField(max_digits=10, decimal_places=2)
     observacoes = models.CharField(max_length=100)
     paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    sala_atendimento = models.ForeignKey(Sala, on_delete=models.CASCADE)
+    psicologa = models.ForeignKey(Psicologa, on_delete=models.CASCADE)
 
-class Psicologa(models.Model):
-    nome=models.CharField(max_length=32)
-    cor = models.CharField(max_length=16)
-    email=models.CharField(max_length=100)
-    senha=models.CharField(max_length=100)
-    
-    def __str__(self):
-        return self.usuario.username
 
 class Disponibilidade(models.Model):
     id = models.AutoField(primary_key=True)
@@ -114,18 +113,18 @@ class PsicoDisponibilidade(models.Model):
     #paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
     #user = models.ForeignKey(User, on_delete=models.CASCADE)
 
-class Psicologo(models.Model):
-    nome=models.CharField(max_length=32)
-    tempo_consulta = models.DurationField(help_text="Duração de cada consulta (ex: 00:30:00 para 30 minutos)")
-    consultas_por_dia = models.PositiveIntegerField(help_text="Número máximo de consultas por dia")
-    horario_inicio = models.TimeField(help_text="Horário de início das consultas (ex: 09:00)")
-    cor = models.CharField(max_length=16)
+# class Psicologo(models.Model):
+#     nome=models.CharField(max_length=32)
+#     tempo_consulta = models.DurationField(help_text="Duração de cada consulta (ex: 00:30:00 para 30 minutos)")
+#     consultas_por_dia = models.PositiveIntegerField(help_text="Número máximo de consultas por dia")
+#     horario_inicio = models.TimeField(help_text="Horário de início das consultas (ex: 09:00)")
+#     cor = models.CharField(max_length=16)
     
-    def __str__(self):
-        return self.usuario.username
+#     def __str__(self):
+#         return self.usuario.username
     
 class Consulta(models.Model):
-    psicologo = models.ForeignKey(Psicologo, on_delete=models.CASCADE)
+    psicologo = models.ForeignKey(Psicologa, on_delete=models.CASCADE)
     Paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
     horario = models.DateTimeField()
     repeticao = models.CharField(max_length=32)
