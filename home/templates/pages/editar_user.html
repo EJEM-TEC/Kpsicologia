@@ -35,7 +35,7 @@
                             <select class="form-control" id="cargo" name="cargo">
                               <option value="administrador" {% if user.groups.first.name == "colaborador" %}selected{% endif %}>Administrador</option>
                               <option value="secretaria" {% if user.groups.first.name == "secretaria" %}selected{% endif %}>Secretária</option>
-                              <option value="psicologa"{% if user.groups.first.name == "psicologa" %}selected{% endif %}>Psicóloga</option>
+                              <!-- <option value="psicologa"{% if user.groups.first.name == "psicologa" %}selected{% endif %}>Psicóloga</option> -->
                             </select>
                           </div>
                     </div>
