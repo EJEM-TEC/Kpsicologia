@@ -59,6 +59,15 @@ class Sala(models.Model):
     def __str__(self):
         return f"Sala {self.numero_sala} - {self.cor_sala}"
     
+class Psicologa(models.Model):
+    nome=models.CharField(max_length=32)
+    cor = models.CharField(max_length=16)
+    email=models.CharField(max_length=100)
+    senha=models.CharField(max_length=100)
+    
+    def __str__(self):
+        return self.usuario.username
+    
 class Paciente(models.Model):
     id = models.AutoField(primary_key=True)
     nome = models.CharField(max_length=100)
@@ -69,6 +78,18 @@ class Paciente(models.Model):
     cpf = models.IntegerField()
     periodo = models.CharField(max_length=100, default="semanal")
 
+
+class ConfirmacaoConsulta(models.Model):
+    dia_semana = models.CharField(max_length=100)
+    periodo_atendimento = models.CharField(max_length=100) 
+    data = models.DateField() 
+    horario_inicio = models.TimeField()
+    confirmacao = models.CharField(max_length=100)
+    forma_pagamento = models.CharField(max_length=100) 
+    valor = models.DecimalField(max_digits=10, decimal_places=2)
+    observacoes = models.CharField(max_length=100)
+    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
+    psicologa = models.ForeignKey(Psicologa, on_delete=models.CASCADE)
 
 
 class Disponibilidade(models.Model):
@@ -90,6 +111,18 @@ class PsicoConfirmarConsulta(models.Model):
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     confirmacao_consulta = models.ForeignKey(ConfirmacaoConsulta, on_delete=models.CASCADE)
+    dia_semana = models.CharField(max_length=100)
+    hora = models.TimeField()
+    livre_ocupado = models.CharField(max_length=100)
+    
+class AgendaPsico(models.Model):
+    dia_semana = models.CharField(max_length=100)
+    hora = models.TimeField()
+    livre_ocupado = models.CharField(max_length=100)
+
+# class PsicoConfirmarConsulta(models.Model):
+#     user = models.ForeignKey(User, on_delete=models.CASCADE)
+#     confirmacao_consulta = models.ForeignKey(ConfirmacaoConsulta, on_delete=models.CASCADE)
 
 class PsicoDisponibilidade(models.Model):
     id = models.AutoField(primary_key=True)
@@ -107,12 +140,16 @@ class PsicoDisponibilidade(models.Model):
     #user = models.ForeignKey(User, on_delete=models.CASCADE)
 
 
+    disponibilidade = models.ForeignKey(AgendaPsico, on_delete=models.CASCADE)
+    user = models.ForeignKey(Psicologa, on_delete=models.CASCADE)
     
 class Consulta(models.Model):
-    psicologo = models.ForeignKey(Psicologo, on_delete=models.CASCADE)
-    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
-    horario = models.DateTimeField()
-    repeticao = models.CharField(max_length=32)
+    psicologo = models.ForeignKey(Psicologa, on_delete=models.CASCADE)
+    Paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
+    horario = models.TimeField()
+    dia_semana = models.CharField(max_length=100)
+    semanal = models.CharField(max_length=32)
+    quinzenal = models.CharField(max_length=32)
     sala=models.ForeignKey(Sala, on_delete=models.CASCADE)
 
 

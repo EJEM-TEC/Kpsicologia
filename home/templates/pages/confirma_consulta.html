@@ -135,6 +135,120 @@
     <div class="col-12">
         <div class="card mb-4">
             <div class="card-header pb-0">
+                <h6>Editar Consulta</h6>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="{% url 'confirma_consulta' psicologo_id=psicologo.id %}">
+                    {% csrf_token %}
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="paciente">Paciente</label>
+                                    <select class="form-control" id="forma_pagamento" name="paciente" required>
+                                        {% for paciente in pacientes %}
+                                            <option value="{{ paciente.id }}">{{ paciente.nome }}</option>
+                                        {% endfor %}
+                                    </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="valor">Data</label>
+                                <input type="date" class="form-control" id="valor" name="data" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="horario">Horário</label> 
+                                    <input type="time" class="form-control" id="horario" name="horario" required />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="dia_semana">Dia da Semana</label>
+                                    <select class="form-control" id="dia_semana" name="dia_semana" required>
+                                      <option value="Segunda-Feira">Segunda-Feira</option>
+                                      <option value="Terça-Feira">Terça-Feira</option>
+                                      <option value="Quarta-Feira">Quarta-Feira</option>
+                                      <option value="Quinta-Feira">Quinta-Feira</option>
+                                      <option value="Sexta-Feira">Sexta-Feira</option>
+                                    </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">        
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="periodo_atendimento">Período de Atendimento</label>
+                                    <select class="form-control" id="periodo_atendimento" name="periodo_atendimento" required>
+                                      <option value="Semanal">Semanal</option>
+                                      <option value="Quinzenal">Quinzenal</option>
+                                    </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="forma_pagamento">Forma de Pagamento</label>
+                                    <select class="form-control" id="forma_pagamento" name="forma_pagamento" required>
+                                      <option value="Pix">Pix</option>
+                                      <option value="Dinheiro">Dinheiro</option>
+                                      <option value="Cartão">Cartão</option>
+                                    </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="valor">Valor</label>
+                                <input type="number" class="form-control" id="valor" name="valor" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="observacoes">Observação</label>
+                                <input type="text" class="form-control" id="observacoes" name="observacoes" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                       
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="confirmacao">Confirmação</label>
+                                <select class="form-control" id="confirmacao" name="confirmacao" required>
+                                    <option value="Sim">Sim</option>
+                                    <option value="Não">Não</option>
+                                    <option value="Faltou">Faltou</option>
+                                  </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-center gap-4 align-middle">
+                                <button type="submit" class="btn btn-primary">Cadastrar</button>
+                                <button type="reset" class="btn btn-secondary">Resetar</button>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
                 <h6>Últimas consultas</h6>
             </div>
             <div class="card-body px-0 pt-0 pb-2">
@@ -143,9 +257,14 @@
                         <thead>
                             <tr>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nome do Cliente</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nome do Psicólogo</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Data</th>
+<<<<<<< HEAD
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Forma de Pagamento</th>
+=======
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Periodo de Atendimento</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Forma Pagamento</th>
+>>>>>>> 49db458a0f54c818457f4d7c2d202df4e5802c88
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Confirmação</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ações</th>
@@ -153,6 +272,7 @@
                             </tr>
                         </thead>
                         <tbody>
+<<<<<<< HEAD
                             {% for consulta in consulta_confirma %}
                                 <tr>
                                     <td class="align-middle text-center">{{ consulta.paciente.nome }}</td>
@@ -174,6 +294,31 @@
                                     </td>
                                 </tr>
                             {% endfor %}
+=======
+                        {% for consulta in consultas %}
+                            {% if consulta.psicologa.nome == psicologo.nome %}
+                            <tr>
+                                <td class="align-middle text-center">{{ consulta.paciente.nome }}</td>
+                                <td class="align-middle text-center">{{ consulta.data }}</td>
+                                <td class="align-middle text-center">{{ consulta.horario_inicio }}</td>
+                                <td class="align-middle text-center">{{ consulta.periodo_atendimento }}</td>
+                                <td class="align-middle text-center">{{ consulta.forma_pagamento }}</td>
+                                <td class="align-middle text-center">{{ consulta.valor }}</td>
+                                <td class="align-middle text-center">{{ consulta.confirmacao }}</td>
+                                <td class="align-middle text-center">
+                                    <a href="{% url 'editar_confirma_consulta' consulta_id=consulta.id_consulta %}" class="text-secondary text-xs" data-toggle="tooltip" data-original-title="Confirma consulta">Editar</a>
+                                </td>
+                                <td class="align-middle text-center">{{ consulta.observacoes }}</td>
+                            </tr> 
+                            {% endif %}
+                        {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center">
+                                    <p class="text-secondary font-weight-bold text-xs">Nenhuma consulta encontrada.</p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+>>>>>>> 49db458a0f54c818457f4d7c2d202df4e5802c88
                         </tbody>
                     </table>
                     

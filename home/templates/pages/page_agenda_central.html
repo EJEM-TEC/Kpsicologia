@@ -28,36 +28,35 @@
                                 <label for="nome_psicologo">Nome do Psicólogo</label>
                                 <select class="form-control" id="nome_psicologo" name="nome_psicologo">
                                     {% for psicologa in psicologas %}
-                                        <option value="{{psicologa.id}}">{{psicologa.username}}</option>
-                                    {% endfor %}
+                                        <option value="{{psicologa.id}}">{{psicologa.nome}}</option>                                    {% endfor %}
                                 </select>                               
                             </div>
                         </div>
                     </div>
 
                     <div class="row">
-                        
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="data_consulta">Data</label>
-                                <input type="date" class="form-control" id="data_consulta" name="data_consulta" required>
+                                <label for="horario_consulta">Horário</label>
+                                <input type="time" class="form-control" id="horario_consulta" name="horario_consulta" required>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="horario_consulta">Horário de início</label>
-                                <input type="time" class="form-control" id="horario_consulta" name="horario_consulta" required>
+                                <label for="dia_semana">Dia da Semana</label>
+                                <select class="form-control" id="dia_semana" name="dia_semana">
+                                    <option value="Segunda">Segunda</option>
+                                    <option value="Terça">Terça</option>
+                                    <option value="Quarta">Quarta</option>
+                                    <option value="Quinta">Quinta</option>
+                                    <option value="Sexta">Sexta</option>
+                                    <option value="Sábado">Sábado</option>
+                                </select>
                             </div>
                         </div>
                     </div>
 
-                    <div class="row">                       
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="horario_consulta_fim">Horário de Fim</label>
-                                <input type="time" class="form-control" id="horario_consulta_fim" name="horario_consulta_fim" required>
-                            </div>
-                        </div>
+                    <div class="row">                         
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="sala_atendimento">Sala de Atendimento</label>
@@ -70,9 +69,6 @@
                                 </select>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="row">        
                         <div class="col-md-6">
                             <div class="d-flex justify-content-center gap-4 align-middle">
                                 <button type="submit" class="btn btn-primary">Registrar</button>
@@ -85,53 +81,37 @@
         </div>
     </div>
 </div>
+<div class="row">
 
+    <div class="col-6">
+      <div>
+        <h2>
+          Salas
+        </h2>
+      </div>
+    </div>
+  </div>
 <div class="row">
     <div class="col-12">
-        <div class="card mb-4">
-            <div class="card-header pb-0">
-                <h6>Consultas Cadastradas</h6>
-            </div>
-            <div class="card-body px-0 pt-0 pb-2">
-                <div class="table-responsive p-0">
-                    <table class="table align-items-center mb-0">
-                        <thead>
-                            <tr>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nome do Cliente</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nome do Psicólogo</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Data</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário de Início</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário de Fim</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Sala de Atendimento</th>
-                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        {% for consulta in consultas %}
-                            <tr>
-                                <td class="align-middle text-center">{{ consulta.paciente.nome }}</td>
-                                <td class="align-middle text-center">{{ consulta.user }}</td>
-                                <td class="align-middle text-center">{{ consulta.data }}</td>
-                                <td class="align-middle text-center">{{ consulta.horario_inicio }}</td>
-                                <td class="align-middle text-center">{{ consulta.horario_fim }}</td>
-                                <td class="align-middle text-center">{{ consulta.sala_atendimento.numero_sala }}</td>
-                                <td class="align-middle">
-                                    <a  href="{% url 'update_consulta' id_consulta=consulta.id_consulta %}" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Edit consulta">Editar</a>
-                                    <a href="{% url 'delete_consulta' id_consulta=consulta.id_consulta %}" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
-                                </td>
-                            </tr> 
-                        {% empty %}
-                            <tr>
-                                <td colspan="7" class="text-center">
-                                    <p class="text-secondary font-weight-bold text-xs">Nenhuma consulta encontrada.</p>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
+        <div class="row d-flex justify-content-center gap-5 my-5">
+            {% for sala in salas %}
+            <div class="col-3">
+              <div class="card card-background card-background-mask-primary move-on-hover align-items-start">
+                <div class="cursor-pointer">
+                  <div class="full-background" style="background-image: url('{% static 'img/curved-images/curved5.jpg' %}')"></div>
+                  <div class="card-body">
+                    <h5 class="text-white mb-0">{{sala.numero_sala}} - {{sala.id_unidade.nome_unidade}}</h5>
+                    <div class="d-flex mt-5">
+                      <button class="btn btn-outline-white p-2 mb-0" type="button" data-bs-toggle="tooltip" data-bs-placement="top">
+                        <a href="{% url 'agenda_central_sala' id_sala=sala.id_sala %}" class="text-white">Acessar</a>
+                      </button>
+                    </div>
+                  </div>
                 </div>
+              </div>
             </div>
-        </div>
+            {% endfor %}
+          </div>
     </div>
 </div>
 {% endblock content %}

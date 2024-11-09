@@ -9,7 +9,7 @@
                 <h6>Editar Consulta</h6>
             </div>
             <div class="card-body p-4">
-                <form method="POST" action="{% url 'update_consulta' id_consulta=consulta.id_consulta %}">
+                <form method="POST" action="{% url 'update_consulta' id_consulta=consulta.id %}">
                     {% csrf_token %}
 
                     <div class="row">

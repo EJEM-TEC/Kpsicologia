@@ -9,10 +9,15 @@
                 <h6>Editar Consulta</h6>
             </div>
             <div class="card-body p-4">
+<<<<<<< HEAD
                 <form method="POST" action="{% url 'editar_confirma_consulta' psicologo.id consulta.id %}">
+=======
+                <form method="POST" action="{% url 'editar_confirma_consulta' consulta_id=consulta.id_consulta %}">
+>>>>>>> 49db458a0f54c818457f4d7c2d202df4e5802c88
                     {% csrf_token %}
                     
                     <div class="row">
+<<<<<<< HEAD
                       <!-- Seleção de Paciente -->
                       <div class="col-md-6">
                         <div class="form-group">
@@ -23,6 +28,55 @@
                               <option value="{{ paciente.id }}" {% if consulta.paciente.id == paciente.id %}selected{% endif %}>{{ paciente.nome }}</option>
                             {% endfor %}
                           </select>
+=======
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="paciente">Paciente</label>
+                                    <select class="form-control" id="forma_pagamento" name="paciente" required>
+                                        {% for paciente in pacientes %}
+                                      <option value="{{paciente.id}}">{{paciente.nome}}</option>
+                                    </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="valor">Data</label>
+                                <input type="date" class="form-control" id="valor" name="data" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="horario">Horário</label> 
+                                    <input type="time" class="form-control" id="horario" name="horario" required />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="numero_consulta">Número da Consulta</label>
+                                <input type="text" class="form-control" id="numero_consulta" name="numero_consulta" value="{{ consulta.numero_consulta }}" required>
+                            </div>
+                        </div> -->
+                              <!-- <label for="username">Nome</label> -->
+                              <!-- <input type="text" class="form-control" id="username" name="username" required value="{{user.username}}"> -->
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="dia_semana">Dia da Semana</label>
+                                    <select class="form-control" id="dia_semana" name="dia_semana" required>
+                                      <option value="Segunda-Feira">Segunda-Feira</option>
+                                      <option value="Terça-Feira">Terça-Feira</option>
+                                      <option value="Quarta-Feira">Quarta-Feira</option>
+                                      <option value="Quinta-Feira">Quinta-Feira</option>
+                                      <option value="Sexta-Feira">Sexta-Feira</option>
+                                    </select>
+                            </div>
+>>>>>>> 49db458a0f54c818457f4d7c2d202df4e5802c88
                         </div>
                       </div>
                   
@@ -48,6 +102,7 @@
                             <input type="datetime-local" class="form-control" id="data" name="data" value="{{ consulta.data|date:'Y-m-d\\TH:i' }}" required>
                           </div>
                         </div>
+<<<<<<< HEAD
                       </div>
                   
                       <!-- Observação -->
@@ -55,6 +110,13 @@
                         <div class="form-group">
                           <label for="observacoes" class="form-label">Observação</label>
                           <textarea class="form-control" id="observacoes" name="observacoes" rows="3" placeholder="Observações sobre a consulta">{{ consulta.observacoes }}</textarea>
+=======
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="valor">Valor</label>
+                                <input type="number" class="form-control" id="valor" name="valor" required>
+                            </div>
+>>>>>>> 49db458a0f54c818457f4d7c2d202df4e5802c88
                         </div>
                       </div>
                     </div>
