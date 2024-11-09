@@ -60,7 +60,9 @@ urlpatterns = [
     path('psicologas/<int:psicologo_id>/confirmar/', views.confirma_consulta, name='confirma_consulta'),
     path('psicologas/<int:psicologo_id>/agendar/', views.psico_agenda, name='psico_agenda'),
     path('deletar_agenda_psico/<int:id_psicologo>/<int:id_horario>', views.deletar_psico_agenda, name='delete_psico_agenda'),
-    path('psicologas/<int:consulta_id>/editar', views.editar_confirma_consulta, name='editar_confirma_consulta')
+    path('psicologas/<int:consulta_id>/editar', views.editar_confirma_consulta, name='editar_confirma_consulta'),
+    path('agenda_central/sala/<int:id_sala>', views.agenda_central_sala, name='agenda_central_sala'),
+    #path('disponibilidade-dias/<int:psicologa_id>/', views.disponibilidade_dias_psicologa, name='disponibilidade_dias_psicologa'),
 
     #path('cadastrar_salas/', views.sala, name='salas'),
 
