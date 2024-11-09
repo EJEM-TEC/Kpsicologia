@@ -53,12 +53,15 @@ urlpatterns = [
     path('pacientes/', views.pacientes, name='pacientes'),
     path('pacientes/<int:id_paciente>/editar', views.editar_paciente, name='update_paciente'),
     path('pacientes/<int:id_paciente>/deletar', views.deletar_paciente, name='delete_paciente'),
-    path('psicologas/confirmar/<int:id_usuario>/', views.confirma_consulta, name='confirma_consulta'),
     path('psicologas/editar/<int:id_consulta>/', views.editar_confirma_consulta, name='editar_confirma_consulta'),  # URL para confirmar consulta  # URL para confirmar consulta
     path('deletar_psicologo/<int:psicologo_id>/delete/', views.deletar_psicologo, name='deletar_psicologo'),
     path('editar_psicologo/<int:psicologo_id>/editar/', views.editar_psicologo, name='editar_psicologo'),
     path('psicologas/<int:psicologo_id>/confirmar/', views.confirma_consulta, name='confirma_consulta'),
-    path('psicologas/<int:psicologo_id>/agendar/', views.agenda_psicologo, name='agenda_psicologo'),
+    path('psicologas/<int:psicologo_id>/confirmar/<int:consulta_id>/excluir', views.deletar_consulta, name='deletar_consulta'),
+    path('psicologas/<int:psicologo_id>/confirmar/<int:consulta_id>/editar', views.editar_confirma_consulta, name='editar_confirma_consulta'),
+    path('psicologas/<int:psicologo_id>/agendar/', views.psico_agenda, name='psico_agenda'),
+    path('deletar_agenda_psico/<int:id_psicologo>/<int:id_horario>', views.deletar_psico_agenda, name='delete_psico_agenda'),
+    path('financeiro/', views.financeiro, name='financeiro')
 
     #path('cadastrar_salas/', views.sala, name='salas'),
 

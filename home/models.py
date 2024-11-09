@@ -15,7 +15,15 @@ class Usuario(models.Model):
 
     def __str__(self):
         return self.nome
+
+class Psicologo(models.Model):
+    id = models.AutoField(primary_key=True)
+    nome=models.CharField(max_length=32)
+    cor = models.CharField(max_length=16)
     
+    def __str__(self):
+        return self.usuario.username 
+
 class Unidade(models.Model):
     id_unidade = models.AutoField(primary_key=True)
     nome_unidade = models.CharField(max_length=100)
@@ -62,25 +70,21 @@ class Paciente(models.Model):
     periodo = models.CharField(max_length=100, default="semanal")
 
 
-class ConfirmacaoConsulta(models.Model):
-    dia_semana = models.CharField(max_length=100)
-    periodo_atendimento = models.CharField(max_length=100) 
-    data = models.DateField() 
-    horario_inicio = models.TimeField()
-    horario_fim = models.TimeField()
-    confirmacao = models.CharField(max_length=100)
-    forma_pagamento = models.CharField(max_length=100) 
-    valor = models.DecimalField(max_digits=10, decimal_places=2)
-    observacoes = models.CharField(max_length=100)
-    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    sala_atendimento = models.ForeignKey(Sala, on_delete=models.CASCADE)
 
 class Disponibilidade(models.Model):
     id = models.AutoField(primary_key=True)
     data = models.DateField()
     hora_inicio = models.TimeField()
     hora_fim = models.TimeField()
+
+class ConfirmacaoConsulta(models.Model):
+    data = models.DateTimeField() 
+    psicologo = models.ForeignKey(Psicologo, on_delete=models.CASCADE)
+    confirmacao = models.CharField(max_length=100)
+    forma_pagamento = models.CharField(max_length=100) 
+    valor = models.DecimalField(max_digits=10, decimal_places=2)
+    observacoes = models.CharField(max_length=100)
+    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
 
 class PsicoConfirmarConsulta(models.Model):
     id = models.AutoField(primary_key=True)
@@ -102,13 +106,7 @@ class PsicoDisponibilidade(models.Model):
     #paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
     #user = models.ForeignKey(User, on_delete=models.CASCADE)
 
-class Psicologo(models.Model):
-    id = models.AutoField(primary_key=True)
-    nome=models.CharField(max_length=32)
-    cor = models.CharField(max_length=16)
-    
-    def __str__(self):
-        return self.usuario.username
+
     
 class Consulta(models.Model):
     psicologo = models.ForeignKey(Psicologo, on_delete=models.CASCADE)
@@ -117,4 +115,71 @@ class Consulta(models.Model):
     repeticao = models.CharField(max_length=32)
     sala=models.ForeignKey(Sala, on_delete=models.CASCADE)
 
+
+class Disponibilidade(models.Model):
+    id = models.AutoField(primary_key=True)
+    dia_semana = models.CharField(max_length=100)
+    hora = models.TimeField()
+    livre_ocupado = models.CharField(max_length=100)
+    
+class AgendaPsico(models.Model):
+    dia_semana = models.CharField(max_length=100)
+    hora = models.TimeField()
+    livre_ocupado = models.CharField(max_length=100)
+
+# class PsicoConfirmarConsulta(models.Model):
+#     user = models.ForeignKey(User, on_delete=models.CASCADE)
+#     confirmacao_consulta = models.ForeignKey(ConfirmacaoConsulta, on_delete=models.CASCADE)
+
+class PsicoDisponibilidade(models.Model):
+    disponibilidade = models.ForeignKey(AgendaPsico, on_delete=models.CASCADE)
+    user = models.ForeignKey(Psicologo, on_delete=models.CASCADE)
+
+#class Consulta(models.Model):
+    #id_consulta = models.AutoField(primary_key=True)
+    #data = models.DateField()
+    #horario_inicio = models.TimeField()
+    #horario_fim = models.TimeField()
+    #observacao = models.CharField(max_length=100)
+    #sala_atendimento = models.ForeignKey(Sala, on_delete=models.CASCADE)
+    #paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
+    #user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+# class Psicologo(models.Model):
+#     nome=models.CharField(max_length=32)
+#     tempo_consulta = models.DurationField(help_text="Duração de cada consulta (ex: 00:30:00 para 30 minutos)")
+#     consultas_por_dia = models.PositiveIntegerField(help_text="Número máximo de consultas por dia")
+#     horario_inicio = models.TimeField(help_text="Horário de início das consultas (ex: 09:00)")
+#     cor = models.CharField(max_length=16)
+    
+#     def __str__(self):
+#         return self.usuario.username
+    
+class Consulta(models.Model):
+    psicologo = models.ForeignKey(Psicologo, on_delete=models.CASCADE)
+    Paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
+    horario = models.DateTimeField()
+    repeticao = models.CharField(max_length=32)
+    sala=models.ForeignKey(Sala, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ['psicologo', 'horario']
+
+    @staticmethod
+    def horarios_disponiveis(psicologo, data):
+        # Obtenha o horário de início e duração da consulta
+        horario_inicio = timezone.datetime.combine(data, psicologo.horario_inicio)
+        intervalo_consulta = psicologo.tempo_consulta
+        horarios_disponiveis = []
+
+        # Gere os horários com base no número de consultas e tempo de consulta
+        for i in range(psicologo.consultas_por_dia):
+            horario = horario_inicio + i * intervalo_consulta
+            if horario >= timezone.now():
+                horarios_disponiveis.append(horario)
+
+        # Filtre horários já ocupados
+        consultas = Consulta.objects.filter(psicologo=psicologo, horario__date=data)
+        horarios_ocupados = {consulta.horario for consulta in consultas}
+        return [horario for horario in horarios_disponiveis if horario not in horarios_ocupados]
     
