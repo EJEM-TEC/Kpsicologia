@@ -642,11 +642,20 @@ def psicologa(request):
     return render(request, 'pages/psicologa.html', {'psicologos': psicologos})
 
 def deletar_psicologo(request, psicologo_id):
-    psicologo = get_object_or_404(Psicologa, id=psicologo_id)
-    if request.method == "POST":
-        psicologo.delete()
-        return redirect('psicologa')
-    return render(request, 'pages/confirmar_excluir_psicologo.html', {'psicologo': psicologo})
+    # Busca a psicóloga específica pelo ID ou retorna 404 se não for encontrada
+    psicologa = get_object_or_404(Psicologa, id=psicologo_id)
+
+    if request.method == 'POST':
+        # Exclui a psicóloga
+        user = User.objects.filter(username=psicologa.nome).first()
+        if user:
+            user.delete()  # Exclui também o usuário relacionado, se existir
+        
+        psicologa.delete()
+        
+        return redirect('psicologa')  # Redireciona para a lista de psicólogas após a exclusão
+
+    return render(request, 'pages/delete_psicologa.html', {'psicologa': psicologa})
 
 def editar_psicologo(request, psicologo_id):
     psicologo = get_object_or_404(Psicologa, id=psicologo_id)
