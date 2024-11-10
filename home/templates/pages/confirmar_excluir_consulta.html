@@ -8,36 +8,22 @@
       <div class="col-6">
         <div>
           <h2>
-            Cadastrar Psicólogas
+            Excluir Consulta
           </h2>
         </div>
       </div>
-      <form method="POST" action="{% url 'psicologa' %}">
-        {% csrf_token %}
-        <div class="row">
-          <div class="col-md-6">
-            <div class="form-group" style="margin-top: 32px;">
-              <input type="text" class="form-control" name="nome" placeholder="Nome da Psicóloga" maxlength="32" required>
-            </div>
+      <section class="section dashboard">
+        <div class="card">
+          <div class="card-body">
+            <form method="post"> {% csrf_token %}
+              <h5 class="card-title">Deletando a confirmacao da consulta do paciente: {{ consulta.paciente.nome }}</h5>
+              <p class="card-text">Tem certeza que quer deletar este psicologo?</p>
+              <p class="card-text"><button type="submit" class="btn btn-danger">Confirmar</button></p>
+              <p class="card-text"><a href="{% url 'confirma_consulta' psicologo.id%}" class="btn btn-secondary">Cancelar</a></p>
+            </form>
           </div>
-         
-        <div class="row">
-          <div class="col-md-6">
-            <div class="form-group">
-              <div class="input-group mb-4">
-                <span class="input-group-text"><i class="ni ni-palette"></i></span>
-                <input type="color" class="form-control" name="cor" required>
-                <small class="form-text text-muted">Escolha uma cor de identificação</small>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="form-group">
-              <button type="submit" class="btn btn-primary">Cadastrar Psicóloga</button>
-            </div>
-          </div>
-        </div>
-      </form>
+        </div><!-- End Card with titles, buttons, and links -->
+      </section>
       
 
 {% endblock content %}

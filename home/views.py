@@ -8,7 +8,11 @@ from rolepermissions.roles import assign_role
 from rolepermissions.decorators import has_role_decorator
 from django.contrib.auth.models import User, Group
 from django.http import HttpResponse
+<<<<<<< HEAD
+from .models import Usuario, Consulta, Unidade, Sala, Paciente, ConfirmacaoConsulta, Psicologo, Disponibilidade, AgendaPsico, PsicoDisponibilidade
+=======
 from .models import Usuario, Consulta, Unidade, Sala, Paciente, ConfirmacaoConsulta, Psicologa, Disponibilidade, PsicoDisponibilidade, AgendaPsico
+>>>>>>> 49db458a0f54c818457f4d7c2d202df4e5802c88
 from rolepermissions.roles import assign_role, get_user_roles, RolesManager
 from rolepermissions.exceptions import RoleDoesNotExist
 from django.contrib.auth.models import Group
@@ -16,7 +20,11 @@ from django.contrib.auth import authenticate, login as login_django
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import update_session_auth_hash
 from datetime import timedelta
+<<<<<<< HEAD
+from django.db.models import Sum
+=======
 from django.http import JsonResponse
+>>>>>>> 49db458a0f54c818457f4d7c2d202df4e5802c88
 
 # Páginas Simples
 @login_required(login_url='login1')
@@ -679,6 +687,56 @@ def editar_psicologo(request, psicologo_id):
         'psicologo': psicologo
     })
 
+<<<<<<< HEAD
+def confirma_consulta(request, psicologo_id):
+    psicologo = get_object_or_404(Psicologo, id=psicologo_id)
+    pacientes = Paciente.objects.all()
+    consulta_confirmadas = ConfirmacaoConsulta.objects.all()
+
+    # Cálculos financeiros
+    valor_total_atendimentos = ConfirmacaoConsulta.objects.aggregate(Sum('valor'))['valor__sum'] or 0
+    valor_total_cartao = ConfirmacaoConsulta.objects.filter(forma_pagamento='cartao').aggregate(Sum('valor'))['valor__sum'] or 0
+    valor_repasse = valor_total_atendimentos / 2
+    valor_acerto = valor_repasse - valor_total_cartao
+
+    if request.method == 'POST':
+        # Obtendo dados do formulário
+        data = request.POST.get('data')
+        confirmacao = request.POST.get('confirmacao')
+        forma_pagamento = request.POST.get('forma_pagamento')
+        valor = request.POST.get('valor')
+        observacoes = request.POST.get('observacoes')
+        paciente_id = request.POST.get('paciente')
+        
+        paciente = get_object_or_404(Paciente, id=paciente_id)
+        
+        # Criação da consulta confirmada
+        consulta_confirma = ConfirmacaoConsulta.objects.create(
+            data=data,
+            psicologo=psicologo,
+            confirmacao=confirmacao,
+            forma_pagamento=forma_pagamento,
+            valor=valor,
+            observacoes=observacoes,
+            paciente=paciente
+        )
+
+        consulta_confirma.save()
+
+        # Redirecionamento após salvar
+        return redirect('confirma_consulta', psicologo_id=psicologo_id)
+
+    return render(request, 'pages/confirma_consulta.html', {
+        'psicologo': psicologo,
+        'pacientes': pacientes,
+        'consulta_confirma': consulta_confirmadas,
+        'valor_total_atendimentos': valor_total_atendimentos,
+        'valor_total_cartao': valor_total_cartao,
+        'valor_repasse': valor_repasse,
+        'valor_acerto': valor_acerto,
+    })
+=======
+>>>>>>> 49db458a0f54c818457f4d7c2d202df4e5802c88
 @login_required(login_url='login1')
 @has_role_decorator('administrador')
 def pacientes(request):
@@ -754,10 +812,62 @@ def deletar_paciente(request, id_paciente):
     
     return render(request, 'pages/deletar_paciente.html', {'paciente': paciente})
 
+<<<<<<< HEAD
+def agenda_psicologo(request, id_psicologo):
+    pass
+
+def deletar_consulta(request, psicologo_id, consulta_id):
+    consulta = get_object_or_404(ConfirmacaoConsulta, id=consulta_id)
+    psicologo = get_object_or_404(Psicologo, id=psicologo_id)
+    
+    if request.method == "POST":
+        consulta.delete()
+        return redirect('confirma_consulta', psicologo_id=psicologo_id)
+    
+    return render(request, 'pages/confirmar_excluir_consulta.html', {
+        'psicologo': psicologo,
+        'consulta': consulta
+    })
+
+from django.shortcuts import render, get_object_or_404, redirect
+
+def editar_confirma_consulta(request, psicologo_id, consulta_id):
+    psicologo = get_object_or_404(Psicologo, id=psicologo_id)
+    consulta = get_object_or_404(ConfirmacaoConsulta, id=consulta_id)
+    pacientes = Paciente.objects.all()
+
+    if request.method == 'POST':
+        # Obtendo os dados do formulário
+        consulta.data = request.POST.get('data')
+        consulta.confirmacao = request.POST.get('confirmacao')
+        consulta.forma_pagamento = request.POST.get('forma_pagamento')
+        consulta.valor = request.POST.get('valor')
+        consulta.observacoes = request.POST.get('observacoes')
+        paciente_id = request.POST.get('paciente')
+        consulta.paciente = get_object_or_404(Paciente, id=paciente_id)
+        
+        # Salvando as alterações
+        consulta.save()
+
+        # Redireciona para a página de confirmações de consultas do psicólogo
+        return redirect('confirma_consulta', psicologo_id=psicologo_id)
+    
+    return render(request, 'pages/editar_confirma_consulta.html', {
+        'psicologo': psicologo,
+        'consulta': consulta,
+        'pacientes': pacientes,
+    })
+
+
+@login_required(login_url='login1') 
+def psico_agenda(request, psicologo_id):
+    psicologo = get_object_or_404(Psicologo, id=psicologo_id)
+=======
 
 @login_required(login_url='login1') 
 def psico_agenda(request, psicologo_id):
     psicologo = get_object_or_404(Psicologa, id=psicologo_id)
+>>>>>>> 49db458a0f54c818457f4d7c2d202df4e5802c88
     psico_agendas = PsicoDisponibilidade.objects.filter(user_id=psicologo).select_related('disponibilidade')
 
     agenda = [ps.disponibilidade for ps in psico_agendas]
@@ -783,7 +893,11 @@ def psico_agenda(request, psicologo_id):
                     disponibilidade=nova_agenda  # Usamos `nova_agenda` diretamente
                 )
 
+<<<<<<< HEAD
+            return redirect('psico_agenda', psicologo.id )
+=======
             return redirect('psicologa')
+>>>>>>> 49db458a0f54c818457f4d7c2d202df4e5802c88
 
     return render(request, 'pages/psico_agenda.html', {
         'agendas': agenda,
@@ -794,7 +908,11 @@ def psico_agenda(request, psicologo_id):
 @login_required(login_url='login1')
 def deletar_psico_agenda(request, id_psicologo, id_horario):
     
+<<<<<<< HEAD
+    psicologo = get_object_or_404(Psicologo, id=id_psicologo)
+=======
     psicologo = get_object_or_404(Psicologa, id=id_psicologo)
+>>>>>>> 49db458a0f54c818457f4d7c2d202df4e5802c88
 
     horario = get_object_or_404(AgendaPsico, id=id_horario)
 
@@ -811,6 +929,11 @@ def deletar_psico_agenda(request, id_psicologo, id_horario):
 
     return render(request, 'pages/deletar_agenda.html', {'horario': horario})
 
+<<<<<<< HEAD
+
+def financeiro(request):
+    return render(request, 'pages/financeiro.html')
+=======
 @login_required(login_url='login_1')
 def agenda_central_sala(request, id_sala):
     sala = get_object_or_404(Sala, id_sala = id_sala)
@@ -820,3 +943,4 @@ def agenda_central_sala(request, id_sala):
     return render(request, 'pages/page_agenda_central_individual.html', {
         'agendas': agendas
     })
+>>>>>>> 49db458a0f54c818457f4d7c2d202df4e5802c88

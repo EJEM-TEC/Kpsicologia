@@ -9,10 +9,26 @@
                 <h6>Editar Consulta</h6>
             </div>
             <div class="card-body p-4">
+<<<<<<< HEAD
+                <form method="POST" action="{% url 'editar_confirma_consulta' psicologo.id consulta.id %}">
+=======
                 <form method="POST" action="{% url 'editar_confirma_consulta' consulta_id=consulta.id_consulta %}">
+>>>>>>> 49db458a0f54c818457f4d7c2d202df4e5802c88
                     {% csrf_token %}
-
+                    
                     <div class="row">
+<<<<<<< HEAD
+                      <!-- Seleção de Paciente -->
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <label for="paciente" class="form-label">Paciente</label>
+                          <select class="form-control" id="paciente" name="paciente" required>
+                            <option value="" disabled>Selecione o paciente</option>
+                            {% for paciente in pacientes %}
+                              <option value="{{ paciente.id }}" {% if consulta.paciente.id == paciente.id %}selected{% endif %}>{{ paciente.nome }}</option>
+                            {% endfor %}
+                          </select>
+=======
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="paciente">Paciente</label>
@@ -60,78 +76,89 @@
                                       <option value="Sexta-Feira">Sexta-Feira</option>
                                     </select>
                             </div>
+>>>>>>> 49db458a0f54c818457f4d7c2d202df4e5802c88
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="periodo_atendimento">Período de Atendimento</label>
-                                    <select class="form-control" id="periodo_atendimento" name="periodo_atendimento" required>
-                                      <option value="Semanal">Semanal</option>
-                                      <option value="Quinzenal">Quinzenal</option>
-                                    </select>
-                            </div>
+                      </div>
+                  
+                      <!-- Valor -->
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <label for="valor">Valor</label>
+                          <div class="input-group mb-4">
+                            <span class="input-group-text"><i class="ni ni-money-coins"></i></span>
+                            <input type="number" class="form-control" id="valor" name="valor" placeholder="Digite o valor" min="0" step="0.01" value="{{ consulta.valor }}" required>
+                          </div>
+                          <small class="form-text text-muted">Insira o valor em moeda (ex: 100.00)</small>
                         </div>
+                      </div>
                     </div>
-
+                  
                     <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="forma_pagamento">Forma de Pagamento</label>
-                                    <select class="form-control" id="forma_pagamento" name="forma_pagamento" required>
-                                      <option value="Pix">Pix</option>
-                                      <option value="Dinheiro">Dinheiro</option>
-                                      <option value="Cartão">Cartão</option>
-                                    </select>
-                            </div>
+                      <!-- Data da Consulta -->
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <label for="data" class="form-label">Data da Consulta</label>
+                          <div class="input-group mb-4">
+                            <input type="datetime-local" class="form-control" id="data" name="data" value="{{ consulta.data|date:'Y-m-d\\TH:i' }}" required>
+                          </div>
                         </div>
+<<<<<<< HEAD
+                      </div>
+                  
+                      <!-- Observação -->
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <label for="observacoes" class="form-label">Observação</label>
+                          <textarea class="form-control" id="observacoes" name="observacoes" rows="3" placeholder="Observações sobre a consulta">{{ consulta.observacoes }}</textarea>
+=======
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="valor">Valor</label>
                                 <input type="number" class="form-control" id="valor" name="valor" required>
                             </div>
+>>>>>>> 49db458a0f54c818457f4d7c2d202df4e5802c88
                         </div>
+                      </div>
                     </div>
-
+                  
                     <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="observacoes">Observação</label>
-                                <input type="text" class="form-control" id="observacoes" name="observacoes" value="{{ consulta.observacoes }}" required>
-                            </div>
+                      <!-- Meio de Pagamento -->
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <label for="forma_pagamento" class="form-label">Meio de Pagamento</label>
+                          <select class="form-control" id="forma_pagamento" name="forma_pagamento" required>
+                            <option value="" disabled>Selecione o meio de pagamento</option>
+                            <option value="cartao" {% if consulta.forma_pagamento == "cartao" %}selected{% endif %}>Cartão</option>
+                            <option value="dinheiro" {% if consulta.forma_pagamento == "dinheiro" %}selected{% endif %}>Dinheiro</option>
+                            <option value="pix" {% if consulta.forma_pagamento == "pix" %}selected{% endif %}>Pix</option>
+                            <option value="transferencia" {% if consulta.forma_pagamento == "transferencia" %}selected{% endif %}>Transferência</option>
+                          </select>
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="confirmacao">Confirmação</label>
-                                <select class="form-control" id="confirmacao" name="confirmacao" required>
-                                    <option value="Sim">Sim</option>
-                                    <option value="Não">Não</option>
-                                    <option value="Faltou">Faltou</option>
-                                  </select>
-                            </div>
+                      </div>
+                  
+                      <!-- Desfecho -->
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <label for="confirmacao" class="form-label">Desfecho</label>
+                          <select class="form-control" id="confirmacao" name="confirmacao" required>
+                            <option value="" disabled>Selecione o desfecho</option>
+                            <option value="realizada" {% if consulta.confirmacao == "realizada" %}selected{% endif %}>Consulta Realizada</option>
+                            <option value="nao_realizada" {% if consulta.confirmacao == "nao_realizada" %}selected{% endif %}>Consulta Não Realizada</option>
+                          </select>
                         </div>
-                        
+                      </div>
                     </div>
-
+                  
                     <div class="row">
-                        <div class="col-md-6">
-                            <div class="d-flex justify-content-center gap-4 align-middle">
-                                <button type="submit" class="btn btn-primary">Atualizar</button>
-                                <button type="reset" class="btn btn-secondary">Resetar</button>
-                            </div>
+                      <!-- Botão de Submissão -->
+                      <div class="col-md-12">
+                        <div class="form-group text-center mt-4">
+                          <button type="submit" class="btn btn-primary">Salvar Alterações</button>
                         </div>
-                        <!-- <div class="col-md-6"> -->
-                            <!-- <div class="form-group">
-                                <label for="unidade_atendimento">Unidade de Atendimento</label>
-                                <select class="form-control" id="unidade_atendimento" name="unidade_atendimento" required>
-                                    <option value="">Selecione...</option>
-                                    {% for uni in unis %}
-                                        <option value="{{ uni.id_unidade }}" {% if uni.id_unidade == consulta.unidade_atendimento.id_unidade %}selected{% endif %}>{{ uni.nome_unidade }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div> -->
-                        <!-- </div> -->
-                       
+                      </div>
                     </div>
                 </form>
+                
             </div>
         </div>
     </div>

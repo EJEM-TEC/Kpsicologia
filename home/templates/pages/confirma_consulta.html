@@ -2,7 +2,135 @@
 {% load static %}
 
 {% block content %}
+<div class="row">
+    <!-- Coluna do formulário -->
+    <div class="col-md-8">
+        <form method="POST" action="{% url 'confirma_consulta' psicologo.id %}">
+            {% csrf_token %}
+            
+            <div class="row">
+                <!-- Seleção de Paciente -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="paciente" class="form-label">Paciente</label>
+                        <select class="form-control" id="paciente" name="paciente" required>
+                            <option value="" disabled selected>Selecione o paciente</option>
+                            {% for paciente in pacientes %}
+                                <option value="{{ paciente.id }}">{{ paciente.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Valor da Consulta -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="valor">Valor</label>
+                        <div class="input-group mb-4">
+                            <span class="input-group-text"><i class="ni ni-money-coins"></i></span>
+                            <input type="number" class="form-control" id="valor" name="valor" placeholder="Digite o valor" min="0" step="0.01" required>
+                        </div>
+                        <small class="form-text text-muted">Insira o valor em moeda (ex: 100.00)</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <!-- Data e Hora da Consulta -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="data" class="form-label">Data e Hora da Consulta</label>
+                        <div class="input-group mb-4">
+                            <input type="datetime-local" class="form-control" id="data" name="data" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Observação -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="observacoes" class="form-label">Observação</label>
+                        <textarea class="form-control" id="observacoes" name="observacoes" rows="3" placeholder="Observações sobre a consulta"></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <!-- Meio de Pagamento -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="forma_pagamento" class="form-label">Meio de Pagamento</label>
+                        <select class="form-control" id="forma_pagamento" name="forma_pagamento" required>
+                            <option value="" disabled selected>Selecione o meio de pagamento</option>
+                            <option value="cartao">Cartão</option>
+                            <option value="dinheiro">Dinheiro</option>
+                            <option value="pix">Pix</option>
+                            <option value="transferencia">Transferência</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Desfecho -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="confirmacao" class="form-label">Desfecho</label>
+                        <select class="form-control" id="confirmacao" name="confirmacao" required>
+                            <option value="" disabled selected>Selecione o desfecho</option>
+                            <option value="realizada">Consulta Realizada</option>
+                            <option value="nao_realizada">Consulta Não Realizada</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <!-- Botão de Submissão -->
+                <div class="col-md-12">
+                    <div class="form-group text-center mt-4">
+                        <button type="submit" class="btn btn-primary">Salvar Consulta</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
 
+    <!-- Coluna do card de resumo financeiro -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Resumo Financeiro</h5>
+                
+                <div class="mb-3">
+                    <h6 class="text-muted">Valor Total dos Atendimentos</h6>
+                    <p class="card-text font-weight-bold">
+                        R$ {{ valor_total_atendimentos|floatformat:2 }}
+                    </p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="text-muted">Valor Total no Cartão</h6>
+                    <p class="card-text font-weight-bold">
+                        R$ {{ valor_total_cartao|floatformat:2 }}
+                    </p>
+                </div>
+
+                <div class="mb-3">
+                    <h6 class="text-muted">Valor Referente ao Repasse (50%)</h6>
+                    <p class="card-text font-weight-bold">
+                        R$ {{ valor_repasse|floatformat:2 }}
+                    </p>
+                </div>
+
+                <div class="mb-3">
+                    <h6 class="text-muted">Valor Restante para Acerto</h6>
+                    <p class="card-text font-weight-bold">
+                        R$ {{ valor_acerto|floatformat:2 }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="row">
     <div class="col-12">
         <div class="card mb-4">
@@ -130,9 +258,13 @@
                             <tr>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nome do Cliente</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Data</th>
+<<<<<<< HEAD
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Forma de Pagamento</th>
+=======
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Periodo de Atendimento</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Forma Pagamento</th>
+>>>>>>> 49db458a0f54c818457f4d7c2d202df4e5802c88
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Confirmação</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ações</th>
@@ -140,6 +272,29 @@
                             </tr>
                         </thead>
                         <tbody>
+<<<<<<< HEAD
+                            {% for consulta in consulta_confirma %}
+                                <tr>
+                                    <td class="align-middle text-center">{{ consulta.paciente.nome }}</td>
+                                    <td class="align-middle text-center">{{ consulta.psicologo.nome }}</td>
+                                    <td class="align-middle text-center">{{ consulta.data|date:"d/m/Y H:i" }}</td> <!-- Exibindo data formatada -->
+                                    <td class="align-middle text-center">{{ consulta.forma_pagamento }}</td>
+                                    <td class="align-middle text-center">{{ consulta.valor }}</td>
+                                    <td class="align-middle text-center">{{ consulta.confirmacao }}</td>
+                                    <td class="align-middle text-center">
+                                        <a href="{% url 'editar_confirma_consulta' psicologo.id consulta.id %}" class="text-secondary text-xs" data-toggle="tooltip" data-original-title="Editar consulta">Editar</a> /
+                                        <a href="{% url 'deletar_consulta' psicologo.id consulta.id %}" class="text-secondary text-xs" data-toggle="tooltip" data-original-title="Excluir consulta">Excluir</a>
+                                    </td>
+                                    <td class="align-middle text-center">{{ consulta.observacoes }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="8" class="text-center">
+                                        <p class="text-secondary font-weight-bold text-xs">Nenhuma consulta encontrada.</p>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+=======
                         {% for consulta in consultas %}
                             {% if consulta.psicologa.nome == psicologo.nome %}
                             <tr>
@@ -163,8 +318,10 @@
                                 </td>
                             </tr>
                         {% endfor %}
+>>>>>>> 49db458a0f54c818457f4d7c2d202df4e5802c88
                         </tbody>
                     </table>
+                    
                 </div>
             </div>
         </div>
