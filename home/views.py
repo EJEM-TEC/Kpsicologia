@@ -8,11 +8,7 @@ from rolepermissions.roles import assign_role
 from rolepermissions.decorators import has_role_decorator
 from django.contrib.auth.models import User, Group
 from django.http import HttpResponse
-<<<<<<< HEAD
-from .models import Usuario, Consulta, Unidade, Sala, Paciente, ConfirmacaoConsulta, Psicologo, Disponibilidade, AgendaPsico, PsicoDisponibilidade
-=======
-from .models import Usuario, Consulta, Unidade, Sala, Paciente, ConfirmacaoConsulta, Psicologa, Disponibilidade, PsicoDisponibilidade, AgendaPsico
->>>>>>> 49db458a0f54c818457f4d7c2d202df4e5802c88
+from .models import Psicologa, Usuario, Consulta, Unidade, Sala, Paciente, ConfirmacaoConsulta, Psicologo, Disponibilidade, AgendaPsico, PsicoDisponibilidade
 from rolepermissions.roles import assign_role, get_user_roles, RolesManager
 from rolepermissions.exceptions import RoleDoesNotExist
 from django.contrib.auth.models import Group
@@ -20,11 +16,8 @@ from django.contrib.auth import authenticate, login as login_django
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import update_session_auth_hash
 from datetime import timedelta
-<<<<<<< HEAD
 from django.db.models import Sum
-=======
-from django.http import JsonResponse
->>>>>>> 49db458a0f54c818457f4d7c2d202df4e5802c88
+from django.shortcuts import render, get_object_or_404, redirect
 
 # Páginas Simples
 @login_required(login_url='login1')
@@ -687,9 +680,8 @@ def editar_psicologo(request, psicologo_id):
         'psicologo': psicologo
     })
 
-<<<<<<< HEAD
 def confirma_consulta(request, psicologo_id):
-    psicologo = get_object_or_404(Psicologo, id=psicologo_id)
+    psicologo = get_object_or_404(Psicologa, id=psicologo_id)
     pacientes = Paciente.objects.all()
     consulta_confirmadas = ConfirmacaoConsulta.objects.all()
 
@@ -735,8 +727,6 @@ def confirma_consulta(request, psicologo_id):
         'valor_repasse': valor_repasse,
         'valor_acerto': valor_acerto,
     })
-=======
->>>>>>> 49db458a0f54c818457f4d7c2d202df4e5802c88
 @login_required(login_url='login1')
 @has_role_decorator('administrador')
 def pacientes(request):
@@ -812,7 +802,6 @@ def deletar_paciente(request, id_paciente):
     
     return render(request, 'pages/deletar_paciente.html', {'paciente': paciente})
 
-<<<<<<< HEAD
 def agenda_psicologo(request, id_psicologo):
     pass
 
@@ -829,7 +818,7 @@ def deletar_consulta(request, psicologo_id, consulta_id):
         'consulta': consulta
     })
 
-from django.shortcuts import render, get_object_or_404, redirect
+
 
 def editar_confirma_consulta(request, psicologo_id, consulta_id):
     psicologo = get_object_or_404(Psicologo, id=psicologo_id)
@@ -861,14 +850,8 @@ def editar_confirma_consulta(request, psicologo_id, consulta_id):
 
 @login_required(login_url='login1') 
 def psico_agenda(request, psicologo_id):
-    psicologo = get_object_or_404(Psicologo, id=psicologo_id)
-=======
-
-@login_required(login_url='login1') 
-def psico_agenda(request, psicologo_id):
     psicologo = get_object_or_404(Psicologa, id=psicologo_id)
->>>>>>> 49db458a0f54c818457f4d7c2d202df4e5802c88
-    psico_agendas = PsicoDisponibilidade.objects.filter(user_id=psicologo).select_related('disponibilidade')
+    psico_agendas = PsicoDisponibilidade.objects.filter(user_id=psicologo_id).select_related('disponibilidade')
 
     agenda = [ps.disponibilidade for ps in psico_agendas]
 
@@ -893,11 +876,7 @@ def psico_agenda(request, psicologo_id):
                     disponibilidade=nova_agenda  # Usamos `nova_agenda` diretamente
                 )
 
-<<<<<<< HEAD
             return redirect('psico_agenda', psicologo.id )
-=======
-            return redirect('psicologa')
->>>>>>> 49db458a0f54c818457f4d7c2d202df4e5802c88
 
     return render(request, 'pages/psico_agenda.html', {
         'agendas': agenda,
@@ -908,15 +887,11 @@ def psico_agenda(request, psicologo_id):
 @login_required(login_url='login1')
 def deletar_psico_agenda(request, id_psicologo, id_horario):
     
-<<<<<<< HEAD
-    psicologo = get_object_or_404(Psicologo, id=id_psicologo)
-=======
     psicologo = get_object_or_404(Psicologa, id=id_psicologo)
->>>>>>> 49db458a0f54c818457f4d7c2d202df4e5802c88
 
     horario = get_object_or_404(AgendaPsico, id=id_horario)
 
-    psico_horario = get_object_or_404(PsicoDisponibilidade, disponibilidade=horario, user=psicologo)
+    psico_horario = get_object_or_404(PsicoDisponibilidade, disponibilidade=horario, user=psicologo.id)
 
 
     if request.method == "POST":
@@ -929,11 +904,11 @@ def deletar_psico_agenda(request, id_psicologo, id_horario):
 
     return render(request, 'pages/deletar_agenda.html', {'horario': horario})
 
-<<<<<<< HEAD
 
 def financeiro(request):
     return render(request, 'pages/financeiro.html')
-=======
+
+
 @login_required(login_url='login_1')
 def agenda_central_sala(request, id_sala):
     sala = get_object_or_404(Sala, id_sala = id_sala)
@@ -943,4 +918,3 @@ def agenda_central_sala(request, id_sala):
     return render(request, 'pages/page_agenda_central_individual.html', {
         'agendas': agendas
     })
->>>>>>> 49db458a0f54c818457f4d7c2d202df4e5802c88
