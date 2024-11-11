@@ -193,30 +193,13 @@ class PsicoDisponibilidade(models.Model):
 #         return self.usuario.username
     
 class Consulta(models.Model):
-    psicologo = models.ForeignKey(Psicologo, on_delete=models.CASCADE)
+    psicologo = models.ForeignKey(Psicologa, on_delete=models.CASCADE)
     Paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
-    horario = models.DateTimeField()
+    horario = models.TimeField()
+    dia_semana = models.CharField(max_length=100)
     repeticao = models.CharField(max_length=32)
+    semanal = models.CharField(max_length=32)
+    quinzenal = models.CharField(max_length=32)
     sala=models.ForeignKey(Sala, on_delete=models.CASCADE)
 
-    class Meta:
-        unique_together = ['psicologo', 'horario']
-
-    @staticmethod
-    def horarios_disponiveis(psicologo, data):
-        # Obtenha o horário de início e duração da consulta
-        horario_inicio = timezone.datetime.combine(data, psicologo.horario_inicio)
-        intervalo_consulta = psicologo.tempo_consulta
-        horarios_disponiveis = []
-
-        # Gere os horários com base no número de consultas e tempo de consulta
-        for i in range(psicologo.consultas_por_dia):
-            horario = horario_inicio + i * intervalo_consulta
-            if horario >= timezone.now():
-                horarios_disponiveis.append(horario)
-
-        # Filtre horários já ocupados
-        consultas = Consulta.objects.filter(psicologo=psicologo, horario__date=data)
-        horarios_ocupados = {consulta.horario for consulta in consultas}
-        return [horario for horario in horarios_disponiveis if horario not in horarios_ocupados]
     
