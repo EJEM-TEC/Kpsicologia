@@ -721,7 +721,7 @@ def confirma_consulta(request, psicologo_id):
     return render(request, 'pages/confirma_consulta.html', {
         'psicologo': psicologo,
         'pacientes': pacientes,
-        'consulta_confirma': consulta_confirmadas,
+        'consultas': consulta_confirmadas,
         'valor_total_atendimentos': valor_total_atendimentos,
         'valor_total_cartao': valor_total_cartao,
         'valor_repasse': valor_repasse,
