@@ -8,7 +8,7 @@ from rolepermissions.roles import assign_role
 from rolepermissions.decorators import has_role_decorator
 from django.contrib.auth.models import User, Group
 from django.http import HttpResponse
-from .models import Psicologa, Usuario, Consulta, Unidade, Sala, Paciente, ConfirmacaoConsulta, Psicologo, Disponibilidade, AgendaPsico, PsicoDisponibilidade
+from .models import Psicologa, Usuario, Consulta, Unidade, Sala, Paciente, ConfirmacaoConsulta, Psicologo, Disponibilidade, AgendaPsico, PsicoDisponibilidade, Financeiro
 from rolepermissions.roles import assign_role, get_user_roles, RolesManager
 from rolepermissions.exceptions import RoleDoesNotExist
 from django.contrib.auth.models import Group
@@ -905,9 +905,43 @@ def deletar_psico_agenda(request, id_psicologo, id_horario):
     return render(request, 'pages/deletar_agenda.html', {'horario': horario})
 
 
+#financeiro das psicólogas
 def financeiro(request):
-    return render(request, 'pages/financeiro.html')
+    psicologas = Psicologa.objects.all()
+    financeiro = Financeiro.objects.all()
 
+    if request.method == 'POST':
+        nome_psicologa = request.POST.get('nome_psicologa')
+        valor_previsto = request.POST.get('valor_previsto')
+        valor_pendente = request.POST.get('valor_pendente')
+        valor_acertado = request.POST.get('valor_acertado')
+        #valor_total = request.POST.get('valor_total')
+        qtd_pacientes = request.POST.get('qtd_pacientes')
+        desistencias_atendidos = request.POST.get('desistencias_atendidos')
+        qtd_marcacoes = request.POST.get('qtd_marcacoes')
+        desistencias_novos = request.POST.get('desistencias_novos')
+        psicologa = get_object_or_404(Psicologa, id=nome_psicologa)
+
+        financeiro = Financeiro.objects.create(
+            psicologa = psicologa,
+            valor_previsto = valor_previsto,
+            valor_pendente = valor_pendente,
+            valor_acertado = valor_acertado,
+            valor_total = valor_previsto+valor_pendente+valor_acertado,
+            qtd_pacientes = qtd_pacientes,
+            desistencias_atendidos =  desistencias_atendidos,
+            qtd_marcacoes = qtd_marcacoes,
+            desistencias_novos = desistencias_novos
+        )
+
+        financeiro.save()
+
+        redirect('financeiro')
+    
+    return render(request, 'pages/financeiro.html',{'psicologas': psicologas}, {'financeiro': financeiro})
+
+
+    
 
 @login_required(login_url='login_1')
 def agenda_central_sala(request, id_sala):
