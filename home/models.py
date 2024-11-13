@@ -202,17 +202,35 @@ class Consulta(models.Model):
     quinzenal = models.CharField(max_length=32)
     sala=models.ForeignKey(Sala, on_delete=models.CASCADE)
 
+# class Financeiro(models.Model):
+#     psicologa = models.ForeignKey(Psicologa, on_delete=models.CASCADE, null=True)
+#     valor_previsto = models.DecimalField(max_digits=10, decimal_places=2)
+#     valor_pendente = models.DecimalField(max_digits=10, decimal_places=2)
+#     valor_acertado = models.DecimalField(max_digits=10, decimal_places=2)
+#     valor_total= models.DecimalField(max_digits=10, decimal_places=2)
+#     qtd_pacientes = models.IntegerField()
+#     desistencias_atendidos = models.IntegerField()
+#     qtd_marcacoes = models.IntegerField()
+#     desistencias_novos = models.IntegerField()
+    
 class Financeiro(models.Model):
     psicologa = models.ForeignKey(Psicologa, on_delete=models.CASCADE, null=True)
     valor_previsto = models.DecimalField(max_digits=10, decimal_places=2)
     valor_pendente = models.DecimalField(max_digits=10, decimal_places=2)
     valor_acertado = models.DecimalField(max_digits=10, decimal_places=2)
-    valor_total= models.DecimalField(max_digits=10, decimal_places=2)
-    qtd_pacientes = models.IntegerField()
-    desistencias_atendidos = models.IntegerField()
-    qtd_marcacoes = models.IntegerField()
-    desistencias_novos = models.IntegerField()
+    valor_total= models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    qtd_pacientes = models.PositiveIntegerField()
+    desistencias_atendidos = models.PositiveIntegerField()
+    qtd_marcacoes = models.PositiveIntegerField()
+    desistencias_novos = models.PositiveIntegerField()
     
+    # @property
+    # def valor_total(self):
+    #     # Retorna a soma dos valores calculada dinamicamente
+    #     return self.valor_previsto + self.valor_pendente + self.valor_acertado
 
+    def save(self, *args, **kwargs):
+        self.valor_total = self.valor_previsto + self.valor_pendente + self.valor_acertado
+        super().save(*args, **kwargs)
 
     

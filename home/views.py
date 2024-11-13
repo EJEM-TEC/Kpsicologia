@@ -18,7 +18,7 @@ from django.contrib.auth import update_session_auth_hash
 from datetime import timedelta
 from django.db.models import Sum
 from django.shortcuts import render, get_object_or_404, redirect
-
+from decimal import Decimal
 # Páginas Simples
 @login_required(login_url='login1')
 def index(request):
@@ -905,29 +905,75 @@ def deletar_psico_agenda(request, id_psicologo, id_horario):
     return render(request, 'pages/deletar_agenda.html', {'horario': horario})
 
 
+# #financeiro das psicólogas
+# def financeiro(request):
+#     psicologas = Psicologa.objects.all()
+#     financeiro = Financeiro.objects.all()
+
+#     if request.method == 'POST':
+#         nome_psicologa = request.POST.get('nome_psicologa')
+#         valor_previsto = request.POST.get('valor_previsto')
+#         valor_pendente = request.POST.get('valor_pendente')
+#         valor_acertado = request.POST.get('valor_acertado')
+#         #valor_total = request.POST.get('valor_total')
+#         qtd_pacientes = request.POST.get('qtd_pacientes')
+#         desistencias_atendidos = request.POST.get('desistencias_atendidos')
+#         qtd_marcacoes = request.POST.get('qtd_marcacoes')
+#         desistencias_novos = request.POST.get('desistencias_novos')
+#         psicologa = get_object_or_404(Psicologa, id=nome_psicologa)
+
+#         financeiro = Financeiro.objects.create(
+#             psicologa = psicologa,
+#             valor_previsto = valor_previsto,
+#             valor_pendente = valor_pendente,
+#             valor_acertado = valor_acertado,
+#             valor_total = valor_previsto+valor_pendente+valor_acertado,
+#             qtd_pacientes = qtd_pacientes,
+#             desistencias_atendidos =  desistencias_atendidos,
+#             qtd_marcacoes = qtd_marcacoes,
+#             desistencias_novos = desistencias_novos
+#         )
+
+#         financeiro.save()
+
+#         redirect('financeiro')
+    
+#     return render(request, 'pages/financeiro.html',{'psicologas': psicologas}, {'financeiro': financeiro})
+
+
 #financeiro das psicólogas
+@login_required(login_url='login1')
 def financeiro(request):
     psicologas = Psicologa.objects.all()
-    financeiro = Financeiro.objects.all()
+    financeiros = Financeiro.objects.all()
 
     if request.method == 'POST':
-        nome_psicologa = request.POST.get('nome_psicologa')
-        valor_previsto = request.POST.get('valor_previsto')
-        valor_pendente = request.POST.get('valor_pendente')
-        valor_acertado = request.POST.get('valor_acertado')
-        #valor_total = request.POST.get('valor_total')
+        # valor_previsto = request.POST.get('valor_previsto', 0),
+        # request.POST.get('valor_previsto')
+        # valor_pendente = request.POST.get('valor_pendente')
+        # valor_pendente = float(request.POST.get('valor_pendente', 0)),
+        # valor_acertado = request.POST.get('valor_acertado')
+        # valor_acertado = float(request.POST.get('valor_acertado', 0)),
+        # valor_total = request.POST.get('valor_total')
+        
+        valor_previsto = Decimal(request.POST['valor_previsto'])
+        valor_pendente = Decimal(request.POST['valor_pendente'])
+        valor_acertado = Decimal(request.POST['valor_acertado'])
         qtd_pacientes = request.POST.get('qtd_pacientes')
+        valor_total = valor_previsto + valor_pendente + valor_acertado,
         desistencias_atendidos = request.POST.get('desistencias_atendidos')
         qtd_marcacoes = request.POST.get('qtd_marcacoes')
         desistencias_novos = request.POST.get('desistencias_novos')
-        psicologa = get_object_or_404(Psicologa, id=nome_psicologa)
-
+        nome_psicologo = request.POST.get('nome_psicologo')
+        psicologa = get_object_or_404(Psicologa, nome=nome_psicologo)
+        # psicologa = get_object_or_404(Psicologa, nome='nome_psicologo')
+        
         financeiro = Financeiro.objects.create(
             psicologa = psicologa,
             valor_previsto = valor_previsto,
             valor_pendente = valor_pendente,
             valor_acertado = valor_acertado,
-            valor_total = valor_previsto+valor_pendente+valor_acertado,
+            valor_total = valor_total,
             qtd_pacientes = qtd_pacientes,
             desistencias_atendidos =  desistencias_atendidos,
             qtd_marcacoes = qtd_marcacoes,
@@ -936,12 +982,9 @@ def financeiro(request):
 
         financeiro.save()
 
-        redirect('financeiro')
+        return redirect('financeiro')
     
-    return render(request, 'pages/financeiro.html',{'psicologas': psicologas}, {'financeiro': financeiro})
-
-
-    
+    return render(request, 'pages/financeiro.html',{'psicologas': psicologas}, {'financeiros': financeiros})
 
 @login_required(login_url='login_1')
 def agenda_central_sala(request, id_sala):
