@@ -984,7 +984,13 @@ def financeiro(request):
 
         return redirect('financeiro')
     
-    return render(request, 'pages/financeiro.html',{'psicologas': psicologas}, {'financeiros': financeiros})
+    context = {
+        'psicologas': psicologas,
+        'financeiros': financeiros
+    }
+    return render(request, 'pages/financeiro.html', context)
+
+    #return render(request, 'pages/financeiro.html',{'psicologas': psicologas}, {'financeiros': financeiros})
 
 @login_required(login_url='login_1')
 def agenda_central_sala(request, id_sala):
