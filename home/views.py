@@ -1,3 +1,5 @@
+from decimal import Decimal
+import shutil
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.views import PasswordResetView, PasswordChangeView, PasswordResetConfirmView
 from django.urls import reverse
@@ -8,7 +10,7 @@ from rolepermissions.roles import assign_role
 from rolepermissions.decorators import has_role_decorator
 from django.contrib.auth.models import User, Group
 from django.http import HttpResponse
-from .models import Psicologa, Usuario, Consulta, Unidade, Sala, Paciente, ConfirmacaoConsulta, Psicologo, Disponibilidade, AgendaPsico, PsicoDisponibilidade
+from .models import Financeiro, Psicologa, Usuario, Consulta, Unidade, Sala, Paciente, ConfirmacaoConsulta, Psicologo, Disponibilidade, AgendaPsico, PsicoDisponibilidade
 from rolepermissions.roles import assign_role, get_user_roles, RolesManager
 from rolepermissions.exceptions import RoleDoesNotExist
 from django.contrib.auth.models import Group
@@ -18,6 +20,14 @@ from django.contrib.auth import update_session_auth_hash
 from datetime import timedelta
 from django.db.models import Sum
 from django.shortcuts import render, get_object_or_404, redirect
+from docx import Document
+from io import BytesIO
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+import os
+from django.conf import settings
+from docx2pdf import convert
+import tempfile
 
 # Páginas Simples
 @login_required(login_url='login1')
@@ -918,3 +928,130 @@ def agenda_central_sala(request, id_sala):
     return render(request, 'pages/page_agenda_central_individual.html', {
         'agendas': agendas
     })
+
+
+@login_required(login_url='login_1')
+def gerar_recibo(request, id_consulta):
+
+    consulta = get_object_or_404(ConfirmacaoConsulta, id=id_consulta)
+
+    if request.method == 'POST':
+
+         # Caminho do documento original
+        original_doc_path = os.path.join(settings.BASE_DIR, 'Documento_Recibo.docx')
+        # Caminho para a cópia modificada
+        copied_doc_path = os.path.join(settings.BASE_DIR, 'Documento_Recibo_Copia.docx')
+        
+        # Criar uma cópia do documento original
+        shutil.copyfile(original_doc_path, copied_doc_path)
+        
+        # Carregar e modificar o documento copiado
+        doc = Document(copied_doc_path)
+        
+        # Substituir placeholders no documento
+        for paragraph in doc.paragraphs:
+            if 'Valor' in paragraph.text:
+                paragraph.text = paragraph.text.replace(
+                    'Valor', 
+                    str(consulta.valor)
+                )
+            if 'Nome_Psicologa' in paragraph.text:
+                paragraph.text = paragraph.text.replace(
+                    'Nome_Psicologa', 
+                    str(consulta.psicologo.nome)
+                )
+            if 'Observacao' in paragraph.text:
+                paragraph.text = paragraph.text.replace(
+                    'Observacao', 
+                    f'R$ {str(consulta.observacoes)}'
+                )
+            if 'dia' in paragraph.text:
+                paragraph.text = paragraph.text.replace(
+                    'dia', 
+                    str(consulta.data.date().day)
+                )
+            if 'mês' in paragraph.text:
+                paragraph.text = paragraph.text.replace(
+                    'mês', 
+                    str(consulta.data.date().month)
+                )
+            if 'ano' in paragraph.text:
+                paragraph.text = paragraph.text.replace(
+                    'ano', 
+                    str(consulta.data.date().year)
+                )
+            
+        
+        # Salvar o documento copiado modificado
+        doc.save(copied_doc_path)
+
+        # caminho_original = f'r"C:\Ejem\TEC\[PROJETO] - [KPSICOLOGIA]\CRM\soft-ui-dashboard-django\Documento_Recibo_Copia.docx"'
+        
+        # #convert(f"{copied_doc_path}",  "arquivo.pdf")
+
+        # with tempfile.TemporaryDirectory() as temp_dir:
+        #     # Define o caminho temporário para o arquivo
+        #     temp_doc_path = f"{temp_dir}/Documento_Recibo_Copia.docx"
+            
+        #     # Copia o arquivo para a pasta temporária
+        #     shutil.copy2(caminho_original, temp_doc_path)
+            
+        #     # Converte o arquivo .docx para .pdf
+        #     output_pdf = f"{temp_dir}/recibo.pdf"
+        #     convert(temp_doc_path, output_pdf)
+            
+        #     print("Arquivo convertido para PDF com sucesso!")
+
+    
+    return render(request, 'pages/gerar_recibo.html', {'consulta': consulta})
+
+#financeiro das psicólogas
+@login_required(login_url='login1')
+def financeiro(request):
+    psicologas = Psicologa.objects.all()
+    financeiros = Financeiro.objects.all()
+
+    if request.method == 'POST':
+        # valor_previsto = request.POST.get('valor_previsto', 0),
+        # request.POST.get('valor_previsto')
+        # valor_pendente = request.POST.get('valor_pendente')
+        # valor_pendente = float(request.POST.get('valor_pendente', 0)),
+        # valor_acertado = request.POST.get('valor_acertado')
+        # valor_acertado = float(request.POST.get('valor_acertado', 0)),
+        # valor_total = request.POST.get('valor_total')
+        
+        valor_previsto = Decimal(request.POST['valor_previsto'])
+        valor_pendente = Decimal(request.POST['valor_pendente'])
+        valor_acertado = Decimal(request.POST['valor_acertado'])
+        qtd_pacientes = request.POST.get('qtd_pacientes')
+        valor_total = valor_previsto + valor_pendente + valor_acertado,
+        desistencias_atendidos = request.POST.get('desistencias_atendidos')
+        qtd_marcacoes = request.POST.get('qtd_marcacoes')
+        desistencias_novos = request.POST.get('desistencias_novos')
+        nome_psicologo = request.POST.get('nome_psicologo')
+        psicologa = get_object_or_404(Psicologa, nome=nome_psicologo)
+        # psicologa = get_object_or_404(Psicologa, nome='nome_psicologo')
+        
+        financeiro = Financeiro.objects.create(
+            psicologa = psicologa,
+            valor_previsto = valor_previsto,
+            valor_pendente = valor_pendente,
+            valor_acertado = valor_acertado,
+            valor_total = valor_total,
+            qtd_pacientes = qtd_pacientes,
+            desistencias_atendidos =  desistencias_atendidos,
+            qtd_marcacoes = qtd_marcacoes,
+            desistencias_novos = desistencias_novos
+        )
+
+        financeiro.save()
+
+        return redirect('financeiro')
+    
+    context = {
+        'psicologas': psicologas,
+        'financeiros': financeiros
+    }
+    return render(request, 'pages/financeiro.html', context)
+
+

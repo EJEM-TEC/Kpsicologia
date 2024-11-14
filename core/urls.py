@@ -62,7 +62,8 @@ urlpatterns = [
     path('psicologas/<int:psicologo_id>/agendar/', views.psico_agenda, name='psico_agenda'),
     path('deletar_agenda_psico/<int:id_psicologo>/<int:id_horario>', views.deletar_psico_agenda, name='delete_psico_agenda'),
     path('agenda_central/sala/<int:id_sala>', views.agenda_central_sala, name='agenda_central_sala'),
-    path('financeiro/', views.financeiro, name='financeiro')
+    path('financeiro/', views.financeiro, name='financeiro'),
+    path('geracao_recibo/<int:id_consulta>', views.gerar_recibo, name='gerar_recibo'),
 
     #path('cadastrar_salas/', views.sala, name='salas'),
 

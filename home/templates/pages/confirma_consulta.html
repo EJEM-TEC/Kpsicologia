@@ -159,6 +159,7 @@
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Confirmação</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ações</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Recibo</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Observações</th>
                             </tr>
                         </thead>
@@ -171,6 +172,9 @@
                                     <td class="align-middle text-center">{{ consulta.forma_pagamento }}</td>
                                     <td class="align-middle text-center">{{ consulta.valor }}</td>
                                     <td class="align-middle text-center">{{ consulta.confirmacao }}</td>
+                                    <td class="align-middle text-center">
+                                        <a href="{% url  'gerar_recibo' id_consulta=consulta.id %}">Gerar</a>
+                                    </td>
                                     <td class="align-middle text-center">
                                         <a href="{% url 'editar_confirma_consulta' psicologo.id consulta.id %}" class="text-secondary text-xs" data-toggle="tooltip" data-original-title="Editar consulta">Editar</a> /
                                         <a href="{% url 'deletar_consulta' psicologo.id consulta.id %}" class="text-secondary text-xs" data-toggle="tooltip" data-original-title="Excluir consulta">Excluir</a>
