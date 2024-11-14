@@ -26,7 +26,6 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 import os
 from django.conf import settings
-from docx2pdf import convert
 import tempfile
 from decimal import Decimal
 

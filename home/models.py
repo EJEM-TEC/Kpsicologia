@@ -102,6 +102,7 @@ class ConfirmacaoConsulta(models.Model):
     data = models.DateTimeField() 
     psicologo = models.ForeignKey(Psicologa, on_delete=models.CASCADE)
     confirmacao = models.CharField(max_length=100)
+    status = models.CharField(max_length=100)
     forma_pagamento = models.CharField(max_length=100) 
     valor = models.DecimalField(max_digits=10, decimal_places=2)
     observacoes = models.CharField(max_length=100)
