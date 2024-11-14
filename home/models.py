@@ -223,5 +223,4 @@ class Financeiro(models.Model):
         self.valor_total = self.valor_previsto + self.valor_pendente + self.valor_acertado
         super().save(*args, **kwargs)
 
-
     
