@@ -28,6 +28,15 @@ import os
 from django.conf import settings
 import tempfile
 from decimal import Decimal
+from django.shortcuts import render
+
+
+
+def handler404(request):
+    return render(request, '404.html', status=404)
+
+def handler500(request):
+    return render(request, '500.html', status=500)
 
 # Páginas Simples
 @login_required(login_url='login1')

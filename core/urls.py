@@ -16,6 +16,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 from home import views
+# from django.conf.urls import handler404, handler500
+
+# handler404 = 'core.views.handler404'
+# handler500 = 'core.views.handler500'
 
 urlpatterns = [
     #path('', include('home.urls')),
