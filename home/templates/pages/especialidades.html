@@ -1,0 +1,66 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+
+
+    <div class="container-fluid py-4">
+      <div class="col-6">
+        <div>
+          <h2>
+            Especialidades Psicólogas
+          </h2>
+        </div>
+      </div>
+    </div>
+    <div class="card m-4">
+      <div class="card-body p-4">
+        <form method="POST" action="{% url 'especialidades' %}">
+          {% csrf_token %}
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="especialidade">Nome</label>
+                <input type="text" class="form-control" id="especialidade" name="especialidade" required>
+              </div>
+            </div> 
+          </div> 
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <button type="submit" class="btn btn-primary">Cadastrar Especialidade</button>
+                <button type="reset" class="btn btn-secondary">Resetar</button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div> 
+    <div class="card m-4">
+      <div class="card-body p-4">
+        <div class="table-responsive">
+          <table class="table align-items-center mb-0">
+            <thead>
+              <tr>
+                <th class="text-secondary text-xxs font-weight-bolder opacity-7 text-center">Especialidade</th>
+                <th class="text-secondary text-xxs font-weight-bolder opacity-7 text-center">Excluir</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for especialidade in especialidades %}
+              <tr>
+                <td class="align-middle text-center">
+                  {{ especialidade.especialidade }}
+                </td>
+                <td class="align-middle text-center">
+                  <a href="#">Remover</a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+{% endblock content %}

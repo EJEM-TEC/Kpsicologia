@@ -22,7 +22,10 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="idade_paciente">Idade</label>
-                                <input type="number" class="form-control" id="idade_paciente" name="idade_paciente" value="{{paciente.idade}}" required>
+                                <select class="form-control" id="idade_paciente" name="idade_paciente" required>
+                                    <option value="Adulto">Adulto</option>
+                                    <option value="Criança">Criança</option>
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -30,14 +33,17 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="rg_paciente">RG</label>
-                                <input type="number" class="form-control" id="rg_paciente" name="rg_paciente" value="{{paciente.rg}}" required>      
+                                <label for="valor">Valor ( R$ )</label>
+                                <input type="number" class="form-control" id="valor" name="valor" value="{{paciente.valor}}" required>      
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="email_paciente">E-mail</label>
-                                <input type="text" class="form-control" id="email_paciente" name="email_paciente" value="{{paciente.email}}" required>
+                                <label for="tipo_atendimento">Tipo atendimento</label>
+                                <select class="form-control" id="tipo_atendimento" name="tipo_atendimento" required>
+                                    <option value="Tipo1">Tipo1</option>
+                                    <option value="Tipo2">Tipo2</option>
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -51,29 +57,20 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="cpf_paciente">CPF</label>
-                                <input type="number" class="form-control" id="cpf_paciente" name="cpf_paciente" value="{{paciente.cpf}}" required>
-                            </div>
-                        </div>
-                        
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
                                 <label for="periodo_paciente">Período de atendimento</label>
                                 <select class="form-control" id="periodo_paciente" name="periodo_paciente">
-                                  <option value="semanal">Semanal</option>
-                                  <option value="quinzenal">Quinzenal</option>
-                                  <option value="nao_fixo">Sem horário fixo</option>
+                                  <option value="Semanal">Semanal</option>
+                                  <option value="Quinzenal">Quinzenal</option>
+                                  <!-- <option value="nao_fixo">Sem horário fixo</option> -->
                                 </select>
                               </div>
-                        </div>
+                        </div>                       
+                    </div>
+                    <div class="row">
                         <div class="col-md-12">
                             <div class="d-flex justify-content-center gap-4 align-middle">
-                                <button type="submit" class="btn btn-primary">Editar</button>
+                                <button type="submit" class="btn btn-primary">Registrar</button>
                                 <button type="reset" class="btn btn-secondary">Resetar</button>
-                        
                             </div>
                         </div>
                     </div>

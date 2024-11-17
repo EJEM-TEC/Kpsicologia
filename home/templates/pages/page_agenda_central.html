@@ -6,7 +6,7 @@
     <div class="col-12">
         <div class="card mb-4">
             <div class="card-header pb-0">
-                <h6>Criação de Consultas</h6>
+                <h6>Filtragem de Consultas</h6>
             </div>
             <div class="card-body p-4">
                 <form method="POST" action="{% url 'agenda_central' %}">
@@ -15,63 +15,31 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="nome_cliente">Nome do Paciente</label>
-                                <select class="form-control" id="nome_cliente" name="nome_cliente">
+                                <label for="paciente_id">Psicóloga</label>
+                                <select class="form-control" id="paciente_id" name="psicologa_id" required>
+                                    {% for psicologa in psicologas %}
+                                    <option value="{{psicologa.id}}">{{psicologa.nome}}</option>
+                                    {% endfor %}
+                                    <option value="todos">Todos</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="paciente_id">Paciente</label>
+                                <select class="form-control" id="paciente_id" name="paciente_id" required>
                                     {% for paciente in pacientes %}
                                     <option value="{{paciente.id}}">{{paciente.nome}}</option>
                                     {% endfor %}
-                                </select>                              
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="nome_psicologo">Nome do Psicólogo</label>
-                                <select class="form-control" id="nome_psicologo" name="nome_psicologo">
-                                    {% for psicologa in psicologas %}
-                                        <option value="{{psicologa.id}}">{{psicologa.nome}}</option>                                    {% endfor %}
-                                </select>                               
+                                    <option value="todos">Todos</option>
+                                </select>
                             </div>
                         </div>
                     </div>
-
                     <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="horario_consulta">Horário</label>
-                                <input type="time" class="form-control" id="horario_consulta" name="horario_consulta" required>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="dia_semana">Dia da Semana</label>
-                                <select class="form-control" id="dia_semana" name="dia_semana">
-                                    <option value="Segunda">Segunda</option>
-                                    <option value="Terça">Terça</option>
-                                    <option value="Quarta">Quarta</option>
-                                    <option value="Quinta">Quinta</option>
-                                    <option value="Sexta">Sexta</option>
-                                    <option value="Sábado">Sábado</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">                         
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="sala_atendimento">Sala de Atendimento</label>
-                                <select class="form-control" id="sala_atendimento" name="sala_atendimento" required>
-                                    {% for sala in salas %}
-                                        <option value="{{ sala.id_sala }}">{{ sala.numero_sala }}</option>
-                                        {% empty %}
-                                        <option>"não encontrado"</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <div class="d-flex justify-content-center gap-4 align-middle">
-                                <button type="submit" class="btn btn-primary">Registrar</button>
+                                <button type="submit" class="btn btn-primary">Filtrar</button>
                                 <button type="reset" class="btn btn-secondary">Resetar</button>
                             </div>
                         </div>
@@ -81,37 +49,60 @@
         </div>
     </div>
 </div>
-<div class="row">
 
-    <div class="col-6">
-      <div>
-        <h2>
-          Salas
-        </h2>
-      </div>
-    </div>
-  </div>
+{% for sala in salas %}
 <div class="row">
     <div class="col-12">
-        <div class="row d-flex justify-content-center gap-5 my-5">
-            {% for sala in salas %}
-            <div class="col-3">
-              <div class="card card-background card-background-mask-primary move-on-hover align-items-start">
-                <div class="cursor-pointer">
-                  <div class="full-background" style="background-image: url('{% static 'img/curved-images/curved5.jpg' %}')"></div>
-                  <div class="card-body">
-                    <h5 class="text-white mb-0">{{sala.numero_sala}} - {{sala.id_unidade.nome_unidade}}</h5>
-                    <div class="d-flex mt-5">
-                      <button class="btn btn-outline-white p-2 mb-0" type="button" data-bs-toggle="tooltip" data-bs-placement="top">
-                        <a href="{% url 'agenda_central_sala' id_sala=sala.id_sala %}" class="text-white">Acessar</a>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+                <h6>Agendas da Sala {{ sala.numero_sala }}</h6>
             </div>
-            {% endfor %}
-          </div>
+            <div class="card-body px-4 pt-0 pb-2">
+                {% for dia in dias_da_semana %}
+                <div class="mb-4">
+                    <p>{{ dia }} Feira</p>
+                    <div class="table-responsive p-0">
+                        <table class="table align-items-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Semanal</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Quinzenal</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Deletar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for consulta in consultas %}
+                                {% if consulta.sala == sala and consulta.dia_semana == dia %}
+                                <tr style="background-color: {{ consulta.psicologo.cor }};">
+                                    <td class="align-middle text-center text-white">{{ consulta.horario }}</td>
+                                    <td class="align-middle text-center text-white">{{ consulta.semanal }}</td>
+                                    <td class="align-middle text-center text-white">{{ consulta.quinzenal }}</td>
+                                    <td class="align-middle">
+                                        <a href="{% url 'delete_consulta' id_consulta=consulta.id %}" 
+                                           class="text-secondary font-weight-bold text-xs text-center text-white" 
+                                           data-toggle="tooltip" data-original-title="Delete consulta">
+                                           Remover
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center">
+                                        <p class="text-secondary font-weight-bold text-xs">Nenhuma consulta encontrada.</p>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
     </div>
 </div>
+{% endfor %}
+
 {% endblock content %}

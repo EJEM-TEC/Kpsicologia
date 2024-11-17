@@ -4,47 +4,48 @@
 {% block content %}
 <div class="row">
     <div class="col-12">
-        <div class="card mb-4">
-            <div class="card-header pb-0">
-                <h6>Segunda Feira</h6>
-            </div>
-            <div class="card-body px-0 pt-0 pb-2">
-                <div class="table-responsive p-0">
-                    <table class="table align-items-center mb-0">
-                        <thead>
-                            <tr>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Psicologo</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Semanal</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Quinzenal</th>
-                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Deletar</th>
-                        </thead>
-                        <tbody>
-                        {% for agenda in agendas %}
-                            {% if agenda.dia_semana == "Segunda"  %}
-                            <tr style="background-color: {{agenda.psicologo.cor}};">
-                                <td class="align-middle text-center text-white">{{ agenda.horario }}</td>
-                                <td class="align-middle text-center text-white">{{ agenda.psicologo.nome }}</td>
-                                <td class="align-middle text-center text-white">{{ agenda.semanal }}</td>
-                                <td class="align-middle text-center text-white">{{ agenda.quinzenal }}</td>                                
-                                <td class="align-middle">
-                                    <a href="{% url  'delete_consulta' id_consulta=agenda.id %}" class="text-secondary font-weight-bold text-xs text-center text-white" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
-                                </td>
-                            </tr>
-                            {% endif %}
-                        {% empty %}
-                            <tr>
-                                <td colspan="7" class="text-center">
-                                    <p class="text-secondary font-weight-bold text-xs">Nenhuma consulta encontrada.</p>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
+       
+            <div class="card mb-4">
+                <div class="card-header pb-0">
+                    <h6>Segunda Feira</h6>
+                </div>
+                <div class="card-body px-0 pt-0 pb-2">
+                    <div class="table-responsive p-0">
+                        <table class="table align-items-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Psicologo</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Semanal</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Quinzenal</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Deletar</th>
+                            </thead>
+                            <tbody>
+                            {% for agenda in agendas %}
+                                {% if agenda.dia_semana == "Segunda"  %}
+                                <tr style="background-color: {{agenda.psicologo.cor}};">
+                                    <td class="align-middle text-center text-white">{{ agenda.horario }}</td>
+                                    <td class="align-middle text-center text-white">{{ agenda.psicologo.nome }}</td>
+                                    <td class="align-middle text-center text-white">{{ agenda.semanal }}</td>
+                                    <td class="align-middle text-center text-white">{{ agenda.quinzenal }}</td>                                
+                                    <td class="align-middle">
+                                        <a href="{% url  'delete_consulta' id_consulta=agenda.id %}" class="text-secondary font-weight-bold text-xs text-center text-white" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center">
+                                        <p class="text-secondary font-weight-bold text-xs">Nenhuma consulta encontrada.</p>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
+  </div>
 </div>
 <div class="row">
     <div class="col-12">

@@ -22,7 +22,10 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="idade_paciente">Idade</label>
-                                <input type="number" class="form-control" id="idade_paciente" name="idade_paciente" required>
+                                <select class="form-control" id="idade_paciente" name="idade_paciente" required>
+                                    <option value="Adulto">Adulto</option>
+                                    <option value="Criança">Criança</option>
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -30,14 +33,17 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="rg_paciente">RG</label>
-                                <input type="number" class="form-control" id="rg_paciente" name="rg_paciente" required>      
+                                <label for="valor">Valor ( R$ )</label>
+                                <input type="number" class="form-control" id="valor" name="valor" required>      
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="email_paciente">E-mail</label>
-                                <input type="text" class="form-control" id="email_paciente" name="email_paciente" required>
+                                <label for="tipo_atendimento">Tipo atendimento</label>
+                                <select class="form-control" id="tipo_atendimento" name="tipo_atendimento" required>
+                                    <option value="Tipo1">Tipo1</option>
+                                    <option value="Tipo2">Tipo2</option>
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -51,16 +57,6 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="cpf_paciente">CPF</label>
-                                <input type="number" class="form-control" id="cpf_paciente" name="cpf_paciente" required>
-                            </div>
-                        </div>
-                        
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
                                 <label for="periodo_paciente">Período de atendimento</label>
                                 <select class="form-control" id="periodo_paciente" name="periodo_paciente">
                                   <option value="Semanal">Semanal</option>
@@ -68,8 +64,16 @@
                                   <!-- <option value="nao_fixo">Sem horário fixo</option> -->
                                 </select>
                               </div>
-                        </div>
-
+                        </div>                       
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="nome_responsavel">Nome Responsável</label>
+                                <input type="text" class="form-control" id="nome_responsavel" name="nome_responsavel">
+                            </div>
+                        </div> 
+                    </div>
                     <div class="row">
                         <div class="col-md-12">
                             <div class="d-flex justify-content-center gap-4 align-middle">
@@ -97,11 +101,11 @@
                             <tr>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nome</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Idade</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">RG</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor ( R$ )</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Período de Atendimento</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Email</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nome Resposnável</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Telefone</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">CPF</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Tipo Atendimento</th>
                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ações</th>
                             </tr>
                         </thead>
@@ -110,11 +114,11 @@
                             <tr>
                                 <td class="align-middle text-center">{{ paciente.nome }}</td>
                                 <td class="align-middle text-center">{{ paciente.idade }}</td>
-                                <td class="align-middle text-center">{{ paciente.rg }}</td>
+                                <td class="align-middle text-center">{{ paciente.valor }}</td>
                                 <td class="align-middle text-center">{{ paciente.periodo }}</td>
-                                <td class="align-middle text-center">{{ paciente.email }}</td>
+                                <td class="align-middle text-center">{{ paciente.nome_responsavel }}</td>
                                 <td class="align-middle text-center">{{ paciente.telefone }}</td>
-                                <td class="align-middle text-center">{{ paciente.cpf }}</td>
+                                <td class="align-middle text-center">{{ paciente.tipo_atendimento }}</td>
                                 <td class="align-middle">
                                     <a href="{% url 'update_paciente' id_paciente=paciente.id %}" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Edit consulta">Editar</a>
                                     <a href="{% url 'delete_paciente' id_paciente=paciente.id %}" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>

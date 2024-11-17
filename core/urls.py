@@ -46,11 +46,9 @@ urlpatterns = [
 
     path('perfil_usuario/', views.perfil, name='perfil_usuario'),
     path('perfil_usuario/<int:user_id>/editar_perfil/', views.update_profile, name='editar_perfil'),   
-    path('agenda_central/', views.create_consulta, name='agenda_central'),
     #path('perfil_usuario/<int:user_id>/editar_perfil/', views.update_profile, name='editar_perfil'),
     path('psicologas/', views.psicologa, name='psicologa'),
     # URLs para gerenciamento de consultas
-    path('consultas/', views.create_consulta, name='lista_consultas'),  # URL para listar consultas
     #path('consultas/novo/', views.create_consulta, name='create_consulta'),  # URL para criar nova consulta
     path('consultas/editar/<int:id_consulta>/', views.update_consulta, name='update_consulta'),  # URL para editar consulta
     path('consultas/deletar/<int:id_consulta>/', views.delete_consulta, name='delete_consulta'),  # URL para deletar consulta
@@ -64,10 +62,10 @@ urlpatterns = [
     path('psicologas/<int:psicologo_id>/confirmar/<int:consulta_id>/excluir', views.deletar_consulta, name='deletar_consulta'),
     path('psicologas/<int:psicologo_id>/confirmar/<int:consulta_id>/editar', views.editar_confirma_consulta, name='editar_confirma_consulta'),
     path('psicologas/<int:psicologo_id>/agendar/', views.psico_agenda, name='psico_agenda'),
-    path('deletar_agenda_psico/<int:id_psicologo>/<int:id_horario>', views.deletar_psico_agenda, name='delete_psico_agenda'),
-    path('agenda_central/sala/<int:id_sala>', views.agenda_central_sala, name='agenda_central_sala'),
     path('financeiro/', views.financeiro, name='financeiro'),
     path('geracao_recibo/<int:id_consulta>', views.gerar_recibo, name='gerar_recibo'),
+    path('agenda_central', views.agenda_central, name='agenda_central'),
+    path('especialidades', views.cadastrar_especialidade, name='especialidades')
 
     #path('cadastrar_salas/', views.sala, name='salas'),
 

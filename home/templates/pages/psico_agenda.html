@@ -9,50 +9,76 @@
                 <h6>Agenda de {{psicologo.nome}}</h6>
             </div>
             <div class="card-body p-4">
-                <form method="POST" action="{% url 'psico_agenda' psicologo_id=psicologo.id  %}">
-                    {% csrf_token %}
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="dia_semana">Dia da Semana</label>
-                                <select class="form-control" id="dia_semana" name="dia_semana">
-                                    <option value="Segunda">Segunda</option>
-                                    <option value="Terça">Terça</option>
-                                    <option value="Quarta">Quarta</option>
-                                    <option value="Quinta">Quinta</option>
-                                    <option value="Sexta">Sexta</option>
-                                    <option value="Sábado">Sábado</option>
-                                  </select>
+                    <form method="POST" action="{% url 'psico_agenda' psicologo_id=psicologo.id  %}">
+                        {% csrf_token %}
+    
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="nome_cliente">Nome do Paciente</label>
+                                    <select class="form-control" id="nome_cliente" name="nome_cliente">
+                                        {% for paciente in pacientes %}
+                                        <option value="{{paciente.id}}">{{paciente.nome}}</option>
+                                        {% endfor %}
+                                    </select>                              
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="horario_consulta">Horário</label>
+                                    <input type="time" class="form-control" id="horario_consulta" name="horario_consulta" required>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="hora">Horário</label>
-                                <input type="time" class="form-control" id="idade_paciente" name="hora" required>
+    
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="dia_semana">Dia da Semana</label>
+                                    <select class="form-control" id="dia_semana" name="dia_semana">
+                                        <option value="Segunda">Segunda</option>
+                                        <option value="Terça">Terça</option>
+                                        <option value="Quarta">Quarta</option>
+                                        <option value="Quinta">Quinta</option>
+                                        <option value="Sexta">Sexta</option>
+                                        <option value="Sábado">Sábado</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="sala_atendimento">Sala de Atendimento</label>
+                                    <select class="form-control" id="sala_atendimento" name="sala_atendimento" required>
+                                        {% for sala in salas %}
+                                            <option value="{{ sala.id_sala }}">{{ sala.numero_sala }}</option>
+                                            {% empty %}
+                                            <option>"não encontrado"</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="d-flex justify-content-center gap-4 align-middle">
-                                <button type="submit" class="btn btn-primary">Registrar</button>
-                                <button type="reset" class="btn btn-secondary">Resetar</button>
+    
+                        <div class="row">                            
+                            <div class="col-md-12">
+                                <div class="d-flex justify-content-center gap-4 align-middle">
+                                    <button type="submit" class="btn btn-primary">Registrar</button>
+                                    <button type="reset" class="btn btn-secondary">Resetar</button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </form>
+                    </form>
             </div>
         </div>
     </div>
 </div>
 
+{% for dia in dias_da_semana %}
 <div class="row">
     <div class="col-12">
         <div class="card mb-4">
             <div class="card-header pb-0">
-                <h6>Segunda Feira</h6>
+                <h6>{{ dia }}</h6>
             </div>
             <div class="card-body px-0 pt-0 pb-2">
                 <div class="table-responsive p-0">
@@ -60,17 +86,22 @@
                         <thead>
                             <tr>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Situação</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Sala</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Semanal</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Quinzenal</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Deletar</th>
+                            </tr>
                         </thead>
                         <tbody>
                         {% for agenda in agendas %}
-                            {% if agenda.dia_semana == "Segunda"  %}
-                            <tr>
-                                <td class="align-middle text-center">{{ agenda.hora }}</td>
-                                <td class="align-middle text-center">{{ agenda.livre_ocupado }}</td>
+                            {% if agenda.dia_semana == dia  %}
+                            <tr style="background-color: {{agenda.psicologo.cor}};">
+                                <td class="align-middle text-center text-white">{{ agenda.horario }}</td>
+                                <td class="align-middle text-center text-white">{{ agenda.sala.numero_sala }}</td>
+                                <td class="align-middle text-center text-white">{{ agenda.semanal }}</td>
+                                <td class="align-middle text-center text-white">{{ agenda.quinzenal }}</td> 
                                 <td class="align-middle">
-                                    <a href="{% url 'delete_psico_agenda' id_psicologo=psicologo.id id_horario=agenda.id %}" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
+                                    <a href="{% url  'delete_consulta' id_consulta=agenda.id %}" class="text-secondary font-weight-bold text-xs text-center text-white" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
                                 </td>
                             </tr>
                             {% endif %}
@@ -88,204 +119,6 @@
         </div>
     </div>
 </div>
-<div class="row">
-    <div class="col-12">
-        <div class="card mb-4">
-            <div class="card-header pb-0">
-                <h6>Terça Feira</h6>
-            </div>
-            <div class="card-body px-0 pt-0 pb-2">
-                <div class="table-responsive p-0">
-                    <table class="table align-items-center mb-0">
-                        <thead>
-                            <tr>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Situação</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Deletar</th>
-                        </thead>
-                        <tbody>
-                        {% for agenda in agendas %}
-                            {% if agenda.dia_semana == "Terça"  %}
-                            <tr>
-                                <td class="align-middle text-center">{{ agenda.hora }}</td>
-                                <td class="align-middle text-center">{{ agenda.livre_ocupado }}</td>
-                                <td class="align-middle">
-                                    <a href="{% url 'delete_psico_agenda' id_psicologo=psicologo.id id_horario=agenda.id %}" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
-                                </td>
-                            </tr>
-                            {% endif %}
-                        {% empty %}
-                            <tr>
-                                <td colspan="7" class="text-center">
-                                    <p class="text-secondary font-weight-bold text-xs">Nenhuma consulta encontrada.</p>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="row">
-    <div class="col-12">
-        <div class="card mb-4">
-            <div class="card-header pb-0">
-                <h6>Quarta Feira</h6>
-            </div>
-            <div class="card-body px-0 pt-0 pb-2">
-                <div class="table-responsive p-0">
-                    <table class="table align-items-center mb-0">
-                        <thead>
-                            <tr>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Situação</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Deletar</th>
-                        </thead>
-                        <tbody>
-                        {% for agenda in agendas %}
-                            {% if agenda.dia_semana == "Quarta"  %}
-                            <tr>
-                                <td class="align-middle text-center">{{ agenda.hora }}</td>
-                                <td class="align-middle text-center">{{ agenda.livre_ocupado }}</td>
-                                <td class="align-middle">
-                                    <a href="{% url 'delete_psico_agenda' id_psicologo=psicologo.id id_horario=agenda.id %}" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
-                                </td>
-                            </tr>
-                            {% endif %}
-                        {% empty %}
-                            <tr>
-                                <td colspan="7" class="text-center">
-                                    <p class="text-secondary font-weight-bold text-xs">Nenhuma consulta encontrada.</p>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="row">
-    <div class="col-12">
-        <div class="card mb-4">
-            <div class="card-header pb-0">
-                <h6>Quinta-Feira</h6>
-            </div>
-            <div class="card-body px-0 pt-0 pb-2">
-                <div class="table-responsive p-0">
-                    <table class="table align-items-center mb-0">
-                        <thead>
-                            <tr>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Situação</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Deletar</th>
-                        </thead>
-                        <tbody>
-                        {% for agenda in agendas %}
-                            {% if agenda.dia_semana == "Quinta"  %}
-                            <tr>
-                                <td class="align-middle text-center">{{ agenda.hora }}</td>
-                                <td class="align-middle text-center">{{ agenda.livre_ocupado }}</td>
-                                <td class="align-middle">
-                                    <a href="{% url 'delete_psico_agenda' id_psicologo=psicologo.id id_horario=agenda.id %}" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
-                                </td>
-                            </tr>
-                            {% endif %}
-                        {% empty %}
-                            <tr>
-                                <td colspan="7" class="text-center">
-                                    <p class="text-secondary font-weight-bold text-xs">Nenhuma consulta encontrada.</p>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="row">
-    <div class="col-12">
-        <div class="card mb-4">
-            <div class="card-header pb-0">
-                <h6>Sexta</h6>
-            </div>
-            <div class="card-body px-0 pt-0 pb-2">
-                <div class="table-responsive p-0">
-                    <table class="table align-items-center mb-0">
-                        <thead>
-                            <tr>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Situação</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Deletar</th>
-                        </thead>
-                        <tbody>
-                        {% for agenda in agendas %}
-                            {% if agenda.dia_semana == "Sexta"  %}
-                            <tr>
-                                <td class="align-middle text-center">{{ agenda.hora }}</td>
-                                <td class="align-middle text-center">{{ agenda.livre_ocupado }}</td>
-                                <td class="align-middle">
-                                    <a href="{% url 'delete_psico_agenda' id_psicologo=psicologo.id id_horario=agenda.id %}" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
-                                </td>
-                            </tr>
-                            {% endif %}
-                        {% empty %}
-                            <tr>
-                                <td colspan="7" class="text-center">
-                                    <p class="text-secondary font-weight-bold text-xs">Nenhuma consulta encontrada.</p>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="row">
-    <div class="col-12">
-        <div class="card mb-4">
-            <div class="card-header pb-0">
-                <h6>Sábado</h6>
-            </div>
-            <div class="card-body px-0 pt-0 pb-2">
-                <div class="table-responsive p-0">
-                    <table class="table align-items-center mb-0">
-                        <thead>
-                            <tr>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Situação</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Deletar</th>
-                        </thead>
-                        <tbody>
-                        {% for agenda in agendas %}
-                            {% if agenda.dia_semana == "Sábado"  %}
-                            <tr>
-                                <td class="align-middle text-center">{{ agenda.hora }}</td>
-                                <td class="align-middle text-center">{{ agenda.livre_ocupado }}</td>
-                                <td class="align-middle text-center">
-                                    <a href="{% url 'delete_psico_agenda' id_psicologo=psicologo.id id_horario=agenda.id %}" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
-                                </td>
-                            </tr>
-                            {% endif %}
-                        {% empty %}
-                            <tr>
-                                <td colspan="7" class="text-center">
-                                    <p class="text-secondary font-weight-bold text-xs">Nenhuma consulta encontrada.</p>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+{% endfor %}
+
 {% endblock content %}

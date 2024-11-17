@@ -27,7 +27,7 @@
           <div class="row">
             <div class="col-md-6">
               <div class="form-group">
-                  <label for="email"> E-mail</label>
+                  <label for="email">E-mail</label>
                   <input type="email"class="form-control" id="email" name="email" required>
               </div>
           </div>  
@@ -39,6 +39,24 @@
                 </div>
               </div>
             </div>     
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="especialidade">Especialidade</label>
+                <select class="form-control" id="especialidade" name="especialidade" required>
+                  {% for especialidade in especialidades %}
+                  <option value="{{especialidade.especialidade}}">{{especialidade.especialidade}}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>  
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="abordagem">Abordagem</label>
+                <input type="text" class="form-control" id="abordagem" name="abordagem" required>
+              </div>
+            </div>  
           </div>
           <div class="row">
             <div class="col-md-6">
@@ -58,6 +76,7 @@
             <div class="col-md-6">
               <div class="form-group">
                 <button type="submit" class="btn btn-primary">Cadastrar Psicóloga</button>
+                <button type="reset" class="btn btn-secondary">Resetar</button>
               </div>
             </div>
           </div>
@@ -70,11 +89,14 @@
           <thead>
             <tr>
               <th class="text-secondary text-xxs font-weight-bolder opacity-7">Nome</th>
-              <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Cor</th>
+              <th class=" text-secondary text-xxs font-weight-bolder opacity-7">Cor</th>
+              <th class=" text-secondary text-xxs font-weight-bolder opacity-7">Email</th>
+              <th class=" text-secondary text-xxs font-weight-bolder opacity-7">Especialidade</th>
+              <th class=" text-secondary text-xxs font-weight-bolder opacity-7">Abordagem</th>
               <th class="text-secondary text-xxs font-weight-bolder opacity-7">Agenda</th>
               <th class="text-secondary text-xxs font-weight-bolder opacity-7">Confirmar Consulta</th>
-              <th class="text-secondary opacity-7">Editar</th>
-              <th class="text-secondary opacity-7">Excluir</th>
+              <th class="text-secondary text-xxs opacity-7">Editar</th>
+              <th class="text-secondary text-xxs opacity-7">Excluir</th>
               
             </tr>
           </thead>
@@ -89,16 +111,45 @@
                   </div>
                 </div>
               </td>
+              
               <td>
                 <span style="display: inline-block; width: 12px; height: 12px; background-color: {{psicologo.cor}}; border-radius: 50%;"></span>
               </td>
+                <td>
+                  <div class="d-flex px-2 py-1">
+                    
+                    <div class="d-flex flex-column justify-content-center">
+                      <h6 class="mb-0 text-xs">{{psicologo.email}}</h6>
+                      
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="d-flex px-2 py-1">
+                    
+                    <div class="d-flex flex-column justify-content-center">
+                      <h6 class="mb-0 text-xs">{{psicologo.especializacao}}</h6>
+                      
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="d-flex px-2 py-1">
+                    
+                    <div class="d-flex flex-column justify-content-center">
+                      <h6 class="mb-0 text-xs">{{psicologo.abordagem}}</h6>
+                      
+                    </div>
+                  </div>
+                </td>
               <td>
-                <span>
-                  <a href="{% url 'psico_agenda' psicologo.id %}" class="btn btn-primary">
-                    <i class="bi bi-book"></i>
-                  </a>
-            </span>
-          </td> 
+                  <span>
+                    <a href="{% url 'psico_agenda' psicologo.id %}" class="btn btn-primary">
+                      <i class="bi bi-book"></i>
+                    </a>
+              </span>
+              </td>
+                
                   <td>
                     <span>
                       <a href="{% url 'confirma_consulta' psicologo_id=psicologo.id %}" class="btn btn-primary">

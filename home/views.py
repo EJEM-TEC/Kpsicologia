@@ -10,7 +10,7 @@ from rolepermissions.roles import assign_role
 from rolepermissions.decorators import has_role_decorator
 from django.contrib.auth.models import User, Group
 from django.http import HttpResponse
-from .models import Psicologa, Usuario, Consulta, Unidade, Sala, Paciente, ConfirmacaoConsulta, Psicologo, Disponibilidade, AgendaPsico, PsicoDisponibilidade, Financeiro
+from .models import Psicologa, Usuario, Consulta, Unidade, Sala, Paciente, ConfirmacaoConsulta, Financeiro, EspecialidadePsico
 from rolepermissions.roles import assign_role, get_user_roles, RolesManager
 from rolepermissions.exceptions import RoleDoesNotExist
 from django.contrib.auth.models import Group
@@ -27,7 +27,7 @@ from reportlab.lib.pagesizes import letter
 import os
 from django.conf import settings
 import tempfile
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from django.shortcuts import render
 
 
@@ -68,22 +68,6 @@ def is_admin(user):
 # # Função para verificar se o usuário é usuário comum
 def is_user(user):
     return user.groups.filter(name='usuario').exists()
-
-# Login com redirecionamento baseado no tipo de usuário
-# class UserLoginView(LoginView):
-#     template_name = 'accounts/login.html'
-#     form_class = LoginForm
-
-#     # Redireciona o usuário com base no tipo (administrador ou comum)
-#     def form_valid(self, form):
-#         auth_login(self.request, form.get_user())
-#         if is_admin(self.request.user):
-#             return redirect('/admin_dashboard/')  # Redireciona administradores para o painel administrativo
-#         else:
-#             return redirect('/profile/')  # Redireciona usuários comuns para a página de perfil
-
-# Registro de usuário (somente administradores podem cadastrar novos usuários)
-# s
 
 # Logout
 @login_required(login_url='/accounts/login/')
@@ -166,13 +150,6 @@ class UserPasswordResetConfirmView(PasswordResetConfirmView):
 class UserPasswordChangeView(PasswordChangeView):
     template_name = 'accounts/password_change.html'
     form_class = UserPasswordChangeForm
-
-# # Listagem de usuários (somente administradores podem acessar)
-# @login_required(login_url='/accounts/login/')
-# @user_passes_test(is_admin)
-# def lista_usuarios(request):
-#     users = Usuario.objects.all()
-#     return render(request, 'users/page_user.html', {'usuarios': users})
 
 @login_required(login_url='login1')
 @has_role_decorator('administrador')
@@ -258,15 +235,6 @@ def delete_user(request, user_id):
 
     return render(request, "pages/deletar_user.html", {'user': user})
 
-def criar_atendimento(request):
-    pass
-
-# # Listagem de unidades (somente administradores podem acessar)
-# @login_required(login_url='/accounts/login/')
-# @user_passes_test(is_admin)
-# def lista_unidades(request):
-#     unis = Unidade.objects.all()
-#     return render(request, 'unis/page_unidades.html', {'unidades': unis})
 
 @login_required(login_url='login1')
 @has_role_decorator('administrador')
@@ -346,35 +314,6 @@ def logout_user(request):
 def perfil(request):
     user = request.user
     return render(request, 'pages/perfil_usuario.html', {'user': user})
-    # if request.method == 'POST':
-    #     username = request.POST.get('username')
-    #     email = request.POST.get('email')
-    #     cargo = request.POST.get('cargo')
-
-
-# @login_required
-# def editar_perfil(request, user_id):
-#     user = get_object_or_404(User, id=user_id)
-#     if request.method == 'POST':
-#         form = EditProfileForm(request.POST)
-#         if form.is_valid():
-#             username = form.cleaned_data['username']
-#             email = form.cleaned_data['email']
-#             new_password = form.cleaned_data['new_password']
-
-#             request.user.name = username
-#             request.user.email = email
-
-#             if new_password:
-#                 request.user.set_password(new_password)
-
-#             request.user.save()
-#             return redirect('perfil_usuario')  # Redirecionar para a página de perfil
-#     else:
-#         form = EditProfileForm(initial={'name': request.user.name, 'email': request.user.email})
-
-#     return render(request, 'pages/editar_perfil.html', {'form': form})
-
 
 @login_required(login_url='login1')
 def update_profile(request, user_id):
@@ -478,77 +417,29 @@ def editar_confirma_consulta(request, id_consulta):
 
 @login_required(login_url='login1')
 @has_role_decorator('administrador')
-def lista_consultas(request):
+def agenda_central(request):
     consultas = Consulta.objects.all()
-    return render(request, 'pages/page_agenda_central.html', {'consultas': consultas})
-
-@login_required(login_url='login1')
-@has_role_decorator('administrador')
-def create_consulta(request):
-    salas_atendimento = Sala.objects.all()
-    consultas = Consulta.objects.all()
-    pacientes = Paciente.objects.all()
     psicologas = Psicologa.objects.all()
+    salas = Sala.objects.all()
+    pacientes = Paciente.objects.all()
+    dias_da_semana = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"]
 
-    if request.method == 'POST':
-        nome_cliente = request.POST.get('nome_cliente')
-        nome_psicologo = request.POST.get('nome_psicologo')
-        dia_semana = request.POST.get('dia_semana')
-        horario_consulta = request.POST.get('horario_consulta')
-        sala_atendimento_id = request.POST.get('sala_atendimento')
+    if request.method == "POST":
+        paciente_id = request.POST.get("paciente_id")
+        psicologa_id = request.POST.get('psicologa_id')
 
-        sala_atendimento = get_object_or_404(Sala, id_sala=sala_atendimento_id)
-        paciente = get_object_or_404(Paciente, id=nome_cliente)
-        psicologa = get_object_or_404(Psicologa, id=nome_psicologo)
+        if psicologa_id != 'todos':
+            psicologo = get_object_or_404(Psicologa, id=psicologa_id)
+            consultas = consultas.filter(psicologo=psicologo)
 
-        # Verificar se uma consulta com esses mesmos critérios já existe
-        consulta_existente = Consulta.objects.filter(
-            psicologo=psicologa,
-            horario=horario_consulta,
-            dia_semana=dia_semana,
-            sala=sala_atendimento,
-            Paciente=paciente
-        ).first()
+        if paciente_id != 'todos':
+            paciente = get_object_or_404(Paciente, id=paciente_id)
+            consultas = consultas.filter(Paciente=paciente)
 
-        if consulta_existente:
-            # Exibir mensagem de erro
-            return HttpResponse("Essa consulta já está cadastrada")
 
-        # Verificar se já existe uma consulta no mesmo horário e dia com o mesmo psicólogo
-        consulta_por_horario = Consulta.objects.filter(
-            psicologo=psicologa,
-            horario=horario_consulta,
-            dia_semana=dia_semana
-        ).first()
+    return render(request, 'pages/page_agenda_central.html', {'consultas': consultas, 'salas': salas, 'dias_da_semana': dias_da_semana, 'pacientes': pacientes, 'psicologas': psicologas})
 
-        if consulta_por_horario:
-            # Atualizar a coluna "semanal" ou "quinzenal" dependendo do período do paciente
-            if paciente.periodo == "Semanal" and not consulta_por_horario.semanal:
-                consulta_por_horario.semanal = paciente.nome
-            elif paciente.periodo == "Quinzenal" and not consulta_por_horario.quinzenal:
-                consulta_por_horario.quinzenal = paciente.nome
-            consulta_por_horario.save()
-        else:
-            # Criar uma nova consulta se ainda não existe uma com esse horário e psicólogo
-            consulta = Consulta.objects.create(
-                Paciente=paciente,
-                psicologo=psicologa,
-                horario=horario_consulta,
-                sala=sala_atendimento,
-                dia_semana=dia_semana,
-                semanal=paciente.nome if paciente.periodo == "Semanal" else "",
-                quinzenal=paciente.nome if paciente.periodo == "Quinzenal" else ""
-            )
-            consulta.save()
 
-        return redirect('lista_consultas')
-    
-    return render(request, "pages/page_agenda_central.html", {
-        'salas': salas_atendimento, 
-        'psicologas': psicologas, 
-        'pacientes': pacientes, 
-        'consultas': consultas
-    })
 @login_required(login_url='login1')
 def update_consulta(request, consulta_id):
     # Buscar a consulta específica a ser editada
@@ -605,9 +496,6 @@ def update_consulta(request, consulta_id):
         'consulta': consulta
     })
 
-def page_agenda_central():
-    return render('pages/editar_agenda_central.html')
-
 
 @login_required(login_url='login1')
 def delete_consulta(request, id_consulta):
@@ -623,18 +511,23 @@ def delete_consulta(request, id_consulta):
 def psicologa(request):
     
     psicologos = Psicologa.objects.all()
+    especialidades = EspecialidadePsico.objects.all()
 
     if request.method == 'POST':
         nome = request.POST.get('nome')
         cor = request.POST.get('cor')
         email = request.POST.get('email')
         senha = request.POST.get('senha')
+        especialidade = request.POST.get('especialidade')
+        abordagem = request.POST.get('abordagem')
 
         psicologa = Psicologa.objects.create(
             nome = nome,
             cor = cor,
             email = email,
-            senha = senha
+            senha = senha,
+            especializacao = especialidade,
+            abordagem = abordagem
         )
 
         cargo = 'psicologa'
@@ -659,7 +552,7 @@ def psicologa(request):
     
     # Serializa os dados (ajuste os campos conforme necessário)
 
-    return render(request, 'pages/psicologa.html', {'psicologos': psicologos})
+    return render(request, 'pages/psicologa.html', {'psicologos': psicologos, 'especialidades': especialidades})
 
 def deletar_psicologo(request, psicologo_id):
     # Busca a psicóloga específica pelo ID ou retorna 404 se não for encontrada
@@ -755,26 +648,35 @@ def pacientes(request):
     if request.method == 'POST':
         nome_paciente = request.POST.get('nome_paciente')
         idade_paciente = request.POST.get('idade_paciente')
-        rg_paciente = request.POST.get('rg_paciente')
-        email_paciente = request.POST.get('email_paciente')
         telefone_paciente = request.POST.get('telefone_paciente')
-        cpf_paciente = request.POST.get('cpf_paciente')
+        valor = request.POST.get('valor')
+        tipo_atendimento = request.POST.get('tipo_atendimento')
+        nome_responsavel = request.POST.get('nome_responsavel')
         periodo_paciente = request.POST.get('periodo_paciente')
 
+        if not nome_responsavel:
+            nome_responsavel = ""
 
+        # Validação do valor
+        try:
+            valor_decimal = Decimal(valor) if valor else Decimal("0")
+        except InvalidOperation:
+            # Defina um valor padrão ou trate o erro
+            valor_decimal = Decimal("0")
+
+        # Criação do paciente
         paciente = Paciente.objects.create(
-            nome = nome_paciente,
-            idade = idade_paciente,
-            rg = rg_paciente,
-            email = email_paciente,
-            telefone = telefone_paciente,
-            cpf = cpf_paciente,
-            periodo = periodo_paciente
+            nome=nome_paciente,
+            idade=idade_paciente,
+            valor=valor_decimal,
+            tipo_atendimento=tipo_atendimento,
+            nome_responsavel=nome_responsavel,
+            telefone=telefone_paciente,
+            periodo=periodo_paciente
         )
 
         paciente.save()
-
-        redirect('pacientes')
+        return redirect('pacientes')
     
     return render(request, 'pages/pacientes.html', {'pacientes': pacientes})
 
@@ -787,18 +689,18 @@ def editar_paciente(request, id_paciente):
     if request.method == 'POST':
         nome_paciente = request.POST.get('nome_paciente')
         idade_paciente = request.POST.get('idade_paciente')
-        rg_paciente = request.POST.get('rg_paciente')
-        email_paciente = request.POST.get('email_paciente')
         telefone_paciente = request.POST.get('telefone_paciente')
-        cpf_paciente = request.POST.get('cpf_paciente')
+        valor = request.POST.get('valor')
+        tipo_atendimento = request.POST.get('tipo_atendimento')
+        nome_responsavel = request.POST.get('nome_responsavel')
         periodo_paciente = request.POST.get('periodo_paciente')
 
         paciente.nome = nome_paciente;
-        paciente.rg = rg_paciente;
+        paciente.valor = valor;
         paciente.idade = idade_paciente;
-        paciente.email = email_paciente;
+        paciente.tipo_atendimento = tipo_atendimento;
         paciente.telefone = telefone_paciente;
-        paciente.cpf = cpf_paciente;
+        paciente.nome_responsavel = nome_responsavel;
         paciente.periodo = periodo_paciente
         
         paciente.save()
@@ -821,12 +723,11 @@ def deletar_paciente(request, id_paciente):
     
     return render(request, 'pages/deletar_paciente.html', {'paciente': paciente})
 
-def agenda_psicologo(request, id_psicologo):
-    pass
+
 
 def deletar_consulta(request, psicologo_id, consulta_id):
     consulta = get_object_or_404(ConfirmacaoConsulta, id=consulta_id)
-    psicologo = get_object_or_404(Psicologo, id=psicologo_id)
+    psicologo = get_object_or_404(Psicologa, id=psicologo_id)
     
     if request.method == "POST":
         consulta.delete()
@@ -840,7 +741,7 @@ def deletar_consulta(request, psicologo_id, consulta_id):
 
 
 def editar_confirma_consulta(request, psicologo_id, consulta_id):
-    psicologo = get_object_or_404(Psicologo, id=psicologo_id)
+    psicologo = get_object_or_404(Psicologa, id=psicologo_id)
     consulta = get_object_or_404(ConfirmacaoConsulta, id=consulta_id)
     pacientes = Paciente.objects.all()
 
@@ -866,160 +767,6 @@ def editar_confirma_consulta(request, psicologo_id, consulta_id):
         'pacientes': pacientes,
     })
 
-
-@login_required(login_url='login1') 
-def psico_agenda(request, psicologo_id):
-    psicologo = get_object_or_404(Psicologa, id=psicologo_id)
-    psico_agendas = PsicoDisponibilidade.objects.filter(user_id=psicologo_id).select_related('disponibilidade')
-
-    agenda = [ps.disponibilidade for ps in psico_agendas]
-
-    if request.method == 'POST':
-        dia_semana = request.POST.get('dia_semana')
-        hora = request.POST.get('hora')
-
-        if dia_semana and hora:
-            # Cria a nova agenda
-            nova_agenda = AgendaPsico.objects.create(
-                dia_semana=dia_semana,
-                hora=hora,
-                livre_ocupado='Livre'
-            )
-
-            print(f"Psicologo ID: {psicologo.id}, Nova Agenda ID: {nova_agenda.id}")
-
-            # Verifica se nova_agenda foi criada antes de associá-la
-            if nova_agenda:
-                PsicoDisponibilidade.objects.create(
-                    user=psicologo,  # Aqui usamos o objeto `psicologo` diretamente
-                    disponibilidade=nova_agenda  # Usamos `nova_agenda` diretamente
-                )
-
-            return redirect('psico_agenda', psicologo.id )
-
-    return render(request, 'pages/psico_agenda.html', {
-        'agendas': agenda,
-        'psicologo': psicologo
-    })
-
-
-@login_required(login_url='login1')
-def deletar_psico_agenda(request, id_psicologo, id_horario):
-    
-    psicologo = get_object_or_404(Psicologa, id=id_psicologo)
-
-    horario = get_object_or_404(AgendaPsico, id=id_horario)
-
-    psico_horario = get_object_or_404(PsicoDisponibilidade, disponibilidade=horario, user=psicologo.id)
-
-
-    if request.method == "POST":
-
-        psico_horario.delete()
-
-        horario.delete()
-
-        return redirect('psico_agenda', psicologo_id=psicologo.id)
-
-    return render(request, 'pages/deletar_agenda.html', {'horario': horario})
-
-
-# #financeiro das psicólogas
-# def financeiro(request):
-#     psicologas = Psicologa.objects.all()
-#     financeiro = Financeiro.objects.all()
-
-#     if request.method == 'POST':
-#         nome_psicologa = request.POST.get('nome_psicologa')
-#         valor_previsto = request.POST.get('valor_previsto')
-#         valor_pendente = request.POST.get('valor_pendente')
-#         valor_acertado = request.POST.get('valor_acertado')
-#         #valor_total = request.POST.get('valor_total')
-#         qtd_pacientes = request.POST.get('qtd_pacientes')
-#         desistencias_atendidos = request.POST.get('desistencias_atendidos')
-#         qtd_marcacoes = request.POST.get('qtd_marcacoes')
-#         desistencias_novos = request.POST.get('desistencias_novos')
-#         psicologa = get_object_or_404(Psicologa, id=nome_psicologa)
-
-#         financeiro = Financeiro.objects.create(
-#             psicologa = psicologa,
-#             valor_previsto = valor_previsto,
-#             valor_pendente = valor_pendente,
-#             valor_acertado = valor_acertado,
-#             valor_total = valor_previsto+valor_pendente+valor_acertado,
-#             qtd_pacientes = qtd_pacientes,
-#             desistencias_atendidos =  desistencias_atendidos,
-#             qtd_marcacoes = qtd_marcacoes,
-#             desistencias_novos = desistencias_novos
-#         )
-
-#         financeiro.save()
-
-#         redirect('financeiro')
-    
-#     return render(request, 'pages/financeiro.html',{'psicologas': psicologas}, {'financeiro': financeiro})
-
-
-#financeiro das psicólogas
-@login_required(login_url='login1')
-def financeiro(request):
-    psicologas = Psicologa.objects.all()
-    financeiros = Financeiro.objects.all()
-
-    if request.method == 'POST':
-        # valor_previsto = request.POST.get('valor_previsto', 0),
-        # request.POST.get('valor_previsto')
-        # valor_pendente = request.POST.get('valor_pendente')
-        # valor_pendente = float(request.POST.get('valor_pendente', 0)),
-        # valor_acertado = request.POST.get('valor_acertado')
-        # valor_acertado = float(request.POST.get('valor_acertado', 0)),
-        # valor_total = request.POST.get('valor_total')
-        
-        valor_previsto = Decimal(request.POST['valor_previsto'])
-        valor_pendente = Decimal(request.POST['valor_pendente'])
-        valor_acertado = Decimal(request.POST['valor_acertado'])
-        qtd_pacientes = request.POST.get('qtd_pacientes')
-        valor_total = valor_previsto + valor_pendente + valor_acertado,
-        desistencias_atendidos = request.POST.get('desistencias_atendidos')
-        qtd_marcacoes = request.POST.get('qtd_marcacoes')
-        desistencias_novos = request.POST.get('desistencias_novos')
-        nome_psicologo = request.POST.get('nome_psicologo')
-        psicologa = get_object_or_404(Psicologa, nome=nome_psicologo)
-        # psicologa = get_object_or_404(Psicologa, nome='nome_psicologo')
-        
-        financeiro = Financeiro.objects.create(
-            psicologa = psicologa,
-            valor_previsto = valor_previsto,
-            valor_pendente = valor_pendente,
-            valor_acertado = valor_acertado,
-            valor_total = valor_total,
-            qtd_pacientes = qtd_pacientes,
-            desistencias_atendidos =  desistencias_atendidos,
-            qtd_marcacoes = qtd_marcacoes,
-            desistencias_novos = desistencias_novos
-        )
-
-        financeiro.save()
-
-        return redirect('financeiro')
-    
-    context = {
-        'psicologas': psicologas,
-        'financeiros': financeiros
-    }
-    return render(request, 'pages/financeiro.html', context)
-
-    #return render(request, 'pages/financeiro.html',{'psicologas': psicologas}, {'financeiros': financeiros})
-
-@login_required(login_url='login_1')
-def agenda_central_sala(request, id_sala):
-    sala = get_object_or_404(Sala, id_sala = id_sala)
-
-    agendas = Consulta.objects.filter(sala_id=sala)
-
-    return render(request, 'pages/page_agenda_central_individual.html', {
-        'agendas': agendas
-    })
 
 
 @login_required(login_url='login_1')
@@ -1077,23 +824,6 @@ def gerar_recibo(request, id_consulta):
         # Salvar o documento copiado modificado
         doc.save(copied_doc_path)
 
-        # caminho_original = f'r"C:\Ejem\TEC\[PROJETO] - [KPSICOLOGIA]\CRM\soft-ui-dashboard-django\Documento_Recibo_Copia.docx"'
-        
-        # #convert(f"{copied_doc_path}",  "arquivo.pdf")
-
-        # with tempfile.TemporaryDirectory() as temp_dir:
-        #     # Define o caminho temporário para o arquivo
-        #     temp_doc_path = f"{temp_dir}/Documento_Recibo_Copia.docx"
-            
-        #     # Copia o arquivo para a pasta temporária
-        #     shutil.copy2(caminho_original, temp_doc_path)
-            
-        #     # Converte o arquivo .docx para .pdf
-        #     output_pdf = f"{temp_dir}/recibo.pdf"
-        #     convert(temp_doc_path, output_pdf)
-            
-        #     print("Arquivo convertido para PDF com sucesso!")
-
     
     return render(request, 'pages/gerar_recibo.html', {'consulta': consulta})
 
@@ -1104,14 +834,6 @@ def financeiro(request):
     financeiros = Financeiro.objects.all()
 
     if request.method == 'POST':
-        # valor_previsto = request.POST.get('valor_previsto', 0),
-        # request.POST.get('valor_previsto')
-        # valor_pendente = request.POST.get('valor_pendente')
-        # valor_pendente = float(request.POST.get('valor_pendente', 0)),
-        # valor_acertado = request.POST.get('valor_acertado')
-        # valor_acertado = float(request.POST.get('valor_acertado', 0)),
-        # valor_total = request.POST.get('valor_total')
-        
         valor_previsto = Decimal(request.POST['valor_previsto'])
         valor_pendente = Decimal(request.POST['valor_pendente'])
         valor_acertado = Decimal(request.POST['valor_acertado'])
@@ -1147,3 +869,88 @@ def financeiro(request):
     return render(request, 'pages/financeiro.html', context)
 
 
+@login_required(login_url='login1') 
+def psico_agenda(request, psicologo_id):
+    psicologa = get_object_or_404(Psicologa, id=psicologo_id)
+    salas_atendimento = Sala.objects.all()
+    consultas = Consulta.objects.filter(psicologo=psicologa)
+    pacientes = Paciente.objects.all()
+    
+    if request.method == 'POST':
+        nome_cliente = request.POST.get('nome_cliente')
+        dia_semana = request.POST.get('dia_semana')
+        horario_consulta = request.POST.get('horario_consulta')
+        sala_atendimento_id = request.POST.get('sala_atendimento')
+
+        sala_atendimento = get_object_or_404(Sala, id_sala=sala_atendimento_id)
+        paciente = get_object_or_404(Paciente, id=nome_cliente)
+
+        # Verificar se uma consulta com esses mesmos critérios já existe
+        consulta_existente = Consulta.objects.filter(
+            psicologo=psicologa,
+            horario=horario_consulta,
+            dia_semana=dia_semana,
+            sala=sala_atendimento,
+            Paciente=paciente
+        ).first()
+
+        if consulta_existente:
+            # Exibir mensagem de erro
+            return HttpResponse("Essa consulta já está cadastrada")
+
+        # Verificar se já existe uma consulta no mesmo horário e dia com o mesmo psicólogo
+        consulta_por_horario = Consulta.objects.filter(
+            psicologo=psicologa,
+            horario=horario_consulta,
+            dia_semana=dia_semana
+        ).first()
+
+        if consulta_por_horario:
+            # Atualizar a coluna "semanal" ou "quinzenal" dependendo do período do paciente
+            if paciente.periodo == "Semanal" and not consulta_por_horario.semanal:
+                consulta_por_horario.semanal = paciente.nome
+            elif paciente.periodo == "Quinzenal" and not consulta_por_horario.quinzenal:
+                consulta_por_horario.quinzenal = paciente.nome
+            consulta_por_horario.save()
+        else:
+            # Criar uma nova consulta se ainda não existe uma com esse horário e psicólogo
+            consulta = Consulta.objects.create(
+                Paciente=paciente,
+                psicologo=psicologa,
+                horario=horario_consulta,
+                sala=sala_atendimento,
+                dia_semana=dia_semana,
+                semanal=paciente.nome if paciente.periodo == "Semanal" else "",
+                quinzenal=paciente.nome if paciente.periodo == "Quinzenal" else ""
+            )
+            consulta.save()
+
+        return redirect('psico_agenda', psicologo_id=psicologo_id)
+    
+    dias_da_semana = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"]
+
+    return render(request, "pages/psico_agenda.html", {
+        'salas': salas_atendimento,  
+        'pacientes': pacientes, 
+        'agendas': consultas,
+        'psicologo': psicologa,
+        'dias_da_semana': dias_da_semana
+    })
+
+@login_required(login_url='login1')
+def cadastrar_especialidade(request):
+
+    especialidades = EspecialidadePsico.objects.all()
+
+    if request.method == "POST":
+        
+        especialidade = request.POST.get('especialidade')
+
+        EspecialidadePsico.objects.create(
+            especialidade=especialidade
+        )
+
+        return redirect('especialidades')
+    
+    return render(request, 'pages/especialidades.html', 
+                  { 'especialidades': especialidades })
