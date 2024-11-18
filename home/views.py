@@ -32,11 +32,12 @@ from django.shortcuts import render
 
 
 
-def handler404(request):
+def handler404(request, exception):
     return render(request, '404.html', status=404)
 
 def handler500(request):
     return render(request, '500.html', status=500)
+
 
 # Páginas Simples
 @login_required(login_url='login1')
@@ -165,7 +166,9 @@ def users(request):
 
         user = User.objects.filter(username=username).first()
         if user:
-            return HttpResponse("Já existe um usuário com esse nome")
+            # return HttpResponse("Já existe um usuário com esse nome")
+            return redirect("nome_usuario_erro")
+
 
             # Criando um novo usuário
         user = User.objects.create_user(username=username, email=email, password=senha)
@@ -199,7 +202,9 @@ def login(request):
         if user:
             login_django(request, user)
             return redirect('index')
-        return HttpResponse("Usuário ou senha inválidos")
+        # return HttpResponse("Usuário ou senha inválidos")
+        return redirect("login_erro")
+
     
 @login_required(login_url='login1')
 def update_user(request, user_id):
@@ -252,7 +257,9 @@ def unis(request):
             uni = Unidade.objects.filter(nome_unidade=nome_unidade).first()
 
             if uni:
-                return HttpResponse("Já existe uma unidade com esse nome")
+                # return HttpResponse("Já existe uma unidade com esse nome")
+                return redirect("unis_erro")
+
             
             print(nome_unidade)
             print(endereco_unidade)
@@ -422,11 +429,15 @@ def agenda_central(request):
     psicologas = Psicologa.objects.all()
     salas = Sala.objects.all()
     pacientes = Paciente.objects.all()
+    especialidades = EspecialidadePsico.objects.all()
     dias_da_semana = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"]
 
     if request.method == "POST":
         paciente_id = request.POST.get("paciente_id")
         psicologa_id = request.POST.get('psicologa_id')
+        especialidade_id = request.POST.get('especialidade_id')
+        dia_da_semana = request.POST.get("dia_semana")
+        horario = request.POST.get("horario")
 
         if psicologa_id != 'todos':
             psicologo = get_object_or_404(Psicologa, id=psicologa_id)
@@ -436,8 +447,24 @@ def agenda_central(request):
             paciente = get_object_or_404(Paciente, id=paciente_id)
             consultas = consultas.filter(Paciente=paciente)
 
+        if especialidade_id != 'todos':
+            especialidade = get_object_or_404(EspecialidadePsico, id=especialidade_id)
+            consultas = consultas.filter(especialidade=especialidade)
+        
+        # if dia_da_semana != 'todos':
+        #     consulta = get_object_or_404(Consulta, dia_da_semana=dia_da_semana)
+        #     consultas = consultas.filter(consulta=consulta)
 
-    return render(request, 'pages/page_agenda_central.html', {'consultas': consultas, 'salas': salas, 'dias_da_semana': dias_da_semana, 'pacientes': pacientes, 'psicologas': psicologas})
+        if dia_da_semana != "todos" and dia_da_semana in dias_da_semana:
+            consultas = consultas.filter(dia_da_semana=dia_da_semana)
+        else:
+            pass
+
+        if horario  != 'todos':
+            consulta = get_object_or_404(Consulta, id=horario)
+            consultas = consultas.filter(consulta=consulta)
+            
+    return render(request, 'pages/page_agenda_central.html', {'consultas': consultas, 'salas': salas, 'dias_da_semana': dias_da_semana, 'pacientes': pacientes, 'psicologas': psicologas, 'especialidades': especialidades})
 
 
 @login_required(login_url='login1')
@@ -471,7 +498,8 @@ def update_consulta(request, consulta_id):
 
         if consulta_existente:
 
-            return HttpResponse("Essa consulta já está cadastrada")
+            # return HttpResponse("Essa consulta já está cadastrada")
+            return redirect("consulta_cadastrada1")
 
         # Atualizar a consulta com os novos valores
         consulta.psicologo = psicologa
@@ -572,6 +600,7 @@ def deletar_psicologo(request, psicologo_id):
 
 def editar_psicologo(request, psicologo_id):
     psicologo = get_object_or_404(Psicologa, id=psicologo_id)
+    
 
     # Extraindo horas e minutos para o template
     
@@ -896,7 +925,8 @@ def psico_agenda(request, psicologo_id):
 
         if consulta_existente:
             # Exibir mensagem de erro
-            return HttpResponse("Essa consulta já está cadastrada")
+            # return HttpResponse("Essa consulta já está cadastrada")
+            return redirect('consulta_cadastrada2')
 
         # Verificar se já existe uma consulta no mesmo horário e dia com o mesmo psicólogo
         consulta_por_horario = Consulta.objects.filter(
@@ -954,3 +984,23 @@ def cadastrar_especialidade(request):
     
     return render(request, 'pages/especialidades.html', 
                   { 'especialidades': especialidades })
+
+@login_required(login_url='login1')
+def consulta_cadastrada2(request):
+    return render(request, 'pages/consulta_cadastrada2erro.html')
+
+
+@login_required(login_url='login1')
+def consulta_cadastrada1(request):
+    return render(request, 'pages/consulta_cadastrada1erro.html')
+
+@login_required(login_url='login1')
+def nome_usuario_erro(request):
+    return render(request, 'pages/nome_usuario_erro.html')
+
+def login_erro(request):
+    return render(request, 'pages/login_erro.html')
+
+@login_required(login_url='login1')
+def unis_erro(request):
+    return render(request, 'pages/unis_erro.html')

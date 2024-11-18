@@ -18,8 +18,7 @@ from django.urls import include, path
 from home import views
 # from django.conf.urls import handler404, handler500
 
-# handler404 = 'core.views.handler404'
-# handler500 = 'core.views.handler500'
+
 
 urlpatterns = [
     #path('', include('home.urls')),
@@ -65,7 +64,14 @@ urlpatterns = [
     path('financeiro/', views.financeiro, name='financeiro'),
     path('geracao_recibo/<int:id_consulta>', views.gerar_recibo, name='gerar_recibo'),
     path('agenda_central', views.agenda_central, name='agenda_central'),
-    path('especialidades', views.cadastrar_especialidade, name='especialidades')
+    path('especialidades', views.cadastrar_especialidade, name='especialidades'),
+    path('handler404/', views.handler404, name='handler404'),
+    path('consulta_cadastrada1/', views.consulta_cadastrada1, name='consulta_cadastrada1'),
+    path('consulta_cadastrada2/', views.consulta_cadastrada2, name='consulta_cadastrada2'),
+    path('nome_usuario_erro/', views.nome_usuario_erro, name='nome_usuario_erro'),
+    path('login_erro/', views.login_erro, name='login_erro'),
+    path('unis_erro/', views.unis_erro, name='unis_erro'),
+
 
     #path('cadastrar_salas/', views.sala, name='salas'),
 
@@ -75,3 +81,6 @@ urlpatterns = [
     #path('consultas/editar/<int:consulta_id>/', update_consulta, name='update_consulta'),  # URL para editar consulta
     #path('consultas/deletar/<int:consulta_id>/', delete_consulta, name='delete_consulta'),  # URL para deletar consulta
 ]
+handler404 = 'home.views.handler404'
+handler500 = 'home.views.handler500'
+# handler403 = 'home.views.handler403'

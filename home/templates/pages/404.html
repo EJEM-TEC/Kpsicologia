@@ -1,8 +1,8 @@
-{% extends 'base.html' %}
-
-{% block title %}404 - Página Não Encontrada{% endblock %}
+{% extends 'layouts/base.html' %}
+{% load static %}
 
 {% block content %}
+
 <div class="container-fluid py-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
@@ -11,10 +11,10 @@
                     <h1 class="display-1 text-danger">404</h1>
                     <h4 class="text-muted">Página não encontrada</h4>
                     <p>A página que você está procurando não existe. Volte para a página inicial ou entre em contato conosco se precisar de ajuda.</p>
-                    <a href="/" class="btn btn-primary">Voltar para a Página Inicial</a>
+                    <a href="{% url 'index' %}" class="btn btn-primary">Voltar para a Página Inicial</a>
                 </div>
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
+{% endblock content %}

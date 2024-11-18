@@ -35,6 +35,34 @@
                                 </select>
                             </div>
                         </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="paciente_id">Especialização</label>
+                                <select class="form-control" id="especialidade_id" name="especialidade_id" required>
+                                    {% for especialidade in especialidades %}
+                                    <option value="{{especialidade.id}}">{{especialidade.especialidade}}</option>
+                                    {% endfor %}
+                                    <option value="todos">Todos</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="horario">Horário</label>
+                                <input type="time" class="form-control" id="horario" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="dia_semana">Dia da Semana</label>
+                                <select class="form-control" id="dia_semana" name="dia_semana" required>
+                                    <option value="todos">Todos</option>
+                                    {% for dia in dias_da_semana %}
+                                    <option value="{{ dia }}">{{ dia }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
                     </div>
                     <div class="row">
                         <div class="col-md-12">

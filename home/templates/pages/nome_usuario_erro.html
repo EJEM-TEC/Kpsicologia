@@ -8,13 +8,12 @@
         <div class="col-md-6">
             <div class="card shadow-lg border-0">
                 <div class="card-body text-center">
-                    <h1 class="form-group">500</h1>
-                    <h4 class="text-muted">Erro Interno do Servidor</h4>
-                    <p>Ocorreu um erro inesperado no servidor. Por favor, tente novamente mais tarde.</p>
-                    <a href="{% url 'index' %}" class="btn btn-primary">Voltar para a Página Inicial</a>
+                    <h1 class="form-group">Já existe um usuário com esse nome</h1>
+                    <p>Já existe um usuário cadastrado com esse nome. Escolha outro nome.</p>
+                    <a href="{% url 'users' %}" class="btn btn-primary">Voltar para a Página de Usuários</a>
                 </div>
             </div>
         </div>
     </div>
 </div>
-{% endblock content  %}
+{% endblock content %}
