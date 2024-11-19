@@ -1,0 +1,30 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+
+
+    <div class="container-fluid py-4">
+      <div class="col-6">
+        <div>
+          <h2>
+            Dissacioar Especialidade
+          </h2>
+        </div>
+      </div>
+      <section class="section dashboard">
+        <div class="card">
+          <div class="card-body">
+            <form method="post"> {% csrf_token %}
+              <h5 class="card-title">Dissacioando o {{psicologo.nome}} da especialidade {{especialidade.especialidade}}</h5>
+              <p class="card-text">Tem certeza que quer fazer isso?</p>
+              <p class="card-text"><button type="submit" class="btn btn-danger">Confirmar</button></p>
+              <p class="card-text"><a href="{% url 'psicoEspecialidades' psicologo_id=psicologo.id %}" class="btn btn-secondary">Cancelar</a></p>
+            </form>
+          </div>
+        </div>
+      </section>
+      
+
+{% endblock content %}
+

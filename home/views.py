@@ -10,7 +10,7 @@ from rolepermissions.roles import assign_role
 from rolepermissions.decorators import has_role_decorator
 from django.contrib.auth.models import User, Group
 from django.http import HttpResponse
-from .models import Psicologa, Usuario, Consulta, Unidade, Sala, Paciente, ConfirmacaoConsulta, Financeiro, EspecialidadePsico
+from .models import Psicologa, Usuario, Consulta, Unidade, Sala, Paciente, ConfirmacaoConsulta, Financeiro, EspecialidadePsico, Especialidade, Publico, PublicoPsico
 from rolepermissions.roles import assign_role, get_user_roles, RolesManager
 from rolepermissions.exceptions import RoleDoesNotExist
 from django.contrib.auth.models import Group
@@ -184,8 +184,6 @@ def users(request):
             
         return redirect('users')
 
-        
-    
     return render(request, 'pages/page_user.html', {'users': users})
 
 def login(request):
@@ -421,6 +419,10 @@ def editar_confirma_consulta(request, id_consulta):
         return redirect('psicologa')
 
     return render(request, 'pages/editar_confirma_consulta.html', {'pacientes': pacientes, 'consulta': consulta})
+from django.db.models import Q
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from rolepermissions.decorators import has_role_decorator
 
 @login_required(login_url='login1')
 @has_role_decorator('administrador')
@@ -429,42 +431,58 @@ def agenda_central(request):
     psicologas = Psicologa.objects.all()
     salas = Sala.objects.all()
     pacientes = Paciente.objects.all()
-    especialidades = EspecialidadePsico.objects.all()
+    especialidades = Especialidade.objects.all()
+    publicos = Publico.objects.all()
     dias_da_semana = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"]
 
     if request.method == "POST":
         paciente_id = request.POST.get("paciente_id")
         psicologa_id = request.POST.get('psicologa_id')
         especialidade_id = request.POST.get('especialidade_id')
+        publico_id = request.POST.get('publico')
         dia_da_semana = request.POST.get("dia_semana")
         horario = request.POST.get("horario")
 
+        # Filtragem por psicóloga
         if psicologa_id != 'todos':
             psicologo = get_object_or_404(Psicologa, id=psicologa_id)
             consultas = consultas.filter(psicologo=psicologo)
 
+        # Filtragem por paciente
         if paciente_id != 'todos':
             paciente = get_object_or_404(Paciente, id=paciente_id)
             consultas = consultas.filter(Paciente=paciente)
 
-        if especialidade_id != 'todos':
-            especialidade = get_object_or_404(EspecialidadePsico, id=especialidade_id)
-            consultas = consultas.filter(especialidade=especialidade)
-        
-        # if dia_da_semana != 'todos':
-        #     consulta = get_object_or_404(Consulta, dia_da_semana=dia_da_semana)
-        #     consultas = consultas.filter(consulta=consulta)
+        if especialidade_id and especialidade_id != 'todos':
+            psicologas_com_especialidade = Psicologa.objects.filter(
+                especialidadepsico__especialidade_id=especialidade_id
+            )
+            consultas = consultas.filter(psicologo__in=psicologas_com_especialidade)
 
+        # Filtragem por público relacionado às psicólogas
+        if publico_id and publico_id != 'todos':
+            psicologas_com_publico = Psicologa.objects.filter(
+                publicopsico__publico_id=publico_id
+            )
+            consultas = consultas.filter(psicologo__in=psicologas_com_publico)
+
+        # Filtragem por dia da semana
         if dia_da_semana != "todos" and dia_da_semana in dias_da_semana:
             consultas = consultas.filter(dia_da_semana=dia_da_semana)
-        else:
-            pass
 
-        if horario  != 'todos':
-            consulta = get_object_or_404(Consulta, id=horario)
-            consultas = consultas.filter(consulta=consulta)
-            
-    return render(request, 'pages/page_agenda_central.html', {'consultas': consultas, 'salas': salas, 'dias_da_semana': dias_da_semana, 'pacientes': pacientes, 'psicologas': psicologas, 'especialidades': especialidades})
+        # Filtragem por horário
+        if horario and horario != "todos":
+            consultas = consultas.filter(horario=horario)
+
+    return render(request, 'pages/page_agenda_central.html', {
+        'consultas': consultas,
+        'salas': salas,
+        'dias_da_semana': dias_da_semana,
+        'pacientes': pacientes,
+        'psicologas': psicologas,
+        'especialidades': especialidades,
+        'publicos': publicos,
+    })
 
 
 @login_required(login_url='login1')
@@ -539,14 +557,13 @@ def delete_consulta(request, id_consulta):
 def psicologa(request):
     
     psicologos = Psicologa.objects.all()
-    especialidades = EspecialidadePsico.objects.all()
+    especialidades = Especialidade.objects.all()
 
     if request.method == 'POST':
         nome = request.POST.get('nome')
         cor = request.POST.get('cor')
         email = request.POST.get('email')
         senha = request.POST.get('senha')
-        especialidade = request.POST.get('especialidade')
         abordagem = request.POST.get('abordagem')
 
         psicologa = Psicologa.objects.create(
@@ -554,7 +571,6 @@ def psicologa(request):
             cor = cor,
             email = email,
             senha = senha,
-            especializacao = especialidade,
             abordagem = abordagem
         )
 
@@ -970,13 +986,13 @@ def psico_agenda(request, psicologo_id):
 @login_required(login_url='login1')
 def cadastrar_especialidade(request):
 
-    especialidades = EspecialidadePsico.objects.all()
+    especialidades = Especialidade.objects.all()
 
     if request.method == "POST":
         
         especialidade = request.POST.get('especialidade')
 
-        EspecialidadePsico.objects.create(
+        Especialidade.objects.create(
             especialidade=especialidade
         )
 
@@ -984,6 +1000,124 @@ def cadastrar_especialidade(request):
     
     return render(request, 'pages/especialidades.html', 
                   { 'especialidades': especialidades })
+
+@login_required(login_url='login1')
+def AssociarPsicoEspecialidade(request, psicologo_id):
+
+    psicologo = get_object_or_404(Psicologa, id=psicologo_id)
+    especialidadesGerais = Especialidade.objects.all()
+
+    if request.method == "POST":
+        
+        especialidade_id = request.POST.get('especialidade_id')
+        especialidade = get_object_or_404(Especialidade, id=especialidade_id)
+
+        EspecialidadePsico.objects.create(
+            especialidade=especialidade,
+            psico=psicologo
+        )
+
+        return redirect('psicoEspecialidades', psicologo_id=psicologo.id)
+
+    #Obtendo todos as Especialidades em relação a Psicóloga
+
+    psico_especialidades = EspecialidadePsico.objects.filter(psico=psicologo).select_related(
+        'especialidade'
+    )
+
+    especiadadesPsico = [pe.especialidade for pe in psico_especialidades]
+
+    return render(request, 'pages/associar_psicologo_especialidade.html', {'especialidadesGerais': especialidadesGerais, 
+                                                                           'psicologo': psicologo, 'especiadadesPsico': especiadadesPsico})
+
+@login_required(login_url='login1')
+def DissociarPsicoEspecialidade(request, psicologo_id, especialidade_id):
+
+    psicologo = get_object_or_404(Psicologa, id=psicologo_id)
+
+    especialidade = get_object_or_404(Especialidade, id=especialidade_id)
+
+    psico_especialidade = get_object_or_404(EspecialidadePsico, psico=psicologo, especialidade=especialidade)
+
+
+    if request.method == "POST":
+
+        psico_especialidade.delete()
+
+        return redirect('psicoEspecialidades', psicologo_id=psicologo.id)
+    
+    return render(request, 'pages/des_psicologo_especialidade.html', {
+        'psicologo' : psicologo,
+        'especialidade': especialidade
+    })
+
+@login_required(login_url='login1')
+def AssociarPsicoPublico(request, psicologo_id):
+
+    psicologo = get_object_or_404(Psicologa, id=psicologo_id)
+    publicosGerais = Publico.objects.all()
+
+    if request.method == "POST":
+        
+        publico_id = request.POST.get('publico_id')
+        publico = get_object_or_404(Publico, id=publico_id)
+
+        PublicoPsico.objects.create(
+            publico=publico,
+            psico=psicologo
+        )
+
+        return redirect('psicoPublicos', psicologo_id=psicologo.id)
+
+    #Obtendo todos as Especialidades em relação a Psicóloga
+
+    psico_publicos = PublicoPsico.objects.filter(psico=psicologo).select_related(
+        'publico'
+    )
+
+    publicosPsico = [pp.publico for pp in psico_publicos]
+
+    return render(request, 'pages/associar_psicologo_publico.html', {'publicosGerais': publicosGerais, 
+                                                                           'psicologo': psicologo, 'publicosPsico': publicosPsico})
+
+@login_required(login_url='login1')
+def DissociarPsicoPublico(request, psicologo_id, publico_id):
+
+    psicologo = get_object_or_404(Psicologa, id=psicologo_id)
+
+    publico = get_object_or_404(Publico, id=publico_id)
+
+    psico_especialidade = get_object_or_404(PublicoPsico, psico=psicologo, publico=publico)
+
+
+    if request.method == "POST":
+
+        psico_especialidade.delete()
+
+        return redirect('psicoPublicos', psicologo_id=psicologo.id)
+    
+    return render(request, 'pages/des_psicologo_publico.html', {
+        'psicologo' : psicologo,
+        'publico': publico
+    })
+
+@login_required(login_url='login1')
+def cadastrar_publico(request):
+
+    publicos = Publico.objects.all()
+
+    if request.method == "POST":
+        
+        publico = request.POST.get('publico')
+
+        Publico.objects.create(
+            publico=publico
+        )
+
+        return redirect('publicos')
+    
+    return render(request, 'pages/publicos.html', 
+                  { 'publicos': publicos })
 
 @login_required(login_url='login1')
 def consulta_cadastrada2(request):

@@ -43,36 +43,24 @@
           <div class="row">
             <div class="col-md-6">
               <div class="form-group">
-                <label for="especialidade">Especialidade</label>
-                <select class="form-control" id="especialidade" name="especialidade" required>
-                  {% for especialidade in especialidades %}
-                  <option value="{{especialidade.especialidade}}">{{especialidade.especialidade}}</option>
-                  {% endfor %}
-                </select>
-              </div>
-            </div>  
-            <div class="col-md-6">
-              <div class="form-group">
                 <label for="abordagem">Abordagem</label>
                 <input type="text" class="form-control" id="abordagem" name="abordagem" required>
               </div>
             </div>  
           </div>
-          <div class="row">
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="senha">Senha</label>
-                <input type="password" class="form-control" id="senha" name="senha" required>
-              </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="senha">Senha</label>
+              <input type="password" class="form-control" id="senha" name="senha" required>
             </div>
+          </div>
+          <div class="row">
             <div class="col-md-6">
               <div class="form-group">
                 <label for="Confirmpassword">Confirmar senha</label>
                 <input type="password" class="form-control" id="Confirmpassword" required>
               </div>
             </div>
-          </div>
-          <div class="row">
             <div class="col-md-6">
               <div class="form-group">
                 <button type="submit" class="btn btn-primary">Cadastrar Psicóloga</button>
@@ -89,37 +77,41 @@
           <thead>
             <tr>
               <th class="text-secondary text-xxs font-weight-bolder opacity-7">Nome</th>
-              <th class=" text-secondary text-xxs font-weight-bolder opacity-7">Cor</th>
-              <th class=" text-secondary text-xxs font-weight-bolder opacity-7">Email</th>
-              <th class=" text-secondary text-xxs font-weight-bolder opacity-7">Especialidade</th>
-              <th class=" text-secondary text-xxs font-weight-bolder opacity-7">Abordagem</th>
+              <th class="text-secondary text-xxs font-weight-bolder opacity-7">Cor</th>
+              <th class="text-secondary text-xxs font-weight-bolder opacity-7">Email</th>
+              <th class="text-secondary text-xxs font-weight-bolder opacity-7">Especialidade</th>
+              <th class="text-secondary text-xxs font-weight-bolder opacity-7">Público</th>
+              <th class="text-secondary text-xxs font-weight-bolder opacity-7">Abordagem</th>
               <th class="text-secondary text-xxs font-weight-bolder opacity-7">Agenda</th>
-              <th class="text-secondary text-xxs font-weight-bolder opacity-7">Confirmar Consulta</th>
-              <th class="text-secondary text-xxs opacity-7">Editar</th>
+              <th class="text-secondary text-xxs font-weight-bolder opacity-7">Confirmação</th>
+              <th class="text-secondary text-xxs font-weight-bolder opacity-7">Edição</th>
               <th class="text-secondary text-xxs opacity-7">Excluir</th>
-              
             </tr>
           </thead>
           <tbody>{% for psicologo in psicologos %}
             <tr>
               <td>
                 <div class="d-flex px-2 py-1">
-                  
                   <div class="d-flex flex-column justify-content-center">
                     <h6 class="mb-0 text-xs">{{psicologo.nome}}</h6>
-                    
                   </div>
                 </div>
               </td>
-              
               <td>
                 <span style="display: inline-block; width: 12px; height: 12px; background-color: {{psicologo.cor}}; border-radius: 50%;"></span>
               </td>
                 <td>
                   <div class="d-flex px-2 py-1">
-                    
                     <div class="d-flex flex-column justify-content-center">
                       <h6 class="mb-0 text-xs">{{psicologo.email}}</h6>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="d-flex px-2 py-1">
+                    
+                    <div class="d-flex flex-column justify-content-center">
+                      <a href="{% url 'psicoEspecialidades' psicologo_id=psicologo.id %}" class="mb-0 text-xs">Especialização</>
                       
                     </div>
                   </div>
@@ -128,7 +120,7 @@
                   <div class="d-flex px-2 py-1">
                     
                     <div class="d-flex flex-column justify-content-center">
-                      <h6 class="mb-0 text-xs">{{psicologo.especializacao}}</h6>
+                      <a href="{% url 'psicoPublicos' psicologo_id=psicologo.id %}" class="mb-0 text-xs">Público</>
                       
                     </div>
                   </div>

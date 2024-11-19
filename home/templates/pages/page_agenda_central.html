@@ -16,7 +16,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="paciente_id">Psicóloga</label>
-                                <select class="form-control" id="paciente_id" name="psicologa_id" required>
+                                <select class="form-control" id="paciente_id" name="psicologa_id">
                                     {% for psicologa in psicologas %}
                                     <option value="{{psicologa.id}}">{{psicologa.nome}}</option>
                                     {% endfor %}
@@ -27,7 +27,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="paciente_id">Paciente</label>
-                                <select class="form-control" id="paciente_id" name="paciente_id" required>
+                                <select class="form-control" id="paciente_id" name="paciente_id">
                                     {% for paciente in pacientes %}
                                     <option value="{{paciente.id}}">{{paciente.nome}}</option>
                                     {% endfor %}
@@ -38,7 +38,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="paciente_id">Especialização</label>
-                                <select class="form-control" id="especialidade_id" name="especialidade_id" required>
+                                <select class="form-control" id="especialidade_id" name="especialidade_id">
                                     {% for especialidade in especialidades %}
                                     <option value="{{especialidade.id}}">{{especialidade.especialidade}}</option>
                                     {% endfor %}
@@ -49,16 +49,27 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="horario">Horário</label>
-                                <input type="time" class="form-control" id="horario" required>
+                                <input type="time" class="form-control" id="horario" name="horario">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="dia_semana">Dia da Semana</label>
-                                <select class="form-control" id="dia_semana" name="dia_semana" required>
+                                <select class="form-control" id="dia_semana" name="dia_semana">
                                     <option value="todos">Todos</option>
                                     {% for dia in dias_da_semana %}
                                     <option value="{{ dia }}">{{ dia }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="dia_semana">Público</label>
+                                <select class="form-control" id="dia_semana" name="publico">
+                                    <option value="todos">Todos</option>
+                                    {% for publico in publicos %}
+                                    <option value="{{ publico.id }}">{{ publico.publico }}</option>
                                     {% endfor %}
                                 </select>
                             </div>

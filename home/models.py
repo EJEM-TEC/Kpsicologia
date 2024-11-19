@@ -54,7 +54,6 @@ class Psicologa(models.Model):
     cor = models.CharField(max_length=16)
     email=models.CharField(max_length=100)
     abordagem = models.CharField(max_length=100)
-    especializacao = models.CharField(max_length=100)
     senha=models.CharField(max_length=100)
     
     def __str__(self):
@@ -70,7 +69,7 @@ class Paciente(models.Model):
     tipo_atendimento = models.CharField(max_length=100)
     periodo = models.CharField(max_length=100, default="semanal")
 
-class EspecialidadePsico(models.Model):
+class Especialidade(models.Model):
     id = models.AutoField(primary_key=True)
     especialidade = models.CharField(max_length=100)
 
@@ -121,5 +120,23 @@ class Financeiro(models.Model):
     def save(self, *args, **kwargs):
         self.valor_total = self.valor_previsto + self.valor_pendente + self.valor_acertado
         super().save(*args, **kwargs)
+
+
+class Publico(models.Model):
+    id = models.AutoField(primary_key=True)
+    publico = models.CharField(max_length=100, blank=True, null=True)
+
+
+class PublicoPsico(models.Model):
+    psico = models.ForeignKey(Psicologa, on_delete=models.CASCADE)
+    publico = models.ForeignKey(Publico, on_delete=models.CASCADE)
+
+
+class EspecialidadePsico(models.Model):
+    especialidade = models.ForeignKey(Especialidade, on_delete=models.CASCADE)
+    psico = models.ForeignKey(Psicologa, on_delete=models.CASCADE)
+
+
+
 
     

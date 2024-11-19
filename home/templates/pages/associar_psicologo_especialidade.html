@@ -1,0 +1,76 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+
+    <div class="container-fluid py-4">
+      <div class="col-6">
+        <div>
+          <h2>
+            Especialidades da {{psicologo.nome}}
+          </h2>
+        </div>
+      </div>
+    </div>
+    <div class="card m-4">
+      <div class="card-body p-4">
+        <form method="POST" action="{% url 'psicoEspecialidades' psicologo_id=psicologo.id %}">  {% csrf_token %}
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="especialidade_id">Espacialidade</label>
+                <select class="form-control" id="especialidade_id" name="especialidade_id" required /> 
+                  {% for especialidade in especialidadesGerais %}
+                 <option value="{{especialidade.id}}">{{especialidade.especialidade}}</option>
+                  {% endfor %}
+                </select>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group">
+                  <button type="submit" class="btn btn-primary">Adicionar especialidade</button>
+                </div>
+              </div>
+            </div>
+          </form>
+         </div> 
+        </div> 
+          
+      </div>
+    </div> 
+    <div class="card">
+      <div class="table-responsive">
+        <table class="table align-items-center mb-0">
+          <thead>
+            <tr>
+              <th class="text-secondary text-xxs font-weight-bolder opacity-7">Especialidade</th>
+              <th class="text-secondary text-xxs opacity-7">Desvincular</th>
+              
+            </tr>
+          </thead>
+          <tbody>{% for especialidade in especiadadesPsico %}
+            <tr>
+                <td>
+                  <div class="d-flex px-2 py-1">
+                    <div class="d-flex flex-column justify-content-center">
+                      <h6 class="mb-0 text-xs">{{especialidade.especialidade}}</h6>
+                    </div>
+                  </div>
+                </td>
+          <td>
+            <span>
+              <a href="{% url 'disPsicoEspecialidade' psicologo_id=psicologo.id especialidade_id=especialidade.id %}" class="btn btn-danger">
+                <i class="bi bi-trash-fill"></i>
+              </a>
+        </span>
+      </td>
+
+            </tr>{%endfor%}           
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+{% endblock content %}

@@ -28,12 +28,12 @@ if not SECRET_KEY:
     SECRET_KEY = ''.join(random.choice( string.ascii_lowercase  ) for i in range( 32 ))
 
 # Render Deployment Code
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['15.228.58.61', 'localhost', '127.0.0.1']
 
-handler404 = 'home.views.handler404'
-handler500 = 'home.views.handler500'
+# handler404 = 'home.views.handler404'
+# handler500 = 'home.views.handler500'
 
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:    

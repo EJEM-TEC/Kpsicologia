@@ -1,0 +1,76 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+
+    <div class="container-fluid py-4">
+      <div class="col-6">
+        <div>
+          <h2>
+            Públicos da {{psicologo.nome}}
+          </h2>
+        </div>
+      </div>
+    </div>
+    <div class="card m-4">
+      <div class="card-body p-4">
+        <form method="POST" action="{% url 'psicoPublicos' psicologo_id=psicologo.id %}">  {% csrf_token %}
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="publico_id">Público</label>
+                <select class="form-control" id="publico_id" name="publico_id" required /> 
+                  {% for publico in publicosGerais %}
+                 <option value="{{publico.id}}">{{publico.publico}}</option>
+                  {% endfor %}
+                </select>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group">
+                  <button type="submit" class="btn btn-primary">Adicionar público</button>
+                </div>
+              </div>
+            </div>
+          </form>
+         </div> 
+        </div> 
+          
+      </div>
+    </div> 
+    <div class="card">
+      <div class="table-responsive">
+        <table class="table align-items-center mb-0">
+          <thead>
+            <tr>
+              <th class="text-secondary text-xxs font-weight-bolder opacity-7">Público</th>
+              <th class="text-secondary text-xxs opacity-7">Desvincular</th>
+              
+            </tr>
+          </thead>
+          <tbody>{% for publico in publicosPsico %}
+            <tr>
+                <td>
+                  <div class="d-flex px-2 py-1">
+                    <div class="d-flex flex-column justify-content-center">
+                      <h6 class="mb-0 text-xs">{{publico.publico}}</h6>
+                    </div>
+                  </div>
+                </td>
+          <td>
+            <span>
+              <a href="{% url 'disPsicoPublico' psicologo_id=psicologo.id publico_id=publico.id %}" class="btn btn-danger">
+                <i class="bi bi-trash-fill"></i>
+              </a>
+        </span>
+      </td>
+
+            </tr>{%endfor%}           
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+{% endblock content %}
