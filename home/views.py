@@ -818,43 +818,43 @@ def editar_confirma_consulta(request, psicologo_id, consulta_id):
 #financeiro das psicólogas
 @login_required(login_url='login1')
 def financeiro(request):
-    psicologas = Psicologa.objects.all()
-    financeiros = Financeiro.objects.all()
+    # psicologas = Psicologa.objects.all()
+    financeiros = Financeiro2.objects.all()
 
-    if request.method == 'POST':
-        valor_previsto = Decimal(request.POST['valor_previsto'])
-        valor_pendente = Decimal(request.POST['valor_pendente'])
-        valor_acertado = Decimal(request.POST['valor_acertado'])
-        qtd_pacientes = request.POST.get('qtd_pacientes')
-        valor_total = valor_previsto + valor_pendente + valor_acertado,
-        desistencias_atendidos = request.POST.get('desistencias_atendidos')
-        qtd_marcacoes = request.POST.get('qtd_marcacoes')
-        desistencias_novos = request.POST.get('desistencias_novos')
-        nome_psicologo = request.POST.get('nome_psicologo')
-        psicologa = get_object_or_404(Psicologa, nome=nome_psicologo)
-        # psicologa = get_object_or_404(Psicologa, nome='nome_psicologo')
+    # if request.method == 'POST':
+    #     valor_previsto = Decimal(request.POST['valor_previsto'])
+    #     valor_pendente = Decimal(request.POST['valor_pendente'])
+    #     valor_acertado = Decimal(request.POST['valor_acertado'])
+    #     qtd_pacientes = request.POST.get('qtd_pacientes')
+    #     valor_total = valor_previsto + valor_pendente + valor_acertado,
+    #     desistencias_atendidos = request.POST.get('desistencias_atendidos')
+    #     qtd_marcacoes = request.POST.get('qtd_marcacoes')
+    #     desistencias_novos = request.POST.get('desistencias_novos')
+    #     nome_psicologo = request.POST.get('nome_psicologo')
+    #     psicologa = get_object_or_404(Psicologa, nome=nome_psicologo)
+    #     # psicologa = get_object_or_404(Psicologa, nome='nome_psicologo')
         
-        financeiro = Financeiro.objects.create(
-            psicologa = psicologa,
-            valor_previsto = valor_previsto,
-            valor_pendente = valor_pendente,
-            valor_acertado = valor_acertado,
-            valor_total = valor_total,
-            qtd_pacientes = qtd_pacientes,
-            desistencias_atendidos =  desistencias_atendidos,
-            qtd_marcacoes = qtd_marcacoes,
-            desistencias_novos = desistencias_novos
-        )
+    #     financeiro = Financeiro.objects.create(
+    #         psicologa = psicologa,
+    #         valor_previsto = valor_previsto,
+    #         valor_pendente = valor_pendente,
+    #         valor_acertado = valor_acertado,
+    #         valor_total = valor_total,
+    #         qtd_pacientes = qtd_pacientes,
+    #         desistencias_atendidos =  desistencias_atendidos,
+    #         qtd_marcacoes = qtd_marcacoes,
+    #         desistencias_novos = desistencias_novos
+    #     )
 
-        financeiro.save()
+    #     financeiro.save()
 
-        return redirect('financeiro')
+    #     return redirect('financeiro')
     
-    context = {
-        'psicologas': psicologas,
-        'financeiros': financeiros
-    }
-    return render(request, 'pages/financeiro.html', context)
+    # context = {
+    #     'psicologas': psicologas,
+    #     'financeiros': financeiros
+    # }
+    return render(request, 'pages/financeiro.html', {'financeiros':financeiros})
 
 
 @login_required(login_url='login1') 
