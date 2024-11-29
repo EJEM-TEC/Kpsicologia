@@ -9,143 +9,48 @@
                 <h6>Editar Consulta</h6>
             </div>
             <div class="card-body p-4">
-<<<<<<< HEAD
-                <form method="POST" action="{% url 'editar_confirma_consulta' psicologo.id consulta.id %}">
-=======
-                <form method="POST" action="{% url 'editar_confirma_consulta' consulta_id=consulta.id_consulta %}">
->>>>>>> 49db458a0f54c818457f4d7c2d202df4e5802c88
+                <form method="POST" action="{% url 'editar_confirma_consulta' financeiro.id %}">
                     {% csrf_token %}
-                    
-                    <div class="row">
-<<<<<<< HEAD
-                      <!-- Seleção de Paciente -->
-                      <div class="col-md-6">
-                        <div class="form-group">
-                          <label for="paciente" class="form-label">Paciente</label>
-                          <select class="form-control" id="paciente" name="paciente" required>
-                            <option value="" disabled>Selecione o paciente</option>
-                            {% for paciente in pacientes %}
-                              <option value="{{ paciente.id }}" {% if consulta.paciente.id == paciente.id %}selected{% endif %}>{{ paciente.nome }}</option>
-                            {% endfor %}
-                          </select>
-=======
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="paciente">Paciente</label>
-                                    <select class="form-control" id="forma_pagamento" name="paciente" required>
-                                        {% for paciente in pacientes %}
-                                      <option value="{{paciente.id}}">{{paciente.nome}}</option>
-                                    </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="valor">Data</label>
-                                <input type="date" class="form-control" id="valor" name="data" required>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="horario">Horário</label> 
-                                    <input type="time" class="form-control" id="horario" name="horario" required />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <!-- <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="numero_consulta">Número da Consulta</label>
-                                <input type="text" class="form-control" id="numero_consulta" name="numero_consulta" value="{{ consulta.numero_consulta }}" required>
-                            </div>
-                        </div> -->
-                              <!-- <label for="username">Nome</label> -->
-                              <!-- <input type="text" class="form-control" id="username" name="username" required value="{{user.username}}"> -->
-
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="dia_semana">Dia da Semana</label>
-                                    <select class="form-control" id="dia_semana" name="dia_semana" required>
-                                      <option value="Segunda-Feira">Segunda-Feira</option>
-                                      <option value="Terça-Feira">Terça-Feira</option>
-                                      <option value="Quarta-Feira">Quarta-Feira</option>
-                                      <option value="Quinta-Feira">Quinta-Feira</option>
-                                      <option value="Sexta-Feira">Sexta-Feira</option>
-                                    </select>
-                            </div>
->>>>>>> 49db458a0f54c818457f4d7c2d202df4e5802c88
-                        </div>
-                      </div>
-                  
-                      <!-- Valor -->
-                      <div class="col-md-6">
-                        <div class="form-group">
-                          <label for="valor">Valor</label>
-                          <div class="input-group mb-4">
-                            <span class="input-group-text"><i class="ni ni-money-coins"></i></span>
-                            <input type="number" class="form-control" id="valor" name="valor" placeholder="Digite o valor" min="0" step="0.01" value="{{ consulta.valor }}" required>
-                          </div>
-                          <small class="form-text text-muted">Insira o valor em moeda (ex: 100.00)</small>
-                        </div>
-                      </div>
-                    </div>
-                  
                     <div class="row">
                       <!-- Data da Consulta -->
                       <div class="col-md-6">
                         <div class="form-group">
                           <label for="data" class="form-label">Data da Consulta</label>
                           <div class="input-group mb-4">
-                            <input type="datetime-local" class="form-control" id="data" name="data" value="{{ consulta.data|date:'Y-m-d\\TH:i' }}" required>
+                            <input type="date" class="form-control" id="data" name="data" value="{{ financeiro.data|date:'Y-m-d\\TH:i' }}" required>
                           </div>
                         </div>
-<<<<<<< HEAD
                       </div>
                   
                       <!-- Observação -->
                       <div class="col-md-6">
                         <div class="form-group">
-                          <label for="observacoes" class="form-label">Observação</label>
-                          <textarea class="form-control" id="observacoes" name="observacoes" rows="3" placeholder="Observações sobre a consulta">{{ consulta.observacoes }}</textarea>
-=======
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="valor">Valor</label>
-                                <input type="number" class="form-control" id="valor" name="valor" required>
-                            </div>
->>>>>>> 49db458a0f54c818457f4d7c2d202df4e5802c88
+                          <label for="forma_pagamento" class="form-label">Forma Pagamento</label>
+                          <select class="form-control" id="forma_pagamento" name="forma_pagamento">
+                            <option value="Dinheiro">Dinheiro</option>
+                            <option value="Cartão">Cartão</option>
+                            <option value="Pix">Pix</option>  
+                          </select>
                         </div>
                       </div>
                     </div>
-                  
+
                     <div class="row">
-                      <!-- Meio de Pagamento -->
-                      <div class="col-md-6">
-                        <div class="form-group">
-                          <label for="forma_pagamento" class="form-label">Meio de Pagamento</label>
-                          <select class="form-control" id="forma_pagamento" name="forma_pagamento" required>
-                            <option value="" disabled>Selecione o meio de pagamento</option>
-                            <option value="cartao" {% if consulta.forma_pagamento == "cartao" %}selected{% endif %}>Cartão</option>
-                            <option value="dinheiro" {% if consulta.forma_pagamento == "dinheiro" %}selected{% endif %}>Dinheiro</option>
-                            <option value="pix" {% if consulta.forma_pagamento == "pix" %}selected{% endif %}>Pix</option>
-                            <option value="transferencia" {% if consulta.forma_pagamento == "transferencia" %}selected{% endif %}>Transferência</option>
-                          </select>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                              <label for="presenca" class="form-label">Presença</label>
+                              <select class="form-control" id="presenca" name="presenca">
+                                <option value="Sim">Sim</option>
+                                <option value="Nao">Nao</option>
+                                <option value="Falta Inj">Falta Injustificada</option>
+                              </select>
+                            </div>
                         </div>
-                      </div>
-                  
-                      <!-- Desfecho -->
-                      <div class="col-md-6">
-                        <div class="form-group">
-                          <label for="confirmacao" class="form-label">Desfecho</label>
-                          <select class="form-control" id="confirmacao" name="confirmacao" required>
-                            <option value="" disabled>Selecione o desfecho</option>
-                            <option value="realizada" {% if consulta.confirmacao == "realizada" %}selected{% endif %}>Consulta Realizada</option>
-                            <option value="nao_realizada" {% if consulta.confirmacao == "nao_realizada" %}selected{% endif %}>Consulta Não Realizada</option>
-                          </select>
-                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label for="observacoes" class="form-label">Observações</label>
+                            <input class="form-control" id="observacoes" name="observacoes" value="{{ financeiro.observacoes }}" />
+                          </div>
                       </div>
                     </div>
                   

@@ -69,6 +69,7 @@ class Paciente(models.Model):
     tipo_atendimento = models.CharField(max_length=100)
     periodo = models.CharField(max_length=100, default="semanal")
 
+
 class Especialidade(models.Model):
     id = models.AutoField(primary_key=True)
     especialidade = models.CharField(max_length=100)
@@ -85,6 +86,7 @@ class ConfirmacaoConsulta(models.Model):
     observacoes = models.CharField(max_length=100)
     paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
     psicologa = models.ForeignKey(Psicologa, on_delete=models.CASCADE)
+
 
 
 class PsicoConfirmarConsulta(models.Model):
@@ -104,6 +106,18 @@ class Consulta(models.Model):
     semanal = models.CharField(max_length=32)
     quinzenal = models.CharField(max_length=32)
     sala=models.ForeignKey(Sala, on_delete=models.CASCADE)
+
+class Financeiro2(models.Model):
+    dia_semana = models.CharField(max_length=32, blank=True, null=True)
+    periodo_atendimento = models.CharField(max_length=32, blank=True, null=True)
+    psicologa = models.ForeignKey(Psicologa, on_delete=models.CASCADE)
+    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
+    data = models.DateField(null=True, blank=True)
+    presenca = models.CharField(max_length=32, null=True, blank=True)
+    horario = models.TimeField(null=True, blank=True)
+    forma = models.CharField(max_length=32, null=True, blank=True)
+    observacoes = models.CharField(max_length=32, null=True, blank=True)
+    valor = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
 class Financeiro(models.Model):
     psicologa = models.ForeignKey(Psicologa, on_delete=models.CASCADE, null=True)

@@ -9,7 +9,6 @@
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">Resumo Financeiro</h5>
-                
                 <div class="mb-3">
                     <h6 class="text-muted">Valor Total dos Atendimentos</h6>
                     <p class="card-text font-weight-bold">
@@ -48,93 +47,82 @@
                 <h6>Cadastrar</h6>
             </div>
             <div class="card-body p-4">
+                    <button type="button" class="btn btn-primary"><a  class="text-white" href="{% url 'adiciona_confirma_consulta' psicologo.id %}">Adicionar Semana</a></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+                <h6>Filtragem</h6>
+            </div>
+            <div class="card-body p-4">
                 <form method="POST" action="{% url 'confirma_consulta' psicologo.id %}">
                     {% csrf_token %}
                     
                     <div class="row">
-                        <!-- Seleção de Paciente -->
+                        <!-- Data da Consulta -->
                         <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="paciente" class="form-label">Paciente</label>
-                                <select class="form-control" id="paciente" name="paciente" required>
-                                    <option value="" disabled selected>Selecione o paciente</option>
-                                    {% for paciente in pacientes %}
-                                        <option value="{{ paciente.id }}">{{ paciente.nome }}</option>
-                                    {% endfor %}
-                                </select>
+                          <div class="form-group">
+                            <label for="dia_semana" class="form-label">Dia da Semana</label>
+                            <div class="input-group mb-4">
+                              <select class="form-control" id="dia_semana" name="dia_semana">
+                                <option value="Segunda">Segunda</option>
+                                <option value="Terça">Terça</option>
+                                <option value="Quarta">Quarta</option>
+                                <option value="Quinta">Quinta</option>
+                                <option value="Sexta">Sexta</option>
+                                <option value="Sábado">Sábado</option>
+                                <option value="Todos">Todos</option>
+                              </select>
                             </div>
+                          </div>
                         </div>
-                        
-                        <!-- Valor da Consulta -->
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="valor">Valor</label>
-                                <div class="input-group mb-4">
-                                    <span class="input-group-text"><i class="ni ni-money-coins"></i></span>
-                                    <input type="number" class="form-control" id="valor" name="valor" placeholder="Digite o valor" min="0" step="0.01" required>
-                                </div>
-                                <small class="form-text text-muted">Insira o valor em moeda (ex: 100.00)</small>
-                            </div>
-                        </div>
-                    </div>
                     
-                    <div class="row">
-                        <!-- Data e Hora da Consulta -->
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="data" class="form-label">Data e Hora da Consulta</label>
-                                <div class="input-group mb-4">
-                                    <input type="datetime-local" class="form-control" id="data" name="data" required>
-                                </div>
-                            </div>
-                        </div>
-                        
                         <!-- Observação -->
                         <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="observacoes" class="form-label">Observação</label>
-                                <textarea class="form-control" id="observacoes" name="observacoes" rows="3" placeholder="Observações sobre a consulta"></textarea>
-                            </div>
+                          <div class="form-group">
+                            <label for="periodo_atendimento" class="form-label">Período de Atendimento</label>
+                            <select class="form-control" id="periodo_atendimento" name="periodo_atendimento">
+                              <option value="Semanal">Semanal</option>
+                              <option value="Mensal">Mensal</option>
+                              <option value="Todos">Todos</option>  
+                            </select>
+                          </div>
                         </div>
-                    </div>
-                    
+                      </div>
+
+
                     <div class="row">
-                        <!-- Meio de Pagamento -->
+                        <!-- Data da Consulta -->
                         <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="forma_pagamento" class="form-label">Meio de Pagamento</label>
-                                <select class="form-control" id="forma_pagamento" name="forma_pagamento" required>
-                                    <option value="" disabled selected>Selecione o meio de pagamento</option>
-                                    <option value="cartao">Cartão</option>
-                                    <option value="dinheiro">Dinheiro</option>
-                                    <option value="pix">Pix</option>
-                                    <option value="transferencia">Transferência</option>
-                                </select>
-                            </div>
+                          <div class="form-group">
+                            <label for="data_inicio" class="form-label">Data de Início</label>
+                              <input type="date" class="form-control" id="data_inicio" name="data_inicio">
+                          </div>
                         </div>
-                        
-                        <!-- Desfecho -->
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="confirmacao" class="form-label">Desfecho</label>
-                                <select class="form-control" id="confirmacao" name="confirmacao" required>
-                                    <option value="" disabled selected>Selecione o desfecho</option>
-                                    <option value="realizada">Consulta Realizada</option>
-                                    <option value="nao_realizada">Consulta Não Realizada</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
                     
-                    <div class="row">
+                        <!-- Observação -->
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label for="data_fim" class="form-label">Data de Fim</label>
+                            <input type="date" class="form-control" id="data_fim" name="data_fim">
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="row">
                         <!-- Botão de Submissão -->
                         <div class="col-md-12">
-                            <div class="form-group text-center mt-4">
-                                <button type="submit" class="btn btn-primary">Salvar Consulta</button>
-                                <button type="reset" class="btn btn-primary">Resetar</button>
-                            </div>
+                          <div class="form-group text-center mt-4">
+                            <button type="submit" class="btn btn-primary">Aplicar Filtragens</button>
+                          </div>
                         </div>
-                    </div>
+                      </div>
+                
                 </form>
             </div>
         </div>
@@ -153,33 +141,33 @@
                         <thead>
                             <tr>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nome do Cliente</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Data / Horário</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Dia Semana</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Periodo de Atendimento</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor ( R$ )</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Data</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Forma Pagamento</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Confirmação</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ações</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Recibo</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Presença</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Observações</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ações</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for consulta in consultas %}
+                            {% for financeiro in financeiros %}
                                 <tr>
-                                    <td class="align-middle text-center">{{ consulta.paciente.nome }}</td>
-                                    <td class="align-middle text-center">{{ consulta.psicologo.nome }}</td>
-                                    <td class="align-middle text-center">{{ consulta.data|date:"d/m/Y H:i" }}</td> <!-- Exibindo data formatada -->
-                                    <td class="align-middle text-center">{{ consulta.forma_pagamento }}</td>
-                                    <td class="align-middle text-center">{{ consulta.valor }}</td>
-                                    <td class="align-middle text-center">{{ consulta.confirmacao }}</td>
+                                    <td class="align-middle text-center">{{ financeiro.paciente.nome }}</td>
+                                    <td class="align-middle text-center">{{ financeiro.dia_semana }}</td>
+                                    <td class="align-middle text-center">{{ financeiro.horario }}</td> <!-- Exibindo data formatada -->
+                                    <td class="align-middle text-center">{{ financeiro.periodo_atendimento }}</td>
+                                    <td class="align-middle text-center">R$ {{ financeiro.paciente.valor }}</td>
+                                    <td class="align-middle text-center">{{ financeiro.data }}</td>
+                                    <td class="align-middle text-center">{{ financeiro.forma }}</td>
+                                    <td class="align-middle text-center">{{ financeiro.presenca }}</td>
+                                    <td class="align-middle text-center">{{ financeiro.observacoes }}</td>
                                     <td class="align-middle text-center">
-                                        <a href="{% url  'gerar_recibo' id_consulta=consulta.id %}">Gerar</a>
+                                        <a href="{% url 'editar_confirma_consulta' financeiro_id=financeiro.id %}" class="text-secondary text-xs" data-toggle="tooltip" data-original-title="Editar consulta">Editar</a> /
+                                        <a href="#" class="text-secondary text-xs" data-toggle="tooltip" data-original-title="Excluir consulta">Excluir</a>
                                     </td>
-                                    <td class="align-middle text-center">
-                                        <a href="{% url 'editar_confirma_consulta' psicologo.id consulta.id %}" class="text-secondary text-xs" data-toggle="tooltip" data-original-title="Editar consulta">Editar</a> /
-                                        <a href="{% url 'deletar_consulta' psicologo.id consulta.id %}" class="text-secondary text-xs" data-toggle="tooltip" data-original-title="Excluir consulta">Excluir</a>
-                                    </td>
-                                    <td class="align-middle text-center">{{ consulta.observacoes }}</td>
                                 </tr>
                             {% empty %}
                                 <tr>

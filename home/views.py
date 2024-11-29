@@ -1,4 +1,5 @@
 from decimal import Decimal
+from pyexpat.errors import messages
 import shutil
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.views import PasswordResetView, PasswordChangeView, PasswordResetConfirmView
@@ -10,7 +11,7 @@ from rolepermissions.roles import assign_role
 from rolepermissions.decorators import has_role_decorator
 from django.contrib.auth.models import User, Group
 from django.http import HttpResponse
-from .models import Psicologa, Usuario, Consulta, Unidade, Sala, Paciente, ConfirmacaoConsulta, Financeiro, EspecialidadePsico, Especialidade, Publico, PublicoPsico
+from .models import Psicologa, Usuario, Consulta, Unidade, Sala, Paciente, ConfirmacaoConsulta, Financeiro, EspecialidadePsico, Especialidade, Publico, PublicoPsico, Financeiro2
 from rolepermissions.roles import assign_role, get_user_roles, RolesManager
 from rolepermissions.exceptions import RoleDoesNotExist
 from django.contrib.auth.models import Group
@@ -29,6 +30,8 @@ from django.conf import settings
 import tempfile
 from decimal import Decimal, InvalidOperation
 from django.shortcuts import render
+from django.db.models import Q
+from datetime import datetime
 
 
 
@@ -533,7 +536,7 @@ def update_consulta(request, consulta_id):
         consulta.Paciente = paciente
         consulta.save()
 
-        return redirect('lista_consultas')
+        return redirect('agenda_central')
     
     return render(request, "pages/edit_consulta.html", {
         'salas': salas_atendimento, 
@@ -549,7 +552,7 @@ def delete_consulta(request, id_consulta):
 
     if request.method == 'POST':
         consulta.delete()
-        return redirect('lista_consultas')
+        return redirect('agenda_central')
 
     return render(request, 'pages/deletar_agenda_central.html', {'consulta': consulta})
 
@@ -812,66 +815,6 @@ def editar_confirma_consulta(request, psicologo_id, consulta_id):
         'pacientes': pacientes,
     })
 
-
-
-@login_required(login_url='login_1')
-def gerar_recibo(request, id_consulta):
-
-    consulta = get_object_or_404(ConfirmacaoConsulta, id=id_consulta)
-
-    if request.method == 'POST':
-
-         # Caminho do documento original
-        original_doc_path = os.path.join(settings.BASE_DIR, 'Documento_Recibo.docx')
-        # Caminho para a cópia modificada
-        copied_doc_path = os.path.join(settings.BASE_DIR, 'Documento_Recibo_Copia.docx')
-        
-        # Criar uma cópia do documento original
-        shutil.copyfile(original_doc_path, copied_doc_path)
-        
-        # Carregar e modificar o documento copiado
-        doc = Document(copied_doc_path)
-        
-        # Substituir placeholders no documento
-        for paragraph in doc.paragraphs:
-            if 'Valor' in paragraph.text:
-                paragraph.text = paragraph.text.replace(
-                    'Valor', 
-                    str(consulta.valor)
-                )
-            if 'Nome_Psicologa' in paragraph.text:
-                paragraph.text = paragraph.text.replace(
-                    'Nome_Psicologa', 
-                    str(consulta.psicologo.nome)
-                )
-            if 'Observacao' in paragraph.text:
-                paragraph.text = paragraph.text.replace(
-                    'Observacao', 
-                    f'R$ {str(consulta.observacoes)}'
-                )
-            if 'dia' in paragraph.text:
-                paragraph.text = paragraph.text.replace(
-                    'dia', 
-                    str(consulta.data.date().day)
-                )
-            if 'mês' in paragraph.text:
-                paragraph.text = paragraph.text.replace(
-                    'mês', 
-                    str(consulta.data.date().month)
-                )
-            if 'ano' in paragraph.text:
-                paragraph.text = paragraph.text.replace(
-                    'ano', 
-                    str(consulta.data.date().year)
-                )
-            
-        
-        # Salvar o documento copiado modificado
-        doc.save(copied_doc_path)
-
-    
-    return render(request, 'pages/gerar_recibo.html', {'consulta': consulta})
-
 #financeiro das psicólogas
 @login_required(login_url='login1')
 def financeiro(request):
@@ -1118,6 +1061,109 @@ def cadastrar_publico(request):
     
     return render(request, 'pages/publicos.html', 
                   { 'publicos': publicos })
+
+@login_required(login_url='login1')
+def Confirmar_Consulta(request, psicologo_id):
+
+    psicologa = get_object_or_404(Psicologa, id=psicologo_id)
+    consultas_psico = Financeiro2.objects.filter(psicologa=psicologa)
+
+    if request.method == "POST":
+        # Coletar os dados do formulário
+        dia_semana = request.POST.get("dia_semana")
+        periodo_atendimento = request.POST.get("periodo_atendimento")
+        data_inicio = request.POST.get("data_inicio")
+        data_fim = request.POST.get("data_fim")
+        
+        # Filtragem por Dia da Semana (exceto "Todos")
+        if dia_semana and dia_semana != "Todos":
+            consultas_psico = consultas_psico.filter(dia_semana=dia_semana)
+        
+        # Filtragem por Período de Atendimento (exceto "Todos")
+        if periodo_atendimento and periodo_atendimento != "Todos":
+            consultas_psico = consultas_psico.filter(paciente__periodo=periodo_atendimento)
+        
+        # Filtragem por intervalo de Datas
+        if data_inicio and data_fim:
+            try:
+                data_inicio = datetime.strptime(data_inicio, "%Y-%m-%d")
+                data_fim = datetime.strptime(data_fim, "%Y-%m-%d")
+                # Filtrar consultas dentro do intervalo de datas
+                consultas_psico = consultas_psico.filter(data__range=[data_inicio, data_fim])
+            except ValueError:
+                # Tratar erro no formato de datas
+                messages.error(request, "Por favor, insira datas válidas.")
+        elif data_inicio:
+            try:
+                data_inicio = datetime.strptime(data_inicio, "%Y-%m-%d")
+                consultas_psico = consultas_psico.filter(data__gte=data_inicio)
+            except ValueError:
+                messages.error(request, "Por favor, insira uma data de início válida.")
+        elif data_fim:
+            try:
+                data_fim = datetime.strptime(data_fim, "%Y-%m-%d")
+                consultas_psico = consultas_psico.filter(data__lte=data_fim)
+            except ValueError:
+                messages.error(request, "Por favor, insira uma data de fim válida.")
+
+
+    # Cálculos financeiros
+    valor_total_atendimentos = consultas_psico.filter(presenca='Sim').aggregate(Sum('valor'))['valor__sum'] or 0
+    valor_total_cartao = consultas_psico.filter(forma='Cartão').aggregate(Sum('valor'))['valor__sum'] or 0
+    valor_repasse = valor_total_atendimentos / 2
+    valor_acerto = valor_repasse - valor_total_cartao
+    
+    return render(request, 'pages/confirma_consulta.html', {'financeiros': consultas_psico
+                                                            , 'psicologo': psicologa,
+                                                            'valor_total_atendimentos': valor_total_atendimentos,
+                                                            'valor_total_cartao': valor_total_cartao,
+                                                            'valor_repasse': valor_repasse,
+                                                            'valor_acerto': valor_acerto})
+
+@login_required(login_url='login1')
+def EditarConfirmaConsulta(request, financeiro_id):
+
+    financeiro = get_object_or_404(Financeiro2, id=financeiro_id)
+
+    if request.method == "POST":
+
+        data = request.POST.get('data')
+        forma_pagamento = request.POST.get('forma_pagamento')
+        presenca = request.POST.get('presenca')
+        observacoes = request.POST.get('observacoes')
+
+        financeiro.data = data
+        financeiro.forma = forma_pagamento
+        financeiro.presenca = presenca
+        financeiro.observacoes = observacoes
+
+        financeiro.save()
+
+        return redirect('confirma_consulta', psicologo_id=financeiro.psicologa.id)
+    
+    return render(request, 'pages/editar_confirma_consulta.html', {'financeiro': financeiro})
+
+@login_required(login_url='login1')
+def AdicionarConfirma_consulta(request, psicologo_id):
+
+    psicologa = get_object_or_404(Psicologa, id=psicologo_id)
+    consultas_psico = Consulta.objects.filter(psicologo=psicologa)
+
+    if request.method == "POST":
+
+        for consulta in consultas_psico:
+                Financeiro2.objects.create(
+                    dia_semana=consulta.dia_semana,
+                    periodo_atendimento=consulta.Paciente.periodo,
+                    horario=consulta.horario,
+                    psicologa=consulta.psicologo,
+                    paciente=consulta.Paciente,
+                    valor=consulta.Paciente.valor
+                )
+        
+        return redirect('confirma_consulta', psicologo_id=psicologa.id)
+        
+    return render(request, 'pages/adiciona_confirma_consulta.html',  {'psicologo': psicologa})
 
 @login_required(login_url='login1')
 def consulta_cadastrada2(request):
