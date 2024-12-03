@@ -118,6 +118,7 @@ class Financeiro2(models.Model):
     forma = models.CharField(max_length=32, null=True, blank=True)
     observacoes = models.CharField(max_length=32, null=True, blank=True)
     valor = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    semana = models.IntegerField()  # Semana dentro do mês
 
 class Financeiro(models.Model):
     psicologa = models.ForeignKey(Psicologa, on_delete=models.CASCADE, null=True)

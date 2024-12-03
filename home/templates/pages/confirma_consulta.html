@@ -146,6 +146,7 @@
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Periodo de Atendimento</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor ( R$ )</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Data</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Semana Mês</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Forma Pagamento</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Presença</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Observações</th>
@@ -161,6 +162,7 @@
                                     <td class="align-middle text-center">{{ financeiro.periodo_atendimento }}</td>
                                     <td class="align-middle text-center">R$ {{ financeiro.paciente.valor }}</td>
                                     <td class="align-middle text-center">{{ financeiro.data }}</td>
+                                    <td class="align-middle text-center">Semana {{ financeiro.semana }}</td>
                                     <td class="align-middle text-center">{{ financeiro.forma }}</td>
                                     <td class="align-middle text-center">{{ financeiro.presenca }}</td>
                                     <td class="align-middle text-center">{{ financeiro.observacoes }}</td>

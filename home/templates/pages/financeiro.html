@@ -4,84 +4,42 @@
 {% block content %}
 
 <div class="row">
-    <div class="col-12">
-        <div class="card mb-4">
-            <div class="card-header pb-0">
-                <h6>Cadastro Financeiro Psicólogas</h6>
+    <!-- Coluna do card de resumo financeiro -->
+    <div class="col-md-6 my-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Resumo Financeiro</h5>
+                
+                <div class="mb-3">
+                    <h6 class="text-muted">Valor Total dos Atendimentos</h6>
+                    <p class="card-text font-weight-bold">
+                        R$ {{ valor_total_atendimentos|floatformat:2 }}
+                    </p>
+                </div>
             </div>
-            <div class="card-body p-4">
-                <form method="POST" action="{% url 'financeiro'  %}">
-                    {% csrf_token %}
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="valor_previsto">Valor Previsto entrada até o final do mês</label>
-                                <input type="number" class="form-control" id="valor_previsto" name="valor_previsto" min="0" step="0.01" required>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="valor_pendente">Valor Pendente para Acerto</label>
-                                <input type="number" class="form-control" id="valor_pendente" name="valor_pendente" min="0" step="0.01" required>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="valor_acertado">Valor Acertado</label>
-                                <input type="number" class="form-control" id="valor_acertado" name="valor_acertado" min="0" step="0.01" required>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="qtd_pacientes">Quantidade Pacientes em atendimento</label>
-                                <input type="number" class="form-control" id="qtd_pacientes" name="qtd_pacientes" required>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="desistencias_atendidos">Desistências de pacientes já atendidos</label>
-                                <input type="number" class="form-control" id="desistencias_atendidos" name="desistencias_atendidos" required>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="qtd_marcacoes">Quantidade de novas marcações</label>
-                                <input type="number" class="form-control" id="qtd_marcacoes" name="qtd_marcacoes" required>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="nome_psicologo">Nome do Psicóloga</label>
-                                <select class="form-control" id="nome_psicologo" name="nome_psicologo">
-                                    {% for psicologa in psicologas %}
-                                        <option value="{{ psicologa.nome }}">{{ psicologa.nome }}</option>                                    
-                                    {% endfor %}
-                                </select>                               
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="desistencias_novos">Desistências de pacientes novos</label>
-                                <input type="number" class="form-control" id="desistencias_novos" name="desistencias_novos" required>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="d-flex justify-content-center gap-4 align-middle">
-                                <button type="submit" class="btn btn-primary">Registrar</button>
-                                <button type="reset" class="btn btn-secondary">Resetar</button>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>            
+        </div>
+    </div>
+
+    <!-- Coluna da receita por paciente -->
+    <div class="col-md-6 my-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Receita por Paciente</h5>
+                <ul class="list-group">
+                    {% if receita_por_paciente %}
+                        {% for paciente in receita_por_paciente %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ paciente.paciente__nome }}
+                            <span class="badge badge-primary badge-pill">R$ {{ paciente.receita_bruta|floatformat:2 }}</span>
+                        </li>
+                        {% endfor %}
+                    {% else %}
+                        <li class="list-group-item">
+                            Nenhuma receita encontrada para o período selecionado.
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
         </div>
     </div>
 </div>
@@ -97,15 +55,11 @@
                     <table class="table align-items-center mb-0">
                         <thead>
                             <tr>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Psicóloga</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor Previsto entrada até o final do mês</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor Pendente para Acerto</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor Acertado</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor Total do mês</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Quantidade Pacientes em atendimento</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Desistências de pacientes já atendidos</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Quantidade de novas marcações</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Desistências de pacientes novos</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nome do Cliente</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Plano</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor Consulta ( R$ )</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Semana do Mês</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Desfecho</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -114,33 +68,21 @@
                                 <td class="align-middle text-center">
                                     <div class="d-flex px-2 py-1 border-primary justify-content-center">
                                         <div class="d-flex flex-column justify-content-center">
-                                            <h6 class="mb-0 text-sm text-center">{{ financeiro.psicologa.nome }}</h6>
+                                            <h6 class="mb-0 text-sm text-center">{{ financeiro.paciente.nome }}</h6>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="align-middle text-center">
-                                    <h6 class="mb-0 text-sm text-center">{{ financeiro.valor_previsto }}</h6>
+                                    <h6 class="mb-0 text-sm text-center">{{ financeiro.paciente.periodo }}</h6>
                                 </td>
                                 <td class="align-middle text-center">
-                                    <h6 class="mb-0 text-sm text-center">{{ financeiro.valor_pendente }}</h6>
+                                    <h6 class="mb-0 text-sm text-center">{{ financeiro.paciente.valor }}</h6>
                                 </td>
                                 <td class="align-middle text-center">
-                                    <h6 class="mb-0 text-sm text-center">{{ financeiro.valor_acertado }}</h6>
+                                    <h6 class="mb-0 text-sm text-center">Semana {{ financeiro.semana }}</h6>
                                 </td>
                                 <td class="align-middle text-center">
-                                    <h6 class="mb-0 text-sm text-center">{{ financeiro.valor_total }}</h6>
-                                </td>
-                                <td class="align-middle text-center">
-                                    <h6 class="mb-0 text-sm text-center">{{ financeiro.qtd_pacientes }}</h6>
-                                </td>
-                                <td class="align-middle text-center">
-                                    <h6 class="mb-0 text-sm text-center">{{ financeiro.desistencias_atendidos }}</h6>
-                                </td>
-                                <td class="align-middle text-center">
-                                    <h6 class="mb-0 text-sm text-center">{{ financeiro.qtd_marcacoes }}</h6>
-                                </td>
-                                <td class="align-middle text-center">
-                                    <h6 class="mb-0 text-sm text-center">{{ financeiro.desistencias_novos }}</h6>
+                                    <h6 class="mb-0 text-sm text-center">{{ financeiro.presenca }}</h6>
                                 </td>
                             </tr>
                             {% empty %}

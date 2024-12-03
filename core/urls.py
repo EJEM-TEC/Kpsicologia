@@ -42,7 +42,6 @@ urlpatterns = [
     path("unidades_atendimento/<int:unidade_id>/delete/", views.delete_uni, name="delete_unidade"),
     path("cadastrar_salas/<int:id_sala>/update/", views.update_sala, name="update_sala"),
     path("cadastrar_salas/<int:id_sala>/delete/", views.delete_sala, name="delete_sala"),
-
     path('perfil_usuario/', views.perfil, name='perfil_usuario'),
     path('perfil_usuario/<int:user_id>/editar_perfil/', views.update_profile, name='editar_perfil'),   
     #path('perfil_usuario/<int:user_id>/editar_perfil/', views.update_profile, name='editar_perfil'),
@@ -70,6 +69,7 @@ urlpatterns = [
     path('psicologo_especialidade/<int:psicologo_id>/<int:especialidade_id>', views.DissociarPsicoEspecialidade, name='disPsicoEspecialidade'),
     path('psicologo_publico/<int:psicologo_id>', views.AssociarPsicoPublico, name='psicoPublicos'),
     path('psicologo_publico/<int:psicologo_id>/<int:publico_id>', views.DissociarPsicoPublico, name='disPsicoPublico'),
+    path('consultar_financeiro', views.consultar_financeiro, name='consultar_financeiro'),
     path('handler404/', views.handler404, name='handler404'),
     path('consulta_cadastrada1/', views.consulta_cadastrada1, name='consulta_cadastrada1'),
     path('consulta_cadastrada2/', views.consulta_cadastrada2, name='consulta_cadastrada2'),

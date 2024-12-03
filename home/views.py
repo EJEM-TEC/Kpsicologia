@@ -1127,12 +1127,10 @@ def EditarConfirmaConsulta(request, financeiro_id):
 
     if request.method == "POST":
 
-        data = request.POST.get('data')
         forma_pagamento = request.POST.get('forma_pagamento')
         presenca = request.POST.get('presenca')
         observacoes = request.POST.get('observacoes')
 
-        financeiro.data = data
         financeiro.forma = forma_pagamento
         financeiro.presenca = presenca
         financeiro.observacoes = observacoes
@@ -1143,27 +1141,121 @@ def EditarConfirmaConsulta(request, financeiro_id):
     
     return render(request, 'pages/editar_confirma_consulta.html', {'financeiro': financeiro})
 
+# Mapeamento de dias da semana para números (0 = Segunda, ..., 5 = Sábado)
+DIAS_SEMANA = {
+    "Segunda": 0,
+    "Terça": 1,
+    "Quarta": 2,
+    "Quinta": 3,
+    "Sexta": 4,
+    "Sábado": 5
+}
+
 @login_required(login_url='login1')
 def AdicionarConfirma_consulta(request, psicologo_id):
-
     psicologa = get_object_or_404(Psicologa, id=psicologo_id)
     consultas_psico = Consulta.objects.filter(psicologo=psicologa)
 
-    if request.method == "POST":
+    # Data atual
+    hoje = datetime.now()
 
+    # Obtém o último domingo antes da data de hoje (considerando o domingo como início da semana anterior)
+    ultimo_domingo = hoje - timedelta(days=hoje.weekday() + 1)
+
+    # Calcula o início e o fim da semana anterior (domingo a sábado)
+    inicio_semana_passada = ultimo_domingo - timedelta(days=6)
+    fim_semana_passada = ultimo_domingo
+
+    if request.method == "POST":
         for consulta in consultas_psico:
+            # Obtém o índice do dia da semana
+            dia_semana_index = DIAS_SEMANA.get(consulta.dia_semana)
+
+            if dia_semana_index is None:
+                continue  # Ignora se o dia da semana não for válido
+
+            # Calcula a data exata da consulta com base no início da semana passada
+            data_consulta = inicio_semana_passada + timedelta(days=dia_semana_index)
+
+            # Determina a semana correta dentro do mês
+            semana_mes = (data_consulta.day - 1) // 7 + 1  # Calcula a semana no mês (1ª, 2ª, etc.)
+
+            # Verifica se o registro já existe
+            existe = Financeiro2.objects.filter(
+                dia_semana=consulta.dia_semana,
+                horario=consulta.horario,
+                psicologa=consulta.psicologo,
+                paciente=consulta.Paciente,
+                data=data_consulta
+            ).exists()
+
+            if not existe:
                 Financeiro2.objects.create(
                     dia_semana=consulta.dia_semana,
                     periodo_atendimento=consulta.Paciente.periodo,
                     horario=consulta.horario,
                     psicologa=consulta.psicologo,
                     paciente=consulta.Paciente,
-                    valor=consulta.Paciente.valor
+                    valor=consulta.Paciente.valor,
+                    data=data_consulta,  # Data ajustada
+                    semana=semana_mes  # Semana calculada no mês
                 )
-        
+
         return redirect('confirma_consulta', psicologo_id=psicologa.id)
-        
-    return render(request, 'pages/adiciona_confirma_consulta.html',  {'psicologo': psicologa})
+
+    return render(request, 'pages/adiciona_confirma_consulta.html', {'psicologo': psicologa})
+
+
+@login_required(login_url='login1')
+def consultar_financeiro(request):
+    if request.method == "POST":
+        mes = request.POST.get('mes')
+        ano = request.POST.get('ano')
+
+        if mes and ano:
+            try:
+                mes = int(mes)
+                ano = int(ano)
+
+                # Calcula o início e o fim do mês selecionado
+                data_inicio = datetime(ano, mes, 1)
+                if mes == 12:
+                    data_fim = datetime(ano + 1, 1, 1) - timedelta(days=1)
+                else:
+                    data_fim = datetime(ano, mes + 1, 1) - timedelta(days=1)
+
+                # Filtra as consultas financeiras com base no intervalo de datas e exclui as presenças "Não"
+                financeiros = Financeiro2.objects.filter(data__range=[data_inicio, data_fim]).exclude(presenca="Nao")
+
+                # Receita bruta por paciente (somando valor por paciente no período)
+                receita_por_paciente = financeiros.values('paciente__nome').annotate(
+                    receita_bruta=Sum('valor')
+                ).order_by('paciente__nome')
+
+                # Receita bruta total de todos os pacientes no período
+                receita_total = financeiros.aggregate(receita_total=Sum('valor'))
+
+                # Garante que receita_total seja 0 caso não haja consultas financeiras
+                valor_total_atendimentos = receita_total['receita_total'] if receita_total['receita_total'] else 0
+
+                return render(request, 'pages/financeiro.html', {
+                    'financeiros': financeiros,
+                    'mes': mes,
+                    'ano': ano,
+                    'receita_por_paciente': receita_por_paciente,
+                    'valor_total_atendimentos': valor_total_atendimentos,
+                    'message': "Nenhuma consulta financeira encontrada." if not financeiros else None
+                })
+
+            except ValueError:
+                # Em caso de valores inválidos para mês ou ano
+                return render(request, 'pages/consultar_financeiro.html', {
+                    'error': "Por favor, insira um mês e ano válidos."
+                })
+
+    return render(request, 'pages/consultar_financeiro.html')
+
+
 
 @login_required(login_url='login1')
 def consulta_cadastrada2(request):
