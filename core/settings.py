@@ -30,7 +30,7 @@ if not SECRET_KEY:
 # Render Deployment Code
 DEBUG = True
 
-ALLOWED_HOSTS = ['15.228.58.61', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['*']
 
 # handler404 = 'home.views.handler404'
 # handler500 = 'home.views.handler500'
