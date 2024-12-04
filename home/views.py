@@ -1,36 +1,24 @@
 from decimal import Decimal
 from pyexpat.errors import messages
-import shutil
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.views import PasswordResetView, PasswordChangeView, PasswordResetConfirmView
 from django.urls import reverse
-from home.forms import RegistrationForm, UserPasswordResetForm, UserSetPasswordForm, UserPasswordChangeForm
+from home.forms import UserPasswordResetForm, UserSetPasswordForm, UserPasswordChangeForm
 from django.contrib.auth import logout, authenticate, login as login_django
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from rolepermissions.roles import assign_role
 from rolepermissions.decorators import has_role_decorator
 from django.contrib.auth.models import User, Group
-from django.http import HttpResponse, HttpResponseForbidden
 from .models import Psicologa, Usuario, Consulta, Unidade, Sala, Paciente, ConfirmacaoConsulta, Financeiro, EspecialidadePsico, Especialidade, Publico, PublicoPsico, Financeiro2
-from rolepermissions.roles import assign_role, get_user_roles, RolesManager
-from rolepermissions.exceptions import RoleDoesNotExist
+from rolepermissions.roles import assign_role
 from django.contrib.auth.models import Group
 from django.contrib.auth import authenticate, login as login_django
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import update_session_auth_hash
 from datetime import timedelta
 from django.db.models import Sum
 from django.shortcuts import render, get_object_or_404, redirect
-from docx import Document
-from io import BytesIO
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
-import os
-from django.conf import settings
-import tempfile
 from decimal import Decimal, InvalidOperation
 from django.shortcuts import render
-from django.db.models import Q
 from datetime import datetime
 from django.db.models import F, ExpressionWrapper, DecimalField, Sum
 from django.db.models.functions import Coalesce  # Import correto para Coalesce
@@ -42,7 +30,6 @@ def handler404(request, exception):
 
 def handler500(request):
     return render(request, '500.html', status=500)
-
 
 # Páginas Simples
 @login_required(login_url='login1')
