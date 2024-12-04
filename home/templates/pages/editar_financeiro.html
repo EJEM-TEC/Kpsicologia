@@ -1,0 +1,43 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+              <h6>Determinar valor</h6>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="{% url 'editar_financeiro' id_financeiro=financeiro.id %}">
+                    {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6">
+                              <div class="form-group">
+                                <label for="valor_pagamento">Valor de pagamento ( R$ )</label>
+                                <input type="number"class="form-control" id="valor_pagamento" name="valor_pagamento" value="{{ financeiro.valor_pagamento }}" required>
+                              </div>
+                            </div>
+                            <div class="col-md-6">
+                              <div class="form-group">
+                                <label for="data_pagamento">Data de pagamento </label>
+                                <input type="date"class="form-control" id="data_pagamento" name="data_pagamento" value="{{ financeiro.data_pagamento }}" required>
+                              </div>
+                            </div>
+                          </div>
+                        <div class="row">
+                              <div class="col-md-6">
+                                <div class="d-flex justify-content-center gap-4 align-middle">
+                                  <button type="submit" class="btn bg-gradient-primary">Atualizar</button>
+                                  <button type="reset" class="btn bg-gradient-secondary">Resetar</button>
+                                </div>
+                              </div>
+                        </div>
+                     </div>
+                  </form>
+              </div>
+          </div>
+    </div>
+</div>
+
+{% endblock content %}

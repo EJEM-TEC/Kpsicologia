@@ -46,6 +46,8 @@ urlpatterns = [
     path('perfil_usuario/<int:user_id>/editar_perfil/', views.update_profile, name='editar_perfil'),   
     #path('perfil_usuario/<int:user_id>/editar_perfil/', views.update_profile, name='editar_perfil'),
     path('psicologas/', views.psicologa, name='psicologa'),
+    path('cadastros', views.cadastros, name='cadastros'),
+    path('visualizar_psicologas', views.visualizar_psicologos, name='visualizar_psicologas'),
     # URLs para gerenciamento de consultas
     #path('consultas/novo/', views.create_consulta, name='create_consulta'),  # URL para criar nova consulta
     path('consultas/editar/<int:id_consulta>/', views.update_consulta, name='update_consulta'),  # URL para editar consulta
@@ -62,6 +64,7 @@ urlpatterns = [
     path('psicologas/<int:financeiro_id>/editar', views.EditarConfirmaConsulta, name='editar_confirma_consulta'),
     path('psicologas/<int:psicologo_id>/agendar/', views.psico_agenda, name='psico_agenda'),
     path('financeiro/', views.financeiro, name='financeiro'),
+    path('editar_financeiro/<int:id_financeiro>', views.editar_financeiro, name='editar_financeiro'),
     path('agenda_central', views.agenda_central, name='agenda_central'),
     path('especialidades', views.cadastrar_especialidade, name='especialidades'),
     path('publicos', views.cadastrar_publico, name='publicos'),

@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from rolepermissions.roles import assign_role
 from rolepermissions.decorators import has_role_decorator
 from django.contrib.auth.models import User, Group
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseForbidden
 from .models import Psicologa, Usuario, Consulta, Unidade, Sala, Paciente, ConfirmacaoConsulta, Financeiro, EspecialidadePsico, Especialidade, Publico, PublicoPsico, Financeiro2
 from rolepermissions.roles import assign_role, get_user_roles, RolesManager
 from rolepermissions.exceptions import RoleDoesNotExist
@@ -32,6 +32,8 @@ from decimal import Decimal, InvalidOperation
 from django.shortcuts import render
 from django.db.models import Q
 from datetime import datetime
+from django.db.models import F, ExpressionWrapper, DecimalField, Sum
+from django.db.models.functions import Coalesce  # Import correto para Coalesce
 
 
 
@@ -46,6 +48,14 @@ def handler500(request):
 @login_required(login_url='login1')
 def index(request):
     return render(request, 'pages/index.html', { 'segment': 'index' })
+
+@login_required(login_url='login1')
+def cadastros(request):
+
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permissions.html')
+
+    return render(request, 'pages/cadastros.html', { 'segment': 'cadastros' })
 
 def billing(request):
     return render(request, 'pages/billing.html', { 'segment': 'billing' })
@@ -556,7 +566,7 @@ def delete_consulta(request, id_consulta):
 
     return render(request, 'pages/deletar_agenda_central.html', {'consulta': consulta})
 
-
+@login_required(login_url='login1')
 def psicologa(request):
     
     psicologos = Psicologa.objects.all()
@@ -601,6 +611,16 @@ def psicologa(request):
 
     return render(request, 'pages/psicologa.html', {'psicologos': psicologos, 'especialidades': especialidades})
 
+
+@login_required(login_url='login1')
+def visualizar_psicologos(request):
+
+    psicologos = Psicologa.objects.all()
+
+    return render(request, 'pages/visualizacao_psicologas.html', {'psicologos': psicologos })
+
+
+@login_required(login_url='login1')
 def deletar_psicologo(request, psicologo_id):
     # Busca a psicóloga específica pelo ID ou retorna 404 se não for encontrada
     psicologa = get_object_or_404(Psicologa, id=psicologo_id)
@@ -619,6 +639,10 @@ def deletar_psicologo(request, psicologo_id):
 
 def editar_psicologo(request, psicologo_id):
     psicologo = get_object_or_404(Psicologa, id=psicologo_id)
+
+    # Verificar se o usuário é a psicóloga ou faz parte do grupo 'Administrador'
+    if request.user.username != psicologo.nome and not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission1.html')
     
 
     # Extraindo horas e minutos para o template
@@ -860,6 +884,12 @@ def financeiro(request):
 @login_required(login_url='login1') 
 def psico_agenda(request, psicologo_id):
     psicologa = get_object_or_404(Psicologa, id=psicologo_id)
+
+
+    # Verificar se o usuário é a psicóloga ou faz parte do grupo 'Administrador'
+    if request.user.username != psicologa.nome and not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission1.html')
+
     salas_atendimento = Sala.objects.all()
     consultas = Consulta.objects.filter(psicologo=psicologa)
     pacientes = Paciente.objects.all()
@@ -950,6 +980,11 @@ def AssociarPsicoEspecialidade(request, psicologo_id):
     psicologo = get_object_or_404(Psicologa, id=psicologo_id)
     especialidadesGerais = Especialidade.objects.all()
 
+    # Verificar se o usuário é a psicóloga ou faz parte do grupo 'Administrador'
+    if request.user.username != psicologo.nome and not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission1.html')
+
+
     if request.method == "POST":
         
         especialidade_id = request.POST.get('especialidade_id')
@@ -999,6 +1034,10 @@ def AssociarPsicoPublico(request, psicologo_id):
 
     psicologo = get_object_or_404(Psicologa, id=psicologo_id)
     publicosGerais = Publico.objects.all()
+
+    # Verificar se o usuário é a psicóloga ou faz parte do grupo 'Administrador'
+    if request.user.username != psicologo.nome and not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission1.html')
 
     if request.method == "POST":
         
@@ -1067,6 +1106,11 @@ def Confirmar_Consulta(request, psicologo_id):
 
     psicologa = get_object_or_404(Psicologa, id=psicologo_id)
     consultas_psico = Financeiro2.objects.filter(psicologa=psicologa)
+
+    
+     # Verificar se o usuário é a psicóloga ou faz parte do grupo 'Administrador'
+    if request.user.username != psicologa.nome and not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission1.html')
 
     if request.method == "POST":
         # Coletar os dados do formulário
@@ -1227,9 +1271,14 @@ def consultar_financeiro(request):
                 # Filtra as consultas financeiras com base no intervalo de datas e exclui as presenças "Não"
                 financeiros = Financeiro2.objects.filter(data__range=[data_inicio, data_fim]).exclude(presenca="Nao")
 
-                # Receita bruta por paciente (somando valor por paciente no período)
+                # Receita bruta por paciente e cálculo dos novos valores
                 receita_por_paciente = financeiros.values('paciente__nome').annotate(
-                    receita_bruta=Sum('valor')
+                    receita_bruta=Sum('valor'),
+                    valor_momento=ExpressionWrapper(Sum('valor') / 2, output_field=DecimalField(max_digits=10, decimal_places=2)),
+                    # Uso de Coalesce para tratar valor_pagamento nulo
+                    valor_recebido=ExpressionWrapper(Sum(Coalesce(F('valor_pagamento'), 0) / 2), output_field=DecimalField(max_digits=10, decimal_places=2)),
+                ).annotate(
+                    valor_a_receber=ExpressionWrapper(Sum('valor') / 2 - Sum(Coalesce(F('valor_pagamento'), 0) / 2), output_field=DecimalField(max_digits=10, decimal_places=2))
                 ).order_by('paciente__nome')
 
                 # Receita bruta total de todos os pacientes no período
@@ -1238,12 +1287,26 @@ def consultar_financeiro(request):
                 # Garante que receita_total seja 0 caso não haja consultas financeiras
                 valor_total_atendimentos = receita_total['receita_total'] if receita_total['receita_total'] else 0
 
+                # Cálculo do valor momento total de todos os pacientes
+                valor_momento_total = valor_total_atendimentos / 2
+
+                # Cálculo dos totais gerais a partir do queryset receita_por_paciente
+                total_receita_bruta = sum([paciente['receita_bruta'] for paciente in receita_por_paciente])
+                total_valor_momento = sum([paciente['valor_momento'] for paciente in receita_por_paciente])
+                total_valor_recebido = sum([paciente['valor_recebido'] for paciente in receita_por_paciente])
+                total_valor_a_receber = sum([paciente['valor_a_receber'] for paciente in receita_por_paciente])
+
                 return render(request, 'pages/financeiro.html', {
                     'financeiros': financeiros,
                     'mes': mes,
                     'ano': ano,
                     'receita_por_paciente': receita_por_paciente,
                     'valor_total_atendimentos': valor_total_atendimentos,
+                    'valor_momento_total': valor_momento_total,
+                    'total_receita_bruta': total_receita_bruta,
+                    'total_valor_momento': total_valor_momento,
+                    'total_valor_recebido': total_valor_recebido,
+                    'total_valor_a_receber': total_valor_a_receber,
                     'message': "Nenhuma consulta financeira encontrada." if not financeiros else None
                 })
 
@@ -1255,6 +1318,21 @@ def consultar_financeiro(request):
 
     return render(request, 'pages/consultar_financeiro.html')
 
+@login_required(login_url='login1')
+def editar_financeiro(request, id_financeiro):
+    financeiro = get_object_or_404(Financeiro2, id=id_financeiro)
+
+    if request.method == "POST":
+        valor_pagamento = request.POST.get('valor_pagamento')
+        data_pagamento = request.POST.get('data_pagamento')
+    
+        if valor_pagamento:
+            financeiro.valor_pagamento = valor_pagamento
+            financeiro.data_pagamento = data_pagamento
+            financeiro.save()
+            return redirect('editar_financeiro', id_financeiro=id_financeiro)
+
+    return render(request, 'pages/editar_financeiro.html', {'financeiro': financeiro})
 
 
 @login_required(login_url='login1')

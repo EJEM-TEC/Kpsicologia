@@ -11,34 +11,96 @@
                 <h5 class="card-title">Resumo Financeiro</h5>
                 
                 <div class="mb-3">
-                    <h6 class="text-muted">Valor Total dos Atendimentos</h6>
+                    <h6 class="text-muted">Valor Teórico Bruto</h6>
                     <p class="card-text font-weight-bold">
                         R$ {{ valor_total_atendimentos|floatformat:2 }}
+                    </p>
+                </div>
+                <div class="mb-3">
+                    <h6 class="text-muted">Valor Líquido Real</h6>
+                    <p class="card-text font-weight-bold">
+                        R$ {{ valor_total_atendimentos|floatformat:2 }}
+                    </p>
+                </div>
+                <div class="mb-3">
+                    <h6 class="text-muted">Valor de momento Kpsicologia</h6>
+                    <p class="card-text font-weight-bold">
+                        R$ {{ total_valor_momento |floatformat:2 }}
+                    </p>
+                </div>
+                <div class="mb-3">
+                    <h6 class="text-muted">Valor Previsto de entrada até o final do mês</h6>
+                    <p class="card-text font-weight-bold">
+                        R$ {{ valor_total_atendimentos|floatformat:2 }}
+                    </p>
+                </div>
+                <div class="mb-3">
+                    <h6 class="text-muted">Valor a Receber Kpsicologia</h6>
+                    <p class="card-text font-weight-bold">
+                        R$ {{ total_valor_a_receber |floatformat:2 }}
+                    </p>
+                </div>
+                <div class="mb-3">
+                    <h6 class="text-muted">Valor recebido por Kpsicologia</h6>
+                    <p class="card-text font-weight-bold">
+                        R$ {{ total_valor_recebido |floatformat:2 }}
                     </p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Coluna da receita por paciente -->
-    <div class="col-md-6 my-4">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Receita por Paciente</h5>
-                <ul class="list-group">
-                    {% if receita_por_paciente %}
-                        {% for paciente in receita_por_paciente %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            {{ paciente.paciente__nome }}
-                            <span class="badge badge-primary badge-pill">R$ {{ paciente.receita_bruta|floatformat:2 }}</span>
-                        </li>
-                        {% endfor %}
-                    {% else %}
-                        <li class="list-group-item">
-                            Nenhuma receita encontrada para o período selecionado.
-                        </li>
-                    {% endif %}
-                </ul>
+    <!-- Coluna do card de registros financeiros -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card-header pb-0">
+                <h6>Registros financeiros por paciente</h6>
+            </div>
+            <div class="card mb-4">
+                <div class="card-body px-0 pt-0 pb-2">
+                    <div class="table-responsive p-0">
+                        <table class="table align-items-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nome Paciente</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor Bruto Teórico ( R$ )</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor Líquido Real ( R$ )</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor de Momento Kpsicologia ( R$ )</th>
+                                    <!-- <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor Previsto de entrada até o final do mês ( R$ )</th> -->
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor a receber Kpsicologia ( R$ )</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor Recebido por Kpsicologia ( R$ )</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for paciente in receita_por_paciente %}
+                                <tr>
+                                    <td class="text-center">
+                                        {{ paciente.paciente__nome }}
+                                    </td>
+                                    <td class="text-center">
+                                         R$   {{ paciente.receita_bruta|floatformat:2 }}
+                                    </td>
+                                    <td class="text-center">
+                                         R$  {{ paciente.receita_bruta|floatformat:2 }}
+                                    </td>
+                                    <td class="text-center">
+                                         R$  {{ paciente.valor_momento|floatformat:2 }}
+                                    </td>
+                                    <td class="text-center">
+                                         R$  {{ paciente.valor_a_receber|floatformat:2 }}
+                                    </td>
+                                    <td class="text-center">
+                                         R$  {{ paciente.valor_recebido|floatformat:2 }}
+                                    </td>
+                                    <!-- <td class="text-center">
+                                         R$  {{ paciente.receita_bruta|floatformat:2 }}
+                                    </td> -->
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -60,6 +122,9 @@
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor Consulta ( R$ )</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Semana do Mês</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Desfecho</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor Pagamento ( R$ )</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Data Pagamento </th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Editar </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -76,13 +141,22 @@
                                     <h6 class="mb-0 text-sm text-center">{{ financeiro.paciente.periodo }}</h6>
                                 </td>
                                 <td class="align-middle text-center">
-                                    <h6 class="mb-0 text-sm text-center">{{ financeiro.paciente.valor }}</h6>
+                                    <h6 class="mb-0 text-sm text-center">R$ {{ financeiro.paciente.valor }}</h6>
                                 </td>
                                 <td class="align-middle text-center">
                                     <h6 class="mb-0 text-sm text-center">Semana {{ financeiro.semana }}</h6>
                                 </td>
                                 <td class="align-middle text-center">
                                     <h6 class="mb-0 text-sm text-center">{{ financeiro.presenca }}</h6>
+                                </td>
+                                <td class="align-middle text-center">
+                                    <h6 class="mb-0 text-sm text-center">R$ {{ financeiro.valor_pagamento }}</h6>
+                                </td>
+                                <td class="align-middle text-center">
+                                    <h6 class="mb-0 text-sm text-center"> {{ financeiro.data_pagamento }}</h6>
+                                </td>
+                                <td class="align-middle text-center">
+                                    <a href="{% url 'editar_financeiro' id_financeiro=financeiro.id %}">Editar</a>
                                 </td>
                             </tr>
                             {% empty %}
