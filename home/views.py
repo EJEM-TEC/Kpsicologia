@@ -803,7 +803,12 @@ def deletar_consulta(request, psicologo_id, consulta_id):
     
     if request.method == "POST":
         consulta.delete()
-        return redirect('confirma_consulta', psicologo_id=psicologo_id)
+
+        if request.url == reverse('psico_agenda', args=[psicologo_id]):
+            return redirect('psico_agenda', psicologo_id=psicologo_id)
+        
+        return redirect('agenda_central')
+    
     
     return render(request, 'pages/confirmar_excluir_consulta.html', {
         'psicologo': psicologo,
