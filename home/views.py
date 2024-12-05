@@ -23,8 +23,6 @@ from datetime import datetime
 from django.db.models import F, ExpressionWrapper, DecimalField, Sum
 from django.db.models.functions import Coalesce  # Import correto para Coalesce
 
-
-
 def handler404(request, exception):
     return render(request, '404.html', status=404)
 
@@ -40,7 +38,7 @@ def index(request):
 def cadastros(request):
 
     if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
-        return render(request, 'pages/error_permissions.html')
+        return render(request, 'pages/error_permission.html')
 
     return render(request, 'pages/cadastros.html', { 'segment': 'cadastros' })
 
@@ -425,8 +423,11 @@ from django.contrib.auth.decorators import login_required
 from rolepermissions.decorators import has_role_decorator
 
 @login_required(login_url='login1')
-@has_role_decorator('administrador')
 def agenda_central(request):
+
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+
     consultas = Consulta.objects.all()
     psicologas = Psicologa.objects.all()
     salas = Sala.objects.all()
@@ -609,6 +610,10 @@ def visualizar_psicologos(request):
 
 @login_required(login_url='login1')
 def deletar_psicologo(request, psicologo_id):
+
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+
     # Busca a psicóloga específica pelo ID ou retorna 404 se não for encontrada
     psicologa = get_object_or_404(Psicologa, id=psicologo_id)
 
@@ -637,11 +642,13 @@ def editar_psicologo(request, psicologo_id):
     if request.method == 'POST':
         nome = request.POST.get('nome')
         cor = request.POST.get('cor')
+        abordagem = request.POST.get("abordagem")
         
 
         # Atualiza os campos do psicólogo
         psicologo.nome = nome
         psicologo.cor = cor
+        psicologo.abordagem = abordagem
         psicologo.save()
 
         # Redireciona para a página do psicólogo após editar
@@ -1242,8 +1249,12 @@ def AdicionarConfirma_consulta(request, psicologo_id):
     return render(request, 'pages/adiciona_confirma_consulta.html', {'psicologo': psicologa})
 
 
-@login_required(login_url='login1')
+login_required(login_url='login1')
 def consultar_financeiro(request):
+
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+
     if request.method == "POST":
         mes = request.POST.get('mes')
         ano = request.POST.get('ano')
@@ -1253,40 +1264,49 @@ def consultar_financeiro(request):
                 mes = int(mes)
                 ano = int(ano)
 
-                # Calcula o início e o fim do mês selecionado
                 data_inicio = datetime(ano, mes, 1)
                 if mes == 12:
                     data_fim = datetime(ano + 1, 1, 1) - timedelta(days=1)
                 else:
                     data_fim = datetime(ano, mes + 1, 1) - timedelta(days=1)
 
-                # Filtra as consultas financeiras com base no intervalo de datas e exclui as presenças "Não"
-                financeiros = Financeiro2.objects.filter(data__range=[data_inicio, data_fim]).exclude(presenca="Nao")
+                 # Filtra as consultas financeiras, exclui "presença=Nao" e ignora registros com valores nulos
+                financeiros = Financeiro2.objects.filter(
+                    data__range=[data_inicio, data_fim]
+                ).exclude(
+                    presenca="Nao"
+                ).exclude(
+                    presenca__isnull=True
+                ).exclude(
+                    valor_pagamento__isnull=True
+                )
+
 
                 # Receita bruta por paciente e cálculo dos novos valores
                 receita_por_paciente = financeiros.values('paciente__nome').annotate(
                     receita_bruta=Sum('valor'),
                     valor_momento=ExpressionWrapper(Sum('valor') / 2, output_field=DecimalField(max_digits=10, decimal_places=2)),
-                    # Uso de Coalesce para tratar valor_pagamento nulo
                     valor_recebido=ExpressionWrapper(Sum(Coalesce(F('valor_pagamento'), 0) / 2), output_field=DecimalField(max_digits=10, decimal_places=2)),
                 ).annotate(
                     valor_a_receber=ExpressionWrapper(Sum('valor') / 2 - Sum(Coalesce(F('valor_pagamento'), 0) / 2), output_field=DecimalField(max_digits=10, decimal_places=2))
+                ).annotate(
+                    valor_previsto=ExpressionWrapper(
+                        (Sum('valor') - Sum(Coalesce(F('valor_pagamento'), 0)) + ((Sum('valor') / 2) - Sum(Coalesce(F('valor_pagamento'), 0) / 2)) * 2) / 2,
+                        output_field=DecimalField(max_digits=10, decimal_places=2)
+                    )
                 ).order_by('paciente__nome')
 
-                # Receita bruta total de todos os pacientes no período
                 receita_total = financeiros.aggregate(receita_total=Sum('valor'))
-
-                # Garante que receita_total seja 0 caso não haja consultas financeiras
                 valor_total_atendimentos = receita_total['receita_total'] if receita_total['receita_total'] else 0
-
-                # Cálculo do valor momento total de todos os pacientes
                 valor_momento_total = valor_total_atendimentos / 2
 
-                # Cálculo dos totais gerais a partir do queryset receita_por_paciente
                 total_receita_bruta = sum([paciente['receita_bruta'] for paciente in receita_por_paciente])
                 total_valor_momento = sum([paciente['valor_momento'] for paciente in receita_por_paciente])
                 total_valor_recebido = sum([paciente['valor_recebido'] for paciente in receita_por_paciente])
                 total_valor_a_receber = sum([paciente['valor_a_receber'] for paciente in receita_por_paciente])
+
+                # Soma de todos os valores previstos de cada paciente
+                total_valor_previsto = sum([paciente['valor_previsto'] for paciente in receita_por_paciente])
 
                 return render(request, 'pages/financeiro.html', {
                     'financeiros': financeiros,
@@ -1299,11 +1319,11 @@ def consultar_financeiro(request):
                     'total_valor_momento': total_valor_momento,
                     'total_valor_recebido': total_valor_recebido,
                     'total_valor_a_receber': total_valor_a_receber,
+                    'total_valor_previsto': total_valor_previsto,  # Passa o valor previsto total para o template
                     'message': "Nenhuma consulta financeira encontrada." if not financeiros else None
                 })
 
             except ValueError:
-                # Em caso de valores inválidos para mês ou ano
                 return render(request, 'pages/consultar_financeiro.html', {
                     'error': "Por favor, insira um mês e ano válidos."
                 })

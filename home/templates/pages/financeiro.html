@@ -31,7 +31,7 @@
                 <div class="mb-3">
                     <h6 class="text-muted">Valor Previsto de entrada até o final do mês</h6>
                     <p class="card-text font-weight-bold">
-                        R$ {{ valor_total_atendimentos|floatformat:2 }}
+                        R$ {{ total_valor_previsto|floatformat:2 }}
                     </p>
                 </div>
                 <div class="mb-3">
@@ -66,7 +66,7 @@
                                     <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor Bruto Teórico ( R$ )</th>
                                     <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor Líquido Real ( R$ )</th>
                                     <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor de Momento Kpsicologia ( R$ )</th>
-                                    <!-- <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor Previsto de entrada até o final do mês ( R$ )</th> -->
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor Previsto de entrada até o final do mês ( R$ )</th>
                                     <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor a receber Kpsicologia ( R$ )</th>
                                     <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor Recebido por Kpsicologia ( R$ )</th>
                                 </tr>
@@ -87,14 +87,15 @@
                                          R$  {{ paciente.valor_momento|floatformat:2 }}
                                     </td>
                                     <td class="text-center">
+                                         R$  {{ paciente.valor_previsto|floatformat:2 }}
+                                    </td>
+                                    <td class="text-center">
                                          R$  {{ paciente.valor_a_receber|floatformat:2 }}
                                     </td>
                                     <td class="text-center">
                                          R$  {{ paciente.valor_recebido|floatformat:2 }}
                                     </td>
-                                    <!-- <td class="text-center">
-                                         R$  {{ paciente.receita_bruta|floatformat:2 }}
-                                    </td> -->
+                                    
                                 </tr>
                                 {% endfor %}
                             </tbody>
