@@ -36,7 +36,15 @@
                 </div>
                 <div class="mb-3">
                     <h6 class="text-muted">Valor a Receber Kpsicologia</h6>
-                    <p class="card-text font-weight-bold">
+                    <p class="card-text font-weight-bold 
+                        {% if total_valor_a_receber > 0 %}
+                            text-success
+                        {% elif total_valor_a_receber == 0 %}
+                            text-warning
+                        {% else %}
+                            text-danger
+                        {% endif %}
+                    ">
                         R$ {{ total_valor_a_receber |floatformat:2 }}
                     </p>
                 </div>
@@ -89,7 +97,14 @@
                                     <td class="text-center">
                                          R$  {{ paciente.valor_previsto|floatformat:2 }}
                                     </td>
-                                    <td class="text-center">
+                                    <td class="text-center 
+                                    {% if paciente.valor_a_receber > 0 %}
+                                    text-success
+                                    {% elif paciente.valor_a_receber == 0 %}
+                                        text-warning
+                                    {% else %}
+                                        text-danger
+                                    {% endif %}">
                                          R$  {{ paciente.valor_a_receber|floatformat:2 }}
                                     </td>
                                     <td class="text-center">
@@ -148,7 +163,16 @@
                                     <h6 class="mb-0 text-sm text-center">Semana {{ financeiro.semana }}</h6>
                                 </td>
                                 <td class="align-middle text-center">
-                                    <h6 class="mb-0 text-sm text-center">{{ financeiro.presenca }}</h6>
+                                    <h6 class="mb-0 text-sm text-center
+                                    {% if financeiro.presenca == 'Sim' %}
+                                    text-success
+                                    {% elif financeiro.presenca == 'Falta Injustificada' %}
+                                        text-warning
+                                    {% else %}
+                                        text-danger
+                                    {% endif %}
+                                    
+                                    ">{{ financeiro.presenca }}</h6>
                                 </td>
                                 <td class="align-middle text-center">
                                     <h6 class="mb-0 text-sm text-center">R$ {{ financeiro.valor_pagamento }}</h6>

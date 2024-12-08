@@ -11,41 +11,40 @@
           <div class="card-body p-4">
             <form method="POST" action="{% url 'consultar_financeiro' %}">
               {% csrf_token %}
-                  <div class="row">
-                        <div class="col-md-6">
-                          <div class="form-group">
-                              <label for="mes">Mês</label>
-                              <select class="form-control" id="mes" name="mes" required>
-                                <option value="1">Janeiro</option>
-                                <option value="2">Fevereiro</option>
-                                <option value="3">Março</option>
-                                <option value="4">Abril</option>
-                                <option value="5">Maio</option>
-                                <option value="6">Junho</option>
-                                <option value="7">Julho</option>
-                                <option value="8">Agosto</option>
-                                <option value="9">Setembro</option>
-                                <option value="10">Outubro</option>
-                                <option value="11">Novembro</option>
-                                <option value="12">Dezembro</option>
-                              </select>
-                      </div>
-                      </div>
-                      <div class="col-md-6">
-                          <div class="form-group">
-                            <label for="ano">Ano</label>
-                            <input type="number" class="form-control" id="ano" name="ano" placeholder="Ex: 2024" required>
-                          </div>
-                      </div>
-                    </div>
-                  <div class="row">
-                        <div class="col-md-6">
-                          <div class="d-flex justify-content-center gap-4 align-middle">
-                            <button type="submit" class="btn bg-gradient-primary">Consultar</button>
-                            <button type="reset" class="btn bg-gradient-secondary">Resetar</button>
-                          </div>
-                        </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="mes">Mês</label>
+                    <select class="form-control" id="mes" name="mes" required>
+                      <option value="1" {% if mes == 1 %}selected{% endif %}>Janeiro</option>
+                      <option value="2" {% if mes == 2 %}selected{% endif %}>Fevereiro</option>
+                      <option value="3" {% if mes == 3 %}selected{% endif %}>Março</option>
+                      <option value="4" {% if mes == 4 %}selected{% endif %}>Abril</option>
+                      <option value="5" {% if mes == 5 %}selected{% endif %}>Maio</option>
+                      <option value="6" {% if mes == 6 %}selected{% endif %}>Junho</option>
+                      <option value="7" {% if mes == 7 %}selected{% endif %}>Julho</option>
+                      <option value="8" {% if mes == 8 %}selected{% endif %}>Agosto</option>
+                      <option value="9" {% if mes == 9 %}selected{% endif %}>Setembro</option>
+                      <option value="10" {% if mes == 10 %}selected{% endif %}>Outubro</option>
+                      <option value="11" {% if mes == 11 %}selected{% endif %}>Novembro</option>
+                      <option value="12" {% if mes == 12 %}selected{% endif %}>Dezembro</option>
+                    </select>
                   </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="ano">Ano</label>
+                    <input type="number" class="form-control" id="ano" name="ano" placeholder="Ex: 2024" value="{{ ano }}" required>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="d-flex justify-content-center gap-4 align-middle">
+                    <button type="submit" class="btn bg-gradient-primary">Consultar</button>
+                    <button type="reset" class="btn bg-gradient-secondary">Resetar</button>
+                  </div>
+                </div>
               </div>
             </form>
           </div>

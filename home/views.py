@@ -1,5 +1,6 @@
 from decimal import Decimal
 from pyexpat.errors import messages
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.views import PasswordResetView, PasswordChangeView, PasswordResetConfirmView
 from django.urls import reverse
@@ -22,6 +23,15 @@ from django.shortcuts import render
 from datetime import datetime
 from django.db.models import F, ExpressionWrapper, DecimalField, Sum
 from django.db.models.functions import Coalesce  # Import correto para Coalesce
+from django.db.models import Q
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from rolepermissions.decorators import has_role_decorator
+from django.shortcuts import render, redirect
+from datetime import datetime, timedelta
+from django.db.models import Sum, F, ExpressionWrapper, DecimalField
+from django.db.models.functions import Coalesce
+from .models import Financeiro2
 
 def handler404(request, exception):
     return render(request, '404.html', status=404)
@@ -32,10 +42,17 @@ def handler500(request):
 # Páginas Simples
 @login_required(login_url='login1')
 def index(request):
+
+    request.session['mes'] = None
+    request.session['ano'] = None
+
     return render(request, 'pages/index.html', { 'segment': 'index' })
 
 @login_required(login_url='login1')
 def cadastros(request):
+
+    request.session['mes'] = None
+    request.session['ano'] = None
 
     if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
         return render(request, 'pages/error_permission.html')
@@ -315,6 +332,10 @@ def logout_user(request):
 
 @login_required(login_url='login1')
 def perfil(request):
+
+    request.session['mes'] = None
+    request.session['ano'] = None
+
     user = request.user
     return render(request, 'pages/perfil_usuario.html', {'user': user})
 
@@ -417,43 +438,53 @@ def editar_confirma_consulta(request, id_consulta):
         return redirect('psicologa')
 
     return render(request, 'pages/editar_confirma_consulta.html', {'pacientes': pacientes, 'consulta': consulta})
-from django.db.models import Q
-from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from rolepermissions.decorators import has_role_decorator
+
 
 @login_required(login_url='login1')
 def agenda_central(request):
+
+    request.session['mes'] = None
+    request.session['ano'] = None
 
     if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
         return render(request, 'pages/error_permission.html')
 
     consultas = Consulta.objects.all()
     psicologas = Psicologa.objects.all()
-    salas = Sala.objects.all()
-    pacientes = Paciente.objects.all()
     especialidades = Especialidade.objects.all()
     publicos = Publico.objects.all()
+    unidades = Unidade.objects.all()
     dias_da_semana = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"]
+    
+    # Filtragem de salas que possuem consultas
+    salas_com_consultas = []
+    salas = Sala.objects.all()
 
+    for sala in salas:
+        if consultas.filter(sala=sala).exists():
+            salas_com_consultas.append(sala)
+
+    # Filtragem por POST (caso tenha)
     if request.method == "POST":
-        paciente_id = request.POST.get("paciente_id")
         psicologa_id = request.POST.get('psicologa_id')
         especialidade_id = request.POST.get('especialidade_id')
         publico_id = request.POST.get('publico')
         dia_da_semana = request.POST.get("dia_semana")
-        horario = request.POST.get("horario")
+        horario_inicio = request.POST.get("horario_inicio")
+        horario_fim = request.POST.get("horario_fim")
+        unidade_id = request.POST.get("unidade_id")
 
         # Filtragem por psicóloga
-        if psicologa_id != 'todos':
+        if psicologa_id and psicologa_id != 'todos':
             psicologo = get_object_or_404(Psicologa, id=psicologa_id)
             consultas = consultas.filter(psicologo=psicologo)
 
-        # Filtragem por paciente
-        if paciente_id != 'todos':
-            paciente = get_object_or_404(Paciente, id=paciente_id)
-            consultas = consultas.filter(Paciente=paciente)
+        # Filtragem por unidade
+        if unidade_id and unidade_id != 'todas':
+            unidade = get_object_or_404(Unidade, id_unidade=unidade_id)
+            consultas = consultas.filter(sala__id_unidade=unidade)
 
+        # Filtragem por especialidade
         if especialidade_id and especialidade_id != 'todos':
             psicologas_com_especialidade = Psicologa.objects.filter(
                 especialidadepsico__especialidade_id=especialidade_id
@@ -471,19 +502,26 @@ def agenda_central(request):
         if dia_da_semana != "todos" and dia_da_semana in dias_da_semana:
             consultas = consultas.filter(dia_da_semana=dia_da_semana)
 
-        # Filtragem por horário
-        if horario and horario != "todos":
-            consultas = consultas.filter(horario=horario)
+        # Filtragem por intervalo de horário
+        if horario_inicio and horario_fim:
+            consultas = consultas.filter(horario__gte=horario_inicio, horario__lte=horario_fim)
+
+        # Após os filtros POST, devemos atualizar a lista de salas com consultas
+        salas_com_consultas = []
+        for sala in salas:
+            if consultas.filter(sala=sala).exists():
+                salas_com_consultas.append(sala)
 
     return render(request, 'pages/page_agenda_central.html', {
         'consultas': consultas,
-        'salas': salas,
+        'salas': salas_com_consultas,  # Envia apenas salas que possuem consultas
         'dias_da_semana': dias_da_semana,
-        'pacientes': pacientes,
         'psicologas': psicologas,
         'especialidades': especialidades,
         'publicos': publicos,
+        'unidades': unidades
     })
+
 
 
 @login_required(login_url='login1')
@@ -602,6 +640,9 @@ def psicologa(request):
 
 @login_required(login_url='login1')
 def visualizar_psicologos(request):
+
+    request.session['mes'] = None
+    request.session['ano'] = None
 
     psicologos = Psicologa.objects.all()
 
@@ -880,10 +921,9 @@ def financeiro(request):
     return render(request, 'pages/financeiro.html', {'financeiros':financeiros})
 
 
-@login_required(login_url='login1') 
+@login_required(login_url='login1')
 def psico_agenda(request, psicologo_id):
     psicologa = get_object_or_404(Psicologa, id=psicologo_id)
-
 
     # Verificar se o usuário é a psicóloga ou faz parte do grupo 'Administrador'
     if request.user.username != psicologa.nome and not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
@@ -891,7 +931,6 @@ def psico_agenda(request, psicologo_id):
 
     salas_atendimento = Sala.objects.all()
     consultas = Consulta.objects.filter(psicologo=psicologa)
-    pacientes = Paciente.objects.all()
     
     if request.method == 'POST':
         nome_cliente = request.POST.get('nome_cliente')
@@ -900,7 +939,16 @@ def psico_agenda(request, psicologo_id):
         sala_atendimento_id = request.POST.get('sala_atendimento')
 
         sala_atendimento = get_object_or_404(Sala, id_sala=sala_atendimento_id)
-        paciente = get_object_or_404(Paciente, id=nome_cliente)
+
+        # Verificar se o paciente existe
+        try:
+            paciente = Paciente.objects.get(nome=nome_cliente)
+        except Paciente.DoesNotExist:
+            # Renderiza a página de erro se o paciente não for encontrado
+            return render(request, 'pages/error_paciente_nao_encontrado.html', {
+                'nome_cliente': nome_cliente,
+                'psicologo': psicologa
+            })
 
         # Verificar se uma consulta com esses mesmos critérios já existe
         consulta_existente = Consulta.objects.filter(
@@ -912,8 +960,6 @@ def psico_agenda(request, psicologo_id):
         ).first()
 
         if consulta_existente:
-            # Exibir mensagem de erro
-            # return HttpResponse("Essa consulta já está cadastrada")
             return redirect('consulta_cadastrada2')
 
         # Verificar se já existe uma consulta no mesmo horário e dia com o mesmo psicólogo
@@ -924,14 +970,12 @@ def psico_agenda(request, psicologo_id):
         ).first()
 
         if consulta_por_horario:
-            # Atualizar a coluna "semanal" ou "quinzenal" dependendo do período do paciente
             if paciente.periodo == "Semanal" and not consulta_por_horario.semanal:
                 consulta_por_horario.semanal = paciente.nome
             elif paciente.periodo == "Quinzenal" and not consulta_por_horario.quinzenal:
                 consulta_por_horario.quinzenal = paciente.nome
             consulta_por_horario.save()
         else:
-            # Criar uma nova consulta se ainda não existe uma com esse horário e psicólogo
             consulta = Consulta.objects.create(
                 Paciente=paciente,
                 psicologo=psicologa,
@@ -949,7 +993,6 @@ def psico_agenda(request, psicologo_id):
 
     return render(request, "pages/psico_agenda.html", {
         'salas': salas_atendimento,  
-        'pacientes': pacientes, 
         'agendas': consultas,
         'psicologo': psicologa,
         'dias_da_semana': dias_da_semana
@@ -1249,86 +1292,117 @@ def AdicionarConfirma_consulta(request, psicologo_id):
     return render(request, 'pages/adiciona_confirma_consulta.html', {'psicologo': psicologa})
 
 
-login_required(login_url='login1')
+@login_required(login_url='login1')
+def ExcluirConfirma_consulta(request, psicologo_id):
+    psicologa = get_object_or_404(Psicologa, id=psicologo_id)
+    consultas_psico = Consulta.objects.filter(psicologo=psicologa)
+
+    if request.method == "POST":
+        for consulta in consultas_psico:
+            Financeiro2.objects.filter(
+                dia_semana=consulta.dia_semana,
+                horario=consulta.horario,
+                psicologa=consulta.psicologo,
+                paciente=consulta.Paciente,
+                data=consulta.data
+            ).delete()
+
+        return redirect('confirma_consulta', psicologo_id=psicologa.id)
+
+    return render(request, 'pages/deletar_confirma_consulta.html', {'psicologo': psicologa})
+
+
+@login_required(login_url='login1')
 def consultar_financeiro(request):
 
     if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
         return render(request, 'pages/error_permission.html')
 
+    # Verifica se é uma nova consulta (POST)
     if request.method == "POST":
         mes = request.POST.get('mes')
         ano = request.POST.get('ano')
 
-        if mes and ano:
-            try:
-                mes = int(mes)
-                ano = int(ano)
+        # Armazena mes e ano na sessão
+        request.session['mes'] = mes
+        request.session['ano'] = ano
 
-                data_inicio = datetime(ano, mes, 1)
-                if mes == 12:
-                    data_fim = datetime(ano + 1, 1, 1) - timedelta(days=1)
-                else:
-                    data_fim = datetime(ano, mes + 1, 1) - timedelta(days=1)
+        return redirect('consultar_financeiro')
 
-                 # Filtra as consultas financeiras, exclui "presença=Nao" e ignora registros com valores nulos
-                financeiros = Financeiro2.objects.filter(
-                    data__range=[data_inicio, data_fim]
-                ).exclude(
-                    presenca="Nao"
-                ).exclude(
-                    presenca__isnull=True
-                ).exclude(
-                    valor_pagamento__isnull=True
+    # Recupera mes e ano da sessão
+    mes = request.session.get('mes')
+    ano = request.session.get('ano')
+
+    # Se os valores de mes e ano estiverem presentes na sessão, faz a filtragem
+    if mes and ano:
+        try:
+            mes = int(mes)
+            ano = int(ano)
+
+            data_inicio = datetime(ano, mes, 1)
+            if mes == 12:
+                data_fim = datetime(ano + 1, 1, 1) - timedelta(days=1)
+            else:
+                data_fim = datetime(ano, mes + 1, 1) - timedelta(days=1)
+
+            # Filtra as consultas financeiras
+            financeiros = Financeiro2.objects.filter(
+                data__range=[data_inicio, data_fim]
+            ).exclude(
+                presenca="Nao"
+            ).exclude(
+                presenca__isnull=True
+            )
+
+            # Receita bruta por paciente e cálculo dos novos valores
+            receita_por_paciente = financeiros.values('paciente__nome').annotate(
+                receita_bruta=Sum('valor'),
+                valor_momento=ExpressionWrapper(Sum('valor') / 2, output_field=DecimalField(max_digits=10, decimal_places=2)),
+                valor_recebido=ExpressionWrapper(Sum(Coalesce(F('valor_pagamento'), 0) / 2), output_field=DecimalField(max_digits=10, decimal_places=2)),
+            ).annotate(
+                valor_a_receber=ExpressionWrapper(Sum('valor') / 2 - Sum(Coalesce(F('valor_pagamento'), 0) / 2), output_field=DecimalField(max_digits=10, decimal_places=2))
+            ).annotate(
+                valor_previsto=ExpressionWrapper(
+                    (Sum('valor') - Sum(Coalesce(F('valor_pagamento'), 0)) + ((Sum('valor') / 2) - Sum(Coalesce(F('valor_pagamento'), 0) / 2)) * 2) / 2,
+                    output_field=DecimalField(max_digits=10, decimal_places=2)
                 )
+            ).order_by('paciente__nome')
 
+            receita_total = financeiros.aggregate(receita_total=Sum('valor'))
+            valor_total_atendimentos = receita_total['receita_total'] if receita_total['receita_total'] else 0
+            valor_momento_total = valor_total_atendimentos / 2
 
-                # Receita bruta por paciente e cálculo dos novos valores
-                receita_por_paciente = financeiros.values('paciente__nome').annotate(
-                    receita_bruta=Sum('valor'),
-                    valor_momento=ExpressionWrapper(Sum('valor') / 2, output_field=DecimalField(max_digits=10, decimal_places=2)),
-                    valor_recebido=ExpressionWrapper(Sum(Coalesce(F('valor_pagamento'), 0) / 2), output_field=DecimalField(max_digits=10, decimal_places=2)),
-                ).annotate(
-                    valor_a_receber=ExpressionWrapper(Sum('valor') / 2 - Sum(Coalesce(F('valor_pagamento'), 0) / 2), output_field=DecimalField(max_digits=10, decimal_places=2))
-                ).annotate(
-                    valor_previsto=ExpressionWrapper(
-                        (Sum('valor') - Sum(Coalesce(F('valor_pagamento'), 0)) + ((Sum('valor') / 2) - Sum(Coalesce(F('valor_pagamento'), 0) / 2)) * 2) / 2,
-                        output_field=DecimalField(max_digits=10, decimal_places=2)
-                    )
-                ).order_by('paciente__nome')
+            total_receita_bruta = sum([paciente['receita_bruta'] for paciente in receita_por_paciente])
+            total_valor_momento = sum([paciente['valor_momento'] for paciente in receita_por_paciente])
+            total_valor_recebido = sum([paciente['valor_recebido'] for paciente in receita_por_paciente])
+            total_valor_a_receber = sum([paciente['valor_a_receber'] for paciente in receita_por_paciente])
 
-                receita_total = financeiros.aggregate(receita_total=Sum('valor'))
-                valor_total_atendimentos = receita_total['receita_total'] if receita_total['receita_total'] else 0
-                valor_momento_total = valor_total_atendimentos / 2
+            # Soma de todos os valores previstos de cada paciente
+            total_valor_previsto = sum([paciente['valor_previsto'] for paciente in receita_por_paciente])
 
-                total_receita_bruta = sum([paciente['receita_bruta'] for paciente in receita_por_paciente])
-                total_valor_momento = sum([paciente['valor_momento'] for paciente in receita_por_paciente])
-                total_valor_recebido = sum([paciente['valor_recebido'] for paciente in receita_por_paciente])
-                total_valor_a_receber = sum([paciente['valor_a_receber'] for paciente in receita_por_paciente])
+            return render(request, 'pages/financeiro.html', {
+                'financeiros': financeiros,
+                'mes': mes,
+                'ano': ano,
+                'receita_por_paciente': receita_por_paciente,
+                'valor_total_atendimentos': valor_total_atendimentos,
+                'valor_momento_total': valor_momento_total,
+                'total_receita_bruta': total_receita_bruta,
+                'total_valor_momento': total_valor_momento,
+                'total_valor_recebido': total_valor_recebido,
+                'total_valor_a_receber': total_valor_a_receber,
+                'total_valor_previsto': total_valor_previsto,
+                'message': "Nenhuma consulta financeira encontrada." if not financeiros else None
+            })
 
-                # Soma de todos os valores previstos de cada paciente
-                total_valor_previsto = sum([paciente['valor_previsto'] for paciente in receita_por_paciente])
+        except ValueError:
+            return render(request, 'pages/consultar_financeiro.html', {
+                'error': "Por favor, insira um mês e ano válidos."
+            })
 
-                return render(request, 'pages/financeiro.html', {
-                    'financeiros': financeiros,
-                    'mes': mes,
-                    'ano': ano,
-                    'receita_por_paciente': receita_por_paciente,
-                    'valor_total_atendimentos': valor_total_atendimentos,
-                    'valor_momento_total': valor_momento_total,
-                    'total_receita_bruta': total_receita_bruta,
-                    'total_valor_momento': total_valor_momento,
-                    'total_valor_recebido': total_valor_recebido,
-                    'total_valor_a_receber': total_valor_a_receber,
-                    'total_valor_previsto': total_valor_previsto,  # Passa o valor previsto total para o template
-                    'message': "Nenhuma consulta financeira encontrada." if not financeiros else None
-                })
-
-            except ValueError:
-                return render(request, 'pages/consultar_financeiro.html', {
-                    'error': "Por favor, insira um mês e ano válidos."
-                })
-
+    # Se não houver mes e ano na sessão, renderiza o formulário
     return render(request, 'pages/consultar_financeiro.html')
+
 
 @login_required(login_url='login1')
 def editar_financeiro(request, id_financeiro):
@@ -1337,12 +1411,18 @@ def editar_financeiro(request, id_financeiro):
     if request.method == "POST":
         valor_pagamento = request.POST.get('valor_pagamento')
         data_pagamento = request.POST.get('data_pagamento')
+        presenca = request.POST.get('presenca')
     
         if valor_pagamento:
             financeiro.valor_pagamento = valor_pagamento
             financeiro.data_pagamento = data_pagamento
+            financeiro.presenca = presenca
             financeiro.save()
-            return redirect('editar_financeiro', id_financeiro=id_financeiro)
+            # Pega o mês e ano da sessão ao redirecionar de volta
+            mes = request.session.get('mes')
+            ano = request.session.get('ano')
+            return redirect(f'{reverse("consultar_financeiro")}?mes={mes}&ano={ano}')
+
 
     return render(request, 'pages/editar_financeiro.html', {'financeiro': financeiro})
 

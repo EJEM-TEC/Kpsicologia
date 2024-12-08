@@ -62,6 +62,7 @@ urlpatterns = [
     path('psicologas/<int:psicologo_id>/adicionar/', views.AdicionarConfirma_consulta, name='adiciona_confirma_consulta'),
     path('psicologas/<int:psicologo_id>/confirmar/<int:consulta_id>/excluir', views.deletar_consulta, name='deletar_consulta'),
     path('psicologas/<int:financeiro_id>/editar', views.EditarConfirmaConsulta, name='editar_confirma_consulta'),
+    path('psicologas/<int:psicologo_id>/excluir', views.ExcluirConfirma_consulta, name='deletar_confirma_consulta'),
     path('psicologas/<int:psicologo_id>/agendar/', views.psico_agenda, name='psico_agenda'),
     path('financeiro/', views.financeiro, name='financeiro'),
     path('editar_financeiro/<int:id_financeiro>', views.editar_financeiro, name='editar_financeiro'),

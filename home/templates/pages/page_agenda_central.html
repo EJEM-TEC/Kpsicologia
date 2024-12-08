@@ -26,10 +26,10 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="paciente_id">Paciente</label>
+                                <label for="paciente_id">Unidade</label>
                                 <select class="form-control" id="paciente_id" name="paciente_id">
-                                    {% for paciente in pacientes %}
-                                    <option value="{{paciente.id}}">{{paciente.nome}}</option>
+                                    {% for unidade in unidades %}
+                                    <option value="{{unidade.id_unidade}}">{{unidade.nome_unidade}}</option>
                                     {% endfor %}
                                     <option value="todos">Todos</option>
                                 </select>
@@ -48,8 +48,14 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="horario">Horário</label>
-                                <input type="time" class="form-control" id="horario" name="horario">
+                                <label for="horario_inicio">Horário Início</label>
+                                <input type="time" class="form-control" id="horario_inicio" name="horario_inicio">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="horario_fim">Horário Fim</label>
+                                <input type="time" class="form-control" id="horario_fim" name="horario_fim">
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -94,7 +100,7 @@
     <div class="col-12">
         <div class="card mb-4">
             <div class="card-header pb-0">
-                <h6>Agendas da Sala {{ sala.numero_sala }}</h6>
+                <h6>Agendas da Sala <span class="font-weight-bold" style="color: {{ sala.cor_sala }}; font-weight: 900;"> {{ sala.numero_sala }}</span></h6>
             </div>
             <div class="card-body px-4 pt-0 pb-2">
                 {% for dia in dias_da_semana %}
@@ -126,12 +132,6 @@
                                     </td>
                                 </tr>
                                 {% endif %}
-                            {% empty %}
-                                <tr>
-                                    <td colspan="4" class="text-center">
-                                        <p class="text-secondary font-weight-bold text-xs">Nenhuma consulta encontrada.</p>
-                                    </td>
-                                </tr>
                             {% endfor %}
                             </tbody>
                         </table>

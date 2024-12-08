@@ -164,11 +164,22 @@
                                     <td class="align-middle text-center">{{ financeiro.data }}</td>
                                     <td class="align-middle text-center">Semana {{ financeiro.semana }}</td>
                                     <td class="align-middle text-center">{{ financeiro.forma }}</td>
-                                    <td class="align-middle text-center">{{ financeiro.presenca }}</td>
+                                    <td class="align-middle text-center">
+                                        <h6 class="mb-0 text-sm text-center
+                                        {% if financeiro.presenca == 'Sim' %}
+                                        text-success
+                                        {% elif financeiro.presenca == 'Falta Injustificada' %}
+                                            text-warning
+                                        {% else %}
+                                            text-danger
+                                        {% endif %}
+                                        
+                                        ">{{ financeiro.presenca }}</h6>
+                                    </td>
                                     <td class="align-middle text-center">{{ financeiro.observacoes }}</td>
                                     <td class="align-middle text-center">
                                         <a href="{% url 'editar_confirma_consulta' financeiro_id=financeiro.id %}" class="text-secondary text-xs" data-toggle="tooltip" data-original-title="Editar consulta">Editar</a> /
-                                        <a href="#" class="text-secondary text-xs" data-toggle="tooltip" data-original-title="Excluir consulta">Excluir</a>
+                                        <a href="{% url 'deletar_confirma_consulta' psicologo.id %}" class="text-secondary text-xs" data-toggle="tooltip" data-original-title="Excluir consulta">Excluir</a>
                                     </td>
                                 </tr>
                             {% empty %}

@@ -18,7 +18,7 @@ class Unidade(models.Model):
     id_unidade = models.AutoField(primary_key=True)
     nome_unidade = models.CharField(max_length=100)
     endereco_unidade = models.CharField(max_length=100)
-    CEP_unidade = models.IntegerField()
+    CEP_unidade = models.CharField(max_length=100)
     
 
     def __str__(self):
@@ -26,21 +26,7 @@ class Unidade(models.Model):
     
 class Sala(models.Model):
     id_sala = models.AutoField(primary_key=True)
-    cor_sala = models.CharField(
-        max_length=20,
-        choices=[
-            ('red', 'Vermelho'),
-            ('green', 'Verde'),
-            ('blue', 'Azul'),
-            ('black', 'Preto'),
-            ('white', 'Branco'),
-            ('gray', 'Cinza'),
-            ('yellow', 'Amarelo'),
-            ('cyan', 'Ciano'),
-            ('magenta', 'Magenta'),
-        ],
-        default='white'
-    )
+    cor_sala = models.CharField(max_length=16)
     #numero_sala = models.PositiveIntegerField()
     numero_sala = models.CharField(max_length=100)
 
@@ -66,7 +52,6 @@ class Paciente(models.Model):
     telefone = models.IntegerField()
     nome_responsavel = models.CharField(max_length=100)
     valor = models.DecimalField(max_digits=10, decimal_places=3)
-    tipo_atendimento = models.CharField(max_length=100)
     periodo = models.CharField(max_length=100, default="semanal")
 
 

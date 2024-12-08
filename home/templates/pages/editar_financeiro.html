@@ -12,6 +12,17 @@
                 <form method="POST" action="{% url 'editar_financeiro' id_financeiro=financeiro.id %}">
                     {% csrf_token %}
                         <div class="row">
+                          <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="presenca" class="form-label">Presença</label>
+                                <select class="form-control" id="presenca" name="presenca">
+                                    <option value="Sim" {% if financeiro.presenca == "Sim" %}selected{% endif %}>Sim</option>
+                                    <option value="Nao" {% if financeiro.presenca == "Nao" %}selected{% endif %}>Nao</option>
+                                    <option value="Falta Inj" {% if financeiro.presenca == "Falta Inj" %}selected{% endif %}>Falta Injustificada</option>
+                                </select>
+                            </div>
+                        </div>
+                        
                             <div class="col-md-6">
                               <div class="form-group">
                                 <label for="valor_pagamento">Valor de pagamento ( R$ )</label>
@@ -20,10 +31,10 @@
                             </div>
                             <div class="col-md-6">
                               <div class="form-group">
-                                <label for="data_pagamento">Data de pagamento </label>
-                                <input type="date"class="form-control" id="data_pagamento" name="data_pagamento" value="{{ financeiro.data_pagamento }}" required>
+                                  <label for="data_pagamento">Data de pagamento</label>
+                                  <input type="date" class="form-control" id="data_pagamento" name="data_pagamento" value="{{ financeiro.data_pagamento|date:'Y-m-d' }}" required>
                               </div>
-                            </div>
+                          </div>
                           </div>
                         <div class="row">
                               <div class="col-md-6">
