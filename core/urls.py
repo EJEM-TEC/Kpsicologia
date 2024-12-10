@@ -82,6 +82,7 @@ urlpatterns = [
     path('login_erro/', views.login_erro, name='login_erro'),
     path('unis_erro/', views.unis_erro, name='unis_erro'),
     path('consultar_disponibilidade', views.vizualizar_disponibilidade, name='consultar_disponibilidade'),
+    path('deletar_disponibilidade/<int:disponibilidade_id>/<int:psicologo_id>', views.remover_disponibilidade, name='deletar_disponibilidade'),
 
 
     #path('cadastrar_salas/', views.sala, name='salas'),

@@ -85,7 +85,7 @@
                                 <tr style="background-color: {{ agenda.psicologa.cor }};">
                                     <td class="align-middle text-center text-white">{{ agenda.hora }}</td>
                                     <td class="align-middle">
-                                        <a href="#" class="text-secondary font-weight-bold text-xs text-center text-white" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
+                                        <a href="{% url 'deletar_disponibilidade' disponibilidade_id=agenda.id psicologo_id=psicologo.id %}" class="text-secondary font-weight-bold text-xs text-center text-white" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
                                     </td>
                                 </tr>
                                 {% endfor %}

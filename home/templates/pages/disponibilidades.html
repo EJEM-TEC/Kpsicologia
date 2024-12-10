@@ -23,16 +23,12 @@
                             <thead>
                                 <tr>
                                     <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Deletar</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for agenda in horarios %}
                                 <tr style="background-color: {{ agenda.psicologa.cor }};">
                                     <td class="align-middle text-center text-white">{{ agenda.hora }}</td>
-                                    <td class="align-middle">
-                                        <a href="#" class="text-secondary font-weight-bold text-xs text-center text-white" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
-                                    </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>

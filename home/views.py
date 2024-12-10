@@ -1440,8 +1440,13 @@ def editar_financeiro(request, id_financeiro):
 
 @login_required(login_url='login1')
 def definir_disponibilidade(request, psicologo_id):
+
     psicologa = get_object_or_404(Psicologa, id=psicologo_id)
     horarios = Disponibilidade.objects.filter(psicologa=psicologa)
+
+    # Verificar se o usuário é a psicóloga ou faz parte do grupo 'Administrador'
+    if request.user.username != psicologa.nome and not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission1.html')
 
     # Lista dos dias da semana
     dias_da_semana = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
@@ -1516,6 +1521,19 @@ def vizualizar_disponibilidade(request):
         })
 
     return render(request, 'pages/consultar_disponibilidade.html', {'psicologos': psicologos})
+
+
+@login_required(login_url='login1')
+def remover_disponibilidade(request, disponibilidade_id, psicologo_id):
+    disponibilidade = get_object_or_404(Disponibilidade, id=disponibilidade_id)
+    psicologo = get_object_or_404(Psicologa, id=psicologo_id)
+
+    if request.method == "POST":
+
+        disponibilidade.delete()
+        return redirect('psico_disponibilidade', psicologo_id=psicologo.id)
+
+    return render(request, 'pages/deletar_disponibilidade.html', {'disponibilidade': disponibilidade, 'psicologa': psicologo})
 
 
 @login_required(login_url='login1')
