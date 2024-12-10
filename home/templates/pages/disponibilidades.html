@@ -1,0 +1,48 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-12">
+        <h6>Disponibilidade da Psicóloga:  {{ psicologo.nome }}</h6>
+    </div>
+</div>
+
+{% for dia, horarios in horarios_agrupados %}
+    {% if horarios.exists %} <!-- Verifica se há horários cadastrados para o dia -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header pb-0">
+                    <h6>{{ dia }}</h6>
+                </div>
+                <div class="card-body px-0 pt-0 pb-2">
+                    <div class="table-responsive p-0">
+                        <table class="table align-items-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Deletar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for agenda in horarios %}
+                                <tr style="background-color: {{ agenda.psicologa.cor }};">
+                                    <td class="align-middle text-center text-white">{{ agenda.hora }}</td>
+                                    <td class="align-middle">
+                                        <a href="#" class="text-secondary font-weight-bold text-xs text-center text-white" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+{% endfor %}
+
+{% endblock content %}

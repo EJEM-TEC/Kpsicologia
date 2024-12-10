@@ -1,0 +1,38 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+      <div class="card mb-4">
+          <div class="card-header pb-0">
+            <h6>Consultar Disponibilidades de Psicólogas</h6>
+          </div>
+          <div class="card-body p-4">
+            <form method="POST" action="{% url 'consultar_disponibilidade' %}">
+              {% csrf_token %}
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="psicologo_id">Psicólogo</label>
+                    <select class="form-control" id="psicologo_id" name="psicologo_id" required>
+                      {% for psicologo in psicologos %}
+                      <option value="{{psicologo.id}}">{{psicologo.nome}}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="d-flex justify-content-center gap-4 align-middle">
+                    <button type="submit" class="btn bg-gradient-primary">Consultar</button>
+                    <button type="reset" class="btn bg-gradient-secondary">Resetar</button>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+      </div>
+  </div>
+{% endblock content %}

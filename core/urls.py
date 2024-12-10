@@ -64,6 +64,7 @@ urlpatterns = [
     path('psicologas/<int:financeiro_id>/editar', views.EditarConfirmaConsulta, name='editar_confirma_consulta'),
     path('psicologas/<int:psicologo_id>/excluir', views.ExcluirConfirma_consulta, name='deletar_confirma_consulta'),
     path('psicologas/<int:psicologo_id>/agendar/', views.psico_agenda, name='psico_agenda'),
+    path('psicologas/<int:psicologo_id>/disponibilidade/', views.definir_disponibilidade, name='psico_disponibilidade'),
     path('financeiro/', views.financeiro, name='financeiro'),
     path('editar_financeiro/<int:id_financeiro>', views.editar_financeiro, name='editar_financeiro'),
     path('agenda_central', views.agenda_central, name='agenda_central'),
@@ -80,6 +81,7 @@ urlpatterns = [
     path('nome_usuario_erro/', views.nome_usuario_erro, name='nome_usuario_erro'),
     path('login_erro/', views.login_erro, name='login_erro'),
     path('unis_erro/', views.unis_erro, name='unis_erro'),
+    path('consultar_disponibilidade', views.vizualizar_disponibilidade, name='consultar_disponibilidade'),
 
 
     #path('cadastrar_salas/', views.sala, name='salas'),

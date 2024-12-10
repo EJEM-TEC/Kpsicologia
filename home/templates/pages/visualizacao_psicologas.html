@@ -26,6 +26,7 @@
               <th class="text-secondary text-xxs font-weight-bolder opacity-7">Abordagem</th>
               <th class="text-secondary text-xxs font-weight-bolder opacity-7">Agenda</th>
               <th class="text-secondary text-xxs font-weight-bolder opacity-7">Confirmação</th>
+              <th class="text-secondary text-xxs font-weight-bolder opacity-7">Disponibilidade</th>
               <th class="text-secondary text-xxs font-weight-bolder opacity-7">Edição</th>
               <th class="text-secondary text-xxs opacity-7">Excluir</th>
             </tr>
@@ -92,6 +93,14 @@
                       </a>
                 </span>
               </td> 
+              <td>
+                <span>
+                  <a href="{% url 'psico_disponibilidade' psicologo_id=psicologo.id %}" class="btn btn-primary">
+                    <i class="bi bi-check-circle"></i>
+                    
+                  </a>
+            </span>
+          </td> 
               <td>
                 <span>
                   <a href="{% url 'editar_psicologo' psicologo.id %}" class="btn btn-warning">
