@@ -82,6 +82,7 @@
               <th class="text-secondary text-xxs font-weight-bolder opacity-7">Email</th>
               <th class="text-secondary text-xxs font-weight-bolder opacity-7">Especialidade</th>
               <th class="text-secondary text-xxs font-weight-bolder opacity-7">Público</th>
+              <th class="text-secondary text-xxs font-weight-bolder opacity-7">Unidade</th>
               <th class="text-secondary text-xxs font-weight-bolder opacity-7">Abordagem</th>
               <th class="text-secondary text-xxs font-weight-bolder opacity-7">Agenda</th>
               <th class="text-secondary text-xxs font-weight-bolder opacity-7">Confirmação</th>
@@ -123,6 +124,15 @@
                     
                     <div class="d-flex flex-column justify-content-center">
                       <a href="{% url 'psicoPublicos' psicologo_id=psicologo.id %}" class="mb-0 text-xs">Público</>
+                      
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="d-flex px-2 py-1">
+                    
+                    <div class="d-flex flex-column justify-content-center">
+                      <a href="{% url 'psicoUnidades' psicologo_id=psicologo.id %}" class="mb-0 text-xs">Unidade</>
                       
                     </div>
                   </div>
