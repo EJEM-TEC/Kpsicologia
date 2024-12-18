@@ -142,6 +142,10 @@ class EspecialidadePsico(models.Model):
     especialidade = models.ForeignKey(Especialidade, on_delete=models.CASCADE)
     psico = models.ForeignKey(Psicologa, on_delete=models.CASCADE)
 
+class UnidadePsico(models.Model):
+    unidade = models.ForeignKey(Unidade, on_delete=models.CASCADE)
+    psico = models.ForeignKey(Psicologa, on_delete=models.CASCADE)
+
 
 
 

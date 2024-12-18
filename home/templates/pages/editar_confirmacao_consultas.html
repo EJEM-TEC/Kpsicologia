@@ -1,0 +1,80 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+                <h6>Editar Consultas</h6>
+            </div>
+            <div class="card-body px-0 pt-0 pb-2">
+                <form method="POST" action="#">
+                    {% csrf_token %}
+                    <div class="table-responsive p-0">
+                        <table class="table align-items-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nome do Cliente</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Dia Semana</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Periodo de Atendimento</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor (R$)</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Data</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Semana Mês</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Forma Pagamento</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Presença</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Observações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for financeiro in financeiros %}
+                                    <tr>
+                                        <td class="align-middle text-center">{{ financeiro.paciente.nome }}</td>
+                                        <td class="align-middle text-center">{{ financeiro.dia_semana }}</td>
+                                        <td class="align-middle text-center">{{ financeiro.horario }}</td>
+                                        <td class="align-middle text-center">{{ financeiro.periodo_atendimento }}</td>
+                                        <td class="align-middle text-center">R$ {{ financeiro.paciente.valor }}</td>
+                                        <td class="align-middle text-center">{{ financeiro.data }}</td>
+                                        <td class="align-middle text-center">Semana {{ financeiro.semana }}</td>
+                                        <td class="align-middle text-center">
+                                            <select class="form-control" id="forma_pagamento_{{ financeiro.id }}" name="forma_pagamento_{{ financeiro.id }}">
+                                                <option value="Dinheiro" {% if financeiro.forma_pagamento == 'Dinheiro' %}selected{% endif %}>Dinheiro</option>
+                                                <option value="Cartão" {% if financeiro.forma_pagamento == 'Cartão' %}selected{% endif %}>Cartão</option>
+                                                <option value="Pix" {% if financeiro.forma_pagamento == 'Pix' %}selected{% endif %}>Pix</option>  
+                                            </select>
+                                        </td>
+                                        <td class="align-middle text-center">
+                                            <select class="form-control" id="presenca_{{ financeiro.id }}" name="presenca_{{ financeiro.id }}">
+                                                <option value="Sim" {% if financeiro.presenca == 'Sim' %}selected{% endif %}>Sim</option>
+                                                <option value="Nao" {% if financeiro.presenca == 'Nao' %}selected{% endif %}>Não</option>
+                                                <option value="Falta Inj" {% if financeiro.presenca == 'Falta Inj' %}selected{% endif %}>Falta Injustificada</option>
+                                            </select>
+                                        </td>
+                                        <td class="align-middle text-center">
+                                            <input class="form-control" id="observacoes_{{ financeiro.id }}" name="observacoes_{{ financeiro.id }}" value="{{ financeiro.observacoes }}" />
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="8" class="text-center">
+                                            <p class="text-secondary font-weight-bold text-xs">Nenhuma consulta encontrada.</p>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group text-center mt-4">
+                                <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

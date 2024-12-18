@@ -49,6 +49,9 @@
             <div class="card-body p-4">
                     <button type="button" class="btn btn-primary"><a  class="text-white" href="{% url 'adiciona_confirma_consulta' psicologo.id %}">Adicionar Semana</a></button>
             </div>
+            <div class="card-body p-4">
+                <button type="button" class="btn btn-primary"><a  class="text-white" href="{% url 'editar_consultas' psicologo.id %}">Editar Consultas</a></button>
+            </div>
         </div>
     </div>
 </div>
@@ -178,7 +181,6 @@
                                     </td>
                                     <td class="align-middle text-center">{{ financeiro.observacoes }}</td>
                                     <td class="align-middle text-center">
-                                        <a href="{% url 'editar_confirma_consulta' financeiro_id=financeiro.id %}" class="text-secondary text-xs" data-toggle="tooltip" data-original-title="Editar consulta">Editar</a> /
                                         <a href="{% url 'deletar_confirma_consulta' psicologo.id %}" class="text-secondary text-xs" data-toggle="tooltip" data-original-title="Excluir consulta">Excluir</a>
                                     </td>
                                 </tr>

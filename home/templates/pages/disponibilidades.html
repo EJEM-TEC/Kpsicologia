@@ -2,16 +2,111 @@
 {% load static %}
 
 {% block content %}
-
+<!-- 
 <div class="row">
     <div class="col-12">
         <h6>Disponibilidade da Psicóloga:  {{ psicologo.nome }}</h6>
     </div>
+</div> -->
+
+
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+                <h6>Filtragem de Horários Disponíveis</h6>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="#">
+                    {% csrf_token %}
+
+                    <div class="row">
+                        <!-- <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="paciente_id">Psicóloga</label>
+                                <select class="form-control" id="paciente_id" name="psicologa_id">
+                                    {% for psicologa in psicologas %}
+                                    <option value="{{psicologa.id}}">{{psicologa.nome}}</option>
+                                    {% endfor %}
+                                    <option value="todos">Todos</option>
+                                </select>
+                            </div>
+                        </div> -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="unidade_id">Unidade</label>
+                                <select class="form-control" id="unidade_id" name="unidade_id">
+                                    {% for unidade in unidades %}
+                                    <option value="{{unidade.id_unidade}}">{{unidade.nome_unidade}}</option>
+                                    {% endfor %}
+                                    <option value="todos">Todos</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="paciente_id">Especialização</label>
+                                <select class="form-control" id="especialidade_id" name="especialidade_id">
+                                    {% for especialidade in especialidades %}
+                                    <option value="{{especialidade.id}}">{{especialidade.especialidade}}</option>
+                                    {% endfor %}
+                                    <option value="todos">Todos</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="horario_inicio">Horário Início</label>
+                                <input type="time" class="form-control" id="horario_inicio" name="horario_inicio">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="horario_fim">Horário Fim</label>
+                                <input type="time" class="form-control" id="horario_fim" name="horario_fim">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="dia_semana">Dia da Semana</label>
+                                <select class="form-control" id="dia_semana" name="dia_semana">
+                                    <option value="todos">Todos</option>
+                                    {% for dia in dias_da_semana %}
+                                    <option value="{{ dia }}">{{ dia }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="dia_semana">Público</label>
+                                <select class="form-control" id="dia_semana" name="publico">
+                                    <option value="todos">Todos</option>
+                                    {% for publico in publicos %}
+                                    <option value="{{ publico.id }}">{{ publico.publico }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="d-flex justify-content-center gap-4 align-middle">
+                                <button type="submit" class="btn btn-primary">Filtrar</button>
+                                <button type="reset" class="btn btn-secondary">Resetar</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 
-{% for dia, horarios in horarios_agrupados %}
+
+<!-- {% for dia, horarios in horarios_agrupados %}
     {% if horarios.exists %} <!-- Verifica se há horários cadastrados para o dia -->
-    <div class="row">
+    <!-- <div class="row">
         <div class="col-12">
             <div class="card mb-4">
                 <div class="card-header pb-0">
@@ -37,8 +132,46 @@
                 </div>
             </div>
         </div>
+    </div> -->
+   <!-- {% endif %} --> 
+<!-- {% endfor %} -->
+
+
+{% for psicologo in psicologos %}
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+                <h6>Agenda do Psicologo <span class="font-weight-bold" style="color: {{ sala.cor_sala }}; font-weight: 900;"> {{ psicologo.nome }}</span></h6>
+            </div>
+            <div class="card-body px-4 pt-0 pb-2">
+                {% for dia in dias_da_semana %}
+                <div class="mb-4">
+                    <p>{{ dia }}</p>
+                    <div class="table-responsive p-0">
+                        <table class="table align-items-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for horario in horarios %}
+                                {% if horario.psicologa == psicologo and horario.dia_semana == dia %}
+                                <tr style="background-color: {{ horario.psicologa.cor }};">
+                                    <td class="align-middle text-center text-white">{{ horario.hora }}</td>
+                                </tr>
+                                {% endif %}
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
     </div>
-    {% endif %}
+</div>
 {% endfor %}
 
 {% endblock content %}

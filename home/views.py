@@ -11,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 from rolepermissions.roles import assign_role
 from rolepermissions.decorators import has_role_decorator
 from django.contrib.auth.models import User, Group
-from .models import Psicologa, Usuario, Consulta, Unidade, Sala, Paciente, ConfirmacaoConsulta, Financeiro, EspecialidadePsico, Especialidade, Publico, PublicoPsico, Financeiro2, Disponibilidade
+from .models import Psicologa, Usuario, Consulta, Unidade, Sala, Paciente, ConfirmacaoConsulta, Financeiro, EspecialidadePsico, Especialidade, Publico, PublicoPsico, Financeiro2, Disponibilidade, UnidadePsico
 from rolepermissions.roles import assign_role
 from django.contrib.auth.models import Group
 from django.contrib.auth import authenticate, login as login_django
@@ -1083,6 +1083,60 @@ def DissociarPsicoEspecialidade(request, psicologo_id, especialidade_id):
     })
 
 @login_required(login_url='login1')
+def AssociarPsicoUnidade(request, psicologo_id):
+
+    psicologo = get_object_or_404(Psicologa, id=psicologo_id)
+    unidadesGerais = Unidade.objects.all()
+
+    # Verificar se o usuário é a psicóloga ou faz parte do grupo 'Administrador'
+    if request.user.username != psicologo.nome and not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission1.html')
+
+
+    if request.method == "POST":
+        
+        unidade_id = request.POST.get('unidade_id')
+        unidade = get_object_or_404(Unidade, id_unidade=unidade_id)
+
+        UnidadePsico.objects.create(
+            unidade=unidade,
+            psico=psicologo
+        )
+
+        return redirect('psicoUnidades', psicologo_id=psicologo.id)
+
+    #Obtendo todos as Especialidades em relação a Psicóloga
+
+    psico_unidades = UnidadePsico.objects.filter(psico=psicologo).select_related(
+        'unidade'
+    )
+
+    unidadesPsico = [pu.unidade for pu in psico_unidades]
+
+    return render(request, 'pages/associar_psicologo_unidade.html', {'unidadesGerais': unidadesGerais, 
+                                                                           'psicologo': psicologo, 'unidadesPsico': unidadesPsico})
+@login_required(login_url='login1')
+def DissociarPsicoUnidade(request, psicologo_id, unidade_id):
+
+    psicologo = get_object_or_404(Psicologa, id=psicologo_id)
+
+    unidade = get_object_or_404(Unidade, id_unidade=unidade_id)
+
+    psico_unidade = get_object_or_404(UnidadePsico, psico=psicologo, unidade=unidade)
+
+
+    if request.method == "POST":
+
+        psico_unidade.delete()
+
+        return redirect('psicoUnidades', psicologo_id=psicologo.id)
+    
+    return render(request, 'pages/des_psicologo_unidade.html', {
+        'psicologo' : psicologo,
+        'unidade': unidade
+    })
+
+@login_required(login_url='login1')
 def AssociarPsicoPublico(request, psicologo_id):
 
     psicologo = get_object_or_404(Psicologa, id=psicologo_id)
@@ -1493,34 +1547,155 @@ def definir_disponibilidade(request, psicologo_id):
 
 @login_required(login_url='login1')
 def vizualizar_disponibilidade(request):
+    request.session['mes'] = None
+    request.session['ano'] = None
+
+    # Permissão
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+
+    # Dados iniciais
+    psicologos = Psicologa.objects.all()
+    horarios = Disponibilidade.objects.all()
+    especialidades = Especialidade.objects.all()
+    publicos = Publico.objects.all()
+    unidades = Unidade.objects.all()
+    dias_da_semana = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
+
+    psicologos_com_horarios = []
+
+    for psicologo in psicologos:
+        if horarios.filter(psicologa=psicologo).exists():
+            psicologos_com_horarios.append(psicologo)
+
+    if request.method == 'POST':
+        especialidade_id = request.POST.get('especialidade_id')
+        publico_id = request.POST.get('publico')
+        dia_da_semana = request.POST.get("dia_semana")
+        horario_inicio = request.POST.get("horario_inicio")
+        horario_fim = request.POST.get("horario_fim")
+        unidade_id = request.POST.get("unidade_id")
+
+        # Filtragem por especialidade
+        if especialidade_id and especialidade_id != 'todos':
+            psicologas_com_especialidade = Psicologa.objects.filter(
+                especialidadepsico__especialidade_id=especialidade_id
+            )
+            horarios = horarios.filter(psicologa__in=psicologas_com_especialidade)
+
+        # Filtragem por público
+        if publico_id and publico_id != 'todos':
+            psicologas_com_publico = Psicologa.objects.filter(
+                publicopsico__publico_id=publico_id
+            )
+            horarios = horarios.filter(psicologa__in=psicologas_com_publico)
+
+        # Filtragem por dia da semana
+        if dia_da_semana != "todos" and dia_da_semana in dias_da_semana:
+            horarios = horarios.filter(dia_semana=dia_da_semana)
+
+        # Filtragem por intervalo de horário
+        if horario_inicio and horario_fim:
+            horarios = horarios.filter(hora__gte=horario_inicio, hora__lte=horario_fim)
+
+        # Filtragem por unidade
+        if unidade_id and unidade_id != 'todos':
+            psicologas_com_unidade = Psicologa.objects.filter(
+                unidadepsico__unidade__id_unidade=unidade_id
+            )
+            horarios = horarios.filter(psicologa__in=psicologas_com_unidade)
+
+    return render(request, 'pages/disponibilidades.html', {
+        'psicologos': psicologos_com_horarios,
+        'horarios': horarios,
+        'dias_da_semana': dias_da_semana,
+        'especialidades': especialidades,
+        'publicos': publicos,
+        'unidades': unidades
+    })
+
+
+@login_required(login_url='login1')
+def agenda_central(request):
+
+    request.session['mes'] = None
+    request.session['ano'] = None
 
     if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
         return render(request, 'pages/error_permission.html')
 
-    psicologos = Psicologa.objects.all()    
+    consultas = Consulta.objects.all()
+    psicologas = Psicologa.objects.all()
+    especialidades = Especialidade.objects.all()
+    publicos = Publico.objects.all()
+    unidades = Unidade.objects.all()
+    dias_da_semana = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"]
+    
+    # Filtragem de salas que possuem consultas
+    salas_com_consultas = []
+    salas = Sala.objects.all()
 
-    if request.method == 'POST':
+    for sala in salas:
+        if consultas.filter(sala=sala).exists():
+            salas_com_consultas.append(sala)
 
-        psicologo_id = request.POST.get('psicologo_id')
+    # Filtragem por POST (caso tenha)
+    if request.method == "POST":
+        psicologa_id = request.POST.get('psicologa_id')
+        especialidade_id = request.POST.get('especialidade_id')
+        publico_id = request.POST.get('publico')
+        dia_da_semana = request.POST.get("dia_semana")
+        horario_inicio = request.POST.get("horario_inicio")
+        horario_fim = request.POST.get("horario_fim")
+        unidade_id = request.POST.get("unidade_id")
 
-        psicologa = get_object_or_404(Psicologa, id=psicologo_id)
-        horarios = Disponibilidade.objects.filter(psicologa=psicologa)
+        # Filtragem por psicóloga
+        if psicologa_id and psicologa_id != 'todos':
+            psicologo = get_object_or_404(Psicologa, id=psicologa_id)
+            consultas = consultas.filter(psicologo=psicologo)
 
-        # Lista dos dias da semana
-        dias_da_semana = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
+        # Filtragem por unidade
+        if unidade_id and unidade_id != 'todas':
+            unidade = get_object_or_404(Unidade, id_unidade=unidade_id)
+            consultas = consultas.filter(sala__id_unidade=unidade)
 
-        # Agrupar horários por dia da semana em uma lista de tuplas (dia, horários)
-        horarios_agrupados = []
-        for dia in dias_da_semana:
-            horarios_do_dia = horarios.filter(dia_semana=dia)
-            horarios_agrupados.append((dia, horarios_do_dia))
+        # Filtragem por especialidade
+        if especialidade_id and especialidade_id != 'todos':
+            psicologas_com_especialidade = Psicologa.objects.filter(
+                especialidadepsico__especialidade_id=especialidade_id
+            )
+            consultas = consultas.filter(psicologo__in=psicologas_com_especialidade)
 
-        return render(request, 'pages/disponibilidades.html', {
-            'psicologo': psicologa,
-            'horarios_agrupados': horarios_agrupados
-        })
+        # Filtragem por público relacionado às psicólogas
+        if publico_id and publico_id != 'todos':
+            psicologas_com_publico = Psicologa.objects.filter(
+                publicopsico__publico_id=publico_id
+            )
+            consultas = consultas.filter(psicologo__in=psicologas_com_publico)
 
-    return render(request, 'pages/consultar_disponibilidade.html', {'psicologos': psicologos})
+        # Filtragem por dia da semana
+        if dia_da_semana != "todos" and dia_da_semana in dias_da_semana:
+            consultas = consultas.filter(dia_da_semana=dia_da_semana)
+
+        # Filtragem por intervalo de horário
+        if horario_inicio and horario_fim:
+            consultas = consultas.filter(horario__gte=horario_inicio, horario__lte=horario_fim)
+
+        # Após os filtros POST, devemos atualizar a lista de salas com consultas
+        salas_com_consultas = []
+        for sala in salas:
+            if consultas.filter(sala=sala).exists():
+                salas_com_consultas.append(sala)
+
+    return render(request, 'pages/page_agenda_central.html', {
+        'consultas': consultas,
+        'salas': salas_com_consultas,  # Envia apenas salas que possuem consultas
+        'dias_da_semana': dias_da_semana,
+        'psicologas': psicologas,
+        'especialidades': especialidades,
+        'publicos': publicos,
+        'unidades': unidades
+    })
 
 
 @login_required(login_url='login1')
@@ -1534,6 +1709,36 @@ def remover_disponibilidade(request, disponibilidade_id, psicologo_id):
         return redirect('psico_disponibilidade', psicologo_id=psicologo.id)
 
     return render(request, 'pages/deletar_disponibilidade.html', {'disponibilidade': disponibilidade, 'psicologa': psicologo})
+
+@login_required(login_url='login1')
+def editar_consultas(request, psicologo_id):
+    psicologa = get_object_or_404(Psicologa, id=psicologo_id)
+    consultas_psico = Financeiro2.objects.filter(psicologa=psicologa)
+
+    if request.method == 'POST':
+        for financeiro in consultas_psico:
+            # Captura os dados do formulário com base no ID do financeiro
+            forma_pagamento = request.POST.get(f'forma_pagamento_{financeiro.id}')
+            presenca = request.POST.get(f'presenca_{financeiro.id}')
+            observacoes = request.POST.get(f'observacoes_{financeiro.id}')
+            
+            # Atualiza os campos apenas se houve alteração
+            if forma_pagamento:
+                financeiro.forma_pagamento = forma_pagamento
+            if presenca:
+                financeiro.presenca = presenca
+            if observacoes is not None:
+                financeiro.observacoes = observacoes
+            
+            # Salva as alterações no banco de dados
+            financeiro.save()
+
+        # Exibe uma mensagem de sucesso e redireciona para evitar reenvio do formulário
+        #messages.success(request, 'Consultas atualizadas com sucesso.')
+        return redirect('confirma_consulta', psicologo_id=psicologo_id)
+
+    return render(request, 'pages/editar_confirmacao_consultas.html', {'psicologa': psicologa, 'financeiros': consultas_psico})
+
 
 
 @login_required(login_url='login1')

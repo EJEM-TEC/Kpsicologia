@@ -74,6 +74,8 @@ urlpatterns = [
     path('psicologo_especialidade/<int:psicologo_id>/<int:especialidade_id>', views.DissociarPsicoEspecialidade, name='disPsicoEspecialidade'),
     path('psicologo_publico/<int:psicologo_id>', views.AssociarPsicoPublico, name='psicoPublicos'),
     path('psicologo_publico/<int:psicologo_id>/<int:publico_id>', views.DissociarPsicoPublico, name='disPsicoPublico'),
+    path('psicologo_unidade/<int:psicologo_id>', views.AssociarPsicoUnidade, name='psicoUnidades'),
+    path('psicologo_unidade/<int:psicologo_id>/<int:unidade_id>', views.DissociarPsicoUnidade, name='disPsicoUnidade'),
     path('consultar_financeiro', views.consultar_financeiro, name='consultar_financeiro'),
     path('handler404/', views.handler404, name='handler404'),
     path('consulta_cadastrada1/', views.consulta_cadastrada1, name='consulta_cadastrada1'),
@@ -83,6 +85,7 @@ urlpatterns = [
     path('unis_erro/', views.unis_erro, name='unis_erro'),
     path('consultar_disponibilidade', views.vizualizar_disponibilidade, name='consultar_disponibilidade'),
     path('deletar_disponibilidade/<int:disponibilidade_id>/<int:psicologo_id>', views.remover_disponibilidade, name='deletar_disponibilidade'),
+    path('editar_consultas/<int:psicologo_id>', views.editar_consultas, name='editar_consultas'),
 
 
     #path('cadastrar_salas/', views.sala, name='salas'),

@@ -7,21 +7,21 @@
       <div class="col-6">
         <div>
           <h2>
-            Especialidades da {{psicologo.nome}}
+            Unidades da {{psicologo.nome}}
           </h2>
         </div>
       </div>
     </div>
     <div class="card m-4">
       <div class="card-body p-4">
-        <form method="POST" action="{% url 'psicoEspecialidades' psicologo_id=psicologo.id %}">  {% csrf_token %}
+        <form method="POST" action="{% url 'psicoUnidades' psicologo_id=psicologo.id %}">  {% csrf_token %}
           <div class="row">
             <div class="col-md-6">
               <div class="form-group">
-                <label for="especialidade_id">Especialidade</label>
-                <select class="form-control" id="especialidade_id" name="especialidade_id" required /> 
-                  {% for especialidade in especialidadesGerais %}
-                 <option value="{{especialidade.id}}">{{especialidade.especialidade}}</option>
+                <label for="unidade_id">Unidades</label>
+                <select class="form-control" id="unidade_id" name="unidade_id" required /> 
+                  {% for unidade in unidadesGerais %}
+                 <option value="{{unidade.id_unidade}}">{{unidade.nome_unidade}}</option>
                   {% endfor %}
                 </select>
                 </div>
@@ -30,7 +30,7 @@
             <div class="row">
               <div class="col-md-12">
                 <div class="form-group">
-                  <button type="submit" class="btn btn-primary">Adicionar especialidade</button>
+                  <button type="submit" class="btn btn-primary">Adicionar Unidade</button>
                 </div>
               </div>
             </div>
@@ -45,23 +45,23 @@
         <table class="table align-items-center mb-0">
           <thead>
             <tr>
-              <th class="text-secondary text-xxs font-weight-bolder opacity-7">Especialidade</th>
+              <th class="text-secondary text-xxs font-weight-bolder opacity-7">Unidade</th>
               <th class="text-secondary text-xxs opacity-7">Desvincular</th>
               
             </tr>
           </thead>
-          <tbody>{% for especialidade in especiadadesPsico %}
+          <tbody>{% for unidade in unidadesPsico %}
             <tr>
                 <td>
                   <div class="d-flex px-2 py-1">
                     <div class="d-flex flex-column justify-content-center">
-                      <h6 class="mb-0 text-xs">{{especialidade.especialidade}}</h6>
+                      <h6 class="mb-0 text-xs">{{unidade.nome_unidade}}</h6>
                     </div>
                   </div>
                 </td>
           <td>
             <span>
-              <a href="{% url 'disPsicoEspecialidade' psicologo_id=psicologo.id especialidade_id=especialidade.id %}" class="btn btn-danger">
+              <a href="{% url 'disPsicoUnidade' psicologo_id=psicologo.id unidade_id=unidade.id_unidade %}" class="btn btn-danger">
                 <i class="bi bi-trash-fill"></i>
               </a>
         </span>
