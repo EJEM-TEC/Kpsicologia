@@ -758,7 +758,6 @@ def pacientes(request):
         idade_paciente = request.POST.get('idade_paciente')
         telefone_paciente = request.POST.get('telefone_paciente')
         valor = request.POST.get('valor')
-        tipo_atendimento = request.POST.get('tipo_atendimento')
         nome_responsavel = request.POST.get('nome_responsavel')
         periodo_paciente = request.POST.get('periodo_paciente')
 
@@ -777,7 +776,6 @@ def pacientes(request):
             nome=nome_paciente,
             idade=idade_paciente,
             valor=valor_decimal,
-            tipo_atendimento=tipo_atendimento,
             nome_responsavel=nome_responsavel,
             telefone=telefone_paciente,
             periodo=periodo_paciente
