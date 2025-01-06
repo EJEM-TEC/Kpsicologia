@@ -1719,8 +1719,11 @@ def editar_consultas(request, psicologo_id):
             forma_pagamento = request.POST.get(f'forma_pagamento_{financeiro.id}')
             presenca = request.POST.get(f'presenca_{financeiro.id}')
             observacoes = request.POST.get(f'observacoes_{financeiro.id}')
+            valor_pagamento = request.POST.get(f'valor_pagamento_{financeiro.id}')
             
             # Atualiza os campos apenas se houve alteração
+            if valor_pagamento:
+                financeiro.valor_pagamento = valor_pagamento
             if forma_pagamento:
                 financeiro.forma_pagamento = forma_pagamento
             if presenca:

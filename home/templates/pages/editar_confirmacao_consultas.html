@@ -24,6 +24,7 @@
                                     <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Semana Mês</th>
                                     <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Forma Pagamento</th>
                                     <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Presença</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor Pago</th>
                                     <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Observações</th>
                                 </tr>
                             </thead>
@@ -50,6 +51,9 @@
                                                 <option value="Nao" {% if financeiro.presenca == 'Nao' %}selected{% endif %}>Não</option>
                                                 <option value="Falta Inj" {% if financeiro.presenca == 'Falta Inj' %}selected{% endif %}>Falta Injustificada</option>
                                             </select>
+                                        </td>
+                                        <td class="align-middle text-center">
+                                            <input class="form-control" id="valor_pagamento{{ financeiro.id }}" name="valor_pagamento{{ financeiro.id }}" value="{{ financeiro.valor_pagamento }}" />
                                         </td>
                                         <td class="align-middle text-center">
                                             <input class="form-control" id="observacoes_{{ financeiro.id }}" name="observacoes_{{ financeiro.id }}" value="{{ financeiro.observacoes }}" />
