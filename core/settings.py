@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 import os, random, string
 from pathlib import Path
+from urllib.parse import urlparse
+from os import getenv
 from dotenv import load_dotenv
 
 load_dotenv()  # take environment variables from .env.
@@ -93,31 +95,44 @@ WSGI_APPLICATION = "core.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-DB_ENGINE   = os.getenv('DB_ENGINE'   , None)
-DB_USERNAME = os.getenv('DB_USERNAME' , None)
-DB_PASS     = os.getenv('DB_PASS'     , None)
-DB_HOST     = os.getenv('DB_HOST'     , None)
-DB_PORT     = os.getenv('DB_PORT'     , None)
-DB_NAME     = os.getenv('DB_NAME'     , None)
+tmpPostgres = urlparse(os.getenv("DATABASE_URL"))
 
-if DB_ENGINE and DB_NAME and DB_USERNAME:
-    DATABASES = { 
-      'default': {
-        'ENGINE'  : 'django.db.backends.' + DB_ENGINE, 
-        'NAME'    : DB_NAME,
-        'USER'    : DB_USERNAME,
-        'PASSWORD': DB_PASS,
-        'HOST'    : DB_HOST,
-        'PORT'    : DB_PORT,
-        }, 
+# DB_ENGINE   = os.getenv('DB_ENGINE'   , None)
+# DB_USERNAME = os.getenv('DB_USERNAME' , None)
+# DB_PASS     = os.getenv('DB_PASS'     , None)
+# DB_HOST     = os.getenv('DB_HOST'     , None)
+# DB_PORT     = os.getenv('DB_PORT'     , None)
+# DB_NAME     = os.getenv('DB_NAME'     , None)
+
+# if DB_ENGINE and DB_NAME and DB_USERNAME:
+#     DATABASES = { 
+#       'default': {
+#         'ENGINE'  : 'django.db.backends.' + DB_ENGINE, 
+#         'NAME'    : DB_NAME,
+#         'USER'    : DB_USERNAME,
+#         'PASSWORD': DB_PASS,
+#         'HOST'    : DB_HOST,
+#         'PORT'    : DB_PORT,
+#         }, 
+#     }
+# else:
+#     DATABASES = {
+#         'default': {
+#             'ENGINE': 'django.db.backends.sqlite3',
+#             'NAME': 'db.sqlite3',
+#         }
+#     }
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': tmpPostgres.path.replace('/', ''),
+        'USER': tmpPostgres.username,
+        'PASSWORD': tmpPostgres.password,
+        'HOST': tmpPostgres.hostname,
+        'PORT': 5432,
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': 'db.sqlite3',
-        }
-    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
