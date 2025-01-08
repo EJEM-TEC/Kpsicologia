@@ -14,5 +14,4 @@ inv
 #src
 *.sqlite*
 
-.env
 .vercel
