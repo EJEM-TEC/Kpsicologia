@@ -126,14 +126,13 @@ tmpPostgres = urlparse(os.getenv("DATABASE_URL"))
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': tmpPostgres.path.decode('utf-8').replace('/', '') if isinstance(tmpPostgres.path, bytes) else tmpPostgres.path.replace('/', ''),
+        'NAME': tmpPostgres.path[1:],  # Remove o primeiro '/' ao acessar a string do path
         'USER': tmpPostgres.username,
         'PASSWORD': tmpPostgres.password,
         'HOST': tmpPostgres.hostname,
-        'PORT': 5432,
+        'PORT': tmpPostgres.port or 5432,  # Pega a porta ou usa 5432 como default
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
