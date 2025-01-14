@@ -70,6 +70,7 @@ urlpatterns = [
     path('agenda_central', views.agenda_central, name='agenda_central'),
     path('especialidades', views.cadastrar_especialidade, name='especialidades'),
     path('publicos', views.cadastrar_publico, name='publicos'),
+    path('deletar_publico/<int:publico_id>', views.deletar_publico, name='deletar_publico'),
     path('psicologo_especialidade/<int:psicologo_id>', views.AssociarPsicoEspecialidade, name='psicoEspecialidades'),
     path('psicologo_especialidade/<int:psicologo_id>/<int:especialidade_id>', views.DissociarPsicoEspecialidade, name='disPsicoEspecialidade'),
     path('psicologo_publico/<int:psicologo_id>', views.AssociarPsicoPublico, name='psicoPublicos'),

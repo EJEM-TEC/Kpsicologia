@@ -53,7 +53,7 @@
                   {{ publico.publico }}
                 </td>
                 <td class="align-middle text-center">
-                  <a href="#">Remover</a>
+                  <a href="{% url 'deletar_publico' publico.id %}">Remover</a>
                 </td>
               </tr>
               {% endfor %}

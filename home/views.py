@@ -748,9 +748,10 @@ def confirma_consulta(request, psicologo_id):
         'valor_acerto': valor_acerto,
     })
 @login_required(login_url='login1')
-@has_role_decorator('administrador')
 def pacientes(request):
-
+    
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
     pacientes = Paciente.objects.all()
 
     if request.method == 'POST':
@@ -760,6 +761,8 @@ def pacientes(request):
         valor = request.POST.get('valor')
         nome_responsavel = request.POST.get('nome_responsavel')
         periodo_paciente = request.POST.get('periodo_paciente')
+
+        print(valor)
 
         if not nome_responsavel:
             nome_responsavel = ""
@@ -1205,6 +1208,18 @@ def cadastrar_publico(request):
     
     return render(request, 'pages/publicos.html', 
                   { 'publicos': publicos })
+
+@login_required(login_url='login1')
+def deletar_publico(request, publico_id):
+
+    publico = get_object_or_404(Publico, id=publico_id)
+
+    if request.method == 'POST':
+        publico.delete()
+
+        return redirect('publicos')
+    
+    return render(request, 'pages/deletar_publico.html', {'publico': publico})
 
 @login_required(login_url='login1')
 def Confirmar_Consulta(request, psicologo_id):

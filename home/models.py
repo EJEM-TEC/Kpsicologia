@@ -49,7 +49,7 @@ class Paciente(models.Model):
     id = models.AutoField(primary_key=True)
     nome = models.CharField(max_length=100)
     idade = models.CharField(max_length=100)
-    telefone = models.IntegerField()
+    telefone = models.CharField(max_length=100)
     nome_responsavel = models.CharField(max_length=100)
     valor = models.DecimalField(max_digits=10, decimal_places=3)
     periodo = models.CharField(max_length=100, default="semanal")
