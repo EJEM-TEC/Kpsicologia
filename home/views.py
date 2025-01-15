@@ -961,7 +961,9 @@ def psico_agenda(request, psicologo_id):
         ).first()
 
         if consulta_existente:
-            return redirect('consulta_cadastrada2')
+            return render(request, 'consulta_cadastrada2', {
+                "psicologo": psicologa,
+            })
 
         # Remover disponibilidade existente para o horário e dia selecionados
         disponibilidade_existente = Disponibilidade.objects.filter(
@@ -972,6 +974,10 @@ def psico_agenda(request, psicologo_id):
 
         if disponibilidade_existente:
             disponibilidade_existente.delete()
+        else:
+            return render(request, "pages/error_disponibilidade.html", {
+                'psicolologo': psicologa,
+            })
 
         # Verificar se já existe uma consulta no mesmo horário e dia com o mesmo psicólogo
         consulta_por_horario = Consulta.objects.filter(
@@ -1508,6 +1514,7 @@ def editar_financeiro(request, id_financeiro):
 @login_required(login_url='login1')
 def definir_disponibilidade(request, psicologo_id):
 
+    salas = Sala.objects.all()
     psicologa = get_object_or_404(Psicologa, id=psicologo_id)
     horarios = Disponibilidade.objects.filter(psicologa=psicologa)
 
@@ -1529,6 +1536,9 @@ def definir_disponibilidade(request, psicologo_id):
         qtd_atendimentos = int(request.POST.get('qtd_atendimentos'))
         tempo_atendimento = int(request.POST.get('tempo_atendimento'))  # em minutos
         horario_inicio = request.POST.get('horario_inicio')
+        sala_id = request.POST.get('sala_id')
+
+        sala = get_object_or_404(Sala, id_sala=sala_id)
 
         # Convertemos o horário de início para um objeto datetime.time
         horario_atual = datetime.strptime(horario_inicio, '%H:%M').time()
@@ -1541,11 +1551,17 @@ def definir_disponibilidade(request, psicologo_id):
                 hora=horario_atual,
                 psicologa=psicologa
             ).exists():
-                # Se não existir, cria o horário
+                # # Se não existir, cria o horário
                 Disponibilidade.objects.create(
                     dia_semana=dia_semana,
                     hora=horario_atual,
                     psicologa=psicologa
+                )
+                Consulta.objects.create(
+                    dia_semana=dia_semana,
+                    horario=horario_atual,
+                    psicologo=psicologa,
+                    sala=sala
                 )
             # Incrementa o horário atual pelo tempo de atendimento (em minutos)
             horario_atual = (datetime.combine(datetime.today(), horario_atual) + timedelta(minutes=tempo_atendimento)).time()
@@ -1554,7 +1570,8 @@ def definir_disponibilidade(request, psicologo_id):
 
     return render(request, 'pages/psico_disponibilidade.html', {
         'psicologo': psicologa,
-        'horarios_agrupados': horarios_agrupados
+        'horarios_agrupados': horarios_agrupados,
+        'salas': salas,
     })
 
 
