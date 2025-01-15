@@ -989,8 +989,12 @@ def psico_agenda(request, psicologo_id):
         if consulta_por_horario:
             if paciente.periodo == "Semanal" and not consulta_por_horario.semanal:
                 consulta_por_horario.semanal = paciente.nome
+                consulta_por_horario.Paciente = paciente
+                consulta_por_horario.quinzenal = ""
             elif paciente.periodo == "Quinzenal" and not consulta_por_horario.quinzenal:
                 consulta_por_horario.quinzenal = paciente.nome
+                consulta_por_horario.Paciente = paciente
+                consulta_por_horario.semanal = ""
             consulta_por_horario.save()
         else:
             consulta = Consulta.objects.create(
@@ -1338,6 +1342,10 @@ def AdicionarConfirma_consulta(request, psicologo_id):
 
     if request.method == "POST":
         for consulta in consultas_psico:
+
+            if not consulta.Paciente:
+                continue
+
             # Obtém o índice do dia da semana
             dia_semana_index = DIAS_SEMANA.get(consulta.dia_semana)
 
@@ -1757,7 +1765,7 @@ def editar_consultas(request, psicologo_id):
             if valor_pagamento:
                 financeiro.valor_pagamento = valor_pagamento
             if forma_pagamento:
-                financeiro.forma_pagamento = forma_pagamento
+                financeiro.forma = forma_pagamento
             if presenca:
                 financeiro.presenca = presenca
             if observacoes is not None:

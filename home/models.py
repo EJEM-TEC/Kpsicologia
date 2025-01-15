@@ -89,11 +89,11 @@ class PsicoConfirmarConsulta(models.Model):
     
 class Consulta(models.Model):
     psicologo = models.ForeignKey(Psicologa, on_delete=models.CASCADE)
-    Paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, null=True, blank=True)
+    Paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, null=True)
     horario = models.TimeField()
     dia_semana = models.CharField(max_length=100)
-    semanal = models.CharField(max_length=32, null=True, blank=True)
-    quinzenal = models.CharField(max_length=32, null=True, blank=True)
+    semanal = models.CharField(max_length=32, null=True)
+    quinzenal = models.CharField(max_length=32, null=True)
     sala=models.ForeignKey(Sala, on_delete=models.CASCADE)
 
 class Financeiro2(models.Model):
