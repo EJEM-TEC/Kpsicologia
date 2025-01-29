@@ -932,7 +932,7 @@ def psico_agenda(request, psicologo_id):
         return render(request, 'pages/error_permission1.html')
 
     salas_atendimento = Sala.objects.all()
-    consultas = Consulta.objects.filter(psicologo=psicologa)
+    consultas = Consulta.objects.filter(psicologo=psicologa).order_by('horario')
     
     if request.method == 'POST':
         nome_cliente = request.POST.get('nome_cliente')
@@ -997,15 +997,15 @@ def psico_agenda(request, psicologo_id):
                 consulta_por_horario.semanal = ""
             consulta_por_horario.save()
         else:
-            consulta = Consulta.objects.create(
-                Paciente=paciente,
+            consulta = Consulta.objects.get(
                 psicologo=psicologa,
                 horario=horario_consulta,
                 sala=sala_atendimento,
-                dia_semana=dia_semana,
-                semanal=paciente.nome if paciente.periodo == "Semanal" else "",
-                quinzenal=paciente.nome if paciente.periodo == "Quinzenal" else ""
+                dia_semana=dia_semana
             )
+            consulta.Paciente = paciente,
+            consulta.semanal = paciente.nome if paciente.periodo == "Semanal" else ""
+            consulta.quinzenal = paciente.nome if paciente.periodo == "Quinzenal" else ""
             consulta.save()
 
         return redirect('psico_agenda', psicologo_id=psicologo_id)
@@ -1559,18 +1559,30 @@ def definir_disponibilidade(request, psicologo_id):
                 hora=horario_atual,
                 psicologa=psicologa
             ).exists():
-                # # Se não existir, cria o horário
-                Disponibilidade.objects.create(
-                    dia_semana=dia_semana,
-                    hora=horario_atual,
-                    psicologa=psicologa
-                )
-                Consulta.objects.create(
+                if Consulta.objects.filter(
                     dia_semana=dia_semana,
                     horario=horario_atual,
-                    psicologo=psicologa,
                     sala=sala
-                )
+                ).exists():
+                    
+                    consulta = Consulta.objects.get(
+                        dia_semana=dia_semana,
+                        horario=horario_atual,
+                        sala=sala
+                    )
+
+                    # # Se não existir, cria o horário
+                    Disponibilidade.objects.create(
+                        dia_semana=dia_semana,
+                        hora=horario_atual,
+                        psicologa=psicologa
+                    )
+                    consulta.psicologo = psicologa
+                    consulta.save()
+                else:
+                    return render(request, 'pages/error_disponibilidade_sala.html', {
+                        'psiscolo': psicologa,
+                    })
             # Incrementa o horário atual pelo tempo de atendimento (em minutos)
             horario_atual = (datetime.combine(datetime.today(), horario_atual) + timedelta(minutes=tempo_atendimento)).time()
 
@@ -1662,7 +1674,7 @@ def agenda_central(request):
     if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
         return render(request, 'pages/error_permission.html')
 
-    consultas = Consulta.objects.all()
+    consultas = Consulta.objects.all().order_by('horario')
     psicologas = Psicologa.objects.all()
     especialidades = Especialidade.objects.all()
     publicos = Publico.objects.all()
@@ -1781,11 +1793,59 @@ def editar_consultas(request, psicologo_id):
     return render(request, 'pages/editar_confirmacao_consultas.html', {'psicologa': psicologa, 'financeiros': consultas_psico})
 
 
+@login_required(login_url='login1')
+def definir_horario_sala(request, id_sala):
+
+    sala = get_object_or_404(Sala, id_sala=id_sala)
+    horarios = Consulta.objects.filter(sala=sala)
+
+    if request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission1.html')
+
+    # Lista dos dias da semana
+    dias_da_semana = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
+
+    # Agrupar horários por dia da semana em uma lista de tuplas (dia, horários)
+    horarios_agrupados = []
+    for dia in dias_da_semana:
+        horarios_do_dia = horarios.filter(dia_semana=dia)
+        horarios_agrupados.append((dia, horarios_do_dia))
+
+    if request.method == "POST":
+        dia_semana = request.POST.get('dia_semana')
+        qtd_atendimentos = int(request.POST.get('qtd_atendimentos'))
+        tempo_atendimento = int(request.POST.get('tempo_atendimento'))  # em minutos
+        horario_inicio = request.POST.get('horario_inicio')
+
+        # Convertemos o horário de início para um objeto datetime.time
+        horario_atual = datetime.strptime(horario_inicio, '%H:%M').time()
+
+        # Loop para inserir os horários de acordo com a quantidade de atendimentos
+        for i in range(qtd_atendimentos):
+            # Verificar se já existe um horário com o mesmo dia e hora
+            if not Consulta.objects.filter(
+                dia_semana=dia_semana,
+                horario=horario_atual,
+                sala=sala
+            ).exists():
+                Consulta.objects.create(
+                    dia_semana=dia_semana,
+                    horario=horario_atual,
+                    sala=sala,
+                )
+            # Incrementa o horário atual pelo tempo de atendimento (em minutos)
+            horario_atual = (datetime.combine(datetime.today(), horario_atual) + timedelta(minutes=tempo_atendimento)).time()
+
+        return redirect('horario_sala', id_sala=sala.id_sala)  # Altere para a view de sucesso
+
+    return render(request, 'pages/sala_disponibilidade.html', {
+        'horarios_agrupados': horarios_agrupados,
+        'sala': sala
+    })
 
 @login_required(login_url='login1')
 def consulta_cadastrada2(request):
     return render(request, 'pages/consulta_cadastrada2erro.html')
-
 
 @login_required(login_url='login1')
 def consulta_cadastrada1(request):

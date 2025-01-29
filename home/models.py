@@ -88,7 +88,7 @@ class PsicoConfirmarConsulta(models.Model):
     
     
 class Consulta(models.Model):
-    psicologo = models.ForeignKey(Psicologa, on_delete=models.CASCADE)
+    psicologo = models.ForeignKey(Psicologa, on_delete=models.CASCADE, null=True)
     Paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, null=True)
     horario = models.TimeField()
     dia_semana = models.CharField(max_length=100)
