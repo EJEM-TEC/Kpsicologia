@@ -161,4 +161,55 @@
 </div>
 {% endfor %}
 
+{% for psicologa in psicologas_online %}
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+                <h6>Agendas Online da Psicóloga <span class="font-weight-bold" style="color: {{ psicologa.cor }}; font-weight: 900;"> {{ psicologa.nome }}</span></h6>
+            </div>
+            <div class="card-body px-4 pt-0 pb-2" style="overflow-x: auto; white-space: nowrap;">
+                <div class="d-inline-flex">
+                    {% for dia in dias_da_semana %}
+                    <div class="mb-4 col" style="min-width: 250px;"> <!-- Definindo uma largura mínima para cada dia -->
+                        <p>{{ dia }} Feira</p>
+                        <div class="table-responsive p-0">
+                            <table class="table align-items-center mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário</th>
+                                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Semanal</th>
+                                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Quinzenal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {% for consulta in consultas_online %}
+                                    {% if consulta.psicologo == psicologa and consulta.dia_semana == dia %}
+                                            <tr style="background-color: {{ consulta.psicologo.cor }};">
+                                                <td class="align-middle text-center text-white">{{ consulta.horario }}</td>
+                                                {% if consulta.semanal %}
+                                                <td class="align-middle text-center text-white">{{ consulta.semanal }}</td>
+                                                {% else %}
+                                                <td class="align-middle text-center text-white"></td>
+                                                {% endif %}
+                                                {% if consulta.quinzenal %}
+                                                <td class="align-middle text-center text-white">{{ consulta.quinzenal }}</td>
+                                                {% else %}
+                                            <td class="align-middle text-center text-white"></td>
+                                        {% endif %} 
+                                    </tr>
+                                    {% endif %}
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
 {% endblock content %}

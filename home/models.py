@@ -95,6 +95,16 @@ class Consulta(models.Model):
     semanal = models.CharField(max_length=32, null=True)
     quinzenal = models.CharField(max_length=32, null=True)
     sala=models.ForeignKey(Sala, on_delete=models.CASCADE)
+    ultima_atualizacao = models.DateTimeField(auto_now=True)
+
+class Consulta_Online(models.Model):
+    psicologo = models.ForeignKey(Psicologa, on_delete=models.CASCADE, null=True)
+    Paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, null=True)
+    horario = models.TimeField()
+    dia_semana = models.CharField(max_length=100)
+    semanal = models.CharField(max_length=32, null=True)
+    quinzenal = models.CharField(max_length=32, null=True)
+    ultima_atualizacao = models.DateTimeField(auto_now=True)
 
 class Financeiro2(models.Model):
     dia_semana = models.CharField(max_length=32, blank=True, null=True)
