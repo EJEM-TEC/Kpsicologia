@@ -93,7 +93,6 @@ def logout_view(request):
     return redirect('/accounts/login/')
 
 @login_required(login_url='login1')
-@has_role_decorator('administrador')
 def cadastrar_sala(request):
     salas = Sala.objects.all()
     unidades = Unidade.objects.all()
@@ -599,6 +598,23 @@ def psicologa(request):
     psicologos = Psicologa.objects.all()
     especialidades = Especialidade.objects.all()
 
+
+    hoje = datetime.now().date()
+    psicologos = Psicologa.objects.all()
+
+    # Lista para armazenar as psicólogas e suas respectivas verificações de agenda
+    psicologos_verificacao = []
+
+    for psicologa in psicologos:
+        diferenca_ultima_atualizacao = (hoje - psicologa.ultima_atualizacao_agenda).days
+        verificacao_agenda = diferenca_ultima_atualizacao <= 7
+
+        # Adicionar a psicóloga e a verificação de agenda na lista
+        psicologos_verificacao.append({
+            'psicologo': psicologa,
+            'verificacao_agenda': verificacao_agenda
+        })
+
     if request.method == 'POST':
         nome = request.POST.get('nome')
         cor = request.POST.get('cor')
@@ -636,7 +652,7 @@ def psicologa(request):
     
     # Serializa os dados (ajuste os campos conforme necessário)
 
-    return render(request, 'pages/psicologa.html', {'psicologos': psicologos, 'especialidades': especialidades})
+    return render(request, 'pages/psicologa.html', {'psicologos_verificacao': psicologos_verificacao, 'especialidades': especialidades})
 
 
 @login_required(login_url='login1')
@@ -645,9 +661,24 @@ def visualizar_psicologos(request):
     request.session['mes'] = None
     request.session['ano'] = None
 
+    hoje = datetime.now().date()
     psicologos = Psicologa.objects.all()
 
-    return render(request, 'pages/visualizacao_psicologas.html', {'psicologos': psicologos })
+    # Lista para armazenar as psicólogas e suas respectivas verificações de agenda
+    psicologos_verificacao = []
+
+    for psicologa in psicologos:
+        diferenca_ultima_atualizacao = (hoje - psicologa.ultima_atualizacao_agenda).days
+        verificacao_agenda = diferenca_ultima_atualizacao <= 7
+
+        # Adicionar a psicóloga e a verificação de agenda na lista
+        psicologos_verificacao.append({
+            'psicologo': psicologa,
+            'verificacao_agenda': verificacao_agenda
+        })
+
+    return render(request, 'pages/visualizacao_psicologas.html', {'psicologos_verificacao': psicologos_verificacao})
+
 
 
 @login_required(login_url='login1')
@@ -752,7 +783,7 @@ def pacientes(request):
     
     if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
         return render(request, 'pages/error_permission.html')
-    pacientes = Paciente.objects.all()
+    pacientes = Paciente.objects.all().filter(deletado=False)
 
     if request.method == 'POST':
         nome_paciente = request.POST.get('nome_paciente')
@@ -781,7 +812,8 @@ def pacientes(request):
             valor=valor_decimal,
             nome_responsavel=nome_responsavel,
             telefone=telefone_paciente,
-            periodo=periodo_paciente
+            periodo=periodo_paciente,
+            deletado=False
         )
 
         paciente.save()
@@ -826,20 +858,20 @@ def deletar_paciente(request, id_paciente):
     paciente = get_object_or_404(Paciente, id=id_paciente)
 
     if request.method == 'POST':
-        paciente.delete()
+        paciente.deletado = True
 
         return redirect('pacientes')
     
     return render(request, 'pages/deletar_paciente.html', {'paciente': paciente})
 
-
-
 def deletar_consulta(request, psicologo_id, consulta_id):
     consulta = get_object_or_404(ConfirmacaoConsulta, id=consulta_id)
     psicologo = get_object_or_404(Psicologa, id=psicologo_id)
+    hoje = datetime.now().day
     
     if request.method == "POST":
         consulta.delete()
+        psicologo.ultima_atualizacao_agenda = hoje
 
         if request.url == reverse('psico_agenda', args=[psicologo_id]):
             return redirect('psico_agenda', psicologo_id=psicologo_id)
@@ -851,8 +883,6 @@ def deletar_consulta(request, psicologo_id, consulta_id):
         'psicologo': psicologo,
         'consulta': consulta
     })
-
-
 
 def editar_confirma_consulta(request, psicologo_id, consulta_id):
     psicologo = get_object_or_404(Psicologa, id=psicologo_id)
@@ -887,39 +917,6 @@ def financeiro(request):
     # psicologas = Psicologa.objects.all()
     financeiros = Financeiro2.objects.all()
 
-    # if request.method == 'POST':
-    #     valor_previsto = Decimal(request.POST['valor_previsto'])
-    #     valor_pendente = Decimal(request.POST['valor_pendente'])
-    #     valor_acertado = Decimal(request.POST['valor_acertado'])
-    #     qtd_pacientes = request.POST.get('qtd_pacientes')
-    #     valor_total = valor_previsto + valor_pendente + valor_acertado,
-    #     desistencias_atendidos = request.POST.get('desistencias_atendidos')
-    #     qtd_marcacoes = request.POST.get('qtd_marcacoes')
-    #     desistencias_novos = request.POST.get('desistencias_novos')
-    #     nome_psicologo = request.POST.get('nome_psicologo')
-    #     psicologa = get_object_or_404(Psicologa, nome=nome_psicologo)
-    #     # psicologa = get_object_or_404(Psicologa, nome='nome_psicologo')
-        
-    #     financeiro = Financeiro.objects.create(
-    #         psicologa = psicologa,
-    #         valor_previsto = valor_previsto,
-    #         valor_pendente = valor_pendente,
-    #         valor_acertado = valor_acertado,
-    #         valor_total = valor_total,
-    #         qtd_pacientes = qtd_pacientes,
-    #         desistencias_atendidos =  desistencias_atendidos,
-    #         qtd_marcacoes = qtd_marcacoes,
-    #         desistencias_novos = desistencias_novos
-    #     )
-
-    #     financeiro.save()
-
-    #     return redirect('financeiro')
-    
-    # context = {
-    #     'psicologas': psicologas,
-    #     'financeiros': financeiros
-    # }
     return render(request, 'pages/financeiro.html', {'financeiros':financeiros})
 
 
@@ -930,9 +927,15 @@ def psico_agenda(request, psicologo_id):
     # Verificar se o usuário é a psicóloga ou faz parte do grupo 'Administrador'
     if request.user.username != psicologa.nome and not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
         return render(request, 'pages/error_permission1.html')
-
+    
+    hoje = datetime.now().date()
     salas_atendimento = Sala.objects.all()
     consultas = Consulta.objects.filter(psicologo=psicologa).order_by('horario')
+    verificaco_agenda = True
+    diferenca_ultima_atualizacao = (hoje - psicologa.ultima_atualizacao_agenda).days
+
+    if diferenca_ultima_atualizacao > 7:
+        verificaco_agenda = False
     
     if request.method == 'POST':
         nome_cliente = request.POST.get('nome_cliente')
@@ -945,7 +948,7 @@ def psico_agenda(request, psicologo_id):
         # Verificar se o paciente existe
         try:
             paciente = Paciente.objects.get(nome=nome_cliente)
-        except Paciente.DoesNotExist:
+        except Paciente.DoesNotExist or paciente.deletado == True:
             return render(request, 'pages/error_paciente_nao_encontrado.html', {
                 'nome_cliente': nome_cliente,
                 'psicologo': psicologa
@@ -1008,6 +1011,8 @@ def psico_agenda(request, psicologo_id):
             consulta.quinzenal = paciente.nome if paciente.periodo == "Quinzenal" else ""
             consulta.save()
 
+            psicologa.ultima_atualizacao_agenda = hoje
+
         return redirect('psico_agenda', psicologo_id=psicologo_id)
 
     dias_da_semana = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"]
@@ -1016,7 +1021,8 @@ def psico_agenda(request, psicologo_id):
         'salas': salas_atendimento,  
         'agendas': consultas,
         'psicologo': psicologa,
-        'dias_da_semana': dias_da_semana
+        'dias_da_semana': dias_da_semana,
+        'verificaco_agenda': verificaco_agenda
     })
 
 
@@ -1675,7 +1681,7 @@ def agenda_central(request):
         return render(request, 'pages/error_permission.html')
 
     consultas = Consulta.objects.all().order_by('horario')
-    consultas_online = Consulta_Online.objects.all().order_by('horario')
+    consultas_online = Consulta_Online.objects.all().order_by('horario').filter(Paciente__isnull=False)
     psicologas = Psicologa.objects.all()
     especialidades = Especialidade.objects.all()
     publicos = Publico.objects.all()

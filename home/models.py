@@ -41,6 +41,7 @@ class Psicologa(models.Model):
     email=models.CharField(max_length=100)
     abordagem = models.CharField(max_length=100)
     senha=models.CharField(max_length=100)
+    ultima_atualizacao_agenda = models.DateField(auto_now=True)
     
     def __str__(self):
         return self.usuario.username
@@ -53,6 +54,7 @@ class Paciente(models.Model):
     nome_responsavel = models.CharField(max_length=100)
     valor = models.DecimalField(max_digits=10, decimal_places=3)
     periodo = models.CharField(max_length=100, default="semanal")
+    deletado = models.BooleanField(default=False)
 
 
 class Especialidade(models.Model):
@@ -95,7 +97,7 @@ class Consulta(models.Model):
     semanal = models.CharField(max_length=32, null=True)
     quinzenal = models.CharField(max_length=32, null=True)
     sala=models.ForeignKey(Sala, on_delete=models.CASCADE)
-    ultima_atualizacao = models.DateTimeField(auto_now=True)
+    
 
 class Consulta_Online(models.Model):
     psicologo = models.ForeignKey(Psicologa, on_delete=models.CASCADE, null=True)

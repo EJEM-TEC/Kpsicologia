@@ -6,6 +6,22 @@
     <div class="col-12">
         <div class="card mb-4">
             <div class="card-header pb-0">
+                <div class="card-body p-4">
+                    <h6>Última atualização da agenda: 
+                        {% if verificaco_agenda %}
+                            <span class="text-success fw-bold"> {{ psicologo.ultima_atualizacao_agenda }}</span>
+                        {% else %}
+                           <span class="text-red fw-bold"> {{ psicologo.ultima_atualizacao_agenda }}</span>
+                        {% endif %}
+                    </h6>
+                </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
                 <h6>Agenda de {{psicologo.nome}}</h6>
             </div>
             <div class="card-body p-4">
