@@ -1587,7 +1587,7 @@ def definir_disponibilidade(request, psicologo_id):
                     consulta.save()
                 else:
                     return render(request, 'pages/error_disponibilidade_sala.html', {
-                        'psiscolo': psicologa,
+                        'psicologo': psicologa,
                     })
             # Incrementa o horário atual pelo tempo de atendimento (em minutos)
             horario_atual = (datetime.combine(datetime.today(), horario_atual) + timedelta(minutes=tempo_atendimento)).time()
