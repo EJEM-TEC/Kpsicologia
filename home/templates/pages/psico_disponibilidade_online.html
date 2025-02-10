@@ -4,6 +4,13 @@
 {% block content %}
 <div class="row">
     <div class="col-12">
+        <button type="button" class="btn bg-gradient-primary"><a class="text-white" href="{% url 'psicologa' %}">
+            Voltar
+        </a></button>
+    </div>
+  </div>
+<div class="row">
+    <div class="col-12">
         <div class="card mb-4">
             <div class="card-header pb-0">
                 <h6>Agenda Online de {{psicologo.nome}}</h6>

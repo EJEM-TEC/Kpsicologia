@@ -4,6 +4,13 @@
 {% block content %}
 <div class="row">
     <div class="col-12">
+        <button type="button" class="btn bg-gradient-primary"><a class="text-white" href="{% url 'cadastrar_salas' %}">
+            Voltar
+        </a></button>
+    </div>
+  </div>
+<div class="row">
+    <div class="col-12">
         <div class="card mb-4">
             <div class="card-header pb-0">
                 <h6>Horários da Sala <span class="font-weight-bold" style="color: {{ sala.cor_sala }}; font-weight: 900;"> {{ sala.numero_sala }}</span></h6>
