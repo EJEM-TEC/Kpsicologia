@@ -32,7 +32,7 @@ if not SECRET_KEY:
 # Render Deployment Code
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*', '.vercel.app']
 
 # handler404 = 'home.views.handler404'
 # handler500 = 'home.views.handler500'
@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "home",
     'rolepermissions',
     "core",
+    "example",
     
 ]
 
@@ -89,7 +90,9 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "core.wsgi.application"
+# WSGI_APPLICATION = "core.wsgi.application"
+
+WSGI_APPLICATION = 'api.wsgi.app'
 
 
 # Database
