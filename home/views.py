@@ -24,7 +24,8 @@ from django.shortcuts import render
 from datetime import datetime
 from django.db.models import F, ExpressionWrapper, DecimalField, Sum
 from django.db.models.functions import Coalesce  # Import correto para Coalesce
-from django.db.models import Q
+from django.db.models import Sum, Count, F, Q, DecimalField, ExpressionWrapper
+from django.db.models.functions import Coalesce
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from rolepermissions.decorators import has_role_decorator
@@ -784,6 +785,7 @@ def pacientes(request):
     if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
         return render(request, 'pages/error_permission.html')
     pacientes = Paciente.objects.all().filter(deletado=False)
+    pacientes_deletados = Paciente.objects.all().filter(deletado=True)
 
     if request.method == 'POST':
         nome_paciente = request.POST.get('nome_paciente')
@@ -819,7 +821,8 @@ def pacientes(request):
         paciente.save()
         return redirect('pacientes')
     
-    return render(request, 'pages/pacientes.html', {'pacientes': pacientes})
+    return render(request, 'pages/pacientes.html', {'pacientes': pacientes,
+                                                    'pacientes_deletados': pacientes_deletados})
 
 @login_required(login_url='login1')
 @has_role_decorator('administrador')
@@ -859,6 +862,8 @@ def deletar_paciente(request, id_paciente):
 
     if request.method == 'POST':
         paciente.deletado = True
+
+        paciente.save()
 
         return redirect('pacientes')
     
@@ -1335,6 +1340,7 @@ DIAS_SEMANA = {
 def AdicionarConfirma_consulta(request, psicologo_id):
     psicologa = get_object_or_404(Psicologa, id=psicologo_id)
     consultas_psico = Consulta.objects.filter(psicologo=psicologa)
+    consultas_psico_online = Consulta_Online.objects.filter(psicologo=psicologa)
 
     # Data atual
     hoje = datetime.now()
@@ -1379,6 +1385,46 @@ def AdicionarConfirma_consulta(request, psicologo_id):
                     periodo_atendimento=consulta.Paciente.periodo,
                     horario=consulta.horario,
                     psicologa=consulta.psicologo,
+                    modalidade="Presencial",
+                    paciente=consulta.Paciente,
+                    valor=consulta.Paciente.valor,
+                    data=data_consulta,  # Data ajustada
+                    semana=semana_mes  # Semana calculada no mês
+                )
+
+        for consulta in consultas_psico_online:
+
+            if not consulta.Paciente:
+                continue
+
+            # Obtém o índice do dia da semana
+            dia_semana_index = DIAS_SEMANA.get(consulta.dia_semana)
+
+            if dia_semana_index is None:
+                continue  # Ignora se o dia da semana não for válido
+
+            # Calcula a data exata da consulta com base no início da semana passada
+            data_consulta = inicio_semana_passada + timedelta(days=dia_semana_index)
+
+            # Determina a semana correta dentro do mês
+            semana_mes = (data_consulta.day - 1) // 7 + 1  # Calcula a semana no mês (1ª, 2ª, etc.)
+
+            # Verifica se o registro já existe
+            existe = Financeiro2.objects.filter(
+                dia_semana=consulta.dia_semana,
+                horario=consulta.horario,
+                psicologa=consulta.psicologo,
+                paciente=consulta.Paciente,
+                data=data_consulta
+            ).exists()
+
+            if not existe:
+                Financeiro2.objects.create(
+                    dia_semana=consulta.dia_semana,
+                    periodo_atendimento=consulta.Paciente.periodo,
+                    horario=consulta.horario,
+                    psicologa=consulta.psicologo,
+                    modalidade="Online",
                     paciente=consulta.Paciente,
                     valor=consulta.Paciente.valor,
                     data=data_consulta,  # Data ajustada
@@ -1402,7 +1448,6 @@ def ExcluirConfirma_consulta(request, psicologo_id):
                 horario=consulta.horario,
                 psicologa=consulta.psicologo,
                 paciente=consulta.Paciente,
-                data=consulta.data
             ).delete()
 
         return redirect('confirma_consulta', psicologo_id=psicologa.id)
@@ -1530,7 +1575,7 @@ def definir_disponibilidade(request, psicologo_id):
 
     salas = Sala.objects.all()
     psicologa = get_object_or_404(Psicologa, id=psicologo_id)
-    horarios = Disponibilidade.objects.filter(psicologa=psicologa)
+    horarios = Consulta.objects.filter(psicologo=psicologa).filter(Paciente__isnull=True).order_by('horario')
 
     # Verificar se o usuário é a psicóloga ou faz parte do grupo 'Administrador'
     if request.user.username != psicologa.nome and not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
@@ -1551,6 +1596,7 @@ def definir_disponibilidade(request, psicologo_id):
         tempo_atendimento = int(request.POST.get('tempo_atendimento'))  # em minutos
         horario_inicio = request.POST.get('horario_inicio')
         sala_id = request.POST.get('sala_id')
+        semanal_quinzenal = request.POST.get('semanal_quinzenal')
 
         sala = get_object_or_404(Sala, id_sala=sala_id)
 
@@ -1559,36 +1605,31 @@ def definir_disponibilidade(request, psicologo_id):
 
         # Loop para inserir os horários de acordo com a quantidade de atendimentos
         for i in range(qtd_atendimentos):
-            # Verificar se já existe um horário com o mesmo dia e hora
-            if not Disponibilidade.objects.filter(
+            if Consulta.objects.filter(
                 dia_semana=dia_semana,
-                hora=horario_atual,
-                psicologa=psicologa
+                horario=horario_atual,
+                sala=sala
             ).exists():
-                if Consulta.objects.filter(
+                
+                consulta = Consulta.objects.get(
                     dia_semana=dia_semana,
                     horario=horario_atual,
                     sala=sala
-                ).exists():
-                    
-                    consulta = Consulta.objects.get(
-                        dia_semana=dia_semana,
-                        horario=horario_atual,
-                        sala=sala
-                    )
-
-                    # # Se não existir, cria o horário
-                    Disponibilidade.objects.create(
-                        dia_semana=dia_semana,
-                        hora=horario_atual,
-                        psicologa=psicologa
-                    )
-                    consulta.psicologo = psicologa
+                )
+                consulta.psicologo = psicologa
+                
+                if semanal_quinzenal == 'Semanal':
+                    consulta.semanal = "Semanal"
                     consulta.save()
                 else:
-                    return render(request, 'pages/error_disponibilidade_sala.html', {
-                        'psicologo': psicologa,
-                    })
+                    consulta.quinzenal = "Quinzenal"
+                    consulta.save()
+
+                consulta.save()
+            else:
+                return render(request, 'pages/error_disponibilidade_sala.html', {
+                    'psicologo': psicologa,
+                })
             # Incrementa o horário atual pelo tempo de atendimento (em minutos)
             horario_atual = (datetime.combine(datetime.today(), horario_atual) + timedelta(minutes=tempo_atendimento)).time()
 
@@ -1612,17 +1653,13 @@ def vizualizar_disponibilidade(request):
 
     # Dados iniciais
     psicologos = Psicologa.objects.all()
-    horarios = Disponibilidade.objects.all()
+    horarios = Consulta.objects.all().filter(Paciente__isnull=True)
     especialidades = Especialidade.objects.all()
     publicos = Publico.objects.all()
     unidades = Unidade.objects.all()
     dias_da_semana = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
 
-    psicologos_com_horarios = []
-
-    for psicologo in psicologos:
-        if horarios.filter(psicologa=psicologo).exists():
-            psicologos_com_horarios.append(psicologo)
+    psicologos_com_horarios = [p for p in psicologos if horarios.filter(psicologo=p).exists()]
 
     if request.method == 'POST':
         especialidade_id = request.POST.get('especialidade_id')
@@ -1632,42 +1669,69 @@ def vizualizar_disponibilidade(request):
         horario_fim = request.POST.get("horario_fim")
         unidade_id = request.POST.get("unidade_id")
 
-        # Filtragem por especialidade
         if especialidade_id and especialidade_id != 'todos':
             psicologas_com_especialidade = Psicologa.objects.filter(
                 especialidadepsico__especialidade_id=especialidade_id
             )
             horarios = horarios.filter(psicologa__in=psicologas_com_especialidade)
 
-        # Filtragem por público
         if publico_id and publico_id != 'todos':
             psicologas_com_publico = Psicologa.objects.filter(
                 publicopsico__publico_id=publico_id
             )
             horarios = horarios.filter(psicologa__in=psicologas_com_publico)
 
-        # Filtragem por dia da semana
         if dia_da_semana != "todos" and dia_da_semana in dias_da_semana:
             horarios = horarios.filter(dia_semana=dia_da_semana)
 
-        # Filtragem por intervalo de horário
         if horario_inicio and horario_fim:
             horarios = horarios.filter(hora__gte=horario_inicio, hora__lte=horario_fim)
 
-        # Filtragem por unidade
         if unidade_id and unidade_id != 'todos':
             psicologas_com_unidade = Psicologa.objects.filter(
                 unidadepsico__unidade__id_unidade=unidade_id
             )
             horarios = horarios.filter(psicologa__in=psicologas_com_unidade)
 
+    # Agrupamento dos horários semanais e quinzenais
+    horarios_semanal = {}
+    horarios_quinzenal = {}
+
+    for horario in horarios:
+        unidade = horario.sala.id_unidade.nome_unidade 
+        dia = horario.dia_semana
+        if horario.psicologo:
+            psicologa = horario.psicologo.nome
+            hora = horario.horario.strftime('%H:%M')
+
+            # Verifica se a unidade já existe no dicionário
+            if horario.semanal:
+                # Horários semanais
+                if unidade not in horarios_semanal:
+                    horarios_semanal[unidade] = {}
+                if dia not in horarios_semanal[unidade]:
+                    horarios_semanal[unidade][dia] = []
+                horarios_semanal[unidade][dia].append(f'{hora} {psicologa}')
+            else:
+                # Horários quinzenais
+                if unidade not in horarios_quinzenal:
+                    horarios_quinzenal[unidade] = {}
+                if dia not in horarios_quinzenal[unidade]:
+                    horarios_quinzenal[unidade][dia] = []
+                horarios_quinzenal[unidade][dia].append(f'{hora} {psicologa}')
+
+    # Imprime para debug
+    print(horarios_semanal)
+    print(horarios_quinzenal)
+
     return render(request, 'pages/disponibilidades.html', {
         'psicologos': psicologos_com_horarios,
-        'horarios': horarios,
-        'dias_da_semana': dias_da_semana,
         'especialidades': especialidades,
         'publicos': publicos,
-        'unidades': unidades
+        'unidades': unidades,
+        'horarios_semanal': horarios_semanal,
+        'horarios_quinzenal': horarios_quinzenal,
+        'dias_da_semana': dias_da_semana,
     })
 
 
@@ -1919,12 +1983,15 @@ def psico_agenda_online(request, psicologo_id):
     if request.user.username != psicologa.nome and not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
         return render(request, 'pages/error_permission1.html')
 
-    consultas = Consulta_Online.objects.filter(psicologo=psicologa).order_by('horario')
+    consultas = Consulta_Online.objects.filter(psicologo=psicologa).filter(Paciente__isnull=False).order_by('horario')
+
+    hoje = datetime.now().date()
     
     if request.method == 'POST':
         nome_cliente = request.POST.get('nome_cliente')
         dia_semana = request.POST.get('dia_semana')
         horario_consulta = request.POST.get('horario_consulta')
+        psicologa.ultima_atualizacao_agenda = hoje
 
         # Verificar se o paciente existe
         try:
@@ -1985,6 +2052,158 @@ def psico_agenda_online(request, psicologo_id):
         'psicologo': psicologa,
         'dias_da_semana': dias_da_semana
     })
+
+@login_required(login_url='login1')
+def consulta_financeira_pacientes(request):
+    financeiros = Financeiro2.objects.all()
+    pacientes = Paciente.objects.all()
+
+    receita_por_paciente = financeiros.values('paciente__nome').annotate(
+        receita_bruta=Sum('valor', output_field=DecimalField(max_digits=10, decimal_places=2)),
+        valor_recebido=ExpressionWrapper(
+            Sum(Coalesce(F('valor_pagamento'), 0)),
+            output_field=DecimalField(max_digits=10, decimal_places=2)
+        ),
+        valor_a_receber=ExpressionWrapper(
+            Sum(F('valor')) - Sum(Coalesce(F('valor_pagamento'), 0)),
+            output_field=DecimalField(max_digits=10, decimal_places=2)
+        ),
+        n_consultas=Count('id', output_field=DecimalField(max_digits=10, decimal_places=2)),
+        n_consultas_pagas=ExpressionWrapper(
+            Count('id', filter=Q(valor_pagamento__gte=F('valor'))),
+            output_field=DecimalField(max_digits=10, decimal_places=2)
+        ),
+        n_consultas_nao_pagas=ExpressionWrapper(
+            Count('id', filter=Q(valor_pagamento__lt=F('valor'))),
+            output_field=DecimalField(max_digits=10, decimal_places=2)
+        )
+    ).order_by('paciente__nome')
+
+    return render(request, 'pages/financeiro_paciente.html', {
+        'receita_por_paciente': receita_por_paciente,
+        'pacientes': pacientes
+    })
+
+@login_required(login_url='login1')
+def apuracao_financeira(request):
+    # Apuração geral
+    total_salas = Sala.objects.count()
+    total_unidades = Unidade.objects.count()
+    total_pacientes = Paciente.objects.filter(deletado=False).count()
+    total_faturamento_fisico = Financeiro2.objects.aggregate(Sum('valor_pagamento'))['valor_pagamento__sum'] or 0
+    total_psicologas = Psicologa.objects.count()
+    total_faturamento_online = Financeiro2.objects.filter(modalidade='Online').aggregate(Sum('valor_pagamento'))['valor_pagamento__sum'] or 0
+    total_faturamento = total_faturamento_fisico + total_faturamento_online
+
+    # Total de atendimentos realizados na clínica (presença = "Sim")
+    total_atendimentos_realizados = Financeiro2.objects.filter(presenca="Sim").count()
+
+    # Apuração por unidade
+    unidades = Unidade.objects.all()
+    unidades_data = []
+    
+
+    for unidade in unidades:
+        # Contar o número de salas na unidade
+        num_salas = Sala.objects.filter(id_unidade=unidade).count()
+        
+        # Contar o número de pacientes únicos atendidos na unidade
+        num_pacientes = Paciente.objects.filter(
+            consulta__sala__id_unidade=unidade
+        ).distinct().count()
+        
+        # Somar o faturamento total para a unidade
+        faturamento = Financeiro2.objects.filter(
+            psicologa__consulta__sala__id_unidade=unidade
+        ).aggregate(Sum('valor_pagamento'))['valor_pagamento__sum'] or 0
+
+        # Contar os atendimentos realizados (presenca = 'Sim') na unidade
+        atendimentos_realizados_unidade = Financeiro2.objects.filter(
+            psicologa__consulta__sala__id_unidade=unidade,
+            presenca="Sim"  # Somente contar atendimentos onde presenca é 'Sim'
+        ).count()
+
+        # Adicionar os dados para cada unidade
+        unidades_data.append({
+            'nome_unidade': unidade.nome_unidade,
+            'num_salas': num_salas,
+            'num_pacientes': num_pacientes,
+            'faturamento': faturamento,
+            'atendimentos_realizados': atendimentos_realizados_unidade
+        })
+
+
+    # Apuração por sala - Faturamento e atendimentos realizados
+    salas = Sala.objects.all()
+    salas_data = []
+
+    for sala in salas:
+        # Faturamento por sala
+        faturamento_sala = Financeiro2.objects.filter(
+            psicologa__consulta__sala=sala
+        ).aggregate(Sum('valor_pagamento'))['valor_pagamento__sum'] or 0
+        
+        # Quantidade de atendimentos realizados (presença = "Sim")
+        atendimentos_realizados = Financeiro2.objects.filter(
+            psicologa__consulta__sala=sala,
+            presenca="Sim"
+        ).count()
+
+        salas_data.append({
+            'numero_sala': sala.numero_sala,
+            'faturamento': faturamento_sala,
+            'atendimentos_realizados': atendimentos_realizados
+        })
+
+    contexto = {
+        'total_salas': total_salas,
+        'total_unidades': total_unidades,
+        'total_pacientes': total_pacientes,
+        'total_faturamento_fisico': total_faturamento_fisico,
+        'total_faturamento_online': total_faturamento_online,
+        'total_faturamento': total_faturamento,
+        'total_psicologas': total_psicologas,
+        'total_atendimentos_realizados': total_atendimentos_realizados,
+        'unidades': unidades_data,
+        'salas_data': salas_data
+    }
+
+
+    return render(request, 'pages/apuracao_financeira_kpsicologia.html', contexto)
+
+@login_required(login_url='login1')
+def disponibilidades_psicologos(request):
+
+    request.session['mes'] = None
+    request.session['ano'] = None
+
+    if request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission1.html')
+
+    psicologos = Psicologa.objects.all()
+
+    return render(request, 'pages/disponibilidades_psico.html', {'psicologos': psicologos})
+
+@login_required(login_url='login1')
+def delete_consulta_online(request, consulta_id, psicologo_id):
+    consulta_online = get_object_or_404(Consulta_Online, id=consulta_id)
+    psicologa = get_object_or_404(Psicologa, id=psicologo_id)
+    hoje = datetime.now().day
+
+    if request.method == 'POST':
+
+        if consulta_online.Paciente:
+            consulta_online.delete()
+            psicologa.ultima_atualizacao_agenda = hoje
+            return redirect('psico_agenda_online', psicologo_id=psicologo_id)
+        else:
+            consulta_online.delete()
+            psicologa.ultima_atualizacao_agenda = hoje
+            return redirect('psico_disponibilidade_online', psicologo_id=psicologo_id)
+
+        
+
+    return render(request, 'pages/deletar_agenda_online.html', {'consulta_online': consulta_online, 'psicologo': psicologa})
 
 
 @login_required(login_url='login1')

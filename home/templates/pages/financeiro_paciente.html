@@ -1,0 +1,71 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="row">
+    {% for paciente in receita_por_paciente %}
+    <div class="col-md-6 my-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Resumo Financeiro - {{ paciente.paciente__nome }}</h5>
+    
+                <div class="mb-3">
+                    <h6 class="text-muted">Valor Teórico Bruto</h6>
+                    <p class="card-text font-weight-bold">
+                        R$ {{ paciente.receita_bruta|floatformat:2 }}
+                    </p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="text-muted">Valor Recebido</h6>
+                    <p class="card-text font-weight-bold">
+                        R$ {{ paciente.valor_recebido|floatformat:2 }}
+                    </p>
+                </div>
+    
+                <div class="mb-3">
+                    <h6 class="text-muted">Valor a Receber</h6>
+                    <p class="card-text font-weight-bold 
+                        {% if paciente.valor_a_receber > 0 %}
+                            text-success
+                        {% elif paciente.valor_a_receber == 0 %}
+                            text-warning
+                        {% else %}
+                            text-danger
+                        {% endif %}
+                    ">
+                        R$ {{ paciente.valor_a_receber|floatformat:2 }}
+                    </p>
+                </div>
+    
+                <div class="mb-3">
+                    <h6 class="text-muted">Número de Consultas</h6>
+                    <p class="card-text font-weight-bold">
+                        {{ paciente.n_consultas }}
+                    </p>
+                </div>
+    
+                <div class="mb-3">
+                    <h6 class="text-muted">Consultas Pagas</h6>
+                    <p class="card-text font-weight-bold text-success">
+                        {{ paciente.n_consultas_pagas }}
+                    </p>
+                </div>
+    
+                <div class="mb-3">
+                    <h6 class="text-muted">Consultas Não Pagas</h6>
+                    <p class="card-text font-weight-bold text-danger">
+                        {{ paciente.n_consultas_nao_pagas }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p class="text-muted">Nenhum dado financeiro disponível.</p>
+    {% endfor %}
+    
+</div>
+
+{% endblock content %}

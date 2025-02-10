@@ -81,17 +81,17 @@
                             <tr style="background-color: {{agenda.psicologo.cor}};">
                                 <td class="align-middle text-center text-white">{{ agenda.horario }}</td>
                                 {% if agenda.semanal %}
-                                <td class="align-middle text-center text-white">{{ agenda.semanal }}</td>
-                                {% else %}
                                 <td class="align-middle text-center text-white"></td>
+                                {% else %}
+                                <td style="background-color: #aaaaaa" class="align-middle text-center text-white">{{ agenda.semanal }}</td>
                                 {% endif %}
                                 {% if agenda.quinzenal %}
                                 <td class="align-middle text-center text-white">{{ agenda.quinzenal }}</td>
                                 {% else %}
-                                <td class="align-middle text-center text-white"></td>
+                                <td style="background-color: #aaaaaa" class="align-middle text-center text-white"></td>
                                 {% endif %} 
                                 <td class="align-middle">
-                                    <a href="#" class="text-secondary font-weight-bold text-xs text-center text-white" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
+                                    <a href="{% url 'deletar_consulta_online' consulta_id=agenda.id psicologo_id=agenda.psicologo.id %}" class="text-secondary font-weight-bold text-xs text-center text-white" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
                                 </td>
                             </tr>
                             {% endif %}

@@ -126,4 +126,52 @@
         </div>
     </div>
 </div>
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+                <h6>Pacientes Deletados</h6>
+            </div>
+            <div class="card-body px-0 pt-0 pb-2">
+                <div class="table-responsive p-0">
+                    <table class="table align-items-center mb-0">
+                        <thead>
+                            <tr>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nome</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Idade</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor ( R$ )</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Período de Atendimento</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nome Resposnável</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Telefone</th>
+                                <!-- <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ações</th> -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for paciente in pacientes_deletados %}
+                            <tr>
+                                <td class="align-middle text-center">{{ paciente.nome }}</td>
+                                <td class="align-middle text-center">{{ paciente.idade }}</td>
+                                <td class="align-middle text-center">{{ paciente.valor }}</td>
+                                <td class="align-middle text-center">{{ paciente.periodo }}</td>
+                                <td class="align-middle text-center">{{ paciente.nome_responsavel }}</td>
+                                <td class="align-middle text-center">{{ paciente.telefone }}</td>
+                                <!-- <td class="align-middle">
+                                    <a href="{% url 'update_paciente' id_paciente=paciente.id %}" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Edit consulta">Editar</a>
+                                    <a href="{% url 'delete_paciente' id_paciente=paciente.id %}" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
+                                </td> -->
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center">
+                                    <p class="text-secondary font-weight-bold text-xs">Nenhuma consulta encontrada.</p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock content %}

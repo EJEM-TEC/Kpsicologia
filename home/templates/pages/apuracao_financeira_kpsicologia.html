@@ -1,0 +1,56 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container mt-5">
+        <!-- Apuração Geral -->
+        <h2>Apuração Financeira - Geral</h2>
+        <div class="mt-5 card card-frame">
+            <div class="card-body">
+                <p><strong>Total de Salas:</strong> {{ total_salas }}</p>
+                <p><strong>Total de Unidades:</strong> {{ total_unidades }}</p>
+                <p><strong>Total de Pacientes:</strong> {{ total_pacientes }}</p>
+                <p><strong>Total de Faturamento Presencial:</strong>R$ {{ total_faturamento_fisico }}</p>
+                <p><strong>Total de Faturamento Online :</strong>R$ {{ total_faturamento_online }}</p>
+                <p><strong>Total de Faturamento:</strong> R$ {{ total_faturamento }}</p>
+                <p><strong>Total de Psicólogas:</strong> {{ total_psicologas }}</p>
+                <!-- <p><strong>Total de Atendimentos Realizados:</strong> {{ total_atendimentos_realizados }}</p> -->
+            </div>
+        </div>
+
+        <!-- Apuração por Unidade -->
+        <h2 class="mt-5">Apuração Financeira - Por Unidade</h2>
+        <div class="row">
+            {% for unidade in unidades %}
+            <div class="col-md-6 mt-4">
+                <div class="card card-frame">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ unidade.nome_unidade }}</h5>
+                        <p class="card-text"><strong>Salas:</strong> {{ unidade.num_salas }}</p>
+                        <p class="card-text"><strong>Pacientes:</strong> {{ unidade.num_pacientes }}</p>
+                        <p class="card-text"><strong>Faturamento:</strong> R$ {{ unidade.faturamento }}</p>
+                        <!-- <p class="card-text"><strong>Atendimentos Realizados:</strong> {{ unidade.atendimentos_realizados }}</p> -->
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <!-- Apuração por Sala -->
+        <h2 class="mt-5">Apuração Financeira - Por Sala</h2>
+        <div class="row">
+            {% for sala in salas_data %}
+            <div class="col-md-6 mt-4">
+                <div class="card card-frame">
+                    <div class="card-body">
+                        <h5 class="card-title">Sala {{ sala.numero_sala }}</h5>
+                        <p class="card-text"><strong>Faturamento:</strong> R$ {{ sala.faturamento }}</p>
+                        <!-- <p class="card-text"><strong>Atendimentos Realizados:</strong> {{ sala.atendimentos_realizados }}</p> -->
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+{% endblock content %}

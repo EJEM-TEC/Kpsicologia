@@ -122,6 +122,7 @@ class Financeiro2(models.Model):
     semana = models.IntegerField()  # Semana dentro do mês
     valor_pagamento = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     data_pagamento = models.DateField(null=True, blank=True)
+    modalidade = models.CharField(max_length=32, null=True, blank=True)
 
 class Financeiro(models.Model):
     psicologa = models.ForeignKey(Psicologa, on_delete=models.CASCADE, null=True)

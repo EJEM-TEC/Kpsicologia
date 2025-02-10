@@ -89,7 +89,11 @@ urlpatterns = [
     path('unis_erro/', views.unis_erro, name='unis_erro'),
     path('consultar_disponibilidade', views.vizualizar_disponibilidade, name='consultar_disponibilidade'),
     path('deletar_disponibilidade/<int:disponibilidade_id>/<int:psicologo_id>', views.remover_disponibilidade, name='deletar_disponibilidade'),
+    path('deletar_consulta_online/<int:consulta_id>/<int:psicologo_id>', views.delete_consulta_online, name='deletar_consulta_online'),
     path('editar_consultas/<int:psicologo_id>', views.editar_consultas, name='editar_consultas'),
+    path('consultar_financeiro/pacientes', views.consulta_financeira_pacientes, name='financeiro_pacientes'),
+    path('consultar_financeiro/kpsicologia', views.apuracao_financeira, name='apuracao_financeira_kpsicologia'),
+    path('disponibilidades_psico', views.disponibilidades_psicologos, name='disponibilidades_psicologos'),
 
 
     #path('cadastrar_salas/', views.sala, name='salas'),

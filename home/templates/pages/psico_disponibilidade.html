@@ -61,6 +61,17 @@
                                 </div>
                             </div>                          
                             <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="semanal_quinzenal">Semanal ou Quinzenal</label>
+                                    <select class="form-control" id="semanal_quinzenal" name="semanal_quinzenal">
+                                        <option value="Semanal">Semanal</option>
+                                        <option value="Quinzenal">Quinzenal</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
                                 <div class="d-flex justify-content-center gap-4 align-middle">
                                     <button type="submit" class="btn btn-primary">Registrar</button>
                                     <button type="reset" class="btn btn-secondary">Resetar</button>
@@ -87,15 +98,29 @@
                             <thead>
                                 <tr>
                                     <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Sala</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Semanal</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Quinzenal</th>
                                     <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Deletar</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for agenda in horarios %}
-                                <tr style="background-color: {{ agenda.psicologa.cor }};">
-                                    <td class="align-middle text-center text-white">{{ agenda.hora }}</td>
-                                    <td class="align-middle">
-                                        <a href="{% url 'deletar_disponibilidade' disponibilidade_id=agenda.id psicologo_id=psicologo.id %}" class="text-secondary font-weight-bold text-xs text-center text-white" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
+                                <tr>
+                                    <td style="background-color: {{ agenda.psicologo.cor }};" class="align-middle text-center text-white;">{{ agenda.horario }}</td>
+                                    <td style="background-color: {{ agenda.psicologo.cor }};" class="align-middle text-center text-white">{{ agenda.sala.numero_sala }}</td>
+                                    {% if agenda.semanal %}
+                                    <td style="background-color: {{ agenda.psicologo.cor }};" class="align-middle text-center text-white"></td>
+                                    {% else %}
+                                    <td style="background-color: #aaaaaa;" class="align-middle text-center text-white"></td>
+                                    {% endif %}
+                                    {% if agenda.quinzenal %}
+                                    <td style="background-color: {{ agenda.psicologo.cor }};" class="align-middle text-center text-white"></td>
+                                    {% else %}
+                                    <td style="background-color: #aaaaaa;" class="align-middle text-center text-white"></td>
+                                    {% endif %}
+                                    <td style="background-color: {{ agenda.psicologo.cor }};" class="align-middle">
+                                        <a href="{% url  'delete_consulta' id_consulta=agenda.id %}" class="text-secondary font-weight-bold text-xs text-center text-white" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
                                     </td>
                                 </tr>
                                 {% endfor %}

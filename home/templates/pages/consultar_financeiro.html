@@ -6,7 +6,7 @@
   <div class="col-12">
       <div class="card mb-4">
           <div class="card-header pb-0">
-            <h6>Consultar Financeiro</h6>
+            <h6>Consultar Financeiro Mensal</h6>
           </div>
           <div class="card-body p-4">
             <form method="POST" action="{% url 'consultar_financeiro' %}">
@@ -49,5 +49,41 @@
             </form>
           </div>
       </div>
+  </div>
+  <div class="row">
+    <div class="col-12">
+      <div class="row d-flex justify-content-center gap-5 my-5">
+        <div class="col-3">
+          <div class="card card-background card-background-mask-primary move-on-hover align-items-start">
+            <div class="cursor-pointer">
+              <div class="full-background" style="background-image: url('{% static 'img/curved-images/curved3.jpg' %}')"></div>
+              <div class="card-body">
+                <h5 class="text-white mb-0">Financeiro Pacientes</h5>
+                <div class="d-flex mt-5">
+                  <button class="btn btn-outline-white p-2 mb-0" type="button" data-bs-toggle="tooltip" data-bs-placement="top">
+                    <a href="{% url 'financeiro_pacientes' %}" class="text-white">Acessar</a>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-3">
+          <div class="card card-background card-background-mask-primary move-on-hover align-items-start">
+            <div class="cursor-pointer">
+              <div class="full-background" style="background-image: url('{% static 'img/curved-images/curved6.jpg' %}')"></div>
+              <div class="card-body">
+                <h5 class="text-white mb-0">Financeiro Kpsicologia</h5>
+                <div class="d-flex mt-5">
+                  <button class="btn btn-outline-white p-2 mb-0" type="button" data-bs-toggle="tooltip" data-bs-placement="top">
+                    <a href="{% url 'apuracao_financeira_kpsicologia' %}" class="text-white">Acessar</a>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 {% endblock content %}
