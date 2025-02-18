@@ -215,6 +215,8 @@ def login(request):
         user = authenticate(username=username, password=senha)
         if user:
             login_django(request, user)
+            if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+                return redirect('visualizar_psicologas')
             return redirect('index')
         # return HttpResponse("Usuário ou senha inválidos")
         return redirect("login_erro")
@@ -973,50 +975,34 @@ def psico_agenda(request, psicologo_id):
                 "psicologo": psicologa,
             })
 
-        # Remover disponibilidade existente para o horário e dia selecionados
-        disponibilidade_existente = Disponibilidade.objects.filter(
-            psicologa=psicologa,
-            hora=horario_consulta,
-            dia_semana=dia_semana
-        ).first()
 
-        if disponibilidade_existente:
-            disponibilidade_existente.delete()
-        else:
-            return render(request, "pages/error_disponibilidade.html", {
-                'psicolologo': psicologa,
-            })
-
-        # Verificar se já existe uma consulta no mesmo horário e dia com o mesmo psicólogo
-        consulta_por_horario = Consulta.objects.filter(
+        consulta_por_horario = Consulta.objects.get(
             psicologo=psicologa,
             horario=horario_consulta,
-            dia_semana=dia_semana
-        ).first()
+            dia_semana=dia_semana,
+            sala=sala_atendimento
+        )
 
         if consulta_por_horario:
-            if paciente.periodo == "Semanal" and not consulta_por_horario.semanal:
+
+            if paciente.periodo == "Semanal" and consulta_por_horario.semanal:
                 consulta_por_horario.semanal = paciente.nome
                 consulta_por_horario.Paciente = paciente
                 consulta_por_horario.quinzenal = ""
-            elif paciente.periodo == "Quinzenal" and not consulta_por_horario.quinzenal:
+                consulta_por_horario.save()
+                psicologa.ultima_atualizacao_agenda = hoje
+                psicologa.save()
+            elif paciente.periodo == "Quinzenal" and consulta_por_horario.quinzenal:
                 consulta_por_horario.quinzenal = paciente.nome
                 consulta_por_horario.Paciente = paciente
                 consulta_por_horario.semanal = ""
-            consulta_por_horario.save()
-        else:
-            consulta = Consulta.objects.get(
-                psicologo=psicologa,
-                horario=horario_consulta,
-                sala=sala_atendimento,
-                dia_semana=dia_semana
-            )
-            consulta.Paciente = paciente,
-            consulta.semanal = paciente.nome if paciente.periodo == "Semanal" else ""
-            consulta.quinzenal = paciente.nome if paciente.periodo == "Quinzenal" else ""
-            consulta.save()
-
-            psicologa.ultima_atualizacao_agenda = hoje
+                consulta_por_horario.save()
+                psicologa.ultima_atualizacao_agenda = hoje
+                psicologa.save()
+            else:
+                return render(request, 'pages/error_cadastro.html', {
+                    'psicologo': psicologa
+                })
 
         return redirect('psico_agenda', psicologo_id=psicologo_id)
 
@@ -1673,25 +1659,25 @@ def vizualizar_disponibilidade(request):
             psicologas_com_especialidade = Psicologa.objects.filter(
                 especialidadepsico__especialidade_id=especialidade_id
             )
-            horarios = horarios.filter(psicologa__in=psicologas_com_especialidade)
+            horarios = horarios.filter(psicologo__in=psicologas_com_especialidade)
 
         if publico_id and publico_id != 'todos':
             psicologas_com_publico = Psicologa.objects.filter(
                 publicopsico__publico_id=publico_id
             )
-            horarios = horarios.filter(psicologa__in=psicologas_com_publico)
+            horarios = horarios.filter(psicologo__in=psicologas_com_publico)
 
         if dia_da_semana != "todos" and dia_da_semana in dias_da_semana:
             horarios = horarios.filter(dia_semana=dia_da_semana)
 
         if horario_inicio and horario_fim:
-            horarios = horarios.filter(hora__gte=horario_inicio, hora__lte=horario_fim)
+            horarios = horarios.filter(horario__gte=horario_inicio, horario__lte=horario_fim)
 
         if unidade_id and unidade_id != 'todos':
             psicologas_com_unidade = Psicologa.objects.filter(
                 unidadepsico__unidade__id_unidade=unidade_id
             )
-            horarios = horarios.filter(psicologa__in=psicologas_com_unidade)
+            horarios = horarios.filter(psicologo__in=psicologas_com_unidade)
 
     # Agrupamento dos horários semanais e quinzenais
     horarios_semanal = {}

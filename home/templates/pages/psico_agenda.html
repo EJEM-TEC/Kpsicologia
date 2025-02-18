@@ -114,20 +114,20 @@
                         <tbody>
                         {% for agenda in agendas %}
                             {% if agenda.dia_semana == dia  %}
-                            <tr style="background-color: {{agenda.psicologo.cor}};">
-                                <td class="align-middle text-center text-white">{{ agenda.horario }}</td>
-                                <td class="align-middle text-center text-white">{{ agenda.sala.numero_sala }}</td>
+                            <tr>
+                                <td style="background-color: {{agenda.psicologo.cor}};" class="align-middle text-center text-white">{{ agenda.horario }}</td>
+                                <td style="background-color: {{agenda.psicologo.cor}};" class="align-middle text-center text-white">{{ agenda.sala.numero_sala }}</td>
                                 {% if agenda.semanal %}
-                                <td class="align-middle text-center text-white">{{ agenda.semanal }}</td>
+                                <td style="background-color: {{agenda.psicologo.cor}};" class="align-middle text-center text-white">{{ agenda.semanal }}</td>
                                 {% else %}
-                                <td class="align-middle text-center text-white"></td>
+                                <td style="background-color: gray;" class="align-middle text-center text-white"></td>
                                 {% endif %}
                                 {% if agenda.quinzenal %}
-                                <td class="align-middle text-center text-white">{{ agenda.quinzenal }}</td>
+                                <td style="background-color: {{agenda.psicologo.cor}};" class="align-middle text-center text-white">{{ agenda.quinzenal }}</td>
                                 {% else %}
-                                <td class="align-middle text-center text-white"></td>
+                                <td style="background-color: gray;" class="align-middle text-center text-white"></td>
                                 {% endif %} 
-                                <td class="align-middle">
+                                <td style="background-color: {{agenda.psicologo.cor}};" class="align-middle">
                                     <a href="{% url  'delete_consulta' id_consulta=agenda.id %}" class="text-secondary font-weight-bold text-xs text-center text-white" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
                                 </td>
                             </tr>
