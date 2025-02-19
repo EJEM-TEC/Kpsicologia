@@ -1908,6 +1908,9 @@ def disponibilidade_online(request, psicologo_id):
     psicologa = get_object_or_404(Psicologa, id=psicologo_id)
     horarios = Consulta_Online.objects.filter(psicologo=psicologa)
 
+    if request.user.username != psicologa.nome and not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission1.html')
+
     # Lista dos dias da semana
     dias_da_semana = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
 
