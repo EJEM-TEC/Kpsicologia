@@ -182,47 +182,46 @@
 </div>
 {% endfor %} -->
 
-<h2>Horários Semanais (1 vez por semana)</h2>
-{% if horarios_semanal %}
-    {% for unidade, dias in horarios_semanal.items %}
-        <h3>🟣 {{ unidade }}</h3>
-        {% if dias %}
-            {% for dia, horarios in dias.items %}
-                <h4>🔹 {{ dia }}</h4>
-                <ul>
-                    {% for horario in horarios %}
-                        <li>{{ horario }}</li>
-                    {% endfor %}
-                </ul>
-            {% endfor %}
-        {% else %}
-            <p>Sem horários disponíveis para essa unidade.</p>
-        {% endif %}
+<h2>Disponibilidade Semanal</h2>
+{% for unidade, dias in horarios_semanal.items %}
+    <h3>🟣 {{ unidade }}</h3>
+    {% for dia, horarios in dias.items %}
+        <h4>🔹 {{ dia }}</h4>
+        
+        {% for psicologa in psicologos %}
+            <div class="psicologa-group">
+                <h5>{{ psicologa.nome }}</h5>
+                {% for horario in horarios %}
+                    {% if psicologa.nome in horario %}
+                        <p>Horário: <strong>{{ horario }}</strong></p>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <hr> <!-- Adiciona uma linha de separação entre psicólogas -->
+        {% endfor %}
     {% endfor %}
-{% else %}
-    <p>Nenhum horário semanal encontrado.</p>
-{% endif %}
+{% endfor %}
 
-<h2>Horários Quinzenais (1 vez a cada 15 dias)</h2>
-{% if horarios_quinzenal %}
-    {% for unidade, dias in horarios_quinzenal.items %}
-        <h3>🟣 {{ unidade }}</h3>
-        {% if dias %}
-            {% for dia, horarios in dias.items %}
-                <h4>🔹 {{ dia }}</h4>
-                <ul>
-                    {% for horario in horarios %}
-                        <li>{{ horario }}</li>
-                    {% endfor %}
-                </ul>
-            {% endfor %}
-        {% else %}
-            <p>Sem horários disponíveis para essa unidade.</p>
-        {% endif %}
+<h2>Disponibilidade Quinzenal</h2>
+{% for unidade, dias in horarios_quinzenal.items %}
+    <h3>🟣 {{ unidade }}</h3>
+    {% for dia, horarios in dias.items %}
+        <h4>🔹 {{ dia }}</h4>
+        
+        {% for psicologa in psicologos %}
+            <div class="psicologa-group">
+                <h5>{{ psicologa.nome }}</h5>
+                {% for horario in horarios %}
+                    {% if psicologa.nome in horario %}
+                        <p>Horário: <strong>{{ horario }}</strong></p>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <hr> <!-- Adiciona uma linha de separação entre psicólogas -->
+        {% endfor %}
     {% endfor %}
-{% else %}
-    <p>Nenhum horário quinzenal encontrado.</p>
-{% endif %}
+{% endfor %}
+
 
 
 {% endblock content %}
