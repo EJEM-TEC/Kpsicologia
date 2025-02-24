@@ -21,7 +21,7 @@
       <section class="section dashboard">
         <div class="card">
           <div class="card-body">
-            <form method="POST">
+            <form method="POST" action="{% url 'editar_psicologo' psicologo_id=psicologo.id %}" onsubmit="return validateForm()">
                 {% csrf_token %}
                 <div class="row">
                     <div class="col-md-6">
@@ -36,6 +36,27 @@
                           <input type="text" class="form-control" id="abordagem" name="abordagem" value="{{ psicologo.abordagem }}" required>
                       </div>
                   </div>
+                  <div class="col-md-6">
+                    <div class="form-group" >
+                        <label for="email" class="form-label">Email</label>
+                        <input type="text" class="form-control" id="email" name="email" value="{{ psicologo.email }}" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group" >
+                      <label for="senha" class="form-label">Senha</label>
+                      <input type="password" class="form-control" id="senha" name="senha" required>
+                  </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="form-group" >
+                    <label for="Confirmpassword" class="form-label">Confirmar Senha</label>
+                    <input type="password" class="form-control" id="Confirmpassword" required>
+                </div>
+            </div>
+
+
 
                     
                 <div class="row">
@@ -67,6 +88,17 @@
 
   <script src="{% static 'js/plugins/chartjs.min.js' %}"></script>
   <script>
+
+      function validateForm() { 
+          var password = document.getElementById('senha').value;
+          var confirmPassword = document.getElementById('Confirmpassword').value;
+          if (password !== confirmPassword) {
+            alert('As senhas não coincidem.');
+            return false;
+          }
+          return true;
+        }
+
     var ctx = document.getElementById("chart-bars").getContext("2d");
 
     new Chart(ctx, {

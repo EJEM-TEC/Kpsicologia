@@ -26,6 +26,7 @@ from django.db.models import F, ExpressionWrapper, DecimalField, Sum
 from django.db.models.functions import Coalesce  # Import correto para Coalesce
 from django.db.models import Sum, Count, F, Q, DecimalField, ExpressionWrapper
 from django.db.models.functions import Coalesce
+from django.contrib.postgres.aggregates import ArrayAgg
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from rolepermissions.decorators import has_role_decorator
@@ -707,6 +708,10 @@ def deletar_psicologo(request, psicologo_id):
 
 def editar_psicologo(request, psicologo_id):
     psicologo = get_object_or_404(Psicologa, id=psicologo_id)
+    print(psicologo.nome)
+    user_psico = User.objects.filter(username=psicologo.nome).first()
+
+    print(user_psico)
 
     # Verificar se o usuário é a psicóloga ou faz parte do grupo 'Administrador'
     if request.user.username != psicologo.nome and not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
@@ -719,6 +724,8 @@ def editar_psicologo(request, psicologo_id):
         nome = request.POST.get('nome')
         cor = request.POST.get('cor')
         abordagem = request.POST.get("abordagem")
+        email = request.POST.get("email")
+        senha = request.POST.get("senha")
         
 
         # Atualiza os campos do psicólogo
@@ -727,8 +734,14 @@ def editar_psicologo(request, psicologo_id):
         psicologo.abordagem = abordagem
         psicologo.save()
 
+        # Atualiza os campos do usuário
+        user_psico.username = nome
+        user_psico.email = email
+        user_psico.set_password(senha)
+        user_psico.save()
+
         # Redireciona para a página do psicólogo após editar
-        return redirect('psicologa')
+        return redirect('visualizar_psicologas')
 
     return render(request, 'pages/editar_psicologo.html', {
         'psicologo': psicologo
@@ -2046,6 +2059,7 @@ def psico_agenda_online(request, psicologo_id):
 def consulta_financeira_pacientes(request):
     financeiros = Financeiro2.objects.all()
     pacientes = Paciente.objects.all()
+    psicologas = Psicologa.objects.all()
 
     receita_por_paciente = financeiros.values('paciente__nome').annotate(
         receita_bruta=Sum('valor', output_field=DecimalField(max_digits=10, decimal_places=2)),
@@ -2065,12 +2079,35 @@ def consulta_financeira_pacientes(request):
         n_consultas_nao_pagas=ExpressionWrapper(
             Count('id', filter=Q(valor_pagamento__lt=F('valor'))),
             output_field=DecimalField(max_digits=10, decimal_places=2)
-        )
+        ),
+        psicologas=ArrayAgg('psicologa__nome', distinct=True)
     ).order_by('paciente__nome')
 
+    if request.method == 'POST':
+        nome_paciente = request.POST.get('nome_paciente')
+        psicologa_id = request.POST.get('psicologa_id')
+
+        if nome_paciente:
+
+            try:
+                paciente = Paciente.objects.get(nome=nome_paciente)
+            except Paciente.DoesNotExist or paciente.deletado == True:
+                return render(request, 'pages/error_paciente_nao_encontrado_financeiro.html', {
+                    'nome_cliente': nome_paciente
+                })
+            
+        receita_por_paciente = receita_por_paciente.filter(paciente__nome__icontains=nome_paciente)
+
+        # Caso tenha uma psicóloga selecionada
+        if psicologa_id:
+            receita_por_paciente = receita_por_paciente.filter(psicologa_id=psicologa_id)
+
+    
+        
     return render(request, 'pages/financeiro_paciente.html', {
         'receita_por_paciente': receita_por_paciente,
-        'pacientes': pacientes
+        'pacientes': pacientes,
+        'psicologas': psicologas,
     })
 
 @login_required(login_url='login1')
