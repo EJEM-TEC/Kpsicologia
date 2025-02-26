@@ -94,7 +94,8 @@ urlpatterns = [
     path('consultar_financeiro/pacientes', views.consulta_financeira_pacientes, name='financeiro_pacientes'),
     path('consultar_financeiro/kpsicologia', views.apuracao_financeira, name='apuracao_financeira_kpsicologia'),
     path('disponibilidades_psico', views.disponibilidades_psicologos, name='disponibilidades_psicologos'),
-
+    path('cadastro_despesa', views.cadastro_despesa, name='cadastro_despesa'),
+    path('deletar_despesa/<int:despesa_id>', views.deletar_despesa, name='deletar_despesa'),
 
     #path('cadastrar_salas/', views.sala, name='salas'),
 

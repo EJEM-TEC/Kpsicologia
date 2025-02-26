@@ -4,20 +4,74 @@
 {% block content %}
 
 <div class="container mt-5">
-        <!-- Apuração Geral -->
-        <h2>Apuração Financeira - Geral</h2>
-        <div class="mt-5 card card-frame">
-            <div class="card-body">
-                <p><strong>Total de Salas:</strong> {{ total_salas }}</p>
-                <p><strong>Total de Unidades:</strong> {{ total_unidades }}</p>
-                <p><strong>Total de Pacientes:</strong> {{ total_pacientes }}</p>
-                <p><strong>Total de Faturamento Presencial:</strong>R$ {{ total_faturamento_fisico }}</p>
-                <p><strong>Total de Faturamento Online :</strong>R$ {{ total_faturamento_online }}</p>
-                <p><strong>Total de Faturamento:</strong> R$ {{ total_faturamento }}</p>
-                <p><strong>Total de Psicólogas:</strong> {{ total_psicologas }}</p>
-                <!-- <p><strong>Total de Atendimentos Realizados:</strong> {{ total_atendimentos_realizados }}</p> -->
+       <!-- Apuração Geral -->
+        <h2 class="mb-4">Apuração Financeira - Geral</h2>
+
+        <div class="row">
+            <!-- Card 1: Informações Gerais -->
+            <div class="col-md-6 mb-4">
+                <div class="card card-frame">
+                    <div class="card-body">
+                        <h5 class="card-title">Informações Gerais</h5>
+                        <p><strong>Total de Salas:</strong> {{ total_salas }}</p>
+                        <p><strong>Total de Unidades:</strong> {{ total_unidades }}</p>
+                        <p><strong>Total de Pacientes:</strong> {{ total_pacientes }}</p>
+                        <p><strong>Total de Psicólogas:</strong> {{ total_psicologas }}</p>
+                        <p><strong>Total de Atendimentos Realizados:</strong> {{ total_atendimentos_realizados }}</p>
+                        <p><strong>Salas Utilizadas:</strong> {{ salas_utilizadas }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2: Faturamento -->
+            <div class="col-md-6 mb-4">
+                <div class="card card-frame">
+                    <div class="card-body">
+                        <h5 class="card-title">Faturamento</h5>
+                        <p><strong>Total de Faturamento Presencial:</strong> R$ {{ total_faturamento_fisico }}</p>
+                        <p><strong>Total de Faturamento Online:</strong> R$ {{ total_faturamento_online }}</p>
+                        <p><strong>Total de Faturamento:</strong> R$ {{ total_faturamento }}</p>
+                        <p><strong>Faturamento Médio por Sala:</strong> R$ {{ faturamento_medio_sala }}</p>
+                        <p><strong>Faturamento Médio por Paciente:</strong> R$ {{ faturamento_medio_paciente }}</p>
+                        <p><strong>Faturamento Médio por Psicóloga:</strong> R$ {{ faturamento_medio_psicologa }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3: Indicadores de Utilização -->
+            <div class="col-md-6 mb-4">
+                <div class="card card-frame">
+                    <div class="card-body">
+                        <h5 class="card-title">Indicadores de Utilização</h5>
+                        <p><strong>Taxa de Ocupação das Salas:</strong> {{ taxa_ocupacao_salas }}%</p>
+                        <p><strong>Taxa de Ocupação por Paciente:</strong> {{ taxa_ocupacao_pacientes }}%</p>
+                        <p><strong>Sessões por Paciente:</strong> {{ sessoes_por_paciente }}</p>
+                        <p><strong>Sessões por Psicóloga:</strong> {{ sessoes_por_psicologa }}</p>
+                        <p><strong>Pacientes por Psicóloga:</strong> {{ pacientes_por_psicologa }}</p>
+                        <p><strong>Taxa de Retenção de Pacientes:</strong> {{ taxa_retencao_pacientes }}%</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 4: Financeiro e Crescimento -->
+            <div class="col-md-6 mb-4">
+                <div class="card card-frame">
+                    <div class="card-body">
+                        <h5 class="card-title">Financeiro e Crescimento</h5>
+                        <p><strong>Ticket Médio por Atendimento:</strong> R$ {{ ticket_medio_atendimento }}</p>
+                        <p><strong>Custo Fixo Total:</strong> R$ {{ custo_fixo_total }}</p>
+                        <p><strong>Custo Variável:</strong> R$ {{ custo_variavel }}</p>
+                        <p><strong>Lucro Bruto:</strong> R$ {{ lucro_bruto }}</p>
+                        <p><strong>Lucro Líquido:</strong> R$ {{ lucro_liquido }}</p>
+                        <p><strong>Margem de Lucro:</strong> {{ margem_lucro }}%</p>
+                        <p><strong>Ponto de Equilíbrio:</strong> {{ ponto_equilibrio }}</p>
+                        <p><strong>Taxa de Crescimento de Pacientes:</strong> {{ taxa_crescimento_pacientes }}%</p>
+                        <p><strong>Taxa de Crescimento de Faturamento:</strong> {{ taxa_crescimento_faturamento }}%</p>
+                    </div>
+                </div>
             </div>
         </div>
+
 
         <!-- Apuração por Unidade -->
         <h2 class="mt-5">Apuração Financeira - Por Unidade</h2>

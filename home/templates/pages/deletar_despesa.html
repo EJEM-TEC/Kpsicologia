@@ -1,0 +1,16 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<h1>Deletar Despesa</h1>
+
+<p>Tem certeza de que deseja deletar essa despesa</strong>?</p>
+
+<form method="POST">
+    {% csrf_token %}
+    <button type="submit" class="btn bg-gradient-primary">Deletar</button>
+    <button type="button" class="btn bg-gradient-secondary"><a href="{% url 'cadastro_despesa' %}" style="color: white; text-decoration: none;">Cancelar</a></button>
+</form>
+
+{% endblock content %}

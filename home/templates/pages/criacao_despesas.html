@@ -1,0 +1,92 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+      <button type="button" class="btn bg-gradient-primary"><a class="text-white" href="{% url 'consultar_financeiro' %}">
+          Voltar
+      </a></button>
+  </div>
+</div>
+
+    <div class="container-fluid py-4">
+      <div class="col-6">
+        <div>
+          <h2>
+            Despesas Kpsicologia
+          </h2>
+        </div>
+      </div>
+    </div>
+    <div class="card m-4">
+      <div class="card-body p-4">
+        <form method="POST" action="{% url 'cadastro_despesa' %}">
+          {% csrf_token %}
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="motivo">Motivo</label>
+                <input type="text" class="form-control" id="motivo" name="motivo" required>
+              </div>
+            </div> 
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="valor">Valor (R$)</label>
+                <input type="text" class="form-control" step="0.01" id="valor" name="valor" required>
+              </div>
+            </div>
+          </div> 
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="data">Data</label>
+                <input type="date" class="form-control" id="data" name="data" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <button type="submit" class="btn btn-primary">Cadastrar Despesa</button>
+                <button type="reset" class="btn btn-secondary">Resetar</button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div> 
+    <div class="card m-4">
+      <div class="card-body p-4">
+        <div class="table-responsive">
+          <table class="table align-items-center mb-0">
+            <thead>
+              <tr>
+                <th class="text-secondary text-xxs font-weight-bolder opacity-7 text-center">Motivo</th>
+                <th class="text-secondary text-xxs font-weight-bolder opacity-7 text-center">Valor ( R$ )</th>
+                <th class="text-secondary text-xxs font-weight-bolder opacity-7 text-center">Data</th>
+                <th class="text-secondary text-xxs font-weight-bolder opacity-7 text-center">Excluir</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for despesa in despesas %}
+              <tr>
+                <td class="align-middle text-center">
+                  {{ despesa.motivo }}
+                </td>
+                <td class="align-middle text-center">
+                  {{ despesa.valor }}
+                </td>
+                <td class="align-middle text-center">
+                  {{ despesa.data }}
+                </td>
+                <td class="align-middle text-center">
+                  <a href="{% url 'deletar_despesa' despesa_id=despesa.id %}">Remover</a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+{% endblock content %}

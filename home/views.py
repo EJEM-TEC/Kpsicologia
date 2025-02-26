@@ -11,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 from rolepermissions.roles import assign_role
 from rolepermissions.decorators import has_role_decorator
 from django.contrib.auth.models import User, Group
-from .models import Psicologa, Usuario, Consulta, Unidade, Sala, Paciente, ConfirmacaoConsulta, Financeiro, EspecialidadePsico, Especialidade, Publico, PublicoPsico, Financeiro2, Disponibilidade, UnidadePsico, Consulta_Online
+from .models import Psicologa, Usuario, Consulta, Unidade, Sala, Paciente, ConfirmacaoConsulta, Financeiro, EspecialidadePsico, Especialidade, Publico, PublicoPsico, Financeiro2, Disponibilidade, UnidadePsico, Consulta_Online, Despesas
 from rolepermissions.roles import assign_role
 from django.contrib.auth.models import Group
 from django.contrib.auth import authenticate, login as login_django
@@ -2121,6 +2121,86 @@ def apuracao_financeira(request):
     total_faturamento_online = Financeiro2.objects.filter(modalidade='Online').aggregate(Sum('valor_pagamento'))['valor_pagamento__sum'] or 0
     total_faturamento = total_faturamento_fisico + total_faturamento_online
 
+    # Salas com atendimentos
+    # Filtrando Salas que possuem consultas com presença registrada
+    salas_utilizadas = Consulta.objects.filter(
+        psicologo__isnull=False,
+        Paciente__isnull=False,
+        horario__isnull=False,
+        dia_semana__isnull=False,
+        sala__isnull=False
+    ).values('sala').distinct().count()
+
+
+    # Taxa de Ocupação das Salas
+    taxa_ocupacao_salas = (salas_utilizadas / total_salas) * 100 if total_salas > 0 else 0
+
+    # Faturamento Médio por Sala
+    faturamento_medio_sala = total_faturamento / total_salas if total_salas > 0 else 0
+
+    # Exemplo de capacidade máxima de atendimento
+    capacidade_maxima_atendimento = 100  # Definir valor real
+
+    # Taxa de Ocupação por Paciente
+    taxa_ocupacao_pacientes = (total_pacientes / capacidade_maxima_atendimento) * 100 if capacidade_maxima_atendimento > 0 else 0
+
+    # Faturamento Médio por Paciente
+    faturamento_medio_paciente = total_faturamento / total_pacientes if total_pacientes > 0 else 0
+
+    # Número de Sessões por Paciente
+    total_sessoes_realizadas = Financeiro2.objects.filter(presenca="Sim").count()
+    sessoes_por_paciente = total_sessoes_realizadas / total_pacientes if total_pacientes > 0 else 0
+
+    # Exemplo de pacientes novos e que continuam
+    pacientes_novos = 10  # Definir valor real
+    pacientes_continuam = 8  # Definir valor real
+
+    # Taxa de Retenção de Pacientes
+    taxa_retencao_pacientes = (pacientes_continuam / pacientes_novos) * 100 if pacientes_novos > 0 else 0
+
+
+    # Faturamento Médio por Psicóloga
+    faturamento_medio_psicologa = total_faturamento / total_psicologas if total_psicologas > 0 else 0
+
+    # Pacientes por Psicóloga
+    pacientes_por_psicologa = total_pacientes / total_psicologas if total_psicologas > 0 else 0
+
+    # Sessões por Psicóloga
+    sessoes_por_psicologa = total_sessoes_realizadas / total_psicologas if total_psicologas > 0 else 0
+
+
+    # Exemplo de custos
+    custo_fixo_total = 2000  # Definir valor real
+    custo_variavel = 500  # Definir valor real
+
+    # Ticket Médio por Atendimento
+    ticket_medio_atendimento = total_faturamento / total_sessoes_realizadas if total_sessoes_realizadas > 0 else 0
+
+    # Custo Fixo por Sala
+    custo_fixo_por_sala = custo_fixo_total / total_salas if total_salas > 0 else 0
+
+    # Lucro Bruto e Lucro Líquido
+    lucro_bruto = total_faturamento - custo_variavel
+    lucro_liquido = total_faturamento - (custo_fixo_total + custo_variavel)
+
+    # Margem de Lucro (%)
+    margem_lucro = (lucro_liquido / total_faturamento) * 100 if total_faturamento > 0 else 0
+
+    # Ponto de Equilíbrio
+    ponto_equilibrio = custo_fixo_total / ticket_medio_atendimento if ticket_medio_atendimento > 0 else 0
+
+
+
+    # Exemplo de dados de períodos anteriores
+    pacientes_anteriores = 80  # Definir valor real
+    faturamento_anterior = 10000  # Definir valor real
+
+    # Taxa de Crescimento de Pacientes
+    taxa_crescimento_pacientes = ((total_pacientes - pacientes_anteriores) / pacientes_anteriores) * 100 if pacientes_anteriores > 0 else 0
+
+    # Taxa de Crescimento de Faturamento
+    taxa_crescimento_faturamento = ((total_faturamento - faturamento_anterior) / faturamento_anterior) * 100 if faturamento_anterior > 0 else 0
+
     # Total de atendimentos realizados na clínica (presença = "Sim")
     total_atendimentos_realizados = Financeiro2.objects.filter(presenca="Sim").count()
 
@@ -2191,7 +2271,28 @@ def apuracao_financeira(request):
         'total_psicologas': total_psicologas,
         'total_atendimentos_realizados': total_atendimentos_realizados,
         'unidades': unidades_data,
-        'salas_data': salas_data
+        'salas_data': salas_data,
+        'salas_utilizadas': salas_utilizadas,
+        'taxa_ocupacao_salas': taxa_ocupacao_salas,
+        'faturamento_medio_sala': faturamento_medio_sala,
+        'taxa_ocupacao_pacientes': taxa_ocupacao_pacientes,
+        'faturamento_medio_paciente': faturamento_medio_paciente,
+        'sessoes_por_paciente': sessoes_por_paciente,
+        'taxa_retencao_pacientes': taxa_retencao_pacientes,
+        'faturamento_medio_psicologa': faturamento_medio_psicologa,
+        'pacientes_por_psicologa': pacientes_por_psicologa,
+        'sessoes_por_psicologa': sessoes_por_psicologa,
+        'custo_fixo_total': custo_fixo_total,
+        'custo_variavel': custo_variavel,
+        'ticket_medio_atendimento': ticket_medio_atendimento,
+        'custo_fixo_por_sala': custo_fixo_por_sala,
+        'lucro_bruto': lucro_bruto,
+        'lucro_liquido': lucro_liquido,
+        'margem_lucro': margem_lucro,
+        'ponto_equilibrio': ponto_equilibrio,
+        'taxa_crescimento_pacientes': taxa_crescimento_pacientes,
+        'taxa_crescimento_faturamento': taxa_crescimento_faturamento
+
     }
 
 
@@ -2231,6 +2332,36 @@ def delete_consulta_online(request, consulta_id, psicologo_id):
 
     return render(request, 'pages/deletar_agenda_online.html', {'consulta_online': consulta_online, 'psicologo': psicologa})
 
+@login_required(login_url='login1')
+def cadastro_despesa(request):
+
+    despesas = Despesas.objects.all()
+
+    if request.method == 'POST':
+        motivo = request.POST.get('motivo')
+        valor = request.POST.get('valor')
+        data = request.POST.get('data')
+
+        Despesas.objects.create(
+                motivo=motivo,
+                valor=valor,
+                data=data
+            )
+        
+        return redirect('cadastro_despesa')
+    
+    return render(request, 'pages/criacao_despesas.html', {'despesas': despesas})
+
+@login_required(login_url='login1')
+def deletar_despesa(request, despesa_id):
+    despesa = get_object_or_404(Despesas, id=despesa_id)
+
+    if request.method == 'POST':
+        despesa.delete()
+        return redirect('cadastro_despesa')
+
+    return render(request, 'pages/deletar_despesa.html', {'despesa': despesa})
+       
 
 @login_required(login_url='login1')
 def consulta_cadastrada2(request):

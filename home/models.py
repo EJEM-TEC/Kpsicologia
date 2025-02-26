@@ -97,6 +97,12 @@ class Consulta(models.Model):
     semanal = models.CharField(max_length=32, null=True)
     quinzenal = models.CharField(max_length=32, null=True)
     sala=models.ForeignKey(Sala, on_delete=models.CASCADE)
+
+
+class Despesas(models.Model):
+    motivo = models.CharField(max_length=100, null=True, blank=True)
+    valor = models.DecimalField(max_digits=10, decimal_places=2)
+    data = models.DateField()
     
 
 class Consulta_Online(models.Model):
