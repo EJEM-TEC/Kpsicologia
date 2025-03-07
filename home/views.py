@@ -729,15 +729,25 @@ def editar_psicologo(request, psicologo_id):
         
 
         # Atualiza os campos do psicólogo
-        psicologo.nome = nome
-        psicologo.cor = cor
-        psicologo.abordagem = abordagem
-        psicologo.save()
+        if nome:
+            psicologo.nome = nome
+            user_psico.username = nome
 
-        # Atualiza os campos do usuário
-        user_psico.username = nome
-        user_psico.email = email
-        user_psico.set_password(senha)
+        if cor:
+            psicologo.cor = cor
+        
+        if abordagem:
+            psicologo.abordagem = abordagem
+        
+        if email:
+            psicologo.email = email
+            user_psico.email = email
+        
+        if senha:
+            psicologo.senha = senha
+            user_psico.password = senha
+
+        psicologo.save()      
         user_psico.save()
 
         # Redireciona para a página do psicólogo após editar
