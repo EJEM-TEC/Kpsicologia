@@ -745,7 +745,7 @@ def editar_psicologo(request, psicologo_id):
         
         if senha:
             psicologo.senha = senha
-            user_psico.password = senha
+            user_psico.set_password(senha)
 
         psicologo.save()      
         user_psico.save()
