@@ -43,12 +43,12 @@
                 <div class="card card-frame">
                     <div class="card-body">
                         <h5 class="card-title">Indicadores de Utilização</h5>
-                        <p><strong>Taxa de Ocupação das Salas:</strong> {{ taxa_ocupacao_salas }}%</p>
-                        <p><strong>Taxa de Ocupação por Paciente:</strong> {{ taxa_ocupacao_pacientes }}%</p>
-                        <p><strong>Sessões por Paciente:</strong> {{ sessoes_por_paciente }}</p>
-                        <p><strong>Sessões por Psicóloga:</strong> {{ sessoes_por_psicologa }}</p>
-                        <p><strong>Pacientes por Psicóloga:</strong> {{ pacientes_por_psicologa }}</p>
-                        <p><strong>Taxa de Retenção de Pacientes:</strong> {{ taxa_retencao_pacientes }}%</p>
+                        <p><strong>Taxa de Ocupação das Salas:</strong> {{ taxa_ocupacao_salas|floatformat:2 }}%</p>
+                        <p><strong>Taxa de Ocupação por Paciente:</strong> {{ taxa_ocupacao_pacientes|floatformat:2 }}%</p>
+                        <p><strong>Sessões por Paciente:</strong> {{ sessoes_por_paciente|floatformat:2 }}</p>
+                        <p><strong>Sessões por Psicóloga:</strong> {{ sessoes_por_psicologa|floatformat:2 }}</p>
+                        <p><strong>Pacientes por Psicóloga:</strong> {{ pacientes_por_psicologa|floatformat:2 }}</p>
+                        <p><strong>Taxa de Retenção de Pacientes:</strong> {{ taxa_retencao_pacientes|floatformat:2 }}%</p>
                     </div>
                 </div>
             </div>

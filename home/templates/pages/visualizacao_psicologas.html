@@ -8,6 +8,10 @@
       <button type="button" class="btn bg-gradient-primary"><a class="text-white" href="{% url 'index' %}">
           Voltar
       </a></button>
+    {% else %}
+      <button type="button" class="btn bg-gradient-primary"><a class="text-white" href="{% url 'index' %}">
+        Voltar
+    </a></button>
     {% endif %}
   </div>
 </div>

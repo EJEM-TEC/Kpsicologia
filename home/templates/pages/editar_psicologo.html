@@ -5,9 +5,15 @@
 
 <div class="row">
   <div class="col-12">
-      <button type="button" class="btn bg-gradient-primary"><a class="text-white" href="{% url 'psicologa' %}">
-          Voltar
-      </a></button>
+      {% if user.is_superuser %}
+        <button type="button" class="btn bg-gradient-primary"><a class="text-white" href="{% url 'visualizar_psicologas' %}">
+            Voltar
+        </a></button>
+    {% else %}
+        <button type="button" class="btn bg-gradient-primary"><a class="text-white" href="{% url 'index' %}">
+            Voltar
+        </a></button>
+    {% endif %}
   </div>
 </div>
     <div class="container-fluid py-4">

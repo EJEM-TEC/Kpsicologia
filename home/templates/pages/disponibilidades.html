@@ -44,10 +44,11 @@
                             <div class="form-group">
                                 <label for="unidade_id">Unidade</label>
                                 <select class="form-control" id="unidade_id" name="unidade_id">
+                                    <option value="todos">Todos</option>
                                     {% for unidade in unidades %}
                                     <option value="{{unidade.id_unidade}}">{{unidade.nome_unidade}}</option>
                                     {% endfor %}
-                                    <option value="todos">Todos</option>
+                                    
                                 </select>
                             </div>
                         </div>
@@ -55,10 +56,11 @@
                             <div class="form-group">
                                 <label for="paciente_id">Especialização</label>
                                 <select class="form-control" id="especialidade_id" name="especialidade_id">
+                                    <option value="todos">Todos</option>
                                     {% for especialidade in especialidades %}
                                     <option value="{{especialidade.id}}">{{especialidade.especialidade}}</option>
                                     {% endfor %}
-                                    <option value="todos">Todos</option>
+                                    
                                 </select>
                             </div>
                         </div>
@@ -213,7 +215,7 @@
                 <h5>{{ psicologa.nome }}</h5>
                 {% for horario in horarios %}
                     {% if psicologa.nome in horario %}
-                        <p>Horário: <strong>{{ horario }}</strong></p>
+                        <p><strong>{{ horario.hora }}</strong></p>
                     {% endif %}
                 {% endfor %}
             </div>

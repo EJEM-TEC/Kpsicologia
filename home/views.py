@@ -36,6 +36,17 @@ from django.db.models import Sum, F, ExpressionWrapper, DecimalField
 from django.db.models.functions import Coalesce
 from .models import Financeiro2
 
+
+cards = [
+    {"title": "Agenda", "url_name": 'psico_agenda', "image": "img/curved-images/curved3.jpg"},
+    {"title": "Confirmação", "url_name": 'confirma_consulta', "image": "img/curved-images/curved6.jpg"},
+    {"title": "Disponibilidade", "url_name": 'psico_disponibilidade', "image": "img/curved-images/curved7.jpg"},
+    {"title": "Disponibilidades Extras", "url_name": 'psico_disponibilidade_online', "image": "img/curved-images/curved6.jpg"},
+    {"title": "Agenda de Horários Extras", "url_name": 'psico_agenda_online', "image": "img/curved-images/curved6.jpg"},
+    {"title": "Edição", "url_name": 'editar_psicologo', "image": "img/curved-images/curved6.jpg"},
+    {"title": "Perfil", "url_name": 'perfil_usuario', "image": "img/curved-images/curved7.jpg"},
+]
+
 def handler404(request, exception):
     return render(request, '404.html', status=404)
 
@@ -49,6 +60,17 @@ def index(request):
     request.session['mes'] = None
     request.session['ano'] = None
 
+    user = request.user
+    username = user.username
+    
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+
+        
+        
+        psicologa = Psicologa.objects.filter(nome=username).first()
+
+        return render(request, 'pages/index_psicologa.html', {'user': user, 'psicologo': psicologa, 'cards': cards})
+    
     return render(request, 'pages/index.html', { 'segment': 'index' })
 
 @login_required(login_url='login1')
@@ -170,7 +192,6 @@ class UserPasswordChangeView(PasswordChangeView):
     form_class = UserPasswordChangeForm
 
 @login_required(login_url='login1')
-@has_role_decorator('administrador')
 def users(request):
 
     users = User.objects.all()
@@ -217,7 +238,11 @@ def login(request):
         if user:
             login_django(request, user)
             if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
-                return redirect('visualizar_psicologas')
+                
+                psicologa = Psicologa.objects.filter(nome=username).first()
+
+                return render(request, 'pages/index_psicologa.html', {'user': user, 'psicologo': psicologa, 'cards': cards})
+            
             return redirect('index')
         # return HttpResponse("Usuário ou senha inválidos")
         return redirect("login_erro")
@@ -259,7 +284,6 @@ def delete_user(request, user_id):
 
 
 @login_required(login_url='login1')
-@has_role_decorator('administrador')
 def unis(request):
 
     unidades = Unidade.objects.all()
@@ -760,11 +784,11 @@ def editar_psicologo(request, psicologo_id):
 def confirma_consulta(request, psicologo_id):
     psicologo = get_object_or_404(Psicologa, id=psicologo_id)
     pacientes = Paciente.objects.all()
-    consulta_confirmadas = ConfirmacaoConsulta.objects.all()
+    consulta_confirmadas = Financeiro2.objects.all()
 
     # Cálculos financeiros
-    valor_total_atendimentos = ConfirmacaoConsulta.objects.aggregate(Sum('valor'))['valor__sum'] or 0
-    valor_total_cartao = ConfirmacaoConsulta.objects.filter(forma_pagamento='cartao').aggregate(Sum('valor'))['valor__sum'] or 0
+    valor_total_atendimentos = Financeiro2.objects.aggregate(Sum('valor_pagamento'))['valor_pagamento__sum'] or 0
+    valor_total_cartao = Financeiro2.objects.filter(forma_pagamento='cartao').aggregate(Sum('valor_pagamento'))['valor_pagamento__sum'] or 0
     valor_repasse = valor_total_atendimentos / 2
     valor_acerto = valor_repasse - valor_total_cartao
 
@@ -780,7 +804,7 @@ def confirma_consulta(request, psicologo_id):
         paciente = get_object_or_404(Paciente, id=paciente_id)
         
         # Criação da consulta confirmada
-        consulta_confirma = ConfirmacaoConsulta.objects.create(
+        consulta_confirma = Financeiro2.objects.create(
             data=data,
             psicologo=psicologo,
             confirmacao=confirmacao,
@@ -850,7 +874,6 @@ def pacientes(request):
                                                     'pacientes_deletados': pacientes_deletados})
 
 @login_required(login_url='login1')
-@has_role_decorator('administrador')
 def editar_paciente(request, id_paciente):
 
     paciente = get_object_or_404(Paciente, id=id_paciente)
@@ -880,7 +903,6 @@ def editar_paciente(request, id_paciente):
 
 
 @login_required(login_url='login1')
-@has_role_decorator('administrador')
 def deletar_paciente(request, id_paciente):
 
     paciente = get_object_or_404(Paciente, id=id_paciente)
@@ -894,6 +916,7 @@ def deletar_paciente(request, id_paciente):
     
     return render(request, 'pages/deletar_paciente.html', {'paciente': paciente})
 
+@login_required(login_url='login1')
 def deletar_consulta(request, psicologo_id, consulta_id):
     consulta = get_object_or_404(ConfirmacaoConsulta, id=consulta_id)
     psicologo = get_object_or_404(Psicologa, id=psicologo_id)
@@ -914,6 +937,7 @@ def deletar_consulta(request, psicologo_id, consulta_id):
         'consulta': consulta
     })
 
+@login_required(login_url='login1')
 def editar_confirma_consulta(request, psicologo_id, consulta_id):
     psicologo = get_object_or_404(Psicologa, id=psicologo_id)
     consulta = get_object_or_404(ConfirmacaoConsulta, id=consulta_id)
@@ -1302,8 +1326,8 @@ def Confirmar_Consulta(request, psicologo_id):
 
 
     # Cálculos financeiros
-    valor_total_atendimentos = consultas_psico.filter(presenca='Sim').aggregate(Sum('valor'))['valor__sum'] or 0
-    valor_total_cartao = consultas_psico.filter(forma='Cartão').aggregate(Sum('valor'))['valor__sum'] or 0
+    valor_total_atendimentos = consultas_psico.filter(presenca='Sim').aggregate(Sum('valor_pagamento'))['valor_pagamento__sum'] or 0
+    valor_total_cartao = consultas_psico.filter(forma='Cartão').aggregate(Sum('valor_pagamento'))['valor_pagamento__sum'] or 0
     valor_repasse = valor_total_atendimentos / 2
     valor_acerto = valor_repasse - valor_total_cartao
     
@@ -1662,14 +1686,18 @@ def vizualizar_disponibilidade(request):
 
     # Dados iniciais
     psicologos = Psicologa.objects.all()
-    horarios = Consulta.objects.all().filter(Paciente__isnull=True)
     especialidades = Especialidade.objects.all()
     publicos = Publico.objects.all()
     unidades = Unidade.objects.all()
     dias_da_semana = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
 
-    psicologos_com_horarios = [p for p in psicologos if horarios.filter(psicologo=p).exists()]
+    # Busca todas as consultas disponíveis (sem paciente)
+    horarios = Consulta.objects.filter(Paciente__isnull=True).select_related('psicologo', 'sala')
 
+    # Obtendo psicólogos que têm horários disponíveis
+    psicologos_com_horarios = Psicologa.objects.filter(consulta__in=horarios).distinct()
+
+    # Filtragem baseada nos inputs do formulário
     if request.method == 'POST':
         especialidade_id = request.POST.get('especialidade_id')
         publico_id = request.POST.get('publico')
@@ -1678,29 +1706,25 @@ def vizualizar_disponibilidade(request):
         horario_fim = request.POST.get("horario_fim")
         unidade_id = request.POST.get("unidade_id")
 
+        # Aplicando filtros
+        filtros = Q()
+
         if especialidade_id and especialidade_id != 'todos':
-            psicologas_com_especialidade = Psicologa.objects.filter(
-                especialidadepsico__especialidade_id=especialidade_id
-            )
-            horarios = horarios.filter(psicologo__in=psicologas_com_especialidade)
+            filtros &= Q(psicologo__especialidadepsico__especialidade_id=especialidade_id)
 
         if publico_id and publico_id != 'todos':
-            psicologas_com_publico = Psicologa.objects.filter(
-                publicopsico__publico_id=publico_id
-            )
-            horarios = horarios.filter(psicologo__in=psicologas_com_publico)
+            filtros &= Q(psicologo__publicopsico__publico_id=publico_id)
 
         if dia_da_semana != "todos" and dia_da_semana in dias_da_semana:
-            horarios = horarios.filter(dia_semana=dia_da_semana)
+            filtros &= Q(dia_semana=dia_da_semana)
 
         if horario_inicio and horario_fim:
-            horarios = horarios.filter(horario__gte=horario_inicio, horario__lte=horario_fim)
+            filtros &= Q(horario__gte=horario_inicio, horario__lte=horario_fim)
 
         if unidade_id and unidade_id != 'todos':
-            psicologas_com_unidade = Psicologa.objects.filter(
-                unidadepsico__unidade__id_unidade=unidade_id
-            )
-            horarios = horarios.filter(psicologo__in=psicologas_com_unidade)
+            filtros &= Q(sala__id_unidade=unidade_id)
+
+        horarios = horarios.filter(filtros)
 
     # Agrupamento dos horários semanais e quinzenais
     horarios_semanal = {}
@@ -1713,23 +1737,12 @@ def vizualizar_disponibilidade(request):
             psicologa = horario.psicologo.nome
             hora = horario.horario.strftime('%H:%M')
 
-            # Verifica se a unidade já existe no dicionário
             if horario.semanal:
-                # Horários semanais
-                if unidade not in horarios_semanal:
-                    horarios_semanal[unidade] = {}
-                if dia not in horarios_semanal[unidade]:
-                    horarios_semanal[unidade][dia] = []
-                horarios_semanal[unidade][dia].append(f'{hora} {psicologa}')
+                horarios_semanal.setdefault(unidade, {}).setdefault(dia, []).append(f'{hora} {psicologa}')
             else:
-                # Horários quinzenais
-                if unidade not in horarios_quinzenal:
-                    horarios_quinzenal[unidade] = {}
-                if dia not in horarios_quinzenal[unidade]:
-                    horarios_quinzenal[unidade][dia] = []
-                horarios_quinzenal[unidade][dia].append(f'{hora} {psicologa}')
+                horarios_quinzenal.setdefault(unidade, {}).setdefault(dia, []).append(f'{hora} {psicologa}')
 
-    # Imprime para debug
+    # Debugging
     print(horarios_semanal)
     print(horarios_quinzenal)
 
@@ -2131,6 +2144,8 @@ def apuracao_financeira(request):
     total_faturamento_online = Financeiro2.objects.filter(modalidade='Online').aggregate(Sum('valor_pagamento'))['valor_pagamento__sum'] or 0
     total_faturamento = total_faturamento_fisico + total_faturamento_online
 
+    print(total_faturamento)
+
     # Salas com atendimentos
     # Filtrando Salas que possuem consultas com presença registrada
     salas_utilizadas = Consulta.objects.filter(
@@ -2141,7 +2156,6 @@ def apuracao_financeira(request):
         sala__isnull=False
     ).values('sala').distinct().count()
 
-
     # Taxa de Ocupação das Salas
     taxa_ocupacao_salas = (salas_utilizadas / total_salas) * 100 if total_salas > 0 else 0
 
@@ -2149,7 +2163,7 @@ def apuracao_financeira(request):
     faturamento_medio_sala = total_faturamento / total_salas if total_salas > 0 else 0
 
     # Exemplo de capacidade máxima de atendimento
-    capacidade_maxima_atendimento = 100  # Definir valor real
+    capacidade_maxima_atendimento = Consulta.objects.count()  # Definir valor real
 
     # Taxa de Ocupação por Paciente
     taxa_ocupacao_pacientes = (total_pacientes / capacidade_maxima_atendimento) * 100 if capacidade_maxima_atendimento > 0 else 0
@@ -2168,7 +2182,6 @@ def apuracao_financeira(request):
     # Taxa de Retenção de Pacientes
     taxa_retencao_pacientes = (pacientes_continuam / pacientes_novos) * 100 if pacientes_novos > 0 else 0
 
-
     # Faturamento Médio por Psicóloga
     faturamento_medio_psicologa = total_faturamento / total_psicologas if total_psicologas > 0 else 0
 
@@ -2178,10 +2191,11 @@ def apuracao_financeira(request):
     # Sessões por Psicóloga
     sessoes_por_psicologa = total_sessoes_realizadas / total_psicologas if total_psicologas > 0 else 0
 
-
     # Exemplo de custos
     custo_fixo_total = 2000  # Definir valor real
-    custo_variavel = 500  # Definir valor real
+    custo_variavel = Despesas.objects.aggregate(Sum('valor')).get('valor__sum', 0) or 0  # Definir valor real
+
+    print(custo_variavel)
 
     # Ticket Médio por Atendimento
     ticket_medio_atendimento = total_faturamento / total_sessoes_realizadas if total_sessoes_realizadas > 0 else 0
