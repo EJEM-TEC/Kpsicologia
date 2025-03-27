@@ -193,9 +193,9 @@
         {% for psicologa in psicologos %}
             <div class="psicologa-group">
                 <h5>{{ psicologa.nome }}</h5>
-                {% for horario in horarios %}
-                    {% if psicologa.nome in horario %}
-                        <p>Horário: <strong>{{ horario }}</strong></p>
+                {% for item in horarios %}
+                    {% if psicologa.nome == item.psicologa %}
+                        <p><strong>{{ item.hora }}</strong></p>
                     {% endif %}
                 {% endfor %}
             </div>
@@ -213,9 +213,9 @@
         {% for psicologa in psicologos %}
             <div class="psicologa-group">
                 <h5>{{ psicologa.nome }}</h5>
-                {% for horario in horarios %}
-                    {% if psicologa.nome in horario %}
-                        <p><strong>{{ horario.hora }}</strong></p>
+                {% for item in horarios %}
+                    {% if psicologa.nome == item.psicologa %}
+                        <p><strong>{{ item.hora }}</strong></p>
                     {% endif %}
                 {% endfor %}
             </div>
@@ -223,6 +223,7 @@
         {% endfor %}
     {% endfor %}
 {% endfor %}
+
 
 
 

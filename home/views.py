@@ -118,6 +118,10 @@ def logout_view(request):
 
 @login_required(login_url='login1')
 def cadastrar_sala(request):
+
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+
     salas = Sala.objects.all()
     unidades = Unidade.objects.all()
 
@@ -144,6 +148,10 @@ def cadastrar_sala(request):
 
 @login_required(login_url='login1')
 def update_sala(request, id_sala):
+
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+
     sala = get_object_or_404(Sala, id_sala=id_sala)
     unidades = Unidade.objects.all()
     if request.method == 'POST':
@@ -170,6 +178,10 @@ def update_sala(request, id_sala):
 
 @login_required(login_url='login1')
 def delete_sala(request, id_sala):
+
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+
     sala= get_object_or_404(Sala, id_sala=id_sala)
 
     if request.method == 'POST':
@@ -193,6 +205,9 @@ class UserPasswordChangeView(PasswordChangeView):
 
 @login_required(login_url='login1')
 def users(request):
+
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
 
     users = User.objects.all()
     
@@ -250,6 +265,10 @@ def login(request):
     
 @login_required(login_url='login1')
 def update_user(request, user_id):
+
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+
     user = get_object_or_404(User, id=user_id)
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -274,6 +293,10 @@ def update_user(request, user_id):
 
 @login_required(login_url='login1')
 def delete_user(request, user_id):
+
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+
     user= get_object_or_404(User, id=user_id)
 
     if request.method == 'POST':
@@ -285,6 +308,9 @@ def delete_user(request, user_id):
 
 @login_required(login_url='login1')
 def unis(request):
+
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
 
     unidades = Unidade.objects.all()
     
@@ -324,6 +350,10 @@ def unis(request):
 
 @login_required(login_url='login1')
 def update_uni(request, unidade_id):
+
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+
     unidade = get_object_or_404(Unidade, id_unidade=unidade_id)
     if request.method == 'POST':
         nome_unidade = request.POST.get('nome_unidade')
@@ -342,6 +372,10 @@ def update_uni(request, unidade_id):
 
 @login_required(login_url='login1')
 def delete_uni(request, unidade_id):
+
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+
     unidade= get_object_or_404(Unidade, id_unidade=unidade_id)
 
     if request.method == 'POST':
@@ -612,6 +646,10 @@ def update_consulta(request, consulta_id):
 
 @login_required(login_url='login1')
 def delete_consulta(request, id_consulta):
+
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+
     consulta = get_object_or_404(Consulta, id=id_consulta)
 
     if request.method == 'POST':
@@ -622,6 +660,9 @@ def delete_consulta(request, id_consulta):
 
 @login_required(login_url='login1')
 def psicologa(request):
+
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
     
     psicologos = Psicologa.objects.all()
     especialidades = Especialidade.objects.all()
@@ -685,6 +726,9 @@ def psicologa(request):
 
 @login_required(login_url='login1')
 def visualizar_psicologos(request):
+
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
 
     request.session['mes'] = None
     request.session['ano'] = None
@@ -876,6 +920,9 @@ def pacientes(request):
 @login_required(login_url='login1')
 def editar_paciente(request, id_paciente):
 
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+
     paciente = get_object_or_404(Paciente, id=id_paciente)
 
     if request.method == 'POST':
@@ -904,6 +951,9 @@ def editar_paciente(request, id_paciente):
 
 @login_required(login_url='login1')
 def deletar_paciente(request, id_paciente):
+
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
 
     paciente = get_object_or_404(Paciente, id=id_paciente)
 
@@ -1067,6 +1117,9 @@ def psico_agenda(request, psicologo_id):
 @login_required(login_url='login1')
 def cadastrar_especialidade(request):
 
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+
     especialidades = Especialidade.objects.all()
 
     if request.method == "POST":
@@ -1119,6 +1172,9 @@ def AssociarPsicoEspecialidade(request, psicologo_id):
 @login_required(login_url='login1')
 def DissociarPsicoEspecialidade(request, psicologo_id, especialidade_id):
 
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+
     psicologo = get_object_or_404(Psicologa, id=psicologo_id)
 
     especialidade = get_object_or_404(Especialidade, id=especialidade_id)
@@ -1140,12 +1196,12 @@ def DissociarPsicoEspecialidade(request, psicologo_id, especialidade_id):
 @login_required(login_url='login1')
 def AssociarPsicoUnidade(request, psicologo_id):
 
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+
     psicologo = get_object_or_404(Psicologa, id=psicologo_id)
     unidadesGerais = Unidade.objects.all()
 
-    # Verificar se o usuário é a psicóloga ou faz parte do grupo 'Administrador'
-    if request.user.username != psicologo.nome and not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
-        return render(request, 'pages/error_permission1.html')
 
 
     if request.method == "POST":
@@ -1173,6 +1229,9 @@ def AssociarPsicoUnidade(request, psicologo_id):
 @login_required(login_url='login1')
 def DissociarPsicoUnidade(request, psicologo_id, unidade_id):
 
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+
     psicologo = get_object_or_404(Psicologa, id=psicologo_id)
 
     unidade = get_object_or_404(Unidade, id_unidade=unidade_id)
@@ -1193,6 +1252,9 @@ def DissociarPsicoUnidade(request, psicologo_id, unidade_id):
 
 @login_required(login_url='login1')
 def AssociarPsicoPublico(request, psicologo_id):
+
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
 
     psicologo = get_object_or_404(Psicologa, id=psicologo_id)
     publicosGerais = Publico.objects.all()
@@ -1227,6 +1289,9 @@ def AssociarPsicoPublico(request, psicologo_id):
 @login_required(login_url='login1')
 def DissociarPsicoPublico(request, psicologo_id, publico_id):
 
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+
     psicologo = get_object_or_404(Psicologa, id=psicologo_id)
 
     publico = get_object_or_404(Publico, id=publico_id)
@@ -1248,6 +1313,9 @@ def DissociarPsicoPublico(request, psicologo_id, publico_id):
 @login_required(login_url='login1')
 def cadastrar_publico(request):
 
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+
     publicos = Publico.objects.all()
 
     if request.method == "POST":
@@ -1266,6 +1334,9 @@ def cadastrar_publico(request):
 @login_required(login_url='login1')
 def deletar_publico(request, publico_id):
 
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+
     publico = get_object_or_404(Publico, id=publico_id)
 
     if request.method == 'POST':
@@ -1277,6 +1348,7 @@ def deletar_publico(request, publico_id):
 
 @login_required(login_url='login1')
 def Confirmar_Consulta(request, psicologo_id):
+    
 
     psicologa = get_object_or_404(Psicologa, id=psicologo_id)
     consultas_psico = Financeiro2.objects.filter(psicologa=psicologa)
@@ -1375,6 +1447,10 @@ def AdicionarConfirma_consulta(request, psicologo_id):
     consultas_psico = Consulta.objects.filter(psicologo=psicologa)
     consultas_psico_online = Consulta_Online.objects.filter(psicologo=psicologa)
 
+        # Verificar se o usuário é a psicóloga ou faz parte do grupo 'Administrador'
+    if request.user.username != psicologa.nome and not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission1.html')
+
     # Data atual
     hoje = datetime.now()
 
@@ -1471,6 +1547,10 @@ def AdicionarConfirma_consulta(request, psicologo_id):
 
 @login_required(login_url='login1')
 def ExcluirConfirma_consulta(request, psicologo_id):
+
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+
     psicologa = get_object_or_404(Psicologa, id=psicologo_id)
     consultas_psico = Consulta.objects.filter(psicologo=psicologa)
 
@@ -1582,6 +1662,10 @@ def consultar_financeiro(request):
 
 @login_required(login_url='login1')
 def editar_financeiro(request, id_financeiro):
+
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+
     financeiro = get_object_or_404(Financeiro2, id=id_financeiro)
 
     if request.method == "POST":
@@ -1605,6 +1689,9 @@ def editar_financeiro(request, id_financeiro):
 
 @login_required(login_url='login1')
 def definir_disponibilidade(request, psicologo_id):
+
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
 
     salas = Sala.objects.all()
     psicologa = get_object_or_404(Psicologa, id=psicologo_id)
@@ -1677,12 +1764,12 @@ def definir_disponibilidade(request, psicologo_id):
 
 @login_required(login_url='login1')
 def vizualizar_disponibilidade(request):
-    request.session['mes'] = None
-    request.session['ano'] = None
 
-    # Permissão
     if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
         return render(request, 'pages/error_permission.html')
+
+    request.session['mes'] = None
+    request.session['ano'] = None
 
     # Dados iniciais
     psicologos = Psicologa.objects.all()
@@ -1731,20 +1818,20 @@ def vizualizar_disponibilidade(request):
     horarios_quinzenal = {}
 
     for horario in horarios:
-        unidade = horario.sala.id_unidade.nome_unidade 
+        unidade = horario.sala.id_unidade.nome_unidade
         dia = horario.dia_semana
         if horario.psicologo:
             psicologa = horario.psicologo.nome
             hora = horario.horario.strftime('%H:%M')
+            psicologa_e_hora = {
+                'psicologa': psicologa,
+                'hora': hora
+            }
 
             if horario.semanal:
-                horarios_semanal.setdefault(unidade, {}).setdefault(dia, []).append(f'{hora} {psicologa}')
+                horarios_semanal.setdefault(unidade, {}).setdefault(dia, []).append(psicologa_e_hora)
             else:
-                horarios_quinzenal.setdefault(unidade, {}).setdefault(dia, []).append(f'{hora} {psicologa}')
-
-    # Debugging
-    print(horarios_semanal)
-    print(horarios_quinzenal)
+                horarios_quinzenal.setdefault(unidade, {}).setdefault(dia, []).append(psicologa_e_hora)
 
     return render(request, 'pages/disponibilidades.html', {
         'psicologos': psicologos_com_horarios,
@@ -1755,6 +1842,7 @@ def vizualizar_disponibilidade(request):
         'horarios_quinzenal': horarios_quinzenal,
         'dias_da_semana': dias_da_semana,
     })
+
 
 
 @login_required(login_url='login1')
@@ -2080,6 +2168,10 @@ def psico_agenda_online(request, psicologo_id):
 
 @login_required(login_url='login1')
 def consulta_financeira_pacientes(request):
+
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+
     financeiros = Financeiro2.objects.all()
     pacientes = Paciente.objects.all()
     psicologas = Psicologa.objects.all()
@@ -2135,6 +2227,10 @@ def consulta_financeira_pacientes(request):
 
 @login_required(login_url='login1')
 def apuracao_financeira(request):
+
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+
     # Apuração geral
     total_salas = Sala.objects.count()
     total_unidades = Unidade.objects.count()
@@ -2337,6 +2433,10 @@ def disponibilidades_psicologos(request):
 
 @login_required(login_url='login1')
 def delete_consulta_online(request, consulta_id, psicologo_id):
+
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+
     consulta_online = get_object_or_404(Consulta_Online, id=consulta_id)
     psicologa = get_object_or_404(Psicologa, id=psicologo_id)
     hoje = datetime.now().day
@@ -2352,12 +2452,13 @@ def delete_consulta_online(request, consulta_id, psicologo_id):
             psicologa.ultima_atualizacao_agenda = hoje
             return redirect('psico_disponibilidade_online', psicologo_id=psicologo_id)
 
-        
-
     return render(request, 'pages/deletar_agenda_online.html', {'consulta_online': consulta_online, 'psicologo': psicologa})
 
 @login_required(login_url='login1')
 def cadastro_despesa(request):
+
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
 
     despesas = Despesas.objects.all()
 
@@ -2378,6 +2479,10 @@ def cadastro_despesa(request):
 
 @login_required(login_url='login1')
 def deletar_despesa(request, despesa_id):
+
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+
     despesa = get_object_or_404(Despesas, id=despesa_id)
 
     if request.method == 'POST':

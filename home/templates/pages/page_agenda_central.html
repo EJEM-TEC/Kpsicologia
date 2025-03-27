@@ -24,10 +24,10 @@
                             <div class="form-group">
                                 <label for="paciente_id">Psicóloga</label>
                                 <select class="form-control" id="paciente_id" name="psicologa_id">
+                                    <option value="todos">Todos</option>
                                     {% for psicologa in psicologas %}
                                     <option value="{{psicologa.id}}">{{psicologa.nome}}</option>
                                     {% endfor %}
-                                    <option value="todos">Todos</option>
                                 </select>
                             </div>
                         </div>
@@ -35,10 +35,10 @@
                             <div class="form-group">
                                 <label for="paciente_id">Unidade</label>
                                 <select class="form-control" id="paciente_id" name="paciente_id">
+                                    <option value="todos">Todos</option>
                                     {% for unidade in unidades %}
                                     <option value="{{unidade.id_unidade}}">{{unidade.nome_unidade}}</option>
                                     {% endfor %}
-                                    <option value="todos">Todos</option>
                                 </select>
                             </div>
                         </div>
@@ -46,10 +46,11 @@
                             <div class="form-group">
                                 <label for="paciente_id">Especialização</label>
                                 <select class="form-control" id="especialidade_id" name="especialidade_id">
+                                    <option value="todos">Todos</option>
                                     {% for especialidade in especialidades %}
                                     <option value="{{especialidade.id}}">{{especialidade.especialidade}}</option>
                                     {% endfor %}
-                                    <option value="todos">Todos</option>
+                                    
                                 </select>
                             </div>
                         </div>
