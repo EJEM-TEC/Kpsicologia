@@ -184,6 +184,7 @@
 </div>
 {% endfor %} -->
 
+<!-- Modificação para Disponibilidade Semanal -->
 <h2>Disponibilidade Semanal</h2>
 {% for unidade, dias in horarios_semanal.items %}
     <h3>🟣 {{ unidade }}</h3>
@@ -191,19 +192,22 @@
         <h4>🔹 {{ dia }}</h4>
         
         {% for psicologa in psicologos %}
-            <div class="psicologa-group">
+            <div class="psicologa-group" id="semanal-{{ unidade|slugify }}-{{ dia|slugify }}-{{ psicologa.id }}">
                 <h5>{{ psicologa.nome }}</h5>
-                {% for item in horarios %}
-                    {% if psicologa.nome == item.psicologa %}
-                        <p><strong>{{ item.hora }}</strong></p>
-                    {% endif %}
-                {% endfor %}
+                <div class="horarios-container">
+                    {% for item in horarios %}
+                        {% if psicologa.nome == item.psicologa %}
+                            <p><strong>{{ item.hora }}</strong></p>
+                        {% endif %}
+                    {% endfor %}
+                </div>
             </div>
-            <hr> <!-- Adiciona uma linha de separação entre psicólogas -->
+            <hr id="hr-semanal-{{ unidade|slugify }}-{{ dia|slugify }}-{{ psicologa.id }}">
         {% endfor %}
     {% endfor %}
 {% endfor %}
 
+<!-- Modificação para Disponibilidade Quinzenal -->
 <h2>Disponibilidade Quinzenal</h2>
 {% for unidade, dias in horarios_quinzenal.items %}
     <h3>🟣 {{ unidade }}</h3>
@@ -211,20 +215,52 @@
         <h4>🔹 {{ dia }}</h4>
         
         {% for psicologa in psicologos %}
-            <div class="psicologa-group">
+            <div class="psicologa-group" id="quinzenal-{{ unidade|slugify }}-{{ dia|slugify }}-{{ psicologa.id }}">
                 <h5>{{ psicologa.nome }}</h5>
-                {% for item in horarios %}
-                    {% if psicologa.nome == item.psicologa %}
-                        <p><strong>{{ item.hora }}</strong></p>
-                    {% endif %}
-                {% endfor %}
+                <div class="horarios-container">
+                    {% for item in horarios %}
+                        {% if psicologa.nome == item.psicologa %}
+                            <p><strong>{{ item.hora }}</strong></p>
+                        {% endif %}
+                    {% endfor %}
+                </div>
             </div>
-            <hr> <!-- Adiciona uma linha de separação entre psicólogas -->
+            <hr id="hr-quinzenal-{{ unidade|slugify }}-{{ dia|slugify }}-{{ psicologa.id }}">
         {% endfor %}
     {% endfor %}
 {% endfor %}
 
-
-
-
 {% endblock content %}
+
+
+{% block scripts %}
+<!-- Script JavaScript para ocultar psicólogas sem horários -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Função para ocultar psicólogas sem horários
+        function ocultarPsicologasSemHorarios() {
+            // Seleciona todos os containers de psicólogas
+            const containers = document.querySelectorAll('.psicologa-group');
+            
+            // Para cada container
+            containers.forEach(container => {
+                // Conta quantos horários existem dentro do container
+                const horariosCount = container.querySelector('.horarios-container').children.length;
+                
+                // Se não houver horários, oculta o container e a linha horizontal correspondente
+                if (horariosCount === 0) {
+                    container.style.display = 'none';
+                    const hrId = 'hr-' + container.id;
+                    const hr = document.getElementById(hrId);
+                    if (hr) {
+                        hr.style.display = 'none';
+                    }
+                }
+            });
+        }
+        
+        // Executa a função quando a página carregar
+        ocultarPsicologasSemHorarios();
+    });
+    </script>
+{% endblock scripts %}    

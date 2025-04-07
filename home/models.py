@@ -114,7 +114,7 @@ class Consulta_Online(models.Model):
     quinzenal = models.CharField(max_length=32, null=True)
     ultima_atualizacao = models.DateTimeField(auto_now=True)
 
-class Financeiro2(models.Model):
+class Financeiro(models.Model):
     dia_semana = models.CharField(max_length=32, blank=True, null=True)
     periodo_atendimento = models.CharField(max_length=32, blank=True, null=True)
     psicologa = models.ForeignKey(Psicologa, on_delete=models.CASCADE)
@@ -129,23 +129,6 @@ class Financeiro2(models.Model):
     valor_pagamento = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     data_pagamento = models.DateField(null=True, blank=True)
     modalidade = models.CharField(max_length=32, null=True, blank=True)
-
-class Financeiro(models.Model):
-    psicologa = models.ForeignKey(Psicologa, on_delete=models.CASCADE, null=True)
-    valor_previsto = models.DecimalField(max_digits=10, decimal_places=2)
-    valor_pendente = models.DecimalField(max_digits=10, decimal_places=2)
-    valor_acertado = models.DecimalField(max_digits=10, decimal_places=2)
-    valor_total= models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    qtd_pacientes = models.PositiveIntegerField()
-    desistencias_atendidos = models.PositiveIntegerField()
-    qtd_marcacoes = models.PositiveIntegerField()
-    desistencias_novos = models.PositiveIntegerField()
-
-
-    def save(self, *args, **kwargs):
-        self.valor_total = self.valor_previsto + self.valor_pendente + self.valor_acertado
-        super().save(*args, **kwargs)
-
 
 class Publico(models.Model):
     id = models.AutoField(primary_key=True)

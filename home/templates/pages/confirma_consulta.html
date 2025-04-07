@@ -58,13 +58,14 @@
     <div class="col-12">
         <div class="card mb-4">
             <div class="card-header pb-0">
-                <h6>Cadastrar</h6>
+                <h6>Opções</h6>
             </div>
             <div class="card-body p-4">
-                    <button type="button" class="btn btn-primary"><a  class="text-white" href="{% url 'adiciona_confirma_consulta' psicologo.id %}">Adicionar Semana</a></button>
-            </div>
-            <div class="card-body p-4">
-                <button type="button" class="btn btn-primary"><a  class="text-white" href="{% url 'editar_consultas' psicologo.id %}">Editar Consultas</a></button>
+                <div class="d-flex justify-content-around">
+                    <button type="button" class="btn bg-gradient-primary"><a class="text-white" href="{% url 'adiciona_confirma_consulta' psicologo.id %}">Adicionar Semana</a></button>
+                    <button type="button" class="btn bg-gradient-primary"><a class="text-white" href="{% url 'editar_consultas' psicologo.id %}">Editar Consultas</a></button>
+                    <button type="button" class="btn bg-gradient-primary"><a class="text-white" href="{% url 'adicionar_consulta_emergencial' psicologo.id %}">Adicionar Consulta Emergencial</a></button>
+                </div>
             </div>
         </div>
     </div>
@@ -87,13 +88,13 @@
                             <label for="dia_semana" class="form-label">Dia da Semana</label>
                             <div class="input-group mb-4">
                               <select class="form-control" id="dia_semana" name="dia_semana">
+                                <option value="Todos">Todos</option>
                                 <option value="Segunda">Segunda</option>
                                 <option value="Terça">Terça</option>
                                 <option value="Quarta">Quarta</option>
                                 <option value="Quinta">Quinta</option>
                                 <option value="Sexta">Sexta</option>
                                 <option value="Sábado">Sábado</option>
-                                <option value="Todos">Todos</option>
                               </select>
                             </div>
                           </div>
@@ -104,9 +105,9 @@
                           <div class="form-group">
                             <label for="periodo_atendimento" class="form-label">Período de Atendimento</label>
                             <select class="form-control" id="periodo_atendimento" name="periodo_atendimento">
+                              <option value="Todos">Todos</option> 
                               <option value="Semanal">Semanal</option>
                               <option value="Mensal">Mensal</option>
-                              <option value="Todos">Todos</option>  
                             </select>
                           </div>
                         </div>
@@ -133,10 +134,17 @@
 
                       <div class="row">
                         <!-- Botão de Submissão -->
-                        <div class="col-md-12">
+                        <div class="col-md-6">
                           <div class="form-group text-center mt-4">
-                            <button type="submit" class="btn btn-primary">Aplicar Filtragens</button>
+                            <button type="submit" class="btn bg-gradient-primary">Aplicar Filtragens</button>
                           </div>
+                          
+                        </div>
+                        <div class="col-md-6">
+                            <!-- Botão de Resetar -->
+                            <div class="form-group text-center mt-4">
+                                <button type="reset" class="btn btn-secondary">Resetar</button>
+                            </div>
                         </div>
                       </div>
                 
@@ -167,6 +175,7 @@
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Forma Pagamento</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Presença</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor Pagamento ( R$ )</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Data Pagamento</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Observações</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ações</th>
                             </tr>
@@ -175,13 +184,31 @@
                             {% for financeiro in financeiros %}
                                 <tr>
                                     <td class="align-middle text-center">{{ financeiro.paciente.nome }}</td>
-                                    <td class="align-middle text-center">{{ financeiro.dia_semana }}</td>
+                                    {% if financeiro.dia_semana == 'Segunda' %}
+                                    <td class="align-middle text-center">Seg</td>
+                                    {% elif financeiro.dia_semana == 'Terça' %}
+                                    <td class="align-middle text-center">Ter</td>
+                                    {% elif financeiro.dia_semana == 'Quarta' %}
+                                    <td class="align-middle text-center">Qua</td>
+                                    {% elif financeiro.dia_semana == 'Quinta' %}
+                                    <td class="align-middle text-center">Qui</td>
+                                    {% elif financeiro.dia_semana == 'Sexta' %}
+                                    <td class="align-middle text-center">Sex</td>
+                                    {% else %}
+                                    <td class="align-middle text-center">Sáb</td>
+                                    {% endif %}
                                     <td class="align-middle text-center">{{ financeiro.horario }}</td> <!-- Exibindo data formatada -->
                                     <td class="align-middle text-center">{{ financeiro.periodo_atendimento }}</td>
                                     <td class="align-middle text-center">R$ {{ financeiro.paciente.valor }}</td>
                                     <td class="align-middle text-center">{{ financeiro.data }}</td>
                                     <td class="align-middle text-center">Semana {{ financeiro.semana }}</td>
+                                    {% if financeiro.forma %}
                                     <td class="align-middle text-center">{{ financeiro.forma }}</td>
+                                    {% else %}
+                                        <td class="align-middle text-center"></td>
+                                    {% endif %}
+                                    
+                                    {% if financeiro.presenca %}
                                     <td class="align-middle text-center">
                                         <h6 class="mb-0 text-sm text-center
                                         {% if financeiro.presenca == 'Sim' %}
@@ -194,14 +221,29 @@
                                         
                                         ">{{ financeiro.presenca }}</h6>
                                     </td>
+                                    {% else %}
+                                        <td class="align-middle text-center"></td>
+                                    {% endif %}
+
                                     {% if financeiro.valor_pagamento %}
                                         <td class="align-middle text-center">R$ {{ financeiro.valor_pagamento }}</td>
                                     {% else %}
                                         <td class="align-middle text-center">R$ 0.00</td>
                                     {% endif %}
+
+                                    {% if financeiro.data_pagamento %}
+                                        <td class="align-middle text-center">{{ financeiro.data_pagamento }}</td>
+                                    {% else %}
+                                        <td class="align-middle text-center"></td>
+                                    {% endif %}
+
+                                    {% if financeiro.observacoes %}
                                     <td class="align-middle text-center">{{ financeiro.observacoes }}</td>
+                                    {% else %}
+                                        <td class="align-middle text-center"></td>
+                                    {% endif %}
                                     <td class="align-middle text-center">
-                                        <a href="{% url 'deletar_confirma_consulta' psicologo.id %}" class="text-secondary text-xs" data-toggle="tooltip" data-original-title="Excluir consulta">Excluir</a>
+                                        <a href="{% url 'deletar_confirma_consulta' psicologo.id financeiro.id %}" class="text-secondary text-xs" data-toggle="tooltip" data-original-title="Excluir consulta">Excluir</a>
                                     </td>
                                 </tr>
                             {% empty %}

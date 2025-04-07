@@ -1,0 +1,150 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-12">
+        {% if user.is_superuser %}
+        <button type="button" class="btn bg-gradient-primary"><a class="text-white" href="{% url 'visualizar_psicologas' %}">
+            Voltar
+        </a></button>
+    {% else %}
+        <button type="button" class="btn bg-gradient-primary"><a class="text-white" href="{% url 'index' %}">
+            Voltar
+        </a></button>
+    {% endif %}
+    </div>
+  </div>
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+                <h6>Adicionar Consulta Emergencial</h6>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="#">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <!-- Data da Consulta -->
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label for="data_consulta" class="form-label">Data da consulta</label>
+                            <input type="date" class="form-control" id="data_consulta" name="data_consulta" required>
+                          </div>
+                        </div>
+                    
+                        <!-- Horário da Consulta -->
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label for="horario_consulta" class="form-label">Horário da Consulta</label>
+                            <input type="time" class="form-control" id="horario_consulta" name="horario_consulta" required>
+                          </div>
+                        </div>
+                      </div>
+
+
+                    <div class="row">
+                        <!-- Paciente -->
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label for="paciente" class="form-label">Paciente</label>
+                              <select class="form-control" id="paciente" name="paciente" required>
+                                <option value="" disabled selected>Selecione um Paciente</option>
+                                {% for paciente in pacientes %}
+                                    <option value="{{ paciente.id }}">{{ paciente.nome }}</option>
+                                {% endfor %}
+                              </select>
+                          </div>
+                        </div>
+                    
+                        <!-- Forma de Pagamento -->
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label for="data_fim" class="form-label">Forma de Pagamento</label>
+                            <select class="form-control" id="forma_pagamento" name="forma_pagamento" required>
+                                <option value="" disabled selected>Selecione uma Forma de Pagamento</option>
+                                <option value="Dinheiro">Dinheiro</option> 
+                                <option value="Cartão">Cartão</option>
+                                <option value="Pix">Pix</option>
+                            </select>
+                          </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Presença -->
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label for="presenca" class="form-label">Presença</label>
+                              <select class="form-control" id="presenca" name="presenca" required>
+                                <option value="" disabled selected>Selecione a Presença</option>
+                                <option value="Sim">Sim</option>
+                                <option value="Nao">Não</option>
+                                <option value="Falta Inj">Falta Injustificada</option>
+                              </select>
+                          </div>
+                        </div>
+                    
+                        <!-- Observação -->
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label for="data_fim" class="form-label">Observações</label>
+                            <textarea class="form-control" id="observacoes" name="observacoes" rows="2" placeholder="Observações"></textarea>
+                          </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Data Pagamento -->
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label for="data_pagamento" class="form-label">Data Pagamento</label>
+                            <input type="date" class="form-control" id="data_pagamento" name="data_pagamento">
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                              <label for="tipo_atendimento" class="form-label">Tipo Atendimento</label>
+                              <select class="form-control" id="tipo_atendimento" name="tipo_atendimento" required>
+                                <option value="" disabled selected>Selecione o Tipo de Atendimento</option>
+                                <option value="Presencial">Presencial</option>
+                                <option value="Online">Online</option>
+                              </select>
+                            </div>
+                          </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Valor Pagamento -->
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label for="valor_pagamento" class="form-label">Valor Pagamento</label>
+                            <input type="number" class="form-control" id="valor_pagamento" step="0.00" name="valor_pagamento" placeholder="Valor Pagamento">
+                          </div>
+                        </div>
+                    </div>
+
+                      <div class="row">
+                        <!-- Botão de Submissão -->
+                        <div class="col-md-6">
+                          <div class="form-group text-center mt-4">
+                            <button type="submit" class="btn bg-gradient-primary">Cadastrar consulta</button>
+                          </div>
+                          
+                        </div>
+                        <div class="col-md-6">
+                            <!-- Botão de Resetar -->
+                            <div class="form-group text-center mt-4">
+                                <button type="reset" class="btn btn-secondary">Resetar</button>
+                            </div>
+                        </div>
+                      </div>
+                
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

@@ -21,56 +21,66 @@ from home import views
 
 
 urlpatterns = [
-    #path('', include('home.urls')),
+
+    # ADMIN
     path("admin/", admin.site.urls),
-    #path("", include('admin_soft.urls'))
-    path('', views.login, name='login1'),
-    path('index/', views.index, name='index'),
-    path('billing/', views.billing, name='billing'),
-    path('tables/', views.tables, name='tables'),
-    path('vr/', views.vr, name='vr'),
-    path('rtl/', views.rtl, name='rtl'),
-    path('profile/', views.profile, name='profile'),
-    path('users/', views.users, name='users'),
+
+    # LOGIN E LOGO
     path('logout/', views.logout_user, name="logout"),
     path('login/', views.login, name='login'),
-    path('cadastrar_salas/', views.cadastrar_sala, name='cadastrar_salas'),
-    path('unidades_atendimento/', views.unis, name='unidade_atendimento'),
+    path('', views.login, name='login1'),
+
+    # MENUS
+    path('index/', views.index, name='index'),
+    path('cadastros', views.cadastros_menu, name='cadastros'),
+    path('consultar_financeiro', views.consultar_financeiro, name='consultar_financeiro'),
+    path('disponibilidades_psico', views.disponibilidades_psicologos, name='disponibilidades_psicologos'),
+
+    #USUÁRIOS
+    path('users/', views.users, name='users'),
     path("users/<int:user_id>/delete/", views.delete_user, name="delete_user"),
     path("users/<int:user_id>/update/", views.update_user, name="update_user"),
+
+    #UNIDADES
+    path('unidades_atendimento/', views.unis, name='unidade_atendimento'),
     path("unidades_atendimento/<int:unidade_id>/update/", views.update_uni, name="update_unidade"),
     path("unidades_atendimento/<int:unidade_id>/delete/", views.delete_uni, name="delete_unidade"),
+
+    #SALAS DE ATENDIMENTO
+    path('cadastrar_salas/', views.cadastrar_sala, name='cadastrar_salas'),
     path("cadastrar_salas/<int:id_sala>/update/", views.update_sala, name="update_sala"),
     path("cadastrar_salas/<int:id_sala>/delete/", views.delete_sala, name="delete_sala"),
     path('salas/<int:id_sala>/disponibilidade/', views.definir_horario_sala, name='horario_sala'),
+    
+    #PERFIL DE USUÁRIO
     path('perfil_usuario/', views.perfil, name='perfil_usuario'),
-    path('perfil_usuario/<int:user_id>/editar_perfil/', views.update_profile, name='editar_perfil'),   
-    #path('perfil_usuario/<int:user_id>/editar_perfil/', views.update_profile, name='editar_perfil'),
-    path('psicologas/', views.psicologa, name='psicologa'),
-    path('cadastros', views.cadastros, name='cadastros'),
-    path('visualizar_psicologas', views.visualizar_psicologos, name='visualizar_psicologas'),
-    # URLs para gerenciamento de consultas
-    #path('consultas/novo/', views.create_consulta, name='create_consulta'),  # URL para criar nova consulta
-    path('consultas/editar/<int:id_consulta>/', views.update_consulta, name='update_consulta'),  # URL para editar consulta
-    path('consultas/deletar/<int:id_consulta>/', views.delete_consulta, name='delete_consulta'),  # URL para deletar consulta
+    path('perfil_usuario/<int:user_id>/editar_perfil/', views.update_profile, name='editar_perfil'),
+
+    #PACIENTES   
     path('pacientes/', views.pacientes, name='pacientes'),
     path('pacientes/<int:id_paciente>/editar', views.editar_paciente, name='update_paciente'),
     path('pacientes/<int:id_paciente>/deletar', views.deletar_paciente, name='delete_paciente'),
-    path('psicologas/editar/<int:id_consulta>/', views.editar_confirma_consulta, name='editar_confirma_consulta'),  # URL para confirmar consulta  # URL para confirmar consulta
+
+    #PSICÓLOGOS
+    path('psicologas/', views.psicologa, name='psicologa'),
+    path('visualizar_psicologas', views.visualizar_psicologos, name='visualizar_psicologas'),
     path('deletar_psicologo/<int:psicologo_id>/delete/', views.deletar_psicologo, name='deletar_psicologo'),
     path('editar_psicologo/<int:psicologo_id>/editar/', views.editar_psicologo, name='editar_psicologo'),
-    path('psicologas/<int:psicologo_id>/confirmar/', views.Confirmar_Consulta, name='confirma_consulta'),
-    path('psicologas/<int:psicologo_id>/adicionar/', views.AdicionarConfirma_consulta, name='adiciona_confirma_consulta'),
-    path('psicologas/<int:psicologo_id>/confirmar/<int:consulta_id>/excluir', views.deletar_consulta, name='deletar_consulta'),
-    path('psicologas/<int:financeiro_id>/editar', views.EditarConfirmaConsulta, name='editar_confirma_consulta'),
-    path('psicologas/<int:psicologo_id>/excluir', views.ExcluirConfirma_consulta, name='deletar_confirma_consulta'),
+
+
+    #AGENDA PSICÓLOGO - CONSULTAS
     path('psicologas/<int:psicologo_id>/agendar/', views.psico_agenda, name='psico_agenda'),
-    path('psicologas/<int:psicologo_id>/agendar_online/', views.psico_agenda_online, name='psico_agenda_online'),
-    path('psicologas/<int:psicologo_id>/disponibilidade/', views.definir_disponibilidade, name='psico_disponibilidade'),
-    path('psicologas/<int:psicologo_id>/disponibilidade_online/', views.disponibilidade_online, name='psico_disponibilidade_online'),
-    path('financeiro/', views.financeiro, name='financeiro'),
-    path('editar_financeiro/<int:id_financeiro>', views.editar_financeiro, name='editar_financeiro'),
-    path('agenda_central', views.agenda_central, name='agenda_central'),
+    path('consultas/editar/<int:id_consulta>/', views.update_consulta, name='update_consulta'),  # URL para editar consulta
+    path('consultas/deletar/<int:id_consulta>/', views.delete_consulta, name='delete_consulta'),  # URL para deletar consulta
+
+    #CONFIMAÇÃO DE CONSULTA - PSICÓLOGO
+    path('psicologas/<int:psicologo_id>/confirmar/', views.Confirmar_Consulta, name='confirma_consulta'),
+    path('psicologas/<int:psicologo_id>/confirmar/adicionar', views.AdicionarConfirma_consulta, name='adiciona_confirma_consulta'),
+    path('psicologas/<int:psicologo_id>/<int:consulta_id>/excluir', views.ExcluirConfirma_consulta, name='deletar_confirma_consulta'),
+    path('editar_confirmacao_consultas/<int:psicologo_id>', views.editar_confirmacao_consultas, name='editar_consultas'),
+    path('adicionar_consulta_emergencial/<int:psicologo_id>', views.adicionarConsultaEmergencial, name='adicionar_consulta_emergencial'),
+
+    #CARACTERÍSTICAS PSICÓLOGO
     path('especialidades', views.cadastrar_especialidade, name='especialidades'),
     path('publicos', views.cadastrar_publico, name='publicos'),
     path('deletar_publico/<int:publico_id>', views.deletar_publico, name='deletar_publico'),
@@ -80,22 +90,40 @@ urlpatterns = [
     path('psicologo_publico/<int:psicologo_id>/<int:publico_id>', views.DissociarPsicoPublico, name='disPsicoPublico'),
     path('psicologo_unidade/<int:psicologo_id>', views.AssociarPsicoUnidade, name='psicoUnidades'),
     path('psicologo_unidade/<int:psicologo_id>/<int:unidade_id>', views.DissociarPsicoUnidade, name='disPsicoUnidade'),
-    path('consultar_financeiro', views.consultar_financeiro, name='consultar_financeiro'),
+
+    #DISPONIBILIDADE PSICÓLOGO
+    path('psicologas/<int:psicologo_id>/disponibilidade/', views.definir_disponibilidade_psico, name='psico_disponibilidade'),
+    path('deletar_disponibilidade/<int:disponibilidade_id>/<int:psicologo_id>', views.remover_disponibilidade, name='deletar_disponibilidade'),
+
+    #DISPONIBILIDADE PSICÓLOGO - ONLINE
+    path('psicologas/<int:psicologo_id>/disponibilidade_online/', views.disponibilidade_online, name='psico_disponibilidade_online'),
+
+    #CONSULTAS ONLINE - PSICÓLOGO
+    path('psicologas/<int:psicologo_id>/agendar_online/', views.psico_agenda_online, name='psico_agenda_online'),
+    path('deletar_consulta_online/<int:consulta_id>/<int:psicologo_id>', views.delete_consulta_online, name='deletar_consulta_online'),
+
+    #AGENDA CENTRAL
+    path('agenda_central', views.agenda_central, name='agenda_central'),   
+    
+    #PÁGINAS DE ERRO
     path('handler404/', views.handler404, name='handler404'),
     path('consulta_cadastrada1/', views.consulta_cadastrada1, name='consulta_cadastrada1'),
     path('consulta_cadastrada2/', views.consulta_cadastrada2, name='consulta_cadastrada2'),
     path('nome_usuario_erro/', views.nome_usuario_erro, name='nome_usuario_erro'),
     path('login_erro/', views.login_erro, name='login_erro'),
     path('unis_erro/', views.unis_erro, name='unis_erro'),
-    path('consultar_disponibilidade', views.vizualizar_disponibilidade, name='consultar_disponibilidade'),
-    path('deletar_disponibilidade/<int:disponibilidade_id>/<int:psicologo_id>', views.remover_disponibilidade, name='deletar_disponibilidade'),
-    path('deletar_consulta_online/<int:consulta_id>/<int:psicologo_id>', views.delete_consulta_online, name='deletar_consulta_online'),
-    path('editar_consultas/<int:psicologo_id>', views.editar_consultas, name='editar_consultas'),
+
+    #FINANCEIRO
     path('consultar_financeiro/pacientes', views.consulta_financeira_pacientes, name='financeiro_pacientes'),
     path('consultar_financeiro/kpsicologia', views.apuracao_financeira, name='apuracao_financeira_kpsicologia'),
-    path('disponibilidades_psico', views.disponibilidades_psicologos, name='disponibilidades_psicologos'),
+    path('editar_financeiro/<int:id_financeiro>', views.editar_financeiro, name='editar_financeiro'),
+
+    #DESPESAS
     path('cadastro_despesa', views.cadastro_despesa, name='cadastro_despesa'),
     path('deletar_despesa/<int:despesa_id>', views.deletar_despesa, name='deletar_despesa'),
+     
+    #DISPONIBILIDADE HORÁRIOS ATENDIMENTO
+    path('consultar_disponibilidade', views.vizualizar_disponibilidade, name='consultar_disponibilidade'),
 
     #path('cadastrar_salas/', views.sala, name='salas'),
 

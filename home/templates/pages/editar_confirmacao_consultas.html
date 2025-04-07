@@ -24,7 +24,8 @@
                                     <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Semana Mês</th>
                                     <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Forma Pagamento</th>
                                     <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Presença</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor Pago</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor Pago ( R$ )</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Data de Pagamento</th>
                                     <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Observações</th>
                                 </tr>
                             </thead>
@@ -32,7 +33,19 @@
                                 {% for financeiro in financeiros %}
                                     <tr>
                                         <td class="align-middle text-center">{{ financeiro.paciente.nome }}</td>
-                                        <td class="align-middle text-center">{{ financeiro.dia_semana }}</td>
+                                        {% if financeiro.dia_semana == 'Segunda' %}
+                                        <td class="align-middle text-center">Seg</td>
+                                        {% elif financeiro.dia_semana == 'Terça' %}
+                                        <td class="align-middle text-center">Ter</td>
+                                        {% elif financeiro.dia_semana == 'Quarta' %}
+                                        <td class="align-middle text-center">Qua</td>
+                                        {% elif financeiro.dia_semana == 'Quinta' %}
+                                        <td class="align-middle text-center">Qui</td>
+                                        {% elif financeiro.dia_semana == 'Sexta' %}
+                                        <td class="align-middle text-center">Sex</td>
+                                        {% else %}
+                                        <td class="align-middle text-center">Sáb</td>
+                                        {% endif %}
                                         <td class="align-middle text-center">{{ financeiro.horario }}</td>
                                         <td class="align-middle text-center">{{ financeiro.periodo_atendimento }}</td>
                                         <td class="align-middle text-center">R$ {{ financeiro.paciente.valor }}</td>
@@ -53,10 +66,29 @@
                                             </select>
                                         </td>
                                         <td class="align-middle text-center">
+                                            {% if financeiro.valor_pagamento %}
                                             <input class="form-control" id="valor_pagamento{{ financeiro.id }}" name="valor_pagamento_{{ financeiro.id }}" value="{{ financeiro.valor_pagamento }}" />
+                                            {% else %}
+                                            <input class="form-control" id="valor_pagamento{{ financeiro.id }}" name="valor_pagamento_{{ financeiro.id }}" value="" />
+                                            {% endif %}
                                         </td>
                                         <td class="align-middle text-center">
+                                            {% if financeiro.data_pagamento %}
+                                            <input type="date" class="form-control" id="data_pagamento{{ financeiro.id }}" 
+                                                   name="data_pagamento_{{ financeiro.id }}" 
+                                                   value="{{ financeiro.data_pagamento|date:'Y-m-d' }}" />
+                                            {% else %}
+                                            <input type="date" class="form-control" id="data_pagamento{{ financeiro.id }}" 
+                                                   name="data_pagamento_{{ financeiro.id }}" 
+                                                   value="" />
+                                            {% endif %}
+                                        </td>
+                                        <td class="align-middle text-center">
+                                            {% if financeiro.observacoes %}
                                             <input class="form-control" id="observacoes_{{ financeiro.id }}" name="observacoes_{{ financeiro.id }}" value="{{ financeiro.observacoes }}" />
+                                            {% else %}
+                                            <input class="form-control" id="observacoes_{{ financeiro.id }}" name="observacoes_{{ financeiro.id }}" value="" />
+                                            {% endif %}
                                         </td>
                                     </tr>
                                 {% empty %}
