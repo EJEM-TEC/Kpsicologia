@@ -102,6 +102,33 @@
         </div>
     </div>
 </div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0">
+                <h6>Legenda de Psicólogas</h6>
+            </div>
+            <div class="card-body p-4">
+                <div class="row">
+                    {% for psicologa in psicologas %}
+                        <div class="col-md-4 col-sm-6 mb-3">
+                            <div class="d-flex align-items-center">
+                                <div style="width: 20px; height: 20px; background-color: {{ psicologa.cor }}; border-radius: 50%; margin-right: 10px;"></div>
+                                <span>{{ psicologa.nome }}</span>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="col-12 text-center">
+                            <p>Nenhuma psicóloga cadastrada no sistema.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <h2> Presencial </h2>
 {% for sala in salas %}
 <div class="row">

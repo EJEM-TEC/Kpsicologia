@@ -62,32 +62,11 @@ class Especialidade(models.Model):
     especialidade = models.CharField(max_length=100)
 
 
-class ConfirmacaoConsulta(models.Model):
-    dia_semana = models.CharField(max_length=100)
-    periodo_atendimento = models.CharField(max_length=100) 
-    data = models.DateField() 
-    horario_inicio = models.TimeField()
-    confirmacao = models.CharField(max_length=100)
-    forma_pagamento = models.CharField(max_length=100) 
-    valor = models.DecimalField(max_digits=10, decimal_places=2)
-    observacoes = models.CharField(max_length=100)
-    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
-    psicologa = models.ForeignKey(Psicologa, on_delete=models.CASCADE)
-
 class Disponibilidade(models.Model):
     dia_semana = models.CharField(max_length=100)
     hora = models.TimeField()
     psicologa = models.ForeignKey(Psicologa, on_delete=models.CASCADE)
 
-
-class PsicoConfirmarConsulta(models.Model):
-    id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    confirmacao_consulta = models.ForeignKey(ConfirmacaoConsulta, on_delete=models.CASCADE)
-    dia_semana = models.CharField(max_length=100)
-    hora = models.TimeField()
-    livre_ocupado = models.CharField(max_length=100)
-    
     
 class Consulta(models.Model):
     psicologo = models.ForeignKey(Psicologa, on_delete=models.CASCADE, null=True)
@@ -129,6 +108,9 @@ class Financeiro(models.Model):
     valor_pagamento = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     data_pagamento = models.DateField(null=True, blank=True)
     modalidade = models.CharField(max_length=32, null=True, blank=True)
+    bloqueada = models.BooleanField(default=False)
+    sala = models.ForeignKey(Sala, on_delete=models.CASCADE, null=True, blank=True)
+
 
 class Publico(models.Model):
     id = models.AutoField(primary_key=True)

@@ -11,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 from rolepermissions.roles import assign_role
 from rolepermissions.decorators import has_role_decorator
 from django.contrib.auth.models import User, Group
-from .models import Psicologa, Usuario, Consulta, Unidade, Sala, Paciente, ConfirmacaoConsulta, EspecialidadePsico, Especialidade, Publico, PublicoPsico, Financeiro, Disponibilidade, UnidadePsico, Consulta_Online, Despesas
+from .models import Psicologa, Consulta, Unidade, Sala, Paciente, EspecialidadePsico, Especialidade, Publico, PublicoPsico, Financeiro, Disponibilidade, UnidadePsico, Consulta_Online, Despesas
 from rolepermissions.roles import assign_role
 from django.contrib.auth.models import Group
 from django.contrib.auth import authenticate, login as login_django
@@ -1093,6 +1093,24 @@ def deletar_paciente(request, id_paciente):
     return render(request, 'pages/deletar_paciente.html', {'paciente': paciente})
 
 
+@login_required(login_url='login1')
+def restaurar_paciente(request, id_paciente):
+
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+
+    paciente = get_object_or_404(Paciente, id=id_paciente)
+
+    if request.method == 'POST':
+        paciente.deletado = False
+
+        paciente.save()
+
+        return redirect('pacientes')
+    
+    return render(request, 'pages/restaurar_paciente.html', {'paciente': paciente})
+
+
 # CARACTERÍSTICAS PSICÓLOGAS
 
 
@@ -1330,7 +1348,6 @@ def DissociarPsicoPublico(request, psicologo_id, publico_id):
 
 
 # CONFIRMAÇÃO CONSULTAS PSICO
-
 @login_required(login_url='login1')
 def Confirmar_Consulta(request, psicologo_id):
     
@@ -1465,7 +1482,9 @@ def AdicionarConfirma_consulta(request, psicologo_id):
                     paciente=consulta.Paciente,
                     valor=consulta.Paciente.valor,
                     data=data_consulta,  # Data ajustada
-                    semana=semana_mes  # Semana calculada no mês
+                    semana=semana_mes,  # Semana calculada no mês
+                    sala=consulta.sala,
+                    bloqueado=False
                 )
 
         for consulta in consultas_psico_online:
@@ -1504,7 +1523,8 @@ def AdicionarConfirma_consulta(request, psicologo_id):
                     paciente=consulta.Paciente,
                     valor=consulta.Paciente.valor,
                     data=data_consulta,  # Data ajustada
-                    semana=semana_mes  # Semana calculada no mês
+                    semana=semana_mes,  # Semana calculada no mês
+                    bloqueado=False
                 )
 
         return redirect('confirma_consulta', psicologo_id=psicologa.id)
@@ -1514,8 +1534,12 @@ def AdicionarConfirma_consulta(request, psicologo_id):
 
 @login_required(login_url='login1')
 def editar_confirmacao_consultas(request, psicologo_id):
+
+    is_admin = request.user.is_superuser or request.user.groups.filter(name='administrador').exists()
+
     psicologa = get_object_or_404(Psicologa, id=psicologo_id)
-    consultas_psico = Financeiro.objects.filter(psicologa=psicologa)
+    consultas_psico = Financeiro.objects.filter(psicologa=psicologa, bloqueada=False)
+    consultas_psico_bloqueadas = Financeiro.objects.filter(psicologa=psicologa, bloqueada=True)
 
     if request.method == 'POST':
         for financeiro in consultas_psico:
@@ -1545,14 +1569,14 @@ def editar_confirmacao_consultas(request, psicologo_id):
         #messages.success(request, 'Consultas atualizadas com sucesso.')
         return redirect('confirma_consulta', psicologo_id=psicologo_id)
 
-    return render(request, 'pages/editar_confirmacao_consultas.html', {'psicologa': psicologa, 'financeiros': consultas_psico})
+    return render(request, 'pages/editar_confirmacao_consultas.html', {'psicologa': psicologa, 'financeiros': consultas_psico, 'financeiros_bloqueados': consultas_psico_bloqueadas, 'is_admin': is_admin})
 
 
 @login_required(login_url='login1')
 def ExcluirConfirma_consulta(request, psicologo_id, consulta_id):
 
-    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
-        return render(request, 'pages/error_permission.html')
+    if request.user.username != psicologa.nome and not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission1.html')
 
     psicologa = get_object_or_404(Psicologa, id=psicologo_id)
     consulta = get_object_or_404(Financeiro, id=consulta_id, psicologa=psicologa)
@@ -1637,10 +1661,43 @@ def adicionarConsultaEmergencial(request, psicologo_id):
         'pacientes': pacientes
     })
 
+@login_required(login_url='login1')
+def bloquear_consulta(request, psicologo_id):
+
+    consultas = Financeiro.objects.all()
+    psicologa = get_object_or_404(Psicologa, id=psicologo_id)
+    if request.method == "POST":
+        for consulta in consultas:
+            consulta.bloqueada = True
+            consulta.save()
+        
+        return redirect('confirma_consulta', psicologo_id=psicologo_id)
+
+    return render(request, 'pages/bloquear_consulta.html', {
+        'psicologo': psicologa,
+    })
+
+@login_required(login_url='login1')
+def desbloquear_consulta(request, psicologo_id):
+
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+
+    consultas = Financeiro.objects.all()
+    psicologa = get_object_or_404(Psicologa, id=psicologo_id)
+    if request.method == "POST":
+        for consulta in consultas:
+            consulta.bloqueada = False
+            consulta.save()
+        
+        return redirect('confirma_consulta', psicologo_id=psicologo_id)
+
+    return render(request, 'pages/desbloquear_consulta.html', {
+        'psicologo': psicologa,
+    })
+
 
 # FINÂNCEIRO
-
-
 @login_required(login_url='login1')
 def consultar_financeiro(request):
 
@@ -1765,7 +1822,7 @@ def consulta_financeira_pacientes(request):
 
     if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
         return render(request, 'pages/error_permission.html')
-
+    
     financeiros = Financeiro.objects.all()
     pacientes = Paciente.objects.all()
     psicologas = Psicologa.objects.all()
@@ -2135,7 +2192,6 @@ def vizualizar_disponibilidade(request):
 
 
 # DISPONIBILIDADE PSICOLOGOS - ONLINE
-
 @login_required(login_url='login1')
 def disponibilidade_online(request, psicologo_id):
     psicologa = get_object_or_404(Psicologa, id=psicologo_id)

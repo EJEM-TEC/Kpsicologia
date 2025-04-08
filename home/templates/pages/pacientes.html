@@ -150,7 +150,7 @@
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Período de Atendimento</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nome Resposnável</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Telefone</th>
-                                <!-- <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ações</th> -->
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Restaurar</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -162,10 +162,9 @@
                                 <td class="align-middle text-center">{{ paciente.periodo }}</td>
                                 <td class="align-middle text-center">{{ paciente.nome_responsavel }}</td>
                                 <td class="align-middle text-center">{{ paciente.telefone }}</td>
-                                <!-- <td class="align-middle">
-                                    <a href="{% url 'update_paciente' id_paciente=paciente.id %}" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Edit consulta">Editar</a>
-                                    <a href="{% url 'delete_paciente' id_paciente=paciente.id %}" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
-                                </td> -->
+                                <td class="align-middle">
+                                    <a href="{% url 'restaurar_paciente' id_paciente=paciente.id %}" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Restaurar consulta">Restaurar</a>
+                                </td>
                             </tr>
                         {% empty %}
                             <tr>
