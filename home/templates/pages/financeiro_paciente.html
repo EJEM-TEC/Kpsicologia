@@ -40,8 +40,11 @@
     <div class="col-md-6 my-4">
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">Resumo Financeiro - {{ paciente.paciente__nome }}</h5>
-    
+                <h5 class="card-title">Resumo Financeiro - <td class="text-center">
+                    <a href="{% url 'financeiro_cliente_individual' id_paciente=paciente.paciente__id %}">
+                        {{ paciente.paciente__nome }}
+                    </a>
+                </td></h5>
                 <div class="mb-3">
                     <h6 class="text-muted">Valor Teórico Bruto</h6>
                     <p class="card-text font-weight-bold">

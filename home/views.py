@@ -1,6 +1,7 @@
 from collections import defaultdict
 from decimal import Decimal
 from pyexpat.errors import messages
+from time import strptime
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.views import PasswordResetView, PasswordChangeView, PasswordResetConfirmView
@@ -34,6 +35,7 @@ from django.shortcuts import render, redirect
 from datetime import datetime, timedelta
 from django.db.models import Sum, F, ExpressionWrapper, DecimalField
 from django.db.models.functions import Coalesce
+from django.db.models import OuterRef, Subquery
 
 cards = [
     {"title": "Agenda", "url_name": 'psico_agenda', "image": "img/curved-images/curved3.jpg"},
@@ -1423,40 +1425,59 @@ DIAS_SEMANA = {
     "Sábado": 5
 }
 
+
 @login_required(login_url='login1')
 def AdicionarConfirma_consulta(request, psicologo_id):
     psicologa = get_object_or_404(Psicologa, id=psicologo_id)
     consultas_psico = Consulta.objects.filter(psicologo=psicologa)
     consultas_psico_online = Consulta_Online.objects.filter(psicologo=psicologa)
 
-        # Verificar se o usuário é a psicóloga ou faz parte do grupo 'Administrador'
+    # Verificar se o usuário é a psicóloga ou faz parte do grupo 'Administrador'
     if request.user.username != psicologa.nome and not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
         return render(request, 'pages/error_permission1.html')
 
-    # Data atual
-    hoje = datetime.now()
-
-    # Obtém o último domingo antes da data de hoje (considerando o domingo como início da semana anterior)
-    ultimo_domingo = hoje - timedelta(days=hoje.weekday() + 1)
-
-    # Calcula o início e o fim da semana anterior (domingo a sábado)
-    inicio_semana_passada = ultimo_domingo - timedelta(days=6)
-    fim_semana_passada = ultimo_domingo
-
     if request.method == "POST":
+        # Receber a data selecionada pelo usuário
+        data_semana_str = request.POST.get('data')
+        
+        if not data_semana_str:
+            # Se a data não foi fornecida, mostrar mensagem de erro
+            return render(request, 'pages/adiciona_confirma_consulta.html', {
+                'psicologo': psicologa,
+                'error': 'Por favor, selecione uma data.'
+            })
+        
+        # Converter a string de data para um objeto datetime
+        data_semana = datetime.strptime(data_semana_str, '%Y-%m-%d')
+        
+        # Calcular o início da semana (segunda-feira) para a data fornecida
+        # weekday() retorna 0 para segunda, 1 para terça, etc.
+        inicio_semana = data_semana - timedelta(days=data_semana.weekday())
+            
+        # Processar consultas presenciais
         for consulta in consultas_psico:
-
             if not consulta.Paciente:
                 continue
 
+            # Mapeamento correto dos dias da semana
+            # Agora o mapeamento é: Segunda=0, Terça=1, Quarta=2, Quinta=3, Sexta=4, Sábado=5
+            dia_semana_mapeamento = {
+                "Segunda": 0,
+                "Terça": 1,
+                "Quarta": 2,
+                "Quinta": 3, 
+                "Sexta": 4,
+                "Sábado": 5
+            }
+
             # Obtém o índice do dia da semana
-            dia_semana_index = DIAS_SEMANA.get(consulta.dia_semana)
+            dia_semana_index = dia_semana_mapeamento.get(consulta.dia_semana)
 
             if dia_semana_index is None:
                 continue  # Ignora se o dia da semana não for válido
 
-            # Calcula a data exata da consulta com base no início da semana passada
-            data_consulta = inicio_semana_passada + timedelta(days=dia_semana_index)
+            # Calcula a data exata da consulta com base no início da semana selecionada
+            data_consulta = inicio_semana + timedelta(days=dia_semana_index)
 
             # Determina a semana correta dentro do mês
             semana_mes = (data_consulta.day - 1) // 7 + 1  # Calcula a semana no mês (1ª, 2ª, etc.)
@@ -1468,8 +1489,7 @@ def AdicionarConfirma_consulta(request, psicologo_id):
                 psicologa=consulta.psicologo,
                 paciente=consulta.Paciente,
                 data=data_consulta,
-                semana=semana_mes  # Semana calculada no mês
-
+                semana=semana_mes
             ).exists()
 
             if not existe:
@@ -1481,30 +1501,35 @@ def AdicionarConfirma_consulta(request, psicologo_id):
                     modalidade="Presencial",
                     paciente=consulta.Paciente,
                     valor=consulta.Paciente.valor,
-                    data=data_consulta,  # Data ajustada
-                    semana=semana_mes,  # Semana calculada no mês
+                    data=data_consulta,
+                    semana=semana_mes,
                     sala=consulta.sala,
-                    bloqueado=False
+                    bloqueada=False
                 )
 
+        # Processar consultas online
         for consulta in consultas_psico_online:
-
             if not consulta.Paciente:
                 continue
 
-            # Obtém o índice do dia da semana
-            dia_semana_index = DIAS_SEMANA.get(consulta.dia_semana)
+            # Usar o mesmo mapeamento corrigido para consultas online
+            dia_semana_mapeamento = {
+                "Segunda": 0,
+                "Terça": 1,
+                "Quarta": 2,
+                "Quinta": 3, 
+                "Sexta": 4,
+                "Sábado": 5
+            }
+            
+            dia_semana_index = dia_semana_mapeamento.get(consulta.dia_semana)
 
             if dia_semana_index is None:
-                continue  # Ignora se o dia da semana não for válido
+                continue
 
-            # Calcula a data exata da consulta com base no início da semana passada
-            data_consulta = inicio_semana_passada + timedelta(days=dia_semana_index)
+            data_consulta = inicio_semana + timedelta(days=dia_semana_index)
+            semana_mes = (data_consulta.day - 1) // 7 + 1
 
-            # Determina a semana correta dentro do mês
-            semana_mes = (data_consulta.day - 1) // 7 + 1  # Calcula a semana no mês (1ª, 2ª, etc.)
-
-            # Verifica se o registro já existe
             existe = Financeiro.objects.filter(
                 dia_semana=consulta.dia_semana,
                 horario=consulta.horario,
@@ -1522,9 +1547,9 @@ def AdicionarConfirma_consulta(request, psicologo_id):
                     modalidade="Online",
                     paciente=consulta.Paciente,
                     valor=consulta.Paciente.valor,
-                    data=data_consulta,  # Data ajustada
-                    semana=semana_mes,  # Semana calculada no mês
-                    bloqueado=False
+                    data=data_consulta,
+                    semana=semana_mes,
+                    bloqueada=False
                 )
 
         return redirect('confirma_consulta', psicologo_id=psicologa.id)
@@ -1575,11 +1600,13 @@ def editar_confirmacao_consultas(request, psicologo_id):
 @login_required(login_url='login1')
 def ExcluirConfirma_consulta(request, psicologo_id, consulta_id):
 
-    if request.user.username != psicologa.nome and not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
-        return render(request, 'pages/error_permission1.html')
+    
 
     psicologa = get_object_or_404(Psicologa, id=psicologo_id)
     consulta = get_object_or_404(Financeiro, id=consulta_id, psicologa=psicologa)
+
+    if request.user.username != psicologa.nome and not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission1.html')
     
     if request.method == "POST":
         consulta.delete()
@@ -1816,7 +1843,6 @@ def editar_financeiro(request, id_financeiro):
 
     return render(request, 'pages/editar_financeiro.html', {'financeiro': financeiro})
 
-
 @login_required(login_url='login1')
 def consulta_financeira_pacientes(request):
 
@@ -1827,25 +1853,41 @@ def consulta_financeira_pacientes(request):
     pacientes = Paciente.objects.all()
     psicologas = Psicologa.objects.all()
 
-    receita_por_paciente = financeiros.values('paciente__nome').annotate(
-        receita_bruta=Sum('valor', output_field=DecimalField(max_digits=10, decimal_places=2)),
+    receita_por_paciente = financeiros.values('paciente__nome', 'paciente__id').annotate(
+        # Usar o valor do paciente multiplicado pelo número de consultas
+        receita_bruta=ExpressionWrapper(
+            Count('id') * Subquery(
+                Paciente.objects.filter(id=OuterRef('paciente__id')).values('valor')[:1]
+            ),
+            output_field=DecimalField(max_digits=10, decimal_places=2)
+        ),
+        
         valor_recebido=ExpressionWrapper(
             Sum(Coalesce(F('valor_pagamento'), 0)),
             output_field=DecimalField(max_digits=10, decimal_places=2)
         ),
+        
         valor_a_receber=ExpressionWrapper(
-            Sum(F('valor')) - Sum(Coalesce(F('valor_pagamento'), 0)),
+            (Count('id') * Subquery(
+                Paciente.objects.filter(id=OuterRef('paciente__id')).values('valor')[:1]
+            )) - Sum(Coalesce(F('valor_pagamento'), 0)),
             output_field=DecimalField(max_digits=10, decimal_places=2)
         ),
+        
         n_consultas=Count('id', output_field=DecimalField(max_digits=10, decimal_places=2)),
-        n_consultas_pagas=ExpressionWrapper(
-            Count('id', filter=Q(valor_pagamento__gte=F('valor'))),
+        
+        n_consultas_pagas=Count(
+            'id', 
+            filter=Q(valor_pagamento__isnull=False) & ~Q(valor_pagamento=0),
             output_field=DecimalField(max_digits=10, decimal_places=2)
         ),
-        n_consultas_nao_pagas=ExpressionWrapper(
-            Count('id', filter=Q(valor_pagamento__lt=F('valor'))),
+        
+        n_consultas_nao_pagas=Count(
+            'id', 
+            filter=Q(valor_pagamento__isnull=True) | Q(valor_pagamento=0),
             output_field=DecimalField(max_digits=10, decimal_places=2)
         ),
+        
         psicologas=ArrayAgg('psicologa__nome', distinct=True)
     ).order_by('paciente__nome')
 
@@ -1854,15 +1896,18 @@ def consulta_financeira_pacientes(request):
         psicologa_id = request.POST.get('psicologa_id')
 
         if nome_paciente:
-
             try:
                 paciente = Paciente.objects.get(nome=nome_paciente)
-            except Paciente.DoesNotExist or paciente.deletado == True:
+                if paciente.deletado:
+                    return render(request, 'pages/error_paciente_nao_encontrado_financeiro.html', {
+                        'nome_cliente': nome_paciente
+                    })
+            except Paciente.DoesNotExist:
                 return render(request, 'pages/error_paciente_nao_encontrado_financeiro.html', {
                     'nome_cliente': nome_paciente
                 })
             
-        receita_por_paciente = receita_por_paciente.filter(paciente__nome__icontains=nome_paciente)
+            receita_por_paciente = receita_por_paciente.filter(paciente__nome__icontains=nome_paciente)
 
         # Caso tenha uma psicóloga selecionada
         if psicologa_id:
@@ -1875,193 +1920,401 @@ def consulta_financeira_pacientes(request):
     })
 
 @login_required(login_url='login1')
-def apuracao_financeira(request):
+def financeiro_cliente_individual(request, id_paciente):
+    """
+    Exibe todos os registros financeiros de um único paciente específico.
+    Permite filtragem por diversos critérios como data, psicóloga, status de presença e pagamento.
+    """
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+    
+    # Obter paciente
+    paciente = get_object_or_404(Paciente, id=id_paciente)
+    
+    # Valores padrão para filtros
+    filtros = {
+        'data_inicio': None,
+        'data_fim': None,
+        'psicologa_id': None,
+        'presenca': None,
+        'pagamento': None,
+        'modalidade': None
+    }
+    
+    # Obter registros financeiros base do paciente
+    financeiros = Financeiro.objects.filter(paciente=paciente).select_related('psicologa').order_by('-data', 'horario')
+    
+    # Aplicar filtros quando o formulário for postado
+    if request.method == 'POST':
+        data_inicio = request.POST.get('data_inicio')
+        data_fim = request.POST.get('data_fim')
+        psicologa_id = request.POST.get('psicologa_id')
+        presenca = request.POST.get('presenca')
+        pagamento = request.POST.get('pagamento')
+        modalidade = request.POST.get('modalidade')
+        
+        # Atualizar dicionário de filtros
+        filtros.update({
+            'data_inicio': data_inicio,
+            'data_fim': data_fim,
+            'psicologa_id': psicologa_id,
+            'presenca': presenca,
+            'pagamento': pagamento,
+            'modalidade': modalidade
+        })
+        
+        # Aplicar filtros nos registros
+        if data_inicio:
+            financeiros = financeiros.filter(data__gte=data_inicio)
+        
+        if data_fim:
+            financeiros = financeiros.filter(data__lte=data_fim)
+        
+        if psicologa_id:
+            financeiros = financeiros.filter(psicologa_id=psicologa_id)
+        
+        if presenca:
+            financeiros = financeiros.filter(presenca=presenca)
+        
+        if pagamento == 'pago':
+            financeiros = financeiros.filter(valor_pagamento__isnull=False).exclude(valor_pagamento=0)
+        elif pagamento == 'nao_pago':
+            financeiros = financeiros.filter(Q(valor_pagamento__isnull=True) | Q(valor_pagamento=0))
+        
+        if modalidade:
+            financeiros = financeiros.filter(modalidade=modalidade)
+    
+    # Calcular resumo financeiro
+    resumo = {}
+    
+    # Receita bruta - valor total teórico
+    receita_bruta = financeiros.count() * paciente.valor
+    
+    # Valor recebido
+    valor_recebido = financeiros.aggregate(Sum('valor_pagamento'))['valor_pagamento__sum'] or 0
+    
+    # Valor a receber
+    valor_a_receber = receita_bruta - valor_recebido
+    
+    # Contagem de consultas
+    n_consultas = financeiros.count()
+    
+    # Consultas pagas
+    n_consultas_pagas = financeiros.filter(valor_pagamento__isnull=False).exclude(valor_pagamento=0).count()
+    
+    # Consultas não pagas
+    n_consultas_nao_pagas = n_consultas - n_consultas_pagas
+    
+    # Obter todas as psicólogas que atenderam este paciente
+    psicologas_ids = financeiros.values_list('psicologa', flat=True).distinct()
+    psicologas_do_paciente = Psicologa.objects.filter(id__in=psicologas_ids)
+    psicologas_nomes = [p.nome for p in psicologas_do_paciente]
+    
+    # Obter todas as psicólogas para o filtro
+    psicologas = Psicologa.objects.all()
+    
+    # Preencher o resumo
+    resumo = {
+        'receita_bruta': receita_bruta,
+        'valor_recebido': valor_recebido,
+        'valor_a_receber': valor_a_receber,
+        'n_consultas': n_consultas,
+        'n_consultas_pagas': n_consultas_pagas,
+        'n_consultas_nao_pagas': n_consultas_nao_pagas,
+        'psicologas': psicologas_nomes
+    }
+    
+    context = {
+        'paciente': paciente,
+        'financeiros': financeiros,
+        'resumo': resumo,
+        'filtros': filtros,
+        'psicologas': psicologas
+    }
+    
+    return render(request, 'pages/financeiro_cliente_individual.html', context)
 
+@login_required(login_url='login1')
+def apuracao_financeira(request):
+    """
+    View para apuração financeira com métricas detalhadas e visualizações.
+    """
     if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
         return render(request, 'pages/error_permission.html')
 
-    # Apuração geral
+    # Período para análise (por padrão, último mês)
+    data_inicio = request.GET.get('data_inicio')
+    data_fim = request.GET.get('data_fim')
+    
+    hoje = datetime.now().date()
+    if not data_inicio:
+        # Por padrão, primeiro dia do mês atual
+        data_inicio = hoje.replace(day=1)
+    else:
+        data_inicio = datetime.strptime(data_inicio, '%Y-%m-%d').date()
+        
+    if not data_fim:
+        # Por padrão, dia atual
+        data_fim = hoje
+    else:
+        data_fim = datetime.strptime(data_fim, '%Y-%m-%d').date()
+    
+    # Filtro base para consultas no período
+    filtro_periodo = Q(data__gte=data_inicio) & Q(data__lte=data_fim)
+    
+    # ===== Contagens básicas =====
     total_salas = Sala.objects.count()
     total_unidades = Unidade.objects.count()
     total_pacientes = Paciente.objects.filter(deletado=False).count()
-    total_faturamento_fisico = Financeiro.objects.aggregate(Sum('valor_pagamento'))['valor_pagamento__sum'] or 0
     total_psicologas = Psicologa.objects.count()
-    total_faturamento_online = Financeiro.objects.filter(modalidade='Online').aggregate(Sum('valor_pagamento'))['valor_pagamento__sum'] or 0
+    
+    # ===== Consultas realizadas =====
+    consultas_periodo = Financeiro.objects.filter(filtro_periodo)
+    total_atendimentos_realizados = consultas_periodo.filter(presenca="Sim").count()
+    
+    # ===== Valores financeiros =====
+    total_faturamento_fisico = consultas_periodo.filter(
+        modalidade='Presencial', 
+        valor_pagamento__isnull=False
+    ).aggregate(Sum('valor_pagamento'))['valor_pagamento__sum'] or 0
+    
+    total_faturamento_online = consultas_periodo.filter(
+        modalidade='Online', 
+        valor_pagamento__isnull=False
+    ).aggregate(Sum('valor_pagamento'))['valor_pagamento__sum'] or 0
+    
     total_faturamento = total_faturamento_fisico + total_faturamento_online
 
-    print(total_faturamento)
-
-    # Salas com atendimentos
-    # Filtrando Salas que possuem consultas com presença registrada
-    salas_utilizadas = Consulta.objects.filter(
-        psicologo__isnull=False,
-        Paciente__isnull=False,
-        horario__isnull=False,
-        dia_semana__isnull=False,
-        sala__isnull=False
-    ).values('sala').distinct().count()
-
-    # Taxa de Ocupação das Salas
-    taxa_ocupacao_salas = (salas_utilizadas / total_salas) * 100 if total_salas > 0 else 0
-
-    # Faturamento Médio por Sala
-    faturamento_medio_sala = total_faturamento / total_salas if total_salas > 0 else 0
-
-    # Exemplo de capacidade máxima de atendimento
-    capacidade_maxima_atendimento = Consulta.objects.count()  # Definir valor real
-
-    # Taxa de Ocupação por Paciente
-    taxa_ocupacao_pacientes = (total_pacientes / capacidade_maxima_atendimento) * 100 if capacidade_maxima_atendimento > 0 else 0
-
-    # Faturamento Médio por Paciente
-    faturamento_medio_paciente = total_faturamento / total_pacientes if total_pacientes > 0 else 0
-
-    # Número de Sessões por Paciente
-    total_sessoes_realizadas = Financeiro.objects.filter(presenca="Sim").count()
-    sessoes_por_paciente = total_sessoes_realizadas / total_pacientes if total_pacientes > 0 else 0
-
-    # Exemplo de pacientes novos e que continuam
-    pacientes_novos = 10  # Definir valor real
-    pacientes_continuam = 8  # Definir valor real
-
-    # Taxa de Retenção de Pacientes
-    taxa_retencao_pacientes = (pacientes_continuam / pacientes_novos) * 100 if pacientes_novos > 0 else 0
-
-    # Faturamento Médio por Psicóloga
-    faturamento_medio_psicologa = total_faturamento / total_psicologas if total_psicologas > 0 else 0
-
-    # Pacientes por Psicóloga
-    pacientes_por_psicologa = total_pacientes / total_psicologas if total_psicologas > 0 else 0
-
-    # Sessões por Psicóloga
-    sessoes_por_psicologa = total_sessoes_realizadas / total_psicologas if total_psicologas > 0 else 0
-
-    # Exemplo de custos
-    custo_fixo_total = 2000  # Definir valor real
-    custo_variavel = Despesas.objects.aggregate(Sum('valor')).get('valor__sum', 0) or 0  # Definir valor real
-
-    print(custo_variavel)
-
-    # Ticket Médio por Atendimento
-    ticket_medio_atendimento = total_faturamento / total_sessoes_realizadas if total_sessoes_realizadas > 0 else 0
-
-    # Custo Fixo por Sala
-    custo_fixo_por_sala = custo_fixo_total / total_salas if total_salas > 0 else 0
-
-    # Lucro Bruto e Lucro Líquido
-    lucro_bruto = total_faturamento - custo_variavel
-    lucro_liquido = total_faturamento - (custo_fixo_total + custo_variavel)
-
-    # Margem de Lucro (%)
-    margem_lucro = (lucro_liquido / total_faturamento) * 100 if total_faturamento > 0 else 0
-
-    # Ponto de Equilíbrio
-    ponto_equilibrio = custo_fixo_total / ticket_medio_atendimento if ticket_medio_atendimento > 0 else 0
-
-
-
-    # Exemplo de dados de períodos anteriores
-    pacientes_anteriores = 80  # Definir valor real
-    faturamento_anterior = 10000  # Definir valor real
-
-    # Taxa de Crescimento de Pacientes
-    taxa_crescimento_pacientes = ((total_pacientes - pacientes_anteriores) / pacientes_anteriores) * 100 if pacientes_anteriores > 0 else 0
-
-    # Taxa de Crescimento de Faturamento
-    taxa_crescimento_faturamento = ((total_faturamento - faturamento_anterior) / faturamento_anterior) * 100 if faturamento_anterior > 0 else 0
-
-    # Total de atendimentos realizados na clínica (presença = "Sim")
-    total_atendimentos_realizados = Financeiro.objects.filter(presenca="Sim").count()
-
-    # Apuração por unidade
+    # ===== Análise por salas =====
+    salas = Sala.objects.all()
+    consultas_por_sala = {}
+    salas_utilizadas = 0
+    
+    salas_data = []
+    for sala in salas:
+        # Consultas realizadas nesta sala
+        consultas_sala = consultas_periodo.filter(
+            sala=sala, 
+            presenca="Sim"
+        )
+        qtd_consultas = consultas_sala.count()
+        
+        if qtd_consultas > 0:
+            salas_utilizadas += 1
+            
+        # Faturamento por sala
+        faturamento_sala = consultas_sala.filter(
+            valor_pagamento__isnull=False
+        ).aggregate(Sum('valor_pagamento'))['valor_pagamento__sum'] or 0
+        
+        # Tempo total de atendimento (em horas)
+        tempo_total_horas = qtd_consultas  # Assumindo consultas de 1 hora
+        
+        salas_data.append({
+            'id': sala.id_sala,
+            'numero_sala': sala.numero_sala,
+            'cor': sala.cor_sala,
+            'faturamento': faturamento_sala,
+            'atendimentos_realizados': qtd_consultas,
+            'tempo_total_horas': tempo_total_horas,
+            'unidade': sala.id_unidade.nome_unidade
+        })
+    
+    # ===== Análise por unidade =====
     unidades = Unidade.objects.all()
     unidades_data = []
     
-
     for unidade in unidades:
-        # Contar o número de salas na unidade
-        num_salas = Sala.objects.filter(id_unidade=unidade).count()
+        # Salas desta unidade
+        salas_unidade = Sala.objects.filter(id_unidade=unidade)
+        num_salas = salas_unidade.count()
         
-        # Contar o número de pacientes únicos atendidos na unidade
-        num_pacientes = Paciente.objects.filter(
-            consulta__sala__id_unidade=unidade
-        ).distinct().count()
+        # Consultas realizadas nesta unidade
+        salas_ids = salas_unidade.values_list('id_sala', flat=True)
+        consultas_unidade = consultas_periodo.filter(
+            sala__id_sala__in=salas_ids, 
+            presenca="Sim"
+        )
         
-        # Somar o faturamento total para a unidade
-        faturamento = Financeiro.objects.filter(
-            psicologa__consulta__sala__id_unidade=unidade
+        # Pacientes atendidos nesta unidade
+        pacientes_unidade = consultas_unidade.values('paciente').distinct().count()
+        
+        # Faturamento da unidade
+        faturamento_unidade = consultas_unidade.filter(
+            valor_pagamento__isnull=False
         ).aggregate(Sum('valor_pagamento'))['valor_pagamento__sum'] or 0
-
-        # Contar os atendimentos realizados (presenca = 'Sim') na unidade
-        atendimentos_realizados_unidade = Financeiro.objects.filter(
-            psicologa__consulta__sala__id_unidade=unidade,
-            presenca="Sim"  # Somente contar atendimentos onde presenca é 'Sim'
-        ).count()
-
-        # Adicionar os dados para cada unidade
+        
         unidades_data.append({
+            'id': unidade.id_unidade,
             'nome_unidade': unidade.nome_unidade,
             'num_salas': num_salas,
-            'num_pacientes': num_pacientes,
-            'faturamento': faturamento,
-            'atendimentos_realizados': atendimentos_realizados_unidade
+            'num_pacientes': pacientes_unidade,
+            'faturamento': faturamento_unidade,
+            'atendimentos_realizados': consultas_unidade.count()
         })
-
-
-    # Apuração por sala - Faturamento e atendimentos realizados
-    salas = Sala.objects.all()
-    salas_data = []
-
-    for sala in salas:
-        # Faturamento por sala
-        faturamento_sala = Financeiro.objects.filter(
-            psicologa__consulta__sala=sala
+    
+    # ===== Análise por psicóloga =====
+    psicologas = Psicologa.objects.all()
+    psicologas_data = []
+    
+    for psicologa in psicologas:
+        consultas_psicologa = consultas_periodo.filter(
+            psicologa=psicologa, 
+            presenca="Sim"
+        )
+        
+        # Valor recebido
+        valor_recebido = consultas_psicologa.filter(
+            valor_pagamento__isnull=False
         ).aggregate(Sum('valor_pagamento'))['valor_pagamento__sum'] or 0
         
-        # Quantidade de atendimentos realizados (presença = "Sim")
-        atendimentos_realizados = Financeiro.objects.filter(
-            psicologa__consulta__sala=sala,
-            presenca="Sim"
-        ).count()
-
-        salas_data.append({
-            'numero_sala': sala.numero_sala,
-            'faturamento': faturamento_sala,
-            'atendimentos_realizados': atendimentos_realizados
+        # Quantidade de pacientes diferentes
+        pacientes_atendidos = consultas_psicologa.values('paciente').distinct().count()
+        
+        psicologas_data.append({
+            'id': psicologa.id,
+            'nome': psicologa.nome,
+            'cor': psicologa.cor,
+            'consultas_realizadas': consultas_psicologa.count(),
+            'valor_recebido': valor_recebido,
+            'pacientes_atendidos': pacientes_atendidos
         })
+    
+    # ===== Análise de ocupação =====
+    # Taxa de ocupação das salas (considerando 8 horas por dia, dias úteis no período)
+    dias_uteis = len([d for d in range((data_fim - data_inicio).days + 1) 
+                    if (data_inicio + timedelta(days=d)).weekday() < 5])
+    capacidade_total_horas = total_salas * dias_uteis * 8  # 8 horas por dia
+    tempo_ocupado_horas = total_atendimentos_realizados  # Assumindo 1h por consulta
+    
+    if capacidade_total_horas > 0:
+        taxa_ocupacao_salas = (tempo_ocupado_horas / capacidade_total_horas) * 100
+    else:
+        taxa_ocupacao_salas = 0
+    
+    # ===== Cálculos de médias e taxas =====
+    faturamento_medio_sala = total_faturamento / total_salas if total_salas > 0 else 0
+    faturamento_medio_paciente = total_faturamento / total_pacientes if total_pacientes > 0 else 0
+    faturamento_medio_psicologa = total_faturamento / total_psicologas if total_psicologas > 0 else 0
+    
+    sessoes_por_paciente = total_atendimentos_realizados / total_pacientes if total_pacientes > 0 else 0
+    sessoes_por_psicologa = total_atendimentos_realizados / total_psicologas if total_psicologas > 0 else 0
+    pacientes_por_psicologa = total_pacientes / total_psicologas if total_psicologas > 0 else 0
+    
+    # Taxa de ocupação por paciente (média de consultas por capacidade)
+    capacidade_maxima_atendimento = total_pacientes * 4  # Assumindo máximo 4 consultas por paciente/mês
+    taxa_ocupacao_pacientes = (total_atendimentos_realizados / capacidade_maxima_atendimento) * 100 if capacidade_maxima_atendimento > 0 else 0
+    
+    # Taxa de retenção (simplificada - indicador demonstrativo)
+    # Aqui poderia ser implementada com dados do mês anterior para comparação
+    taxa_retencao_pacientes = 85  # Valor demonstrativo, idealmente seria calculado
+    
+    # ===== Dados financeiros adicionais =====
+    custo_fixo_total = Despesas.objects.filter(
+        Q(data__gte=data_inicio) & 
+        Q(data__lte=data_fim)
+    ).aggregate(Sum('valor'))['valor__sum'] or 0
+    
+    custo_variavel = 0  # Se houver custos variáveis, adicionar aqui
+    
+    # Métricas financeiras
+    ticket_medio_atendimento = total_faturamento / total_atendimentos_realizados if total_atendimentos_realizados > 0 else 0
+    lucro_bruto = total_faturamento - custo_variavel
+    lucro_liquido = total_faturamento - (custo_fixo_total + custo_variavel)
+    margem_lucro = (lucro_liquido / total_faturamento) * 100 if total_faturamento > 0 else 0
+    ponto_equilibrio = Decimal(str(custo_fixo_total)) / Decimal(str(ticket_medio_atendimento)) if ticket_medio_atendimento > 0 else 0
+    
+    # Para demonstração, poderia ser calculado com dados históricos
+    taxa_crescimento_pacientes = 5  # Demonstrativo
+    taxa_crescimento_faturamento = 8  # Demonstrativo
+    
+    # ===== Dados para gráficos =====
+    # Faturamento por unidade
+    fat_unidades_labels = [u['nome_unidade'] for u in unidades_data]
+    fat_unidades_valores = [float(u['faturamento']) for u in unidades_data]
+    
+    # Consultas por dia da semana
+    dias_semana = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo']
+    consultas_por_dia = {}
+    
+    for dia_index, dia_nome in enumerate(dias_semana):
+        count = consultas_periodo.filter(dia_semana=dia_nome, presenca="Sim").count()
+        consultas_por_dia[dia_nome] = count
+    
+    dias_consultas_labels = list(consultas_por_dia.keys())
+    dias_consultas_valores = list(consultas_por_dia.values())
+    
+    # Consultas por psicóloga
+    psi_consultas_labels = [p['nome'] for p in psicologas_data]
+    psi_consultas_valores = [p['consultas_realizadas'] for p in psicologas_data]
+    psi_consultas_cores = [p['cor'] for p in psicologas_data]
+    
+    # Ocupação das salas
+    salas_ocupacao_labels = [s['numero_sala'] for s in salas_data]
+    salas_ocupacao_valores = [s['atendimentos_realizados'] for s in salas_data]
+    salas_ocupacao_cores = [s['cor'] for s in salas_data]
+    
+    # Faturamento vs custos
+    financeiro_categorias = ['Faturamento', 'Custos Fixos', 'Lucro Líquido']
+    financeiro_valores = [float(total_faturamento), float(custo_fixo_total), float(lucro_liquido)]
 
+    # Construindo contexto para o template
     contexto = {
+        # Dados do período
+        'data_inicio': data_inicio,
+        'data_fim': data_fim,
+        
+        # Dados gerais
         'total_salas': total_salas,
         'total_unidades': total_unidades,
         'total_pacientes': total_pacientes,
+        'total_psicologas': total_psicologas,
+        'total_atendimentos_realizados': total_atendimentos_realizados,
+        'salas_utilizadas': salas_utilizadas,
+        
+        # Dados financeiros
         'total_faturamento_fisico': total_faturamento_fisico,
         'total_faturamento_online': total_faturamento_online,
         'total_faturamento': total_faturamento,
-        'total_psicologas': total_psicologas,
-        'total_atendimentos_realizados': total_atendimentos_realizados,
-        'unidades': unidades_data,
-        'salas_data': salas_data,
-        'salas_utilizadas': salas_utilizadas,
-        'taxa_ocupacao_salas': taxa_ocupacao_salas,
-        'faturamento_medio_sala': faturamento_medio_sala,
-        'taxa_ocupacao_pacientes': taxa_ocupacao_pacientes,
-        'faturamento_medio_paciente': faturamento_medio_paciente,
-        'sessoes_por_paciente': sessoes_por_paciente,
-        'taxa_retencao_pacientes': taxa_retencao_pacientes,
-        'faturamento_medio_psicologa': faturamento_medio_psicologa,
-        'pacientes_por_psicologa': pacientes_por_psicologa,
-        'sessoes_por_psicologa': sessoes_por_psicologa,
         'custo_fixo_total': custo_fixo_total,
         'custo_variavel': custo_variavel,
-        'ticket_medio_atendimento': ticket_medio_atendimento,
-        'custo_fixo_por_sala': custo_fixo_por_sala,
         'lucro_bruto': lucro_bruto,
         'lucro_liquido': lucro_liquido,
+        
+        # Taxas e médias
+        'taxa_ocupacao_salas': taxa_ocupacao_salas,
+        'faturamento_medio_sala': faturamento_medio_sala,
+        'faturamento_medio_paciente': faturamento_medio_paciente,
+        'faturamento_medio_psicologa': faturamento_medio_psicologa,
+        'taxa_ocupacao_pacientes': taxa_ocupacao_pacientes,
+        'sessoes_por_paciente': sessoes_por_paciente,
+        'sessoes_por_psicologa': sessoes_por_psicologa,
+        'pacientes_por_psicologa': pacientes_por_psicologa,
+        'taxa_retencao_pacientes': taxa_retencao_pacientes,
+        'ticket_medio_atendimento': ticket_medio_atendimento,
         'margem_lucro': margem_lucro,
         'ponto_equilibrio': ponto_equilibrio,
         'taxa_crescimento_pacientes': taxa_crescimento_pacientes,
-        'taxa_crescimento_faturamento': taxa_crescimento_faturamento
-
+        'taxa_crescimento_faturamento': taxa_crescimento_faturamento,
+        
+        # Listas de dados por entidade
+        'unidades': unidades_data,
+        'salas_data': salas_data,
+        'psicologas_data': psicologas_data,
+        
+        # Dados para gráficos
+        'fat_unidades_labels': fat_unidades_labels,
+        'fat_unidades_valores': fat_unidades_valores,
+        'dias_consultas_labels': dias_consultas_labels,
+        'dias_consultas_valores': dias_consultas_valores,
+        'psi_consultas_labels': psi_consultas_labels,
+        'psi_consultas_valores': psi_consultas_valores,
+        'psi_consultas_cores': psi_consultas_cores,
+        'salas_ocupacao_labels': salas_ocupacao_labels,
+        'salas_ocupacao_valores': salas_ocupacao_valores,
+        'salas_ocupacao_cores': salas_ocupacao_cores,
+        'financeiro_categorias': financeiro_categorias,
+        'financeiro_valores': financeiro_valores
     }
 
     return render(request, 'pages/apuracao_financeira_kpsicologia.html', contexto)

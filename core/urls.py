@@ -120,6 +120,7 @@ urlpatterns = [
     path('consultar_financeiro/pacientes', views.consulta_financeira_pacientes, name='financeiro_pacientes'),
     path('consultar_financeiro/kpsicologia', views.apuracao_financeira, name='apuracao_financeira_kpsicologia'),
     path('editar_financeiro/<int:id_financeiro>', views.editar_financeiro, name='editar_financeiro'),
+    path('financeiro/cliente/<int:id_paciente>/', views.financeiro_cliente_individual, name='financeiro_cliente_individual'),
 
     #DESPESAS
     path('cadastro_despesa', views.cadastro_despesa, name='cadastro_despesa'),

@@ -4,107 +4,408 @@
 {% block content %}
 
 <div class="container mt-5">
-       <!-- Apuração Geral -->
-        <h2 class="mb-4">Apuração Financeira - Geral</h2>
-
-        <div class="row">
-            <!-- Card 1: Informações Gerais -->
-            <div class="col-md-6 mb-4">
-                <div class="card card-frame">
-                    <div class="card-body">
-                        <h5 class="card-title">Informações Gerais</h5>
-                        <p><strong>Total de Salas:</strong> {{ total_salas }}</p>
-                        <p><strong>Total de Unidades:</strong> {{ total_unidades }}</p>
-                        <p><strong>Total de Pacientes:</strong> {{ total_pacientes }}</p>
-                        <p><strong>Total de Psicólogas:</strong> {{ total_psicologas }}</p>
-                        <p><strong>Total de Atendimentos Realizados:</strong> {{ total_atendimentos_realizados }}</p>
-                        <p><strong>Salas Utilizadas:</strong> {{ salas_utilizadas }}</p>
-                    </div>
+    <!-- Filtro por período -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Filtrar por Período</h5>
+                    <form method="GET" action="{% url 'apuracao_financeira_kpsicologia' %}">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="data_inicio">Data Inicial</label>
+                                    <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ data_inicio|date:'Y-m-d' }}">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="data_fim">Data Final</label>
+                                    <input type="date" class="form-control" id="data_fim" name="data_fim" value="{{ data_fim|date:'Y-m-d' }}">
+                                </div>
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary">Filtrar</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
-
-            <!-- Card 2: Faturamento -->
-            <div class="col-md-6 mb-4">
-                <div class="card card-frame">
-                    <div class="card-body">
-                        <h5 class="card-title">Faturamento</h5>
-                        <p><strong>Total de Faturamento Presencial:</strong> R$ {{ total_faturamento_fisico }}</p>
-                        <p><strong>Total de Faturamento Online:</strong> R$ {{ total_faturamento_online }}</p>
-                        <p><strong>Total de Faturamento:</strong> R$ {{ total_faturamento }}</p>
-                        <p><strong>Faturamento Médio por Sala:</strong> R$ {{ faturamento_medio_sala }}</p>
-                        <p><strong>Faturamento Médio por Paciente:</strong> R$ {{ faturamento_medio_paciente }}</p>
-                        <p><strong>Faturamento Médio por Psicóloga:</strong> R$ {{ faturamento_medio_psicologa }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card 3: Indicadores de Utilização -->
-            <div class="col-md-6 mb-4">
-                <div class="card card-frame">
-                    <div class="card-body">
-                        <h5 class="card-title">Indicadores de Utilização</h5>
-                        <p><strong>Taxa de Ocupação das Salas:</strong> {{ taxa_ocupacao_salas|floatformat:2 }}%</p>
-                        <p><strong>Taxa de Ocupação por Paciente:</strong> {{ taxa_ocupacao_pacientes|floatformat:2 }}%</p>
-                        <p><strong>Sessões por Paciente:</strong> {{ sessoes_por_paciente|floatformat:2 }}</p>
-                        <p><strong>Sessões por Psicóloga:</strong> {{ sessoes_por_psicologa|floatformat:2 }}</p>
-                        <p><strong>Pacientes por Psicóloga:</strong> {{ pacientes_por_psicologa|floatformat:2 }}</p>
-                        <p><strong>Taxa de Retenção de Pacientes:</strong> {{ taxa_retencao_pacientes|floatformat:2 }}%</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card 4: Financeiro e Crescimento -->
-            <div class="col-md-6 mb-4">
-                <div class="card card-frame">
-                    <div class="card-body">
-                        <h5 class="card-title">Financeiro e Crescimento</h5>
-                        <p><strong>Ticket Médio por Atendimento:</strong> R$ {{ ticket_medio_atendimento }}</p>
-                        <p><strong>Custo Fixo Total:</strong> R$ {{ custo_fixo_total }}</p>
-                        <p><strong>Custo Variável:</strong> R$ {{ custo_variavel }}</p>
-                        <p><strong>Lucro Bruto:</strong> R$ {{ lucro_bruto }}</p>
-                        <p><strong>Lucro Líquido:</strong> R$ {{ lucro_liquido }}</p>
-                        <p><strong>Margem de Lucro:</strong> {{ margem_lucro }}%</p>
-                        <p><strong>Ponto de Equilíbrio:</strong> {{ ponto_equilibrio }}</p>
-                        <p><strong>Taxa de Crescimento de Pacientes:</strong> {{ taxa_crescimento_pacientes }}%</p>
-                        <p><strong>Taxa de Crescimento de Faturamento:</strong> {{ taxa_crescimento_faturamento }}%</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-        <!-- Apuração por Unidade -->
-        <h2 class="mt-5">Apuração Financeira - Por Unidade</h2>
-        <div class="row">
-            {% for unidade in unidades %}
-            <div class="col-md-6 mt-4">
-                <div class="card card-frame">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ unidade.nome_unidade }}</h5>
-                        <p class="card-text"><strong>Salas:</strong> {{ unidade.num_salas }}</p>
-                        <p class="card-text"><strong>Pacientes:</strong> {{ unidade.num_pacientes }}</p>
-                        <p class="card-text"><strong>Faturamento:</strong> R$ {{ unidade.faturamento }}</p>
-                        <!-- <p class="card-text"><strong>Atendimentos Realizados:</strong> {{ unidade.atendimentos_realizados }}</p> -->
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-        <!-- Apuração por Sala -->
-        <h2 class="mt-5">Apuração Financeira - Por Sala</h2>
-        <div class="row">
-            {% for sala in salas_data %}
-            <div class="col-md-6 mt-4">
-                <div class="card card-frame">
-                    <div class="card-body">
-                        <h5 class="card-title">Sala {{ sala.numero_sala }}</h5>
-                        <p class="card-text"><strong>Faturamento:</strong> R$ {{ sala.faturamento }}</p>
-                        <!-- <p class="card-text"><strong>Atendimentos Realizados:</strong> {{ sala.atendimentos_realizados }}</p> -->
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
         </div>
     </div>
 
+    <!-- Resumo Geral e Gráficos -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow h-100">
+                <div class="card-header pb-0">
+                    <h5 class="mb-0">Resumo Financeiro</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="financeiro-chart" height="200"></canvas>
+                    </div>
+                    <div class="mt-4">
+                        <p><strong>Faturamento Total:</strong> R$ {{ total_faturamento|floatformat:2 }}</p>
+                        <p><strong>Custos Fixos:</strong> R$ {{ custo_fixo_total|floatformat:2 }}</p>
+                        <p><strong>Lucro Líquido:</strong> R$ {{ lucro_liquido|floatformat:2 }}</p>
+                        <p><strong>Margem de Lucro:</strong> {{ margem_lucro|floatformat:1 }}%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow h-100">
+                <div class="card-header pb-0">
+                    <h5 class="mb-0">Consultas por Dia da Semana</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="dias-chart" height="200"></canvas>
+                    </div>
+                    <div class="mt-4">
+                        <p><strong>Total de Consultas Realizadas:</strong> {{ total_atendimentos_realizados }}</p>
+                        <p><strong>Ticket Médio:</strong> R$ {{ ticket_medio_atendimento|floatformat:2 }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Apuração Geral -->
+    <h2 class="mb-4">Apuração Financeira - Geral</h2>
+
+    <div class="row">
+        <!-- Card 1: Informações Gerais -->
+        <div class="col-md-6 mb-4">
+            <div class="card card-frame">
+                <div class="card-body">
+                    <h5 class="card-title">Informações Gerais</h5>
+                    <p><strong>Total de Salas:</strong> {{ total_salas }}</p>
+                    <p><strong>Total de Unidades:</strong> {{ total_unidades }}</p>
+                    <p><strong>Total de Pacientes:</strong> {{ total_pacientes }}</p>
+                    <p><strong>Total de Psicólogas:</strong> {{ total_psicologas }}</p>
+                    <p><strong>Total de Atendimentos Realizados:</strong> {{ total_atendimentos_realizados }}</p>
+                    <p><strong>Salas Utilizadas:</strong> {{ salas_utilizadas }} ({{ taxa_ocupacao_salas|floatformat:1 }}%)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 2: Faturamento -->
+        <div class="col-md-6 mb-4">
+            <div class="card card-frame">
+                <div class="card-body">
+                    <h5 class="card-title">Faturamento</h5>
+                    <p><strong>Total de Faturamento Presencial:</strong> R$ {{ total_faturamento_fisico|floatformat:2 }}</p>
+                    <p><strong>Total de Faturamento Online:</strong> R$ {{ total_faturamento_online|floatformat:2 }}</p>
+                    <p><strong>Total de Faturamento:</strong> R$ {{ total_faturamento|floatformat:2 }}</p>
+                    <p><strong>Faturamento Médio por Sala:</strong> R$ {{ faturamento_medio_sala|floatformat:2 }}</p>
+                    <p><strong>Faturamento Médio por Paciente:</strong> R$ {{ faturamento_medio_paciente|floatformat:2 }}</p>
+                    <p><strong>Faturamento Médio por Psicóloga:</strong> R$ {{ faturamento_medio_psicologa|floatformat:2 }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 3: Indicadores de Utilização -->
+        <div class="col-md-6 mb-4">
+            <div class="card card-frame">
+                <div class="card-body">
+                    <h5 class="card-title">Indicadores de Utilização</h5>
+                    <p><strong>Taxa de Ocupação das Salas:</strong> {{ taxa_ocupacao_salas|floatformat:2 }}%</p>
+                    <p><strong>Taxa de Ocupação por Paciente:</strong> {{ taxa_ocupacao_pacientes|floatformat:2 }}%</p>
+                    <p><strong>Sessões por Paciente:</strong> {{ sessoes_por_paciente|floatformat:2 }}</p>
+                    <p><strong>Sessões por Psicóloga:</strong> {{ sessoes_por_psicologa|floatformat:2 }}</p>
+                    <p><strong>Pacientes por Psicóloga:</strong> {{ pacientes_por_psicologa|floatformat:2 }}</p>
+                    <p><strong>Taxa de Retenção de Pacientes:</strong> {{ taxa_retencao_pacientes|floatformat:2 }}%</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 4: Financeiro e Crescimento -->
+        <div class="col-md-6 mb-4">
+            <div class="card card-frame">
+                <div class="card-body">
+                    <h5 class="card-title">Financeiro e Crescimento</h5>
+                    <p><strong>Ticket Médio por Atendimento:</strong> R$ {{ ticket_medio_atendimento|floatformat:2 }}</p>
+                    <p><strong>Custo Fixo Total:</strong> R$ {{ custo_fixo_total|floatformat:2 }}</p>
+                    <p><strong>Custo Variável:</strong> R$ {{ custo_variavel|floatformat:2 }}</p>
+                    <p><strong>Lucro Bruto:</strong> R$ {{ lucro_bruto|floatformat:2 }}</p>
+                    <p><strong>Lucro Líquido:</strong> R$ {{ lucro_liquido|floatformat:2 }}</p>
+                    <p><strong>Margem de Lucro:</strong> {{ margem_lucro|floatformat:2 }}%</p>
+                    <p><strong>Ponto de Equilíbrio:</strong> {{ ponto_equilibrio|floatformat:0 }} consultas</p>
+                    <p><strong>Taxa de Crescimento de Pacientes:</strong> {{ taxa_crescimento_pacientes }}%</p>
+                    <p><strong>Taxa de Crescimento de Faturamento:</strong> {{ taxa_crescimento_faturamento }}%</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos adicionais -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow h-100">
+                <div class="card-header pb-0">
+                    <h5 class="mb-0">Consultas por Psicóloga</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="psicologas-chart" height="250"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow h-100">
+                <div class="card-header pb-0">
+                    <h5 class="mb-0">Ocupação por Sala</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="salas-chart" height="250"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Apuração por Unidade -->
+    <h2 class="mt-5">Apuração Financeira - Por Unidade</h2>
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card shadow">
+                <div class="card-header pb-0">
+                    <h5 class="mb-0">Faturamento por Unidade</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="faturamento-unidades-chart" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        {% for unidade in unidades %}
+        <div class="col-md-6 mt-4">
+            <div class="card card-frame">
+                <div class="card-body">
+                    <h5 class="card-title">{{ unidade.nome_unidade }}</h5>
+                    <p class="card-text"><strong>Salas:</strong> {{ unidade.num_salas }}</p>
+                    <p class="card-text"><strong>Pacientes Atendidos:</strong> {{ unidade.num_pacientes }}</p>
+                    <p class="card-text"><strong>Faturamento:</strong> R$ {{ unidade.faturamento|floatformat:2 }}</p>
+                    <p class="card-text"><strong>Atendimentos Realizados:</strong> {{ unidade.atendimentos_realizados }}</p>
+                    {% if unidade.num_salas > 0 %}
+                    <p class="card-text"><strong>Média de Atendimentos por Sala:</strong> 
+                        {{ unidade.atendimentos_realizados|floatformat:1 }}
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Apuração por Sala -->
+    <h2 class="mt-5">Apuração Financeira - Por Sala</h2>
+    <div class="row">
+        {% for sala in salas_data %}
+        <div class="col-md-4 mt-4">
+            <div class="card card-frame">
+                <div class="card-header" style="background-color: {{ sala.cor }}; color: white;">
+                    <h5 class="mb-0">Sala {{ sala.numero_sala }}</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text"><strong>Faturamento:</strong> R$ {{ sala.faturamento|floatformat:2 }}</p>
+                    <p class="card-text"><strong>Atendimentos Realizados:</strong> {{ sala.atendimentos_realizados }}</p>
+                    <p class="card-text"><strong>Tempo de Utilização:</strong> {{ sala.tempo_total_horas }} horas</p>
+                    <p class="card-text"><strong>Unidade:</strong> {{ sala.unidade }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Apuração por Psicóloga -->
+    <h2 class="mt-5">Apuração Financeira - Por Psicóloga</h2>
+    <div class="row">
+        {% for psicologa in psicologas_data %}
+        <div class="col-md-4 mt-4">
+            <div class="card card-frame">
+                <div class="card-header" style="background-color: {{ psicologa.cor }}; color: white;">
+                    <h5 class="mb-0">{{ psicologa.nome }}</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text"><strong>Consultas Realizadas:</strong> {{ psicologa.consultas_realizadas }}</p>
+                    <p class="card-text"><strong>Valor Recebido:</strong> R$ {{ psicologa.valor_recebido|floatformat:2 }}</p>
+                    <p class="card-text"><strong>Pacientes Atendidos:</strong> {{ psicologa.pacientes_atendidos }}</p>
+                    {% if psicologa.consultas_realizadas > 0 %}
+                    <p class="card-text"><strong>Valor Médio por Consulta:</strong> 
+                     {% if psicologa.consultas_realizadas > 0 %}
+                        <p class="card-text"><strong>Valor Médio por Consulta:</strong> 
+                            R$ {{ psicologa.valor_recebido|floatformat:2 }}
+                        </p>
+                        {% endif %}
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
 {% endblock content %}
+
+{% block scripts %}
+<script src="{% static 'js/plugins/chartjs.min.js' %}"></script>
+<script>
+    // Configuração de cores
+    const colors = {
+        primary: '#cb0c9f',
+        secondary: '#8392ab',
+        info: '#17c1e8',
+        success: '#82d616',
+        warning: '#fbcf33',
+        danger: '#ea0606',
+        dark: '#344767',
+        light: '#e9ecef'
+    };
+
+    // Configuração comum para gráficos
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'top',
+            }
+        }
+    };
+
+    // Gráfico Financeiro (Resumo)
+    const financeiroCtx = document.getElementById('financeiro-chart').getContext('2d');
+    new Chart(financeiroCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ financeiro_categorias|safe }},
+            datasets: [{
+                label: 'Valor (R$)',
+                data: {{ financeiro_valores|safe }},
+                backgroundColor: [
+                    colors.primary,
+                    colors.warning,
+                    colors.success
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: chartOptions
+    });
+
+    // Gráfico de Consultas por Dia da Semana
+    const diasCtx = document.getElementById('dias-chart').getContext('2d');
+    new Chart(diasCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ dias_consultas_labels|safe }},
+            datasets: [{
+                label: 'Número de Consultas',
+                data: {{ dias_consultas_valores|safe }},
+                backgroundColor: colors.info,
+                borderColor: colors.info,
+                borderWidth: 1
+            }]
+        },
+        options: chartOptions
+    });
+
+    // Gráfico de Faturamento por Unidade
+    const fatUnidadesCtx = document.getElementById('faturamento-unidades-chart').getContext('2d');
+    new Chart(fatUnidadesCtx, {
+        type: 'pie',
+        data: {
+            labels: {{ fat_unidades_labels|safe }},
+            datasets: [{
+                label: 'Faturamento (R$)',
+                data: {{ fat_unidades_valores|safe }},
+                backgroundColor: [
+                    colors.primary,
+                    colors.info,
+                    colors.success,
+                    colors.warning,
+                    colors.danger,
+                    colors.dark
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                }
+            }
+        }
+    });
+
+    // Gráfico de Consultas por Psicóloga
+    const psicologasCtx = document.getElementById('psicologas-chart').getContext('2d');
+    new Chart(psicologasCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ psi_consultas_labels|safe }},
+            datasets: [{
+                label: 'Consultas Realizadas',
+                data: {{ psi_consultas_valores|safe }},
+                backgroundColor: {{ psi_consultas_cores|safe }},
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Gráfico de Ocupação por Sala
+    const salasCtx = document.getElementById('salas-chart').getContext('2d');
+    new Chart(salasCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ salas_ocupacao_labels|safe }},
+            datasets: [{
+                label: 'Consultas Realizadas',
+                data: {{ salas_ocupacao_valores|safe }},
+                backgroundColor: {{ salas_ocupacao_cores|safe }},
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+{% endblock scripts %}

@@ -5,10 +5,18 @@
 
     <h1>Adicionar Semana</h1>
     
-    <p>Tem certeza de que quer adicionar uma nova semana a confirmação de consultas?</p>
-    
-    <form method="POST">
+    <form method="POST" action="{% url 'adiciona_confirma_consulta' psicologo_id=psicologo.id %}">
+
         {% csrf_token %}
+
+        <div class="col-6 my-4">
+            <label for="data">Selecione a data da semana da confirmação de consulta: </label>
+            <input type="date" name="data" id="data" class="form-control" placeholder="Data da consulta" required>
+            <p>Obs: A data selecionada será referência para a confimação das consultas da semana respectiva.</p>
+        </div>
+
+        
+
         <button type="submit" class="btn bg-gradient-primary">Adicionar</button>
         <button type="button" class="btn bg-gradient-secondary"><a href="{% url 'confirma_consulta' psicologo_id=psicologo.id %}">Cancelar</a></button>
     </form>
