@@ -78,157 +78,115 @@
         </form>
       </div>
     </div> 
-    <div class="card">
-      <div class="table-responsive">
-        <table class="table align-items-center mb-0">
-          <thead>
-            <tr>
-              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nome</th>
-              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Cor</th>
-              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Email</th>
-              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Especialidade</th>
-              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Público</th>
-              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Unidade</th>
-              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Abordagem</th>
-              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Última Atualização Agenda</th>
-              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Agenda</th>
-              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Confirmação</th>
-              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Disponibilidade</th>
-              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Dispobilidade Horários Extras</th>
-              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Agenda Horários Extras</th>
-              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Edição</th>
-              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Excluir</th>
-            </tr>
-          </thead>
-          <tbody>{% for item in psicologos_verificacao %}
-            <tr>
-              <td class="align-middle text-center">
-                <div class="d-flex px-2 py-1 border-primary justify-content-center">
-                  <div class="d-flex flex-column justify-content-center">
-                    <h6 class="mb-0 text-sm text-center">{{item.psicologo.nome}}</h6>
+    
+    <div class="container-fluid py-2">
+      <div class="row mb-4">
+        <div class="col-12">
+          <h2>Psicólogas</h2>
+        </div>
+      </div>
+      
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header pb-0">
+              <div class="d-flex justify-content-between">
+                <h6 class="mb-0">Lista de Psicólogas</h6>
+                <!-- Aqui poderia adicionar um botão para adicionar nova psicóloga -->
+              </div>
+            </div>
+            <div class="card-body px-0 pt-0 pb-2">
+              <!-- Cards responsivos para substituir a tabela horizontal -->
+              <div class="row p-3">
+                {% for item in psicologos_verificacao %}
+                <div class="col-lg-4 col-md-6 mb-4">
+                  <div class="card h-100 border">
+                    <div class="card-header pb-0 pt-3 px-4">
+                      <div class="d-flex align-items-center">
+                        <span class="me-2" style="display: inline-block; width: 16px; height: 16px; background-color: {{item.psicologo.cor}}; border-radius: 50%;"></span>
+                        <h5 class="mb-0">{{item.psicologo.nome}}</h5>
+                      </div>
+                    </div>
+                    <div class="card-body p-3">
+                      <div class="mb-2">
+                        <p class="text-xs mb-1">Email:</p>
+                        <p class="font-weight-bold mb-0">{{item.psicologo.email}}</p>
+                      </div>
+                      <div class="mb-2">
+                        <p class="text-xs mb-1">Abordagem:</p>
+                        <p class="font-weight-bold mb-0">{{item.psicologo.abordagem}}</p>
+                      </div>
+                      <div class="mb-3">
+                        <p class="text-xs mb-1">Última Atualização:</p>
+                        <p class="font-weight-bold mb-0 {% if item.verificacao_agenda %}text-success{% else %}text-danger{% endif %}">
+                          {{item.psicologo.ultima_atualizacao_agenda}}
+                        </p>
+                      </div>
+                      
+                      <div class="mb-2">
+                        <div class="d-flex">
+                          <a href="{% url 'psicoEspecialidades' psicologo_id=item.psicologo.id %}" class="badge badge-sm bg-gradient-light text-dark me-2 mb-1">Especialização</a>
+                          <a href="{% url 'psicoPublicos' psicologo_id=item.psicologo.id %}" class="badge badge-sm bg-gradient-light text-dark me-2 mb-1">Público</a>
+                          <a href="{% url 'psicoUnidades' psicologo_id=item.psicologo.id %}" class="badge badge-sm bg-gradient-light text-dark mb-1">Unidade</a>
+                        </div>
+                      </div>
+                      
+                      <hr class="horizontal dark my-3">
+                      
+                      <div class="row text-center">
+                        <div class="col-6 mb-2">
+                          <a href="{% url 'psico_agenda' item.psicologo.id %}" class="btn btn-primary btn-sm w-100">
+                            <i class="bi bi-book me-1"></i>Agenda
+                          </a>
+                        </div>
+                        <div class="col-6 mb-2">
+                          <a href="{% url 'confirma_consulta' psicologo_id=item.psicologo.id %}" class="btn btn-primary btn-sm w-100">
+                            <i class="bi bi-check-circle me-1"></i>Confirmar
+                          </a>
+                        </div>
+                        <div class="col-6 mb-2">
+                          <a href="{% url 'psico_disponibilidade' psicologo_id=item.psicologo.id %}" class="btn btn-primary btn-sm w-100">
+                            <i class="bi bi-calendar-check me-1"></i>Disponib.
+                          </a>
+                        </div>
+                        <div class="col-6 mb-2">
+                          <a href="{% url 'psico_agenda_online' item.psicologo.id %}" class="btn btn-primary btn-sm w-100">
+                            <i class="bi bi-laptop me-1"></i>Agenda Extra
+                          </a>
+                        </div>
+                        <div class="col-6 mb-2">
+                          <a href="{% url 'psico_disponibilidade_online' psicologo_id=item.psicologo.id %}" class="btn btn-primary btn-sm w-100">
+                            <i class="bi bi-calendar-plus me-1"></i>Disp. Extra
+                          </a>
+                        </div>
+                        <div class="col-6 mb-2">
+                          <div class="dropdown">
+                            <button class="btn btn-secondary btn-sm dropdown-toggle w-100" type="button" id="dropdownMenuButton-{{item.psicologo.id}}" data-bs-toggle="dropdown" aria-expanded="false">
+                              <i class="bi bi-three-dots me-1"></i>Mais
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{item.psicologo.id}}">
+                              <li>
+                                <a class="dropdown-item" href="{% url 'editar_psicologo' item.psicologo.id %}">
+                                  <i class="bi bi-pencil-fill text-warning me-2"></i>Editar
+                                </a>
+                              </li>
+                              <li>
+                                <a class="dropdown-item" href="{% url 'deletar_psicologo' item.psicologo.id %}">
+                                  <i class="bi bi-trash-fill text-danger me-2"></i>Excluir
+                                </a>
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </td>
-              <td class="align-middle text-center">
-                <span style="display: inline-block; width: 12px; height: 12px; background-color: {{item.psicologo.cor}}; border-radius: 50%;"></span>
-              </td>
-                <td class="align-middle text-center">
-                  <div class="d-flex px-2 py-1">
-                    <div class="d-flex flex-column justify-content-center">
-                      <h6 class="mb-0 text-xs">{{item.psicologo.email}}</h6>
-                    </div>
-                  </div>
-                </td>
-                <td class="align-middle text-center">
-                  <div class="d-flex px-2 py-1">
-                    
-                    <div class="d-flex flex-column justify-content-center">
-                      <a href="{% url 'psicoEspecialidades' psicologo_id=item.psicologo.id %}" class="mb-0 text-xs">Especialização</>
-                      
-                    </div>
-                  </div>
-                </td>
-                <td class="align-middle text-center">
-                  <div class="d-flex px-2 py-1">
-                    
-                    <div class="d-flex flex-column justify-content-center">
-                      <a href="{% url 'psicoPublicos' psicologo_id=item.psicologo.id %}" class="mb-0 text-xs">Público</>
-                      
-                    </div>
-                  </div>
-                </td>
-                <td class="align-middle text-center">
-                  <div class="d-flex px-2 py-1">
-                    
-                    <div class="d-flex flex-column justify-content-center">
-                      <a href="{% url 'psicoUnidades' psicologo_id=item.psicologo.id %}" class="mb-0 text-xs">Unidade</>
-                      
-                    </div>
-                  </div>
-                </td>
-                <td class="align-middle text-center">
-                  <div class="d-flex px-2 py-1">
-                    
-                    <div class="d-flex flex-column justify-content-center">
-                      <h6 class="text-xs font-weight-bold mb-0">{{item.psicologo.abordagem}}</h6>
-                      
-                    </div>
-                  </div>
-                </td>
-                <td class="align-middle text-center">
-                  <div class="d-flex px-2 py-1">
-                    
-                    <div class="d-flex flex-column justify-content-center">
-                      <h6 class="text-xs font-weight-bold mb-0">
-                        {% if item.verificacao_agenda %}
-                          <span class="text-success"> {{item.psicologo.ultima_atualizacao_agenda}} </span>
-                        {% else %}
-                          <span class="text-danger"> {{item.psicologo.ultima_atualizacao_agenda}} </span>
-                        {% endif %}
-                      </h6>
-                    </div>
-                  </div>
-                </td>
-              <td class="align-middle text-center">
-                  <span>
-                    <a href="{% url 'psico_agenda' item.psicologo.id %}" class="btn btn-primary">
-                      <i class="bi bi-book"></i>
-                    </a>
-              </span>
-              </td>
-                
-                  <td class="align-middle text-center">
-                    <span>
-                      <a href="{% url 'confirma_consulta' psicologo_id=item.psicologo.id %}" class="btn btn-primary">
-                        <i class="bi bi-check-circle"></i>
-                        
-                      </a>
-                </span>
-              </td> 
-
-              <td class="align-middle text-center">
-                <span>
-                  <a href="{% url 'psico_disponibilidade' psicologo_id=item.psicologo.id %}" class="btn btn-primary">
-                    <i class="bi bi-check-circle"></i>
-                    
-                  </a>
-            </span>
-          </td> 
-
-              <td class="align-middle text-center">
-                <span>
-                  <a href="{% url 'psico_disponibilidade_online' psicologo_id=item.psicologo.id %}" class="btn btn-primary">
-                    <i class="bi bi-check-circle"></i>
-                    
-                  </a>
-            </span>
-          </td> 
-          <td class="align-middle text-center">
-            <span>
-              <a href="{% url 'psico_agenda_online' item.psicologo.id %}" class="btn btn-primary">
-                <i class="bi bi-book"></i>
-              </a>
-        </span>
-        </td>
-              <td class="align-middle text-center">
-                <span>
-                  <a href="{% url 'editar_psicologo' item.psicologo.id %}" class="btn btn-warning">
-                    <i class="bi bi-pencil-fill"></i>
-                  </a>
-            </span>
-          </td> 
-          
-          <td class="align-middle text-center">
-            <span>
-              <a href="{% url 'deletar_psicologo' item.psicologo.id %}" class="btn btn-danger">
-                <i class="bi bi-trash-fill"></i>
-              </a>
-        </span>
-      </td>
-
-            </tr>{%endfor%}           
-          </tbody>
-        </table>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 

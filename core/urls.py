@@ -81,7 +81,7 @@ urlpatterns = [
     path('editar_confirmacao_consultas/<int:psicologo_id>', views.editar_confirmacao_consultas, name='editar_consultas'),
     path('adicionar_consulta_emergencial/<int:psicologo_id>', views.adicionarConsultaEmergencial, name='adicionar_consulta_emergencial'),
     path("bloquear_consulta/<int:psicologo_id>/", views.bloquear_consulta, name="bloquear_consulta"),
-    path("desbloquear_consulta/<int:id_paciente>/", views.desbloquear_consulta, name="desbloquear_consulta"),
+    path("desbloquear_consulta/<int:psicologo_id>/", views.desbloquear_consulta, name="desbloquear_consulta"),
 
     #CARACTERÍSTICAS PSICÓLOGO
     path('especialidades', views.cadastrar_especialidade, name='especialidades'),

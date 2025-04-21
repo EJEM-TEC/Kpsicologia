@@ -17,7 +17,7 @@
           <div class="card-body">
             <form method="post"> {% csrf_token %}
               <h5 class="card-title">Desbloquear a edição das consultas da psicóloga {{ psicologo.nome }}</h5>
-              <p class="card-text">Tem certeza que quer deletar este psicologo?</p>
+              <p class="card-text">Tem certeza que quer desbloquear essas consultas?</p>
               <p class="card-text"><button type="submit" class="btn btn-danger">Confirmar</button></p>
               <p class="card-text"><a href="{% url 'editar_consultas' psicologo.id %}" class="btn btn-secondary">Cancelar</a></p>
             </form>
