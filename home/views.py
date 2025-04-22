@@ -1876,7 +1876,7 @@ def consulta_financeira_pacientes(request):
     apenas_devedores = request.POST.get('apenas_devedores') == 'on'
 
     # Base da consulta para receita por paciente
-    receita_query = financeiros.values('paciente__nome')
+    receita_query = financeiros.values('paciente__nome', 'paciente__id')
     
     # Agregação de dados básicos
     receita_por_paciente = receita_query.annotate(
@@ -1942,7 +1942,19 @@ def consulta_financeira_pacientes(request):
             p for p in paciente_data['psicologas'] if p not in psicologas_com_divida
         ]
         paciente_data['psicologas_sem_divida'] = psicologas_sem_divida
+
+    total_bruto = financeiros.aggregate(Sum('valor'))['valor__sum'] or 0
+    total_recebido = financeiros.aggregate(Sum('valor_pagamento'))['valor_pagamento__sum'] or 0
+
+    # Calcular o valor a receber
+    valor_a_receber = total_bruto - total_recebido
+
+    #Pacientes Ativos
+    pacientes_ativos = Paciente.objects.filter(deletado=False).order_by('nome').count()
     
+    #Valor recebido no mês atual
+    valor_recebido_mes = financeiros.filter(data__month=datetime.now().month).aggregate(Sum('valor_pagamento'))['valor_pagamento__sum'] or 0
+
     # Aplicação dos filtros
     if request.method == 'POST':
         nome_paciente = request.POST.get('nome_paciente')
@@ -1972,11 +1984,19 @@ def consulta_financeira_pacientes(request):
         if apenas_devedores:
             receita_por_paciente = [p for p in receita_por_paciente if p['valor_a_receber'] > 0]
 
+        
+    print(receita_por_paciente)
+
     return render(request, 'pages/financeiro_paciente.html', {
         'receita_por_paciente': receita_por_paciente,
         'pacientes': pacientes,
         'psicologas': psicologas,
         'apenas_devedores': apenas_devedores,  # Enviar para template
+        'total_bruto': total_bruto,
+        'total_recebido': total_recebido,
+        'valor_a_receber': valor_a_receber,
+        'pacientes_ativos': pacientes_ativos,
+        'valor_recebido_mes': valor_recebido_mes,
     })
 
 @login_required(login_url='login1')

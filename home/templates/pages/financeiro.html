@@ -2,121 +2,301 @@
 {% load static %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <button type="button" class="btn bg-gradient-primary"><a class="text-white" href="{% url 'index' %}">
-            Voltar
-        </a></button>
+<div class="container-fluid py-4">
+    <!-- Botão Voltar com ícone -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <a href="{% url 'index' %}" class="btn bg-gradient-primary">
+                <i class="fas fa-arrow-left me-2"></i> Voltar
+            </a>
+        </div>
     </div>
-  </div>
-<div class="row">
-    <!-- Coluna do card de resumo financeiro -->
-    <div class="col-md-6 my-4">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Resumo Financeiro</h5>
-                
-                <div class="mb-3">
-                    <h6 class="text-muted">Valor Teórico Bruto</h6>
-                    <p class="card-text font-weight-bold">
-                        R$ {{ valor_total_atendimentos|floatformat:2 }}
-                    </p>
+
+    <!-- Cabeçalho da página com filtros e período -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h3 class="font-weight-bold mb-0">Financeiro - {% if mes %}{{ mes }}/{% endif %}{{ ano }}</h3>
+            <p class="text-muted">Relatório financeiro completo com métricas e registros detalhados</p>
+        </div>
+    </div>
+
+    <!-- Cards de resumo -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-xl-0 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body p-3">
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="numbers">
+                                <p class="text-sm mb-0 text-capitalize font-weight-bold">Valor Teórico Bruto</p>
+                                <h5 class="font-weight-bolder mb-0">
+                                    R$ {{ valor_total_atendimentos|floatformat:2 }}
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="icon icon-shape bg-gradient-primary shadow text-center border-radius-md">
+                                <i class="fas fa-money-bill-wave text-lg opacity-10" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <h6 class="text-muted">Valor Líquido Real</h6>
-                    <p class="card-text font-weight-bold">
-                        R$ {{ valor_total_atendimentos|floatformat:2 }}
-                    </p>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-xl-0 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body p-3">
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="numbers">
+                                <p class="text-sm mb-0 text-capitalize font-weight-bold">Valor de Momento</p>
+                                <h5 class="font-weight-bolder mb-0">
+                                    R$ {{ total_valor_momento|floatformat:2 }}
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="icon icon-shape bg-gradient-success shadow text-center border-radius-md">
+                                <i class="fas fa-chart-line text-lg opacity-10" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <h6 class="text-muted">Valor de momento Kpsicologia</h6>
-                    <p class="card-text font-weight-bold">
-                        R$ {{ total_valor_momento |floatformat:2 }}
-                    </p>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-xl-0 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body p-3">
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="numbers">
+                                <p class="text-sm mb-0 text-capitalize font-weight-bold">Recebido KPsicologia</p>
+                                <h5 class="font-weight-bolder mb-0">
+                                    R$ {{ total_valor_recebido|floatformat:2 }}
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="icon icon-shape bg-gradient-info shadow text-center border-radius-md">
+                                <i class="fas fa-hand-holding-usd text-lg opacity-10" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <h6 class="text-muted">Valor Previsto de entrada até o final do mês</h6>
-                    <p class="card-text font-weight-bold">
-                        R$ {{ total_valor_previsto|floatformat:2 }}
-                    </p>
-                </div>
-                <div class="mb-3">
-                    <h6 class="text-muted">Valor a Receber Kpsicologia</h6>
-                    <p class="card-text font-weight-bold 
-                        {% if total_valor_a_receber > 0 %}
-                            text-success
-                        {% elif total_valor_a_receber == 0 %}
-                            text-warning
-                        {% else %}
-                            text-danger
-                        {% endif %}
-                    ">
-                        R$ {{ total_valor_a_receber |floatformat:2 }}
-                    </p>
-                </div>
-                <div class="mb-3">
-                    <h6 class="text-muted">Valor recebido por Kpsicologia</h6>
-                    <p class="card-text font-weight-bold">
-                        R$ {{ total_valor_recebido |floatformat:2 }}
-                    </p>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body p-3">
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="numbers">
+                                <p class="text-sm mb-0 text-capitalize font-weight-bold">A Receber KPsicologia</p>
+                                <h5 class="font-weight-bolder mb-0 {% if total_valor_a_receber > 0 %}text-success{% elif total_valor_a_receber == 0 %}text-warning{% else %}text-danger{% endif %}">
+                                    R$ {{ total_valor_a_receber|floatformat:2 }}
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="icon icon-shape bg-gradient-warning shadow text-center border-radius-md">
+                                <i class="fas fa-hourglass-half text-lg opacity-10" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Coluna do card de registros financeiros -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card-header pb-0">
-                <h6>Registros financeiros por paciente</h6>
+    <!-- Informações detalhadas em cards dobráveis -->
+    <div class="accordion mb-4" id="financialAccordion">
+        <!-- Relatório detalhado -->
+        <div class="card shadow-sm">
+            <div class="card-header p-0" id="headingResumoDetalhado">
+                <h2 class="mb-0">
+                    <button class="btn btn-link btn-block text-left p-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseResumoDetalhado" aria-expanded="true" aria-controls="collapseResumoDetalhado">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-chart-pie me-2"></i>
+                                <span class="font-weight-bold">Resumo Financeiro Detalhado</span>
+                            </div>
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </div>
+                    </button>
+                </h2>
             </div>
-            <div class="card mb-4">
-                <div class="card-body px-0 pt-0 pb-2">
-                    <div class="table-responsive p-0">
+        
+            <div id="collapseResumoDetalhado" class="collapse show" aria-labelledby="headingResumoDetalhado" data-parent="#financialAccordion">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card border-0 mb-4">
+                                <div class="card-body bg-light rounded p-3">
+                                    <h6 class="card-title text-uppercase text-primary font-weight-bolder mb-3">Receitas</h6>
+                                    
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between">
+                                            <h6 class="text-muted mb-1">Valor Teórico Bruto</h6>
+                                            <p class="card-text font-weight-bold mb-0">
+                                                R$ {{ valor_total_atendimentos|floatformat:2 }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between">
+                                            <h6 class="text-muted mb-1">Valor Líquido Real</h6>
+                                            <p class="card-text font-weight-bold mb-0">
+                                                R$ {{ valor_total_atendimentos|floatformat:2 }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card border-0 mb-4">
+                                <div class="card-body bg-light rounded p-3">
+                                    <h6 class="card-title text-uppercase text-primary font-weight-bolder mb-3">Previsões e Status</h6>
+                                    
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between">
+                                            <h6 class="text-muted mb-1">Valor de Momento KPsicologia</h6>
+                                            <p class="card-text font-weight-bold mb-0">
+                                                R$ {{ total_valor_momento|floatformat:2 }}
+                                            </p>
+                                        </div>
+                                       
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between">
+                                            <h6 class="text-muted mb-1">Valor Previsto até Final do Mês</h6>
+                                            <p class="card-text font-weight-bold mb-0">
+                                                R$ {{ total_valor_previsto|floatformat:2 }}
+                                            </p>
+                                        </div>
+                                        
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between">
+                                            <h6 class="text-muted mb-1">Valor a Receber KPsicologia</h6>
+                                            <p class="card-text font-weight-bold mb-0 
+                                                {% if total_valor_a_receber > 0 %}
+                                                    text-success
+                                                {% elif total_valor_a_receber == 0 %}
+                                                    text-warning
+                                                {% else %}
+                                                    text-danger
+                                                {% endif %}
+                                            ">
+                                                R$ {{ total_valor_a_receber|floatformat:2 }}
+                                            </p>
+                                        </div>
+                                       
+                                    </div>
+                                    
+                                    <div class="mb-0">
+                                        <div class="d-flex justify-content-between">
+                                            <h6 class="text-muted mb-1">Valor Recebido por KPsicologia</h6>
+                                            <p class="card-text font-weight-bold mb-0">
+                                                R$ {{ total_valor_recebido|floatformat:2 }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Listagem por paciente -->
+        <div class="card shadow-sm my-4">
+            <div class="card-header p-0" id="headingPacientes">
+                <h2 class="mb-0">
+                    <button class="btn btn-link btn-block text-left p-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePacientes" aria-expanded="true" aria-controls="collapsePacientes">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-users me-2"></i>
+                                <span class="font-weight-bold">Registros por Paciente</span>
+                                <span class="badge bg-primary ms-2">{{ receita_por_paciente|length }}</span>
+                            </div>
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </div>
+                    </button>
+                </h2>
+            </div>
+        
+            <div id="collapsePacientes" class="collapse show my-4" aria-labelledby="headingPacientes" data-parent="#financialAccordion">
+                <div class="card-body">
+                    <!-- Filtro e exportação -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="input-group w-25">
+                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            <input type="text" class="form-control" id="searchPacientes" placeholder="Buscar paciente">
+                        </div>
+                    </div>
+                
+                    <!-- Tabela com design aprimorado -->
+                    <div class="table-responsive">
                         <table class="table align-items-center mb-0">
                             <thead>
                                 <tr>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nome Paciente</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor Bruto Teórico ( R$ )</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor Líquido Real ( R$ )</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor de Momento Kpsicologia ( R$ )</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor Previsto de entrada até o final do mês ( R$ )</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor a receber Kpsicologia ( R$ )</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor Recebido por Kpsicologia ( R$ )</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Paciente</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Valor Bruto</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Valor Líquido</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Momento KP</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Previsto (Mês)</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">A Receber KP</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Recebido KP</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for paciente in receita_por_paciente %}
                                 <tr>
-                                    <td class="text-center">
-                                        {{ paciente.paciente__nome }}
+                                    <td>
+                                        <div class="d-flex px-2 py-1">
+                                            <div class="d-flex flex-column justify-content-center">
+                                                <a href="#" class="text-dark font-weight-bold mb-0">
+                                                    {{ paciente.paciente__nome }}
+                                                </a>
+                                            </div>
+                                        </div>
                                     </td>
-                                    <td class="text-center">
-                                         R$   {{ paciente.receita_bruta|floatformat:2 }}
+                                    <td>
+                                        <p class="text-sm font-weight-bold mb-0">R$ {{ paciente.receita_bruta|floatformat:2 }}</p>
                                     </td>
-                                    <td class="text-center">
-                                         R$  {{ paciente.receita_bruta|floatformat:2 }}
+                                    <td>
+                                        <p class="text-sm font-weight-bold mb-0">R$ {{ paciente.receita_bruta|floatformat:2 }}</p>
                                     </td>
-                                    <td class="text-center">
-                                         R$  {{ paciente.valor_momento|floatformat:2 }}
+                                    <td>
+                                        <p class="text-sm font-weight-bold mb-0">R$ {{ paciente.valor_momento|floatformat:2 }}</p>
                                     </td>
-                                    <td class="text-center">
-                                         R$  {{ paciente.valor_previsto|floatformat:2 }}
+                                    <td>
+                                        <p class="text-sm font-weight-bold mb-0">R$ {{ paciente.valor_previsto|floatformat:2 }}</p>
                                     </td>
-                                    <td class="text-center 
-                                    {% if paciente.valor_a_receber > 0 %}
-                                    text-success
-                                    {% elif paciente.valor_a_receber == 0 %}
-                                        text-warning
-                                    {% else %}
-                                        text-danger
-                                    {% endif %}">
-                                         R$  {{ paciente.valor_a_receber|floatformat:2 }}
+                                    <td>
+                                        <p class="text-sm font-weight-bold mb-0 
+                                        {% if paciente.valor_a_receber > 0 %}
+                                        text-success
+                                        {% elif paciente.valor_a_receber == 0 %}
+                                            text-warning
+                                        {% else %}
+                                            text-danger
+                                        {% endif %}">
+                                            R$ {{ paciente.valor_a_receber|floatformat:2 }}
+                                        </p>
                                     </td>
-                                    <td class="text-center">
-                                         R$  {{ paciente.valor_recebido|floatformat:2 }}
+                                    <td>
+                                        <p class="text-sm font-weight-bold mb-0">R$ {{ paciente.valor_recebido|floatformat:2 }}</p>
                                     </td>
-                                    
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -126,81 +306,95 @@
             </div>
         </div>
     </div>
-</div>
 
-<div class="row">
-    <div class="col-12">
-        <div class="card-header pb-0">
-            <h6>Registros Financeiros</h6>
+    <!-- Histórico detalhado -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-history me-2"></i>
+                    Histórico de Registros Financeiros
+                </h5>
+            </div>
         </div>
-        <div class="card mb-4">
-            <div class="card-body px-0 pt-0 pb-2">
-                <div class="table-responsive p-0">
-                    <table class="table align-items-center mb-0">
-                        <thead>
-                            <tr>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nome do Cliente</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Plano</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor Consulta ( R$ )</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Semana do Mês</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Desfecho</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor Pagamento ( R$ )</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Data Pagamento </th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Editar </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for financeiro in financeiros %}
-                            <tr>
-                                <td class="align-middle text-center">
-                                    <div class="d-flex px-2 py-1 border-primary justify-content-center">
-                                        <div class="d-flex flex-column justify-content-center">
-                                            <h6 class="mb-0 text-sm text-center">{{ financeiro.paciente.nome }}</h6>
-                                        </div>
+        <div class="card-body px-0 pb-2">
+            <div class="table-responsive p-0">
+                <table class="table align-items-center mb-0">
+                    <thead>
+                        <tr>
+                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Paciente</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Plano</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Semana</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Pagamento</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Data Pagamento</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for financeiro in financeiros %}
+                        <tr>
+                            <td>
+                                <div class="d-flex px-2 py-1">
+                                    <div class="d-flex flex-column justify-content-center">
+                                        <h6 class="mb-0 text-sm">{{ financeiro.paciente.nome }}</h6>
+                                        <p class="text-xs text-secondary mb-0">{{ financeiro.modalidade|default:"Presencial" }}</p>
                                     </div>
-                                </td>
-                                <td class="align-middle text-center">
-                                    <h6 class="mb-0 text-sm text-center">{{ financeiro.paciente.periodo }}</h6>
-                                </td>
-                                <td class="align-middle text-center">
-                                    <h6 class="mb-0 text-sm text-center">R$ {{ financeiro.paciente.valor }}</h6>
-                                </td>
-                                <td class="align-middle text-center">
-                                    <h6 class="mb-0 text-sm text-center">Semana {{ financeiro.semana }}</h6>
-                                </td>
-                                <td class="align-middle text-center">
-                                    <h6 class="mb-0 text-sm text-center
-                                    {% if financeiro.presenca == 'Sim' %}
-                                    text-success
-                                    {% elif financeiro.presenca == 'Falta Injustificada' %}
-                                        text-warning
+                                </div>
+                            </td>
+                            <td class="align-middle text-center">
+                                <span class="badge badge-sm bg-gradient-info">{{ financeiro.paciente.periodo }}</span>
+                            </td>
+                            <td class="align-middle text-center">
+                                <span class="text-secondary text-sm font-weight-bold">R$ {{ financeiro.paciente.valor }}</span>
+                            </td>
+                            <td class="align-middle text-center">
+                                <span class="badge badge-sm bg-gradient-dark">Semana {{ financeiro.semana }}</span>
+                            </td>
+                            <td class="align-middle text-center">
+                                {% if financeiro.presenca == 'Sim' %}
+                                <span class="badge badge-sm bg-gradient-success">Presente</span>
+                                {% elif financeiro.presenca == 'Falta Injustificada' %}
+                                <span class="badge badge-sm bg-gradient-warning">Falta Injustificada</span>
+                                {% else %}
+                                <span class="badge badge-sm bg-gradient-danger">Ausente</span>
+                                {% endif %}
+                            </td>
+                            <td class="align-middle text-center">
+                                <span class="text-secondary text-sm font-weight-bold">
+                                    {% if financeiro.valor_pagamento %}
+                                    R$ {{ financeiro.valor_pagamento }}
                                     {% else %}
-                                        text-danger
+                                    -
                                     {% endif %}
-                                    
-                                    ">{{ financeiro.presenca }}</h6>
-                                </td>
-                                <td class="align-middle text-center">
-                                    <h6 class="mb-0 text-sm text-center">R$ {{ financeiro.valor_pagamento }}</h6>
-                                </td>
-                                <td class="align-middle text-center">
-                                    <h6 class="mb-0 text-sm text-center"> {{ financeiro.data_pagamento }}</h6>
-                                </td>
-                                <td class="align-middle text-center">
-                                    <a href="{% url 'editar_financeiro' id_financeiro=financeiro.id %}">Editar</a>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="8" class="text-center">
-                                    <p class="text-secondary font-weight-bold text-xs">Nenhum dado financeiro registrado.</p>
-                                </td>
-                            </tr>
-                            {% endfor %}
-
-                        </tbody>
-                    </table>
-                </div>
+                                </span>
+                            </td>
+                            <td class="align-middle text-center">
+                                <span class="text-secondary text-xs font-weight-bold">
+                                    {% if financeiro.data_pagamento %}
+                                    {{ financeiro.data_pagamento|date:"d/m/Y" }}
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td class="align-middle text-center">
+                                <a href="{% url 'editar_financeiro' id_financeiro=financeiro.id %}" class="btn btn-link text-warning text-gradient px-3 mb-0">
+                                    <i class="fas fa-edit me-2"></i>Editar
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-4">
+                                <p class="text-secondary font-weight-bold mb-0">Nenhum registro financeiro para o período selecionado.</p>
+                                <small class="text-muted">Tente selecionar outro período ou adicionar novos registros.</small>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
