@@ -2,265 +2,401 @@
 {% load static %}
 
 {% block content %}
-
-<div class="row">
-    <div class="col-12">
-        <button type="button" class="btn bg-gradient-primary"><a class="text-white" href="{% url 'index' %}">
-            Voltar
-        </a></button>
+<div class="container-fluid py-4">
+  <!-- Back button and page title -->
+  <div class="row mb-4">
+    <div class="col-md-8">
+      <div class="d-flex align-items-center">
+        <button type="button" class="btn bg-gradient-primary btn-sm me-3">
+          <i class="fas fa-arrow-left me-1"></i>
+          <a class="text-white text-decoration-none" href="{% url 'index' %}">Voltar</a>
+        </button>
+        <h4 class="mb-0">Disponibilidades de Horários</h4>
+      </div>
     </div>
-</div>
-<!-- 
-<div class="row">
+  </div>
+
+  <!-- Filter Card -->
+  <div class="row mb-4">
     <div class="col-12">
-        <h6>Disponibilidade da Psicóloga:  {{ psicologo.nome }}</h6>
-    </div>
-</div> -->
-
-
-<div class="row">
-    <div class="col-12">
-        <div class="card mb-4">
-            <div class="card-header pb-0">
-                <h6>Filtragem de Horários Disponíveis</h6>
+      <div class="card shadow-sm">
+        <div class="card-header p-3">
+          <div class="row align-items-center">
+            <div class="col">
+              <h6 class="mb-0">Filtrar Horários Disponíveis</h6>
             </div>
-            <div class="card-body p-4">
-                <form method="POST" action="#">
-                    {% csrf_token %}
-
-                    <div class="row">
-                        <!-- <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="paciente_id">Psicóloga</label>
-                                <select class="form-control" id="paciente_id" name="psicologa_id">
-                                    {% for psicologa in psicologas %}
-                                    <option value="{{psicologa.id}}">{{psicologa.nome}}</option>
-                                    {% endfor %}
-                                    <option value="todos">Todos</option>
-                                </select>
-                            </div>
-                        </div> -->
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="unidade_id">Unidade</label>
-                                <select class="form-control" id="unidade_id" name="unidade_id">
-                                    <option value="todos">Todos</option>
-                                    {% for unidade in unidades %}
-                                    <option value="{{unidade.id_unidade}}">{{unidade.nome_unidade}}</option>
-                                    {% endfor %}
-                                    
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="paciente_id">Especialização</label>
-                                <select class="form-control" id="especialidade_id" name="especialidade_id">
-                                    <option value="todos">Todos</option>
-                                    {% for especialidade in especialidades %}
-                                    <option value="{{especialidade.id}}">{{especialidade.especialidade}}</option>
-                                    {% endfor %}
-                                    
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="horario_inicio">Horário Início</label>
-                                <input type="time" class="form-control" id="horario_inicio" name="horario_inicio">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="horario_fim">Horário Fim</label>
-                                <input type="time" class="form-control" id="horario_fim" name="horario_fim">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="dia_semana">Dia da Semana</label>
-                                <select class="form-control" id="dia_semana" name="dia_semana">
-                                    <option value="todos">Todos</option>
-                                    {% for dia in dias_da_semana %}
-                                    <option value="{{ dia }}">{{ dia }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="dia_semana">Público</label>
-                                <select class="form-control" id="dia_semana" name="publico">
-                                    <option value="todos">Todos</option>
-                                    {% for publico in publicos %}
-                                    <option value="{{ publico.id }}">{{ publico.publico }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="d-flex justify-content-center gap-4 align-middle">
-                                <button type="submit" class="btn btn-primary">Filtrar</button>
-                                <button type="reset" class="btn btn-secondary">Resetar</button>
-                            </div>
-                        </div>
-                    </div>
-                </form>
+            <div class="col-auto">
+              <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="true" aria-controls="filterCollapse">
+                <i class="fas fa-filter me-1"></i> Filtros
+              </button>
             </div>
+          </div>
         </div>
-    </div>
-</div>
-
-
-<!-- {% for dia, horarios in horarios_agrupados %}
-    {% if horarios.exists %} <!-- Verifica se há horários cadastrados para o dia -->
-    <!-- <div class="row">
-        <div class="col-12">
-            <div class="card mb-4">
-                <div class="card-header pb-0">
-                    <h6>{{ dia }}</h6>
-                </div>
-                <div class="card-body px-0 pt-0 pb-2">
-                    <div class="table-responsive p-0">
-                        <table class="table align-items-center mb-0">
-                            <thead>
-                                <tr>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for agenda in horarios %}
-                                <tr style="background-color: {{ agenda.psicologa.cor }};">
-                                    <td class="align-middle text-center text-white">{{ agenda.hora }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+        <div class="collapse show" id="filterCollapse">
+          <div class="card-body p-3">
+            <form method="POST" action="#">
+              {% csrf_token %}
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="unidade_id" class="form-control-label text-xs text-uppercase">Unidade</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="fas fa-building"></i></span>
+                      <select class="form-select" id="unidade_id" name="unidade_id">
+                        <option value="todos">Todos</option>
+                        {% for unidade in unidades %}
+                        <option value="{{unidade.id_unidade}}">{{unidade.nome_unidade}}</option>
+                        {% endfor %}
+                      </select>
                     </div>
+                  </div>
                 </div>
-            </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="especialidade_id" class="form-control-label text-xs text-uppercase">Especialização</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="fas fa-brain"></i></span>
+                      <select class="form-select" id="especialidade_id" name="especialidade_id">
+                        <option value="todos">Todos</option>
+                        {% for especialidade in especialidades %}
+                        <option value="{{especialidade.id}}">{{especialidade.especialidade}}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="horario_inicio" class="form-control-label text-xs text-uppercase">Horário Início</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="fas fa-clock"></i></span>
+                      <input type="time" class="form-control" id="horario_inicio" name="horario_inicio">
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="horario_fim" class="form-control-label text-xs text-uppercase">Horário Fim</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="fas fa-clock"></i></span>
+                      <input type="time" class="form-control" id="horario_fim" name="horario_fim">
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="dia_semana" class="form-control-label text-xs text-uppercase">Dia da Semana</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="fas fa-calendar-day"></i></span>
+                      <select class="form-select" id="dia_semana" name="dia_semana">
+                        <option value="todos">Todos</option>
+                        {% for dia in dias_da_semana %}
+                        <option value="{{ dia }}">{{ dia }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="publico_id" class="form-control-label text-xs text-uppercase">Público</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="fas fa-users"></i></span>
+                      <select class="form-select" id="publico_id" name="publico">
+                        <option value="todos">Todos</option>
+                        {% for publico in publicos %}
+                        <option value="{{ publico.id }}">{{ publico.publico }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12 text-center">
+                  <button type="submit" class="btn bg-gradient-primary btn-sm me-2">
+                    <i class="fas fa-search me-1"></i> Aplicar Filtros
+                  </button>
+                  <button type="reset" class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-eraser me-1"></i> Limpar
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
         </div>
-    </div> -->
-   <!-- {% endif %} --> 
-<!-- {% endfor %} -->
+      </div>
+    </div>
+  </div>
 
-
-<!-- {% for psicologo in psicologos %}
-<div class="row">
+  <!-- Tabs for Frequency -->
+  <div class="row mb-4">
     <div class="col-12">
-        <div class="card mb-4">
-            <div class="card-header pb-0">
-                <h6>Agenda do Psicologo <span class="font-weight-bold" style="color: {{ sala.cor_sala }}; font-weight: 900;"> {{ psicologo.nome }}</span></h6>
-            </div>
-            <div class="card-body px-4 pt-0 pb-2">
-                {% for dia in dias_da_semana %}
-                <div class="mb-4">
-                    <p>{{ dia }}</p>
-                    <div class="table-responsive p-0">
-                        <table class="table align-items-center mb-0">
-                            <thead>
-                                <tr>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            {% for horario in horarios %}
-                                {% if horario.psicologo == psicologo and horario.dia_semana == dia %}
-                                <tr style="background-color: {{ horario.psicologo.cor }};">
-                                    <td class="align-middle text-center text-white">{{ horario.horario }}</td>
-                                </tr>
+      <div class="card shadow-sm">
+        <div class="card-body p-0">
+          <ul class="nav nav-tabs nav-fill" id="frequencyTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="weekly-tab" data-bs-toggle="tab" data-bs-target="#weekly-tab-pane" type="button" role="tab" aria-controls="weekly-tab-pane" aria-selected="true">
+                <i class="fas fa-calendar-week me-2"></i>Disponibilidade Semanal
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="biweekly-tab" data-bs-toggle="tab" data-bs-target="#biweekly-tab-pane" type="button" role="tab" aria-controls="biweekly-tab-pane" aria-selected="false">
+                <i class="fas fa-calendar-alt me-2"></i>Disponibilidade Quinzenal
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab content -->
+  <div class="tab-content" id="frequencyTabContent">
+    <!-- Weekly Tab -->
+    <div class="tab-pane fade show active" id="weekly-tab-pane" role="tabpanel" aria-labelledby="weekly-tab" tabindex="0">
+      {% for unidade, dias in horarios_semanal.items %}
+        <div class="row mb-4">
+          <div class="col-12">
+            <div class="card shadow-sm">
+              <div class="card-header p-3 bg-gradient-light">
+                <div class="d-flex align-items-center">
+                  <div class="icon icon-shape bg-gradient-primary shadow text-center rounded-circle me-3">
+                    <i class="fas fa-building text-white opacity-10"></i>
+                  </div>
+                  <h5 class="mb-0">{{ unidade }}</h5>
+                </div>
+              </div>
+              <div class="card-body">
+                {% for dia, horarios in dias.items %}
+                  <div class="card mb-4 border-0 shadow-none">
+                    <div class="card-header p-3 border-bottom">
+                      <div class="d-flex align-items-center">
+                        <div class="icon icon-shape bg-gradient-info shadow text-center rounded-circle me-2" style="width: 30px; height: 30px; line-height: 30px;">
+                          <i class="fas fa-calendar-day text-white opacity-10" style="font-size: 12px;"></i>
+                        </div>
+                        <h6 class="mb-0">{{ dia }}</h6>
+                      </div>
+                    </div>
+                    <div class="card-body p-0">
+                      <div class="accordion" id="accordion-{{ unidade|slugify }}-{{ dia|slugify }}-semanal">
+                        {% for psicologa in psicologos %}
+                          {% with horarios_psicologa=horarios|dictsort:"psicologa" %}
+                            {% with psicologa_horarios=0 %}
+                              {% for item in horarios %}
+                                {% if psicologa.nome == item.psicologa %}
+                                  {% with psicologa_horarios=1 %}{% endwith %}
                                 {% endif %}
-                            {% endfor %}
-                            </tbody>
-                        </table>
+                              {% endfor %}
+                              
+                              <div class="accordion-item border-0 psicologa-group" id="semanal-{{ unidade|slugify }}-{{ dia|slugify }}-{{ psicologa.id }}">
+                                <h2 class="accordion-header" id="heading-{{ unidade|slugify }}-{{ dia|slugify }}-{{ psicologa.id }}-semanal">
+                                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ unidade|slugify }}-{{ dia|slugify }}-{{ psicologa.id }}-semanal" aria-expanded="false" aria-controls="collapse-{{ unidade|slugify }}-{{ dia|slugify }}-{{ psicologa.id }}-semanal">
+                                    <div class="d-flex align-items-center">
+                                      <div style="width: 16px; height: 16px; background-color: {{ psicologa.cor }}; border-radius: 50%; margin-right: 10px;"></div>
+                                      <span>{{ psicologa.nome }}</span>
+                                    </div>
+                                  </button>
+                                </h2>
+                                <div id="collapse-{{ unidade|slugify }}-{{ dia|slugify }}-{{ psicologa.id }}-semanal" class="accordion-collapse collapse" aria-labelledby="heading-{{ unidade|slugify }}-{{ dia|slugify }}-{{ psicologa.id }}-semanal">
+                                  <div class="accordion-body">
+                                    <div class="horarios-container">
+                                      <div class="row g-3">
+                                        {% for item in horarios %}
+                                          {% if psicologa.nome == item.psicologa %}
+                                            <div class="col-md-3 col-sm-4 col-6">
+                                              <div class="card border-0 shadow-sm">
+                                                <div class="card-body py-2 px-3 text-center" style="background-color: {{ psicologa.cor }}; color: white; border-radius: 10px;">
+                                                  <p class="mb-0 font-weight-bold">{{ item.hora }}</p>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          {% endif %}
+                                        {% empty %}
+                                          <div class="col-12">
+                                            <p class="text-muted text-center mb-0">Nenhum horário disponível.</p>
+                                          </div>
+                                        {% endfor %}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            {% endwith %}
+                          {% endwith %}
+                        {% endfor %}
+                      </div>
                     </div>
-                </div>
+                  </div>
                 {% endfor %}
+              </div>
             </div>
+          </div>
         </div>
+      {% empty %}
+        <div class="row mb-4">
+          <div class="col-12">
+            <div class="alert alert-info" role="alert">
+              <div class="d-flex">
+                <div class="me-3">
+                  <i class="fas fa-info-circle fa-2x"></i>
+                </div>
+                <div>
+                  <h6 class="alert-heading mb-1">Nenhuma disponibilidade semanal encontrada</h6>
+                  <p class="mb-0">Não existem horários disponíveis semanalmente ou os filtros aplicados não retornaram resultados.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
     </div>
+
+    <!-- Biweekly Tab -->
+    <div class="tab-pane fade" id="biweekly-tab-pane" role="tabpanel" aria-labelledby="biweekly-tab" tabindex="0">
+      {% for unidade, dias in horarios_quinzenal.items %}
+        <div class="row mb-4">
+          <div class="col-12">
+            <div class="card shadow-sm">
+              <div class="card-header p-3 bg-gradient-light">
+                <div class="d-flex align-items-center">
+                  <div class="icon icon-shape bg-gradient-primary shadow text-center rounded-circle me-3">
+                    <i class="fas fa-building text-white opacity-10"></i>
+                  </div>
+                  <h5 class="mb-0">{{ unidade }}</h5>
+                </div>
+              </div>
+              <div class="card-body">
+                {% for dia, horarios in dias.items %}
+                  <div class="card mb-4 border-0 shadow-none">
+                    <div class="card-header p-3 border-bottom">
+                      <div class="d-flex align-items-center">
+                        <div class="icon icon-shape bg-gradient-info shadow text-center rounded-circle me-2" style="width: 30px; height: 30px; line-height: 30px;">
+                          <i class="fas fa-calendar-day text-white opacity-10" style="font-size: 12px;"></i>
+                        </div>
+                        <h6 class="mb-0">{{ dia }}</h6>
+                      </div>
+                    </div>
+                    <div class="card-body p-0">
+                      <div class="accordion" id="accordion-{{ unidade|slugify }}-{{ dia|slugify }}-quinzenal">
+                        {% for psicologa in psicologos %}
+                          <div class="accordion-item border-0 psicologa-group" id="quinzenal-{{ unidade|slugify }}-{{ dia|slugify }}-{{ psicologa.id }}">
+                            <h2 class="accordion-header" id="heading-{{ unidade|slugify }}-{{ dia|slugify }}-{{ psicologa.id }}-quinzenal">
+                              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ unidade|slugify }}-{{ dia|slugify }}-{{ psicologa.id }}-quinzenal" aria-expanded="false" aria-controls="collapse-{{ unidade|slugify }}-{{ dia|slugify }}-{{ psicologa.id }}-quinzenal">
+                                <div class="d-flex align-items-center">
+                                  <div style="width: 16px; height: 16px; background-color: {{ psicologa.cor }}; border-radius: 50%; margin-right: 10px;"></div>
+                                  <span>{{ psicologa.nome }}</span>
+                                </div>
+                              </button>
+                            </h2>
+                            <div id="collapse-{{ unidade|slugify }}-{{ dia|slugify }}-{{ psicologa.id }}-quinzenal" class="accordion-collapse collapse" aria-labelledby="heading-{{ unidade|slugify }}-{{ dia|slugify }}-{{ psicologa.id }}-quinzenal">
+                              <div class="accordion-body">
+                                <div class="horarios-container">
+                                  <div class="row g-3">
+                                    {% for item in horarios %}
+                                      {% if psicologa.nome == item.psicologa %}
+                                        <div class="col-md-3 col-sm-4 col-6">
+                                          <div class="card border-0 shadow-sm">
+                                            <div class="card-body py-2 px-3 text-center" style="background-color: {{ psicologa.cor }}; color: white; border-radius: 10px;">
+                                              <p class="mb-0 font-weight-bold">{{ item.hora }}</p>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      {% endif %}
+                                    {% empty %}
+                                      <div class="col-12">
+                                        <p class="text-muted text-center mb-0">Nenhum horário disponível.</p>
+                                      </div>
+                                    {% endfor %}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <div class="row mb-4">
+          <div class="col-12">
+            <div class="alert alert-info" role="alert">
+              <div class="d-flex">
+                <div class="me-3">
+                  <i class="fas fa-info-circle fa-2x"></i>
+                </div>
+                <div>
+                  <h6 class="alert-heading mb-1">Nenhuma disponibilidade quinzenal encontrada</h6>
+                  <p class="mb-0">Não existem horários disponíveis quinzenalmente ou os filtros aplicados não retornaram resultados.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
 </div>
-{% endfor %} -->
 
-<!-- Modificação para Disponibilidade Semanal -->
-<h2>Disponibilidade Semanal</h2>
-{% for unidade, dias in horarios_semanal.items %}
-    <h3>🟣 {{ unidade }}</h3>
-    {% for dia, horarios in dias.items %}
-        <h4>🔹 {{ dia }}</h4>
-        
-        {% for psicologa in psicologos %}
-            <div class="psicologa-group" id="semanal-{{ unidade|slugify }}-{{ dia|slugify }}-{{ psicologa.id }}">
-                <h5>{{ psicologa.nome }}</h5>
-                <div class="horarios-container">
-                    {% for item in horarios %}
-                        {% if psicologa.nome == item.psicologa %}
-                            <p><strong>{{ item.hora }}</strong></p>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-            </div>
-            <hr id="hr-semanal-{{ unidade|slugify }}-{{ dia|slugify }}-{{ psicologa.id }}">
-        {% endfor %}
-    {% endfor %}
-{% endfor %}
-
-<!-- Modificação para Disponibilidade Quinzenal -->
-<h2>Disponibilidade Quinzenal</h2>
-{% for unidade, dias in horarios_quinzenal.items %}
-    <h3>🟣 {{ unidade }}</h3>
-    {% for dia, horarios in dias.items %}
-        <h4>🔹 {{ dia }}</h4>
-        
-        {% for psicologa in psicologos %}
-            <div class="psicologa-group" id="quinzenal-{{ unidade|slugify }}-{{ dia|slugify }}-{{ psicologa.id }}">
-                <h5>{{ psicologa.nome }}</h5>
-                <div class="horarios-container">
-                    {% for item in horarios %}
-                        {% if psicologa.nome == item.psicologa %}
-                            <p><strong>{{ item.hora }}</strong></p>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-            </div>
-            <hr id="hr-quinzenal-{{ unidade|slugify }}-{{ dia|slugify }}-{{ psicologa.id }}">
-        {% endfor %}
-    {% endfor %}
-{% endfor %}
-
-{% endblock content %}
-
-
-{% block scripts %}
-<!-- Script JavaScript para ocultar psicólogas sem horários -->
+<!-- Initialize tooltips and maintain existing functionality -->
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Função para ocultar psicólogas sem horários
-        function ocultarPsicologasSemHorarios() {
-            // Seleciona todos os containers de psicólogas
-            const containers = document.querySelectorAll('.psicologa-group');
-            
-            // Para cada container
-            containers.forEach(container => {
-                // Conta quantos horários existem dentro do container
-                const horariosCount = container.querySelector('.horarios-container').children.length;
-                
-                // Se não houver horários, oculta o container e a linha horizontal correspondente
-                if (horariosCount === 0) {
-                    container.style.display = 'none';
-                    const hrId = 'hr-' + container.id;
-                    const hr = document.getElementById(hrId);
-                    if (hr) {
-                        hr.style.display = 'none';
-                    }
-                }
-            });
-        }
-        
-        // Executa a função quando a página carregar
-        ocultarPsicologasSemHorarios();
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
     });
-    </script>
-{% endblock scripts %}    
+    
+    // Save active tab state
+    var tabStorageKey = 'availability_active_tab';
+    
+    // Set initial tab state from storage if available
+    var storedTab = localStorage.getItem(tabStorageKey);
+    if (storedTab) {
+      var tabToActivate = document.querySelector(storedTab);
+      if (tabToActivate) {
+        var tab = new bootstrap.Tab(tabToActivate);
+        tab.show();
+      }
+    }
+    
+    // Save tab state when changed
+    var tabs = document.querySelectorAll('button[data-bs-toggle="tab"]');
+    tabs.forEach(function(tab) {
+      tab.addEventListener('shown.bs.tab', function(event) {
+        localStorage.setItem(tabStorageKey, '#' + event.target.id);
+      });
+    });
+    
+    // Function to hide psychologists without available hours
+    function ocultarPsicologasSemHorarios() {
+      // Select all psychologist containers
+      const containers = document.querySelectorAll('.psicologa-group');
+      
+      // For each container
+      containers.forEach(container => {
+        // Count how many hours exist within the container
+        const horariosCount = container.querySelector('.horarios-container').querySelectorAll('.col-md-3, .col-sm-4, .col-6').length;
+        
+        // If there are no hours, hide the container
+        if (horariosCount === 0) {
+          container.style.display = 'none';
+        }
+      });
+    }
+    
+    // Run the function when the page loads
+    ocultarPsicologasSemHorarios();
+    
+    // Also run when switching tabs to ensure proper display
+    tabs.forEach(function(tab) {
+      tab.addEventListener('shown.bs.tab', function(event) {
+        setTimeout(ocultarPsicologasSemHorarios, 100);
+      });
+    });
+  });
+</script>
+{% endblock content %}

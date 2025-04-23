@@ -2,250 +2,446 @@
 {% load static %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <button type="button" class="btn bg-gradient-primary"><a class="text-white" href="{% url 'index' %}">
-            Voltar
-        </a></button>
+<div class="container-fluid py-4">
+  <!-- Back button and page title -->
+  <div class="row mb-4">
+    <div class="col-8">
+      <div class="d-flex align-items-center">
+        <button type="button" class="btn bg-gradient-primary btn-sm me-3">
+          <i class="fas fa-arrow-left me-1"></i>
+          <a class="text-white text-decoration-none" href="{% url 'index' %}">Voltar</a>
+        </button>
+        <h4 class="mb-0">Agenda Central</h4>
+      </div>
     </div>
-</div>
-<div class="row">
-    <div class="col-12">
-        <div class="card mb-4">
-            <div class="card-header pb-0">
-                <h6>Filtragem de Consultas</h6>
-            </div>
-            <div class="card-body p-4">
-                <form method="POST" action="{% url 'agenda_central' %}">
-                    {% csrf_token %}
+    <div class="col-4 text-end">
+      <button type="button" class="btn bg-gradient-info btn-sm" data-bs-toggle="modal" data-bs-target="#filterModal">
+        <i class="fas fa-filter me-1"></i> Filtros
+      </button>
+    </div>
+  </div>
 
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="paciente_id">Psicóloga</label>
-                                <select class="form-control" id="paciente_id" name="psicologa_id">
-                                    <option value="todos">Todos</option>
-                                    {% for psicologa in psicologas %}
-                                    <option value="{{psicologa.id}}">{{psicologa.nome}}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="paciente_id">Unidade</label>
-                                <select class="form-control" id="paciente_id" name="paciente_id">
-                                    <option value="todos">Todos</option>
-                                    {% for unidade in unidades %}
-                                    <option value="{{unidade.id_unidade}}">{{unidade.nome_unidade}}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="paciente_id">Especialização</label>
-                                <select class="form-control" id="especialidade_id" name="especialidade_id">
-                                    <option value="todos">Todos</option>
-                                    {% for especialidade in especialidades %}
-                                    <option value="{{especialidade.id}}">{{especialidade.especialidade}}</option>
-                                    {% endfor %}
-                                    
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="horario_inicio">Horário Início</label>
-                                <input type="time" class="form-control" id="horario_inicio" name="horario_inicio">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="horario_fim">Horário Fim</label>
-                                <input type="time" class="form-control" id="horario_fim" name="horario_fim">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="dia_semana">Dia da Semana</label>
-                                <select class="form-control" id="dia_semana" name="dia_semana">
-                                    <option value="todos">Todos</option>
-                                    {% for dia in dias_da_semana %}
-                                    <option value="{{ dia }}">{{ dia }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="dia_semana">Público</label>
-                                <select class="form-control" id="dia_semana" name="publico">
-                                    <option value="todos">Todos</option>
-                                    {% for publico in publicos %}
-                                    <option value="{{ publico.id }}">{{ publico.publico }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="d-flex justify-content-center gap-4 align-middle">
-                                <button type="submit" class="btn btn-primary">Filtrar</button>
-                                <button type="reset" class="btn btn-secondary">Resetar</button>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
+  <!-- Filter Modal -->
+  <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="filterModalLabel">Filtrar Consultas</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-12">
-        <div class="card mb-4">
-            <div class="card-header pb-0">
-                <h6>Legenda de Psicólogas</h6>
-            </div>
-            <div class="card-body p-4">
-                <div class="row">
-                    {% for psicologa in psicologas %}
-                        <div class="col-md-4 col-sm-6 mb-3">
-                            <div class="d-flex align-items-center">
-                                <div style="width: 20px; height: 20px; background-color: {{ psicologa.cor }}; border-radius: 50%; margin-right: 10px;"></div>
-                                <span>{{ psicologa.nome }}</span>
-                            </div>
-                        </div>
-                    {% empty %}
-                        <div class="col-12 text-center">
-                            <p>Nenhuma psicóloga cadastrada no sistema.</p>
-                        </div>
-                    {% endfor %}
+        <div class="modal-body">
+          <form method="POST" action="{% url 'agenda_central' %}" id="filterForm">
+            {% csrf_token %}
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="psicologa_id" class="form-control-label text-xs text-uppercase">Psicóloga</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-user-md"></i></span>
+                    <select class="form-select" id="psicologa_id" name="psicologa_id">
+                      <option value="todos">Todos</option>
+                      {% for psicologa in psicologas %}
+                      <option value="{{psicologa.id}}">{{psicologa.nome}}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<h2> Presencial </h2>
-{% for sala in salas %}
-<div class="row">
-    <div class="col-12">
-        <div class="card mb-4">
-            <div class="card-header pb-0">
-                <h6>Agendas da Sala <span class="font-weight-bold" style="color: {{ sala.cor_sala }}; font-weight: 900;"> {{ sala.numero_sala }}</span></h6>
-            </div>
-            <div class="card-body px-4 pt-0 pb-2" style="overflow-x: auto; white-space: nowrap;">
-                <div class="d-inline-flex">
-                    {% for dia in dias_da_semana %}
-                    <div class="mb-4 col" style="min-width: 250px;"> <!-- Definindo uma largura mínima para cada dia -->
-                        <p>{{ dia }} Feira</p>
-                        <div class="table-responsive p-0">
-                            <table class="table align-items-center mb-0">
-                                <thead>
-                                    <tr>
-                                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário</th>
-                                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Semanal</th>
-                                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Quinzenal</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                {% for consulta in consultas %}
-                                    {% if consulta.sala == sala and consulta.dia_semana == dia %}
-                                        {% if consulta.psicologo %}
-                                            <tr style="background-color: {{ consulta.psicologo.cor }};">
-                                                <td class="align-middle text-center text-white">{{ consulta.horario }}</td>
-                                                {% if consulta.semanal %}
-                                                <td class="align-middle text-center text-white">{{ consulta.semanal }}</td>
-                                                {% else %}
-                                                <td style="background-color: gray;" class="align-middle text-center text-white"></td>
-                                                {% endif %}
-                                                {% if consulta.quinzenal %}
-                                                <td class="align-middle text-center text-white">{{ consulta.quinzenal }}</td>
-                                                {% else %}
-                                            <td style="background-color: gray;" class="align-middle text-center text-white"></td>
-                                        {% endif %}
-                                        {% else %}
-                                            <tr style="background-color: gray;">
-                                                <td class="align-middle text-center text-white">{{ consulta.horario }}</td>
-                                                {% if consulta.semanal %}
-                                                <td class="align-middle text-center">{{ consulta.semanal }}</td>
-                                                {% else %}
-                                                <td class="align-middle text-center"></td>
-                                                {% endif %}
-                                                {% if consulta.quinzenal %}
-                                                <td class="align-middle text-center">{{ consulta.quinzenal }}</td>
-                                                {% else %}
-                                                <td class="align-middle text-center"></td>
-                                                {% endif %}
-                                        {% endif %}
-                                    </tr>
-                                    {% endif %}
-                                {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    {% endfor %}
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="unidade_id" class="form-control-label text-xs text-uppercase">Unidade</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-building"></i></span>
+                    <select class="form-select" id="unidade_id" name="paciente_id">
+                      <option value="todos">Todos</option>
+                      {% for unidade in unidades %}
+                      <option value="{{unidade.id_unidade}}">{{unidade.nome_unidade}}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
                 </div>
-            </div>            
-        </div>
-    </div>
-</div>
-{% endfor %}
-
-<h2> Online </h2>
-{% for psicologa in psicologas_online %}
-<div class="row">
-    <div class="col-12">
-        <div class="card mb-4">
-            <div class="card-header pb-0">
-                <h6>Agendas Online da Psicóloga <span class="font-weight-bold" style="color: {{ psicologa.cor }}; font-weight: 900;"> {{ psicologa.nome }}</span></h6>
+              </div>
             </div>
-            <div class="card-body px-4 pt-0 pb-2" style="overflow-x: auto; white-space: nowrap;">
-                <div class="d-inline-flex">
-                    {% for dia in dias_da_semana %}
-                    <div class="mb-4 col" style="min-width: 250px;"> <!-- Definindo uma largura mínima para cada dia -->
-                        <p>{{ dia }} Feira</p>
-                        <div class="table-responsive p-0">
-                            <table class="table align-items-center mb-0">
-                                <thead>
-                                    <tr>
-                                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário</th>
-                                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Semanal</th>
-                                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Quinzenal</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                {% for consulta in consultas_online %}
-                                    {% if consulta.psicologo == psicologa and consulta.dia_semana == dia %}
-                                            <tr style="background-color: {{ consulta.psicologo.cor }};">
-                                                <td class="align-middle text-center text-white">{{ consulta.horario }}</td>
-                                                {% if consulta.semanal %}
-                                                <td class="align-middle text-center text-white">{{ consulta.semanal }}</td>
-                                                {% else %}
-                                                <td class="align-middle text-center text-white"></td>
-                                                {% endif %}
-                                                {% if consulta.quinzenal %}
-                                                <td class="align-middle text-center text-white">{{ consulta.quinzenal }}</td>
-                                                {% else %}
-                                            <td class="align-middle text-center text-white"></td>
-                                        {% endif %} 
-                                    </tr>
-                                    {% endif %}
-                                {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    {% endfor %}
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="especialidade_id" class="form-control-label text-xs text-uppercase">Especialização</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-brain"></i></span>
+                    <select class="form-select" id="especialidade_id" name="especialidade_id">
+                      <option value="todos">Todos</option>
+                      {% for especialidade in especialidades %}
+                      <option value="{{especialidade.id}}">{{especialidade.especialidade}}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
                 </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="publico_id" class="form-control-label text-xs text-uppercase">Público</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-users"></i></span>
+                    <select class="form-select" id="publico_id" name="publico">
+                      <option value="todos">Todos</option>
+                      {% for publico in publicos %}
+                      <option value="{{ publico.id }}">{{ publico.publico }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+              </div>
             </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="horario_inicio" class="form-control-label text-xs text-uppercase">Horário Início</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-clock"></i></span>
+                    <input type="time" class="form-control" id="horario_inicio" name="horario_inicio">
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="horario_fim" class="form-control-label text-xs text-uppercase">Horário Fim</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-clock"></i></span>
+                    <input type="time" class="form-control" id="horario_fim" name="horario_fim">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-12">
+                <div class="form-group">
+                  <label for="dia_semana" class="form-control-label text-xs text-uppercase">Dia da Semana</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-calendar-day"></i></span>
+                    <select class="form-select" id="dia_semana" name="dia_semana">
+                      <option value="todos">Todos</option>
+                      {% for dia in dias_da_semana %}
+                      <option value="{{ dia }}">{{ dia }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
         </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+          <button type="reset" form="filterForm" class="btn btn-outline-secondary">Resetar</button>
+          <button type="submit" form="filterForm" class="btn bg-gradient-primary">Aplicar Filtros</button>
+        </div>
+      </div>
     </div>
-</div>
-{% endfor %}
+  </div>
 
+  <!-- Tabs for Presencial/Online -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card card-body shadow-sm">
+        <ul class="nav nav-tabs nav-fill" id="modeTab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="presencial-tab" data-bs-toggle="tab" data-bs-target="#presencial-tab-pane" type="button" role="tab" aria-controls="presencial-tab-pane" aria-selected="true">
+              <i class="fas fa-building me-2"></i>Presencial
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="online-tab" data-bs-toggle="tab" data-bs-target="#online-tab-pane" type="button" role="tab" aria-controls="online-tab-pane" aria-selected="false">
+              <i class="fas fa-laptop me-2"></i>Online
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Psychologists legend -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header p-3">
+          <div class="row align-items-center">
+            <div class="col">
+              <h6 class="mb-0">Legenda de Psicólogas</h6>
+            </div>
+            <div class="col-auto">
+              <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#legendaCollapse" aria-expanded="false" aria-controls="legendaCollapse">
+                <i class="fas fa-chevron-down"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="collapse show" id="legendaCollapse">
+          <div class="card-body p-3">
+            <div class="row g-3">
+              {% for psicologa in psicologas %}
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                  <div class="d-flex align-items-center">
+                    <div style="width: 20px; height: 20px; background-color: {{ psicologa.cor }}; border-radius: 50%; margin-right: 10px;"></div>
+                    <span class="text-sm">{{ psicologa.nome }}</span>
+                  </div>
+                </div>
+              {% empty %}
+                <div class="col-12 text-center py-3">
+                  <p class="text-muted mb-0">Nenhuma psicóloga cadastrada no sistema.</p>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab content -->
+  <div class="tab-content" id="modeTabContent">
+    <!-- Presencial Tab -->
+    <div class="tab-pane fade show active" id="presencial-tab-pane" role="tabpanel" aria-labelledby="presencial-tab" tabindex="0">
+      <!-- Sala accordion -->
+      <div class="accordion" id="accordionSalas">
+        {% for sala in salas %}
+        <div class="accordion-item border mb-4 shadow-sm">
+          <h2 class="accordion-header" id="heading{{ sala.id_sala }}">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ sala.id_sala }}" aria-expanded="true" aria-controls="collapse{{ sala.id_sala }}">
+              <div class="d-flex align-items-center">
+                <div style="width: 16px; height: 16px; background-color: {{ sala.cor_sala }}; border-radius: 50%; margin-right: 10px;"></div>
+                <span class="font-weight-bold">Sala {{ sala.numero_sala }}</span>
+              </div>
+            </button>
+          </h2>
+          <div id="collapse{{ sala.id_sala }}" class="accordion-collapse collapse show" aria-labelledby="heading{{ sala.id_sala }}" data-bs-parent="#accordionSalas">
+            <div class="accordion-body p-0">
+              <!-- Tabs for days -->
+              <ul class="nav nav-pills nav-fill p-3 border-bottom" id="pills-tab-{{ sala.id_sala }}" role="tablist">
+                {% for dia in dias_da_semana %}
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link {% if forloop.first %}active{% endif %} text-sm" 
+                          id="pills-{{ dia|lower }}-{{ sala.id_sala }}-tab" 
+                          data-bs-toggle="pill" 
+                          data-bs-target="#pills-{{ dia|lower }}-{{ sala.id_sala }}" 
+                          type="button" role="tab" 
+                          aria-controls="pills-{{ dia|lower }}-{{ sala.id_sala }}" 
+                          aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
+                    {{ dia }}
+                  </button>
+                </li>
+                {% endfor %}
+              </ul>
+              <!-- Tab content for days -->
+              <div class="tab-content" id="pills-tabContent-{{ sala.id_sala }}">
+                {% for dia in dias_da_semana %}
+                <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" 
+                     id="pills-{{ dia|lower }}-{{ sala.id_sala }}" 
+                     role="tabpanel" 
+                     aria-labelledby="pills-{{ dia|lower }}-{{ sala.id_sala }}-tab" 
+                     tabindex="0">
+                  <div class="table-responsive">
+                    <table class="table align-items-center mb-0">
+                      <thead>
+                        <tr>
+                          <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário</th>
+                          <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Semanal</th>
+                          <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Quinzenal</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for consulta in consultas %}
+                          {% if consulta.sala == sala and consulta.dia_semana == dia %}
+                            {% if consulta.psicologo %}
+                              <tr style="background-color: {{ consulta.psicologo.cor }};">
+                                <td class="align-middle text-center text-white">{{ consulta.horario }}</td>
+                                {% if consulta.semanal %}
+                                <td class="align-middle text-center text-white">{{ consulta.semanal }}</td>
+                                {% else %}
+                                <td style="background-color: rgba(128, 128, 128, 0.7);" class="align-middle text-center text-white">-</td>
+                                {% endif %}
+                                {% if consulta.quinzenal %}
+                                <td class="align-middle text-center text-white">{{ consulta.quinzenal }}</td>
+                                {% else %}
+                                <td style="background-color: rgba(128, 128, 128, 0.7);" class="align-middle text-center text-white">-</td>
+                                {% endif %}
+                              </tr>
+                            {% else %}
+                              <tr style="background-color: #f8f9fa;">
+                                <td class="align-middle text-center">{{ consulta.horario }}</td>
+                                {% if consulta.semanal %}
+                                <td class="align-middle text-center">{{ consulta.semanal }}</td>
+                                {% else %}
+                                <td class="align-middle text-center">-</td>
+                                {% endif %}
+                                {% if consulta.quinzenal %}
+                                <td class="align-middle text-center">{{ consulta.quinzenal }}</td>
+                                {% else %}
+                                <td class="align-middle text-center">-</td>
+                                {% endif %}
+                              </tr>
+                            {% endif %}
+                          {% endif %}
+                        {% empty %}
+                          <tr>
+                            <td colspan="3" class="text-center py-3">
+                              <p class="text-secondary mb-0">Nenhum horário encontrado para este dia.</p>
+                            </td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <div class="alert alert-info" role="alert">
+          <div class="d-flex">
+            <div class="me-3">
+              <i class="fas fa-info-circle fa-2x"></i>
+            </div>
+            <div>
+              <h6 class="alert-heading mb-1">Nenhuma sala encontrada</h6>
+              <p class="mb-0">Não existem salas cadastradas ou que correspondam aos filtros selecionados.</p>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Online Tab -->
+    <div class="tab-pane fade" id="online-tab-pane" role="tabpanel" aria-labelledby="online-tab" tabindex="0">
+      <!-- Psicologa accordion -->
+      <div class="accordion" id="accordionPsicologas">
+        {% for psicologa in psicologas_online %}
+        <div class="accordion-item border mb-4 shadow-sm">
+          <h2 class="accordion-header" id="headingOnline{{ psicologa.id }}">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOnline{{ psicologa.id }}" aria-expanded="true" aria-controls="collapseOnline{{ psicologa.id }}">
+              <div class="d-flex align-items-center">
+                <div style="width: 16px; height: 16px; background-color: {{ psicologa.cor }}; border-radius: 50%; margin-right: 10px;"></div>
+                <span class="font-weight-bold">{{ psicologa.nome }}</span>
+              </div>
+            </button>
+          </h2>
+          <div id="collapseOnline{{ psicologa.id }}" class="accordion-collapse collapse show" aria-labelledby="headingOnline{{ psicologa.id }}" data-bs-parent="#accordionPsicologas">
+            <div class="accordion-body p-0">
+              <!-- Tabs for days -->
+              <ul class="nav nav-pills nav-fill p-3 border-bottom" id="pills-tab-online-{{ psicologa.id }}" role="tablist">
+                {% for dia in dias_da_semana %}
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link {% if forloop.first %}active{% endif %} text-sm" 
+                          id="pills-online-{{ dia|lower }}-{{ psicologa.id }}-tab" 
+                          data-bs-toggle="pill" 
+                          data-bs-target="#pills-online-{{ dia|lower }}-{{ psicologa.id }}" 
+                          type="button" role="tab" 
+                          aria-controls="pills-online-{{ dia|lower }}-{{ psicologa.id }}" 
+                          aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
+                    {{ dia }}
+                  </button>
+                </li>
+                {% endfor %}
+              </ul>
+              <!-- Tab content for days -->
+              <div class="tab-content" id="pills-tabContent-online-{{ psicologa.id }}">
+                {% for dia in dias_da_semana %}
+                <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" 
+                     id="pills-online-{{ dia|lower }}-{{ psicologa.id }}" 
+                     role="tabpanel" 
+                     aria-labelledby="pills-online-{{ dia|lower }}-{{ psicologa.id }}-tab" 
+                     tabindex="0">
+                  <div class="table-responsive">
+                    <table class="table align-items-center mb-0">
+                      <thead>
+                        <tr>
+                          <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário</th>
+                          <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Semanal</th>
+                          <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Quinzenal</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for consulta in consultas_online %}
+                          {% if consulta.psicologo == psicologa and consulta.dia_semana == dia %}
+                            <tr style="background-color: {{ consulta.psicologo.cor }};">
+                              <td class="align-middle text-center text-white">{{ consulta.horario }}</td>
+                              {% if consulta.semanal %}
+                              <td class="align-middle text-center text-white">{{ consulta.semanal }}</td>
+                              {% else %}
+                              <td class="align-middle text-center text-white">-</td>
+                              {% endif %}
+                              {% if consulta.quinzenal %}
+                              <td class="align-middle text-center text-white">{{ consulta.quinzenal }}</td>
+                              {% else %}
+                              <td class="align-middle text-center text-white">-</td>
+                              {% endif %}
+                            </tr>
+                          {% endif %}
+                        {% empty %}
+                          <tr>
+                            <td colspan="3" class="text-center py-3">
+                              <p class="text-secondary mb-0">Nenhum horário encontrado para este dia.</p>
+                            </td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <div class="alert alert-info" role="alert">
+          <div class="d-flex">
+            <div class="me-3">
+              <i class="fas fa-info-circle fa-2x"></i>
+            </div>
+            <div>
+              <h6 class="alert-heading mb-1">Nenhuma agenda online encontrada</h6>
+              <p class="mb-0">Não existem agendas online cadastradas ou que correspondam aos filtros selecionados.</p>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Initialize tooltips -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Save active tab state
+    var tabStorageKey = 'agenda_central_active_tab';
+    
+    // Set initial tab state from storage if available
+    var storedTab = localStorage.getItem(tabStorageKey);
+    if (storedTab) {
+      var tabToActivate = document.querySelector(storedTab);
+      if (tabToActivate) {
+        var tab = new bootstrap.Tab(tabToActivate);
+        tab.show();
+      }
+    }
+    
+    // Save tab state when changed
+    var tabs = document.querySelectorAll('button[data-bs-toggle="tab"]');
+    tabs.forEach(function(tab) {
+      tab.addEventListener('shown.bs.tab', function(event) {
+        localStorage.setItem(tabStorageKey, '#' + event.target.id);
+      });
+    });
+  });
+</script>
 {% endblock content %}

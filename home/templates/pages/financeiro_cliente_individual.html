@@ -2,244 +2,380 @@
 {% load static %}
 
 {% block content %}
-<div class="row">
+<div class="container-fluid py-4">
+  <!-- Back button section -->
+  <div class="row mb-4">
     <div class="col-12">
-        <button type="button" class="btn bg-gradient-primary"><a class="text-white" href="{% url 'financeiro_pacientes' %}">
-            Voltar
-        </a></button>
+      <button type="button" class="btn bg-gradient-primary">
+        <i class="fas fa-arrow-left me-2"></i>
+        <a class="text-white text-decoration-none" href="{% url 'financeiro_pacientes' %}">Voltar</a>
+      </button>
     </div>
+  </div>
+
+  <!-- Page header with patient name -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card card-frame shadow">
+        <div class="card-body p-3">
+          <div class="d-flex align-items-center">
+            <div class="icon icon-shape icon-lg bg-gradient-primary shadow text-center border-radius-lg me-3">
+              <i class="fas fa-user-circle opacity-10"></i>
+            </div>
+            <div>
+              <h3 class="mb-0">{{ paciente.nome }}</h3>
+              <p class="text-sm mb-0">Detalhes Financeiros do Paciente</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Financial summary and filter cards -->
+  <div class="row">
+    <!-- Financial summary card -->
+    <div class="col-md-6 mb-4">
+      <div class="card h-100 shadow">
+        <div class="card-header pb-0 p-3">
+          <div class="row">
+            <div class="col-md-8 d-flex align-items-center">
+              <h6 class="mb-0">Resumo Financeiro</h6>
+            </div>
+            <div class="col-md-4 text-end">
+              <i class="fas fa-money-bill-wave text-secondary"></i>
+            </div>
+          </div>
+        </div>
+        <div class="card-body p-3">
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <div class="card card-plain bg-light mb-2">
+                <div class="card-body p-3">
+                  <div class="d-flex flex-column">
+                    <span class="text-xs text-uppercase">Valor Teórico Bruto</span>
+                    <span class="text-lg font-weight-bold">R$ {{ resumo.receita_bruta|floatformat:2 }}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="card card-plain bg-light mb-2">
+                <div class="card-body p-3">
+                  <div class="d-flex flex-column">
+                    <span class="text-xs text-uppercase">Valor Recebido</span>
+                    <span class="text-lg font-weight-bold">R$ {{ resumo.valor_recebido|floatformat:2 }}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="card card-plain bg-light">
+                <div class="card-body p-3">
+                  <div class="d-flex flex-column">
+                    <span class="text-xs text-uppercase">Valor a Receber</span>
+                    <span class="text-lg font-weight-bold 
+                      {% if resumo.valor_a_receber > 0 %}
+                        text-success
+                      {% elif resumo.valor_a_receber == 0 %}
+                        text-warning
+                      {% else %}
+                        text-danger
+                      {% endif %}">
+                      R$ {{ resumo.valor_a_receber|floatformat:2 }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card card-plain bg-light mb-2">
+                <div class="card-body p-3">
+                  <div class="d-flex flex-column">
+                    <span class="text-xs text-uppercase">Número de Consultas</span>
+                    <span class="text-lg font-weight-bold">{{ resumo.n_consultas }}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="card card-plain bg-light mb-2">
+                <div class="card-body p-3">
+                  <div class="d-flex flex-column">
+                    <span class="text-xs text-uppercase">Consultas Pagas</span>
+                    <span class="text-lg font-weight-bold text-success">{{ resumo.n_consultas_pagas }}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="card card-plain bg-light">
+                <div class="card-body p-3">
+                  <div class="d-flex flex-column">
+                    <span class="text-xs text-uppercase">Consultas Não Pagas</span>
+                    <span class="text-lg font-weight-bold text-danger">{{ resumo.n_consultas_nao_pagas }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12">
+              <hr class="horizontal dark my-3">
+              <h6 class="text-uppercase text-body text-xs font-weight-bolder">Psicólogas</h6>
+              <p class="mb-0">
+                {% for psicologa in resumo.psicologas %}
+                  <span class="badge bg-gradient-info">{{ psicologa }}</span>{% if not forloop.last %} {% endif %}
+                {% endfor %}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters card -->
+    <div class="col-md-6 mb-4">
+      <div class="card h-100 shadow">
+        <div class="card-header pb-0 p-3">
+          <div class="row">
+            <div class="col-md-8 d-flex align-items-center">
+              <h6 class="mb-0">Filtrar Registros</h6>
+            </div>
+            <div class="col-md-4 text-end">
+              <i class="fas fa-filter text-secondary"></i>
+            </div>
+          </div>
+        </div>
+        <div class="card-body p-3">
+          <form method="POST" action="{% url 'financeiro_cliente_individual' id_paciente=paciente.id %}">
+            {% csrf_token %}
+            
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="data_inicio" class="form-control-label text-xs text-uppercase">Data de Início</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                    <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ filtros.data_inicio|date:'Y-m-d' }}">
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="data_fim" class="form-control-label text-xs text-uppercase">Data de Fim</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                    <input type="date" class="form-control" id="data_fim" name="data_fim" value="{{ filtros.data_fim|date:'Y-m-d' }}">
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="psicologa_id" class="form-control-label text-xs text-uppercase">Psicóloga</label>
+                  <select class="form-select" id="psicologa_id" name="psicologa_id">
+                    <option value="">Todas</option>
+                    {% for psicologa in psicologas %}
+                      <option value="{{ psicologa.id }}" {% if filtros.psicologa_id == psicologa.id %}selected{% endif %}>{{ psicologa.nome }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="presenca" class="form-control-label text-xs text-uppercase">Status de Presença</label>
+                  <select class="form-select" id="presenca" name="presenca">
+                    <option value="">Todos</option>
+                    <option value="Sim" {% if filtros.presenca == 'Sim' %}selected{% endif %}>Presença Confirmada</option>
+                    <option value="Nao" {% if filtros.presenca == 'Nao' %}selected{% endif %}>Falta</option>
+                    <option value="Falta Inj" {% if filtros.presenca == 'Falta Inj' %}selected{% endif %}>Falta Injustificada</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+            <div class="row mb-4">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="pagamento" class="form-control-label text-xs text-uppercase">Status de Pagamento</label>
+                  <select class="form-select" id="pagamento" name="pagamento">
+                    <option value="">Todos</option>
+                    <option value="pago" {% if filtros.pagamento == 'pago' %}selected{% endif %}>Pagos</option>
+                    <option value="nao_pago" {% if filtros.pagamento == 'nao_pago' %}selected{% endif %}>Não Pagos</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="modalidade" class="form-control-label text-xs text-uppercase">Modalidade</label>
+                  <select class="form-select" id="modalidade" name="modalidade">
+                    <option value="">Todas</option>
+                    <option value="Presencial" {% if filtros.modalidade == 'Presencial' %}selected{% endif %}>Presencial</option>
+                    <option value="Online" {% if filtros.modalidade == 'Online' %}selected{% endif %}>Online</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-12 text-center">
+                <button type="submit" class="btn bg-gradient-primary btn-sm me-2">
+                  <i class="fas fa-search me-1"></i> Filtrar
+                </button>
+                <button type="reset" class="btn btn-outline-secondary btn-sm">
+                  <i class="fas fa-eraser me-1"></i> Limpar
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Financial records table -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow">
+        <div class="card-header pb-0 p-3">
+          <div class="row">
+            <div class="col-md-6 d-flex align-items-center">
+              <h6 class="mb-0">Registros Financeiros</h6>
+            </div>
+            <div class="col-md-6 text-end">
+              <span class="badge bg-gradient-info">{{ financeiros|length }} registros encontrados</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-body px-0 pt-0 pb-2">
+          <div class="table-responsive p-0">
+            <table class="table align-items-center mb-0">
+              <thead>
+                <tr>
+                  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Data</th>
+                  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Dia</th>
+                  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário</th>
+                  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Psicóloga</th>
+                  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Modalidade</th>
+                  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Presença</th>
+                  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor</th>
+                  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Pago</th>
+                  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Data Pag.</th>
+                  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Forma</th>
+                  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Obs.</th>
+                  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for financeiro in financeiros %}
+                <tr>
+                  <td class="align-middle text-center text-sm">
+                    <span class="font-weight-bold">{{ financeiro.data|date:"d/m/Y" }}</span>
+                  </td>
+                  <td class="align-middle text-center text-sm">
+                    {% if financeiro.dia_semana == "Segunda" %}
+                      <span class="badge badge-sm bg-gradient-light text-dark">Seg</span>
+                    {% elif financeiro.dia_semana == "Terça" %}
+                      <span class="badge badge-sm bg-gradient-light text-dark">Ter</span>
+                    {% elif financeiro.dia_semana == "Quarta" %}
+                      <span class="badge badge-sm bg-gradient-light text-dark">Qua</span>
+                    {% elif financeiro.dia_semana == "Quinta" %}
+                      <span class="badge badge-sm bg-gradient-light text-dark">Qui</span>
+                    {% elif financeiro.dia_semana == "Sexta" %}
+                      <span class="badge badge-sm bg-gradient-light text-dark">Sex</span>
+                    {% else %}
+                      <span class="badge badge-sm bg-gradient-light text-dark">Sáb</span>
+                    {% endif %}
+                  </td>
+                  <td class="align-middle text-center text-sm">
+                    <span class="text-secondary text-sm">{{ financeiro.horario }}</span>
+                  </td>
+                  <td class="align-middle text-center text-sm">
+                    <span class="text-xs">{{ financeiro.psicologa.nome }}</span>
+                  </td>
+                  <td class="align-middle text-center text-sm">
+                    {% if financeiro.modalidade == "Presencial" %}
+                      <span class="badge badge-sm bg-gradient-primary">Presencial</span>
+                    {% else %}
+                      <span class="badge badge-sm bg-gradient-info">Online</span>
+                    {% endif %}
+                  </td>
+                  <td class="align-middle text-center text-sm">
+                    {% if financeiro.presenca == "Sim" %}
+                      <span class="badge badge-sm bg-gradient-success">Presente</span>
+                    {% elif financeiro.presenca == "Falta Inj" %}
+                      <span class="badge badge-sm bg-gradient-warning">Falta Inj.</span>
+                    {% else %}
+                      <span class="badge badge-sm bg-gradient-danger">Falta</span>
+                    {% endif %}
+                  </td>
+                  <td class="align-middle text-center text-sm">
+                    <span class="text-secondary">R$ {{ financeiro.valor|floatformat:2 }}</span>
+                  </td>
+                  <td class="align-middle text-center text-sm">
+                    {% if financeiro.valor_pagamento %}
+                      <span class="text-secondary">R$ {{ financeiro.valor_pagamento|floatformat:2 }}</span>
+                    {% else %}
+                      <span class="text-secondary">-</span>
+                    {% endif %}
+                  </td>
+                  <td class="align-middle text-center text-sm">
+                    {% if financeiro.data_pagamento %}
+                      <span class="text-secondary">{{ financeiro.data_pagamento|date:"d/m/Y" }}</span>
+                    {% else %}
+                      <span class="text-secondary">-</span>
+                    {% endif %}
+                  </td>
+                  <td class="align-middle text-center text-sm">
+                    {% if financeiro.forma %}
+                      {% if financeiro.forma == "Dinheiro" %}
+                        <span class="badge badge-sm bg-gradient-success">Dinheiro</span>
+                      {% elif financeiro.forma == "Cartão" %}
+                        <span class="badge badge-sm bg-gradient-info">Cartão</span>
+                      {% else %}
+                        <span class="badge badge-sm bg-gradient-primary">Pix</span>
+                      {% endif %}
+                    {% else %}
+                      <span class="text-secondary">-</span>
+                    {% endif %}
+                  </td>
+                  <td class="align-middle text-center text-sm">
+                    {% if financeiro.observacoes %}
+                      <span data-bs-toggle="tooltip" data-bs-placement="top" title="{{ financeiro.observacoes }}">
+                        <i class="fas fa-comment-dots text-info cursor-pointer"></i>
+                      </span>
+                    {% else %}
+                      <span class="text-secondary">-</span>
+                    {% endif %}
+                  </td>
+                  <td class="align-middle text-center">
+                    <a href="{% url 'editar_financeiro' id_financeiro=financeiro.id %}" class="btn btn-link text-secondary mb-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar registro">
+                      <i class="fas fa-pencil-alt"></i>
+                    </a>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="12" class="text-center py-4">
+                    <div class="d-flex flex-column align-items-center">
+                      <i class="fas fa-folder-open fa-3x text-secondary mb-3"></i>
+                      <h6 class="text-secondary">Nenhum registro financeiro encontrado</h6>
+                      <p class="text-xs text-secondary">Tente ajustar seus critérios de filtro</p>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
-<div class="row">
-    <div class="col-md-6 my-4">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Resumo Financeiro - {{ paciente.nome }}</h5>
-                
-                <div class="mb-3">
-                    <h6 class="text-muted">Valor Teórico Bruto</h6>
-                    <p class="card-text font-weight-bold">
-                        R$ {{ resumo.receita_bruta|floatformat:2 }}
-                    </p>
-                </div>
-                
-                <div class="mb-3">
-                    <h6 class="text-muted">Valor Recebido</h6>
-                    <p class="card-text font-weight-bold">
-                        R$ {{ resumo.valor_recebido|floatformat:2 }}
-                    </p>
-                </div>
-    
-                <div class="mb-3">
-                    <h6 class="text-muted">Valor a Receber</h6>
-                    <p class="card-text font-weight-bold 
-                        {% if resumo.valor_a_receber > 0 %}
-                            text-success
-                        {% elif resumo.valor_a_receber == 0 %}
-                            text-warning
-                        {% else %}
-                            text-danger
-                        {% endif %}
-                    ">
-                        R$ {{ resumo.valor_a_receber|floatformat:2 }}
-                    </p>
-                </div>
-
-                <div class="mb-3">
-                    <h6 class="text-muted">Número de Consultas</h6>
-                    <p class="card-text font-weight-bold">
-                        {{ resumo.n_consultas }}
-                    </p>
-                </div>
-    
-                <div class="mb-3">
-                    <h6 class="text-muted">Consultas Pagas</h6>
-                    <p class="card-text font-weight-bold text-success">
-                        {{ resumo.n_consultas_pagas }}
-                    </p>
-                </div>
-    
-                <div class="mb-3">
-                    <h6 class="text-muted">Consultas Não Pagas</h6>
-                    <p class="card-text font-weight-bold text-danger">
-                        {{ resumo.n_consultas_nao_pagas }}
-                    </p>
-                </div>
-                <div class="mb-3">
-                    <h6 class="text-muted">Psicólogas</h6>
-                    <p class="card-text font-weight-bold">
-                        {% for psicologa in resumo.psicologas %}
-                            {{ psicologa }}{% if not forloop.last %}, {% endif %}
-                        {% endfor %}
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-6 my-4">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Filtrar Registros</h5>
-                <form method="POST" action="{% url 'financeiro_cliente_individual' id_paciente=paciente.id %}">
-                    {% csrf_token %}
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="data_inicio">Data de Início</label>
-                                <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ filtros.data_inicio|date:'Y-m-d' }}">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="data_fim">Data de Fim</label>
-                                <input type="date" class="form-control" id="data_fim" name="data_fim" value="{{ filtros.data_fim|date:'Y-m-d' }}">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="psicologa_id">Psicóloga</label>
-                                <select class="form-control" id="psicologa_id" name="psicologa_id">
-                                    <option value="">Todas</option>
-                                    {% for psicologa in psicologas %}
-                                    <option value="{{ psicologa.id }}" {% if filtros.psicologa_id == psicologa.id %}selected{% endif %}>{{ psicologa.nome }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="presenca">Status de Presença</label>
-                                <select class="form-control" id="presenca" name="presenca">
-                                    <option value="">Todos</option>
-                                    <option value="Sim" {% if filtros.presenca == 'Sim' %}selected{% endif %}>Presença Confirmada</option>
-                                    <option value="Nao" {% if filtros.presenca == 'Nao' %}selected{% endif %}>Falta</option>
-                                    <option value="Falta Inj" {% if filtros.presenca == 'Falta Inj' %}selected{% endif %}>Falta Injustificada</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="pagamento">Status de Pagamento</label>
-                                <select class="form-control" id="pagamento" name="pagamento">
-                                    <option value="">Todos</option>
-                                    <option value="pago" {% if filtros.pagamento == 'pago' %}selected{% endif %}>Pagos</option>
-                                    <option value="nao_pago" {% if filtros.pagamento == 'nao_pago' %}selected{% endif %}>Não Pagos</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="modalidade">Modalidade</label>
-                                <select class="form-control" id="modalidade" name="modalidade">
-                                    <option value="">Todas</option>
-                                    <option value="Presencial" {% if filtros.modalidade == 'Presencial' %}selected{% endif %}>Presencial</option>
-                                    <option value="Online" {% if filtros.modalidade == 'Online' %}selected{% endif %}>Online</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row mt-3">
-                        <div class="col-12 text-center">
-                            <button type="submit" class="btn btn-primary">Filtrar</button>
-                            <button type="reset" class="btn btn-secondary">Limpar</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-            <div class="card-body px-0 pt-0 pb-2">
-                <div class="table-responsive p-0">
-                    <table class="table align-items-center mb-0">
-                        <thead>
-                            <tr>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Data</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Dia Semana</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Psicóloga</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Modalidade</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Presença</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor ( R$ )</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor Pago ( R$ )</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Data Pagamento</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Forma Pagamento</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Observações</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for financeiro in financeiros %}
-                            <tr>
-                                <td class="align-middle text-center">{{ financeiro.data }}</td>
-                                <td class="align-middle text-center">{{ financeiro.dia_semana }}</td>
-                                <td class="align-middle text-center">{{ financeiro.horario }}</td>
-                                <td class="align-middle text-center">{{ financeiro.psicologa.nome }}</td>
-                                <td class="align-middle text-center">{{ financeiro.modalidade }}</td>
-                                <td class="align-middle text-center">
-                                    <h6 class="mb-0 text-sm text-center
-                                    {% if financeiro.presenca == 'Sim' %}
-                                    text-success
-                                    {% elif financeiro.presenca == 'Falta Injustificada' %}
-                                        text-warning
-                                    {% else %}
-                                        text-danger
-                                    {% endif %}
-                                    ">{{ financeiro.presenca }}</h6>
-                                </td>
-                                <td class="align-middle text-center">R$ {{ financeiro.valor|floatformat:2 }}</td>
-                                <td class="align-middle text-center">
-                                    {% if financeiro.valor_pagamento %}
-                                        R$ {{ financeiro.valor_pagamento|floatformat:2 }}
-                                    {% else %}
-                                        -
-                                    {% endif %}
-                                </td>
-                                <td class="align-middle text-center">
-                                    {% if financeiro.data_pagamento %}
-                                        {{ financeiro.data_pagamento }}
-                                    {% else %}
-                                        -
-                                    {% endif %}
-                                </td>
-                                <td class="align-middle text-center">
-                                    {% if financeiro.forma %}
-                                        {{ financeiro.forma }}
-                                    {% else %}
-                                        -
-                                    {% endif %}
-                                </td>
-                                <td class="align-middle text-center">
-                                    {% if financeiro.observacoes %}
-                                        {{ financeiro.observacoes }}
-                                    {% else %}
-                                        -
-                                    {% endif %}
-                                </td>
-                                <td class="align-middle text-center">
-                                    <a href="{% url 'editar_financeiro' id_financeiro=financeiro.id %}" class="text-secondary font-weight-bold text-xs">Editar</a>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="12" class="text-center">
-                                    <p class="text-secondary font-weight-bold text-xs">Nenhum registro financeiro encontrado.</p>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
+<!-- Initialize tooltips -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+  });
+</script>
 {% endblock content %}
