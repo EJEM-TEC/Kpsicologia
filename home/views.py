@@ -1971,21 +1971,19 @@ def consulta_financeira_pacientes(request):
                 
             receita_por_paciente = [p for p in receita_por_paciente if p['paciente__nome'].lower().find(nome_paciente.lower()) >= 0]
         
-        # Filtro por psicóloga
+        # Filtro por psicóloga - CORREÇÃO AQUI
         if psicologa_id:
-            receita_por_paciente = [p for p in receita_por_paciente if any(
-                financeiros.filter(
-                    paciente__nome=p['paciente__nome'], 
-                    psicologa_id=psicologa_id
-                ).exists()
-            )]
+            # Cria uma lista de IDs de pacientes que têm consultas com a psicóloga selecionada
+            pacientes_com_psicologa = financeiros.filter(
+                psicologa_id=psicologa_id
+            ).values_list('paciente__id', flat=True).distinct()
+            
+            # Filtra a lista de resultados para incluir apenas os pacientes da lista acima
+            receita_por_paciente = [p for p in receita_por_paciente if p['paciente__id'] in pacientes_com_psicologa]
         
         # Filtro por pacientes com dívida
         if apenas_devedores:
             receita_por_paciente = [p for p in receita_por_paciente if p['valor_a_receber'] > 0]
-
-        
-    print(receita_por_paciente)
 
     return render(request, 'pages/financeiro_paciente.html', {
         'receita_por_paciente': receita_por_paciente,
@@ -1998,6 +1996,7 @@ def consulta_financeira_pacientes(request):
         'pacientes_ativos': pacientes_ativos,
         'valor_recebido_mes': valor_recebido_mes,
     })
+
 
 @login_required(login_url='login1')
 def financeiro_cliente_individual(request, id_paciente):
