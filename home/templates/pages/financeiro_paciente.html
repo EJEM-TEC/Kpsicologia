@@ -174,147 +174,135 @@
         <div class="row">
             {% for paciente in receita_por_paciente %}
             {% if not paciente.desativado %}
-            <div class="col-md-6 my-3">
-                <div class="card">
-                    <div class="card-header pb-0 p-3">
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm border-0 h-100">
+                    <!-- Cabeçalho do Card -->
+                    <div class="card-header bg-white p-3 border-bottom-0">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h5 class="mb-0">
-                                    <a href="{% url 'financeiro_cliente_individual' paciente.paciente__id %}" class="text-dark">
+                                <h5 class="mb-1 font-weight-bold">
+                                    <a href="{% url 'financeiro_cliente_individual' paciente.paciente__id %}" class="text-dark text-decoration-none">
                                         {{ paciente.paciente__nome }}
                                     </a>
                                 </h5>
-                                <span class="badge bg-success me-1">Ativo</span>
-                                {% if paciente.valor_a_receber > 0 %}
-                                <span class="badge bg-danger">Pendência</span>
-                                {% endif %}
-                            </div>
-                            <div class="dropdown">
-                                <button class="btn btn-link text-secondary mb-0" id="dropdownMenuButton-{{ forloop.counter }}" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="fa fa-ellipsis-v text-xs"></i>
-                                </button>
-                                
+                                <div>
+                                    <span class="badge bg-success me-1 py-1 px-2">Ativo</span>
+                                    {% if paciente.valor_a_receber > 0 %}
+                                    <span class="badge bg-danger py-1 px-2">Pendência</span>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Corpo do Card -->
                     <div class="card-body p-3">
-                        <!-- Estrutura em grid para melhor organização -->
                         <div class="row">
-                            <!-- Coluna esquerda: Dados principais -->
+                            <!-- Coluna esquerda: informações financeiras -->
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <h6 class="text-muted small mb-1">Valor Teórico Bruto</h6>
-                                    <p class="card-text font-weight-bold mb-0">
+                                    <h6 class="text-muted small fw-bold mb-1">Valor Teórico Bruto</h6>
+                                    <p class="fw-bold mb-0 fs-6">
                                         R$ {{ paciente.receita_bruta|floatformat:2 }}
                                     </p>
                                 </div>
                                 
                                 <div class="mb-3">
-                                    <h6 class="text-muted small mb-1">Valor Recebido</h6>
-                                    <p class="card-text font-weight-bold mb-0">
+                                    <h6 class="text-muted small fw-bold mb-1">Valor Recebido</h6>
+                                    <p class="fw-bold mb-0 fs-6">
                                         R$ {{ paciente.valor_recebido|floatformat:2 }}
                                     </p>
                                 </div>
-                        
+                                
                                 <div class="mb-3">
-                                    <h6 class="text-muted small mb-1">Valor a Receber</h6>
-                                    <p class="card-text font-weight-bold mb-0 
+                                    <h6 class="text-muted small fw-bold mb-1">Valor a Receber</h6>
+                                    <p class="fw-bold mb-0 fs-6 
                                         {% if paciente.valor_a_receber > 0 %}
                                             text-danger
                                         {% elif paciente.valor_a_receber == 0 %}
-                                            text-warning
+                                            text-success
                                         {% else %}
                                             text-success
                                         {% endif %}">
                                         R$ {{ paciente.valor_a_receber|floatformat:2 }}
                                     </p>
                                 </div>
-
+                                
                                 <div class="mb-3">
-                                    <h6 class="text-muted small mb-1">Crédito</h6>
-                                    <p class="card-text font-weight-bold mb-0 
+                                    <h6 class="text-muted small fw-bold mb-1">Crédito</h6>
+                                    <p class="fw-bold mb-0 fs-6 
                                         {% if paciente.valor_credito > 0 %}
                                             text-success
                                         {% else %}
                                             text-secondary
                                         {% endif %}">
-                                        R$ {{ paciente.valor_credito|floatformat:2 }}
+                                        R$ 0,00
                                     </p>
                                 </div>
                             </div>
-
-                            <!-- Coluna direita: Dados de consulta -->
+                            
+                            <!-- Coluna direita: estatísticas de consultas -->
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <h6 class="text-muted small mb-1">Consultas</h6>
-                                    <p class="card-text font-weight-bold mb-0">
+                                    <h6 class="text-muted small fw-bold mb-1">Consultas</h6>
+                                    <p class="fw-bold mb-0 fs-6">
                                         {{ paciente.n_consultas }}
                                     </p>
                                 </div>
-                        
+                                
                                 <div class="mb-3">
-                                    <h6 class="text-muted small mb-1">Consultas Pagas</h6>
-                                    <p class="card-text font-weight-bold mb-0 text-success">
+                                    <h6 class="text-muted small fw-bold mb-1">Consultas Pagas</h6>
+                                    <p class="fw-bold mb-0 fs-6 text-success">
                                         {{ paciente.n_consultas_pagas }}
                                     </p>
                                 </div>
-                        
+                                
                                 <div class="mb-3">
-                                    <h6 class="text-muted small mb-1">Consultas Não Pagas</h6>
-                                    <p class="card-text font-weight-bold mb-0 text-danger">
+                                    <h6 class="text-muted small fw-bold mb-1">Consultas Não Pagas</h6>
+                                    <p class="fw-bold mb-0 fs-6 text-danger">
                                         {{ paciente.n_consultas_nao_pagas }}
                                     </p>
                                 </div>
                             </div>
                         </div>
-
+                        
                         <hr class="my-3">
-
-                        <!-- Seção de Psicólogas -->
+                        
+                        <!-- Psicólogas -->
                         <div class="mb-0">
-                            <h6 class="text-muted small mb-2">Psicólogas</h6>
-
-                            <!-- Se não houver dívidas, mostrar todas as psicólogas normalmente -->
-                            {% if paciente.valor_a_receber <= 0 %}
-                                <div>
-                                    {% for psicologa in paciente.psicologas %}
-                                        <span class="badge bg-light text-dark p-2 mb-1">{{ psicologa }}</span>
-                                        {% if not forloop.last %} {% endif %}
-                                    {% endfor %}
-                                </div>
-                            {% else %}
-                                <!-- Se houver dívidas, mostrar separado por status -->
+                            <h6 class="text-muted small fw-bold mb-2">Psicólogas</h6>
+                            
+                            {% if paciente.valor_a_receber > 0 %}
+                                <!-- Com pendências - separar por status -->
                                 <div class="row">
-                                    <!-- Psicólogas com dívida -->
-                                    {% if paciente.dividas_por_psicologa %}
-                                        <div class="col-12 mb-2">
-                                            <p class="text-muted small mb-1">Com dívida:</p>
-                                            {% for divida in paciente.dividas_por_psicologa %}
-                                                <div class="d-inline-block">
-                                                    <span class="badge bg-danger text-white p-2 mb-1">
-                                                        {{ divida.psicologa }} 
-                                                        <span class="ms-1 fw-bold">R$ {{ divida.valor|floatformat:2 }}</span>
-                                                    </span>
-                                                </div>
-                                                {% if not forloop.last %} {% endif %}
+                                    {% if paciente.psicologas %}
+                                    <div class="col-12 mb-2">
+                                        <p class="text-muted small mb-1">Com dívida:</p>
+                                        <div>
+                                            {% for psicologa in paciente.psicologas %}
+                                                <span class="badge bg-danger text-white p-2 me-1 mb-1">
+                                                    {{ psicologa }}
+                                                    <span class="ms-1 fw-bold">R$ {{ paciente.valor_a_receber|floatformat:2 }}</span>
+                                                </span>
                                             {% endfor %}
                                         </div>
-                                    {% endif %}
-                                    
-                                    <!-- Psicólogas sem dívida -->
-                                    <div class="col-12">
-                                        <p class="text-muted small mb-1">Sem dívida:</p>
-                                        {% for psicologa in paciente.psicologas_sem_divida %}
-                                            <span class="badge bg-success text-white p-2 mb-1">{{ psicologa }}</span>
-                                            {% if not forloop.last %} {% endif %}
-                                        {% endfor %}
                                     </div>
+                                    {% endif %}
+                                    <!-- Se houver psicólogas sem dívida, mostrar aqui -->
+                                </div>
+                            {% else %}
+                                <!-- Sem pendências - mostrar todas as psicólogas -->
+                                <div>
+                                    {% for psicologa in paciente.psicologas %}
+                                        <span class="badge bg-light text-dark p-2 me-1 mb-1">
+                                            {{ psicologa }}
+                                        </span>
+                                    {% endfor %}
                                 </div>
                             {% endif %}
                         </div>
                     </div>
                 </div>
-            </div>
             {% endif %}
             {% endfor %}
         </div>

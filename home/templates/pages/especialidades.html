@@ -59,7 +59,7 @@
                   {{ especialidade.especialidade }}
                 </td>
                 <td class="align-middle text-center">
-                  <a href="#">Remover</a>
+                  <a href="{% url 'deletar_especialidade' especialidade.id %}">Remover</a>
                 </td>
               </tr>
               {% endfor %}

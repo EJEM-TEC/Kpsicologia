@@ -1138,6 +1138,21 @@ def cadastrar_especialidade(request):
                   { 'especialidades': especialidades })
 
 @login_required(login_url='login1')
+def deletar_especialidade(request, especialidade_id):
+
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+
+    especialidade = get_object_or_404(Especialidade, id=especialidade_id)
+
+    if request.method == 'POST':
+        especialidade.delete()
+
+        return redirect('especialidades')
+    
+    return render(request, 'pages/deletar_especialidade.html', {'especialidade': especialidade})
+
+@login_required(login_url='login1')
 def cadastrar_publico(request):
 
     if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
@@ -1869,91 +1884,138 @@ def consulta_financeira_pacientes(request):
         return render(request, 'pages/error_permission.html')
     
     financeiros = Financeiro.objects.all()
-    pacientes = Paciente.objects.all()
+    pacientes = Paciente.objects.filter(deletado=False)
     psicologas = Psicologa.objects.all()
-    
+
     # Opção de filtro "apenas devedores"
     apenas_devedores = request.POST.get('apenas_devedores') == 'on'
 
     # Base da consulta para receita por paciente
     receita_query = financeiros.values('paciente__nome', 'paciente__id')
-    
-    # Agregação de dados básicos
+
+    # Primeiro, obtenha as agregações básicas
     receita_por_paciente = receita_query.annotate(
         receita_bruta=Sum('valor', output_field=DecimalField(max_digits=10, decimal_places=2)),
-        valor_recebido=ExpressionWrapper(
-            Sum(Coalesce(F('valor_pagamento'), 0)),
+        valor_recebido=Sum(
+            Coalesce('valor_pagamento', 0),
             output_field=DecimalField(max_digits=10, decimal_places=2)
         ),
-        valor_a_receber=ExpressionWrapper(
-            Sum(F('valor')) - Sum(Coalesce(F('valor_pagamento'), 0)),
-            output_field=DecimalField(max_digits=10, decimal_places=2)
-        ),
-        # Novo campo para crédito - será zero se não houver crédito, ou o valor do crédito
-        # Usando multiplicação por -1 em vez de Abs para valores negativos
-        valor_credito=ExpressionWrapper(
-            Case(
-                When(
-                    valor_a_receber__lt=0, 
-                    then=(Sum(F('valor')) - Sum(Coalesce(F('valor_pagamento'), 0))) * -1
-                ),
-                default=Value(0),
-                output_field=DecimalField(max_digits=10, decimal_places=2)
-            ),
-            output_field=DecimalField(max_digits=10, decimal_places=2)
-        ),
-        n_consultas=Count('id', output_field=DecimalField(max_digits=10, decimal_places=2)),
-        n_consultas_pagas=ExpressionWrapper(
-            Count('id', filter=Q(valor_pagamento__gte=F('valor'))),
-            output_field=DecimalField(max_digits=10, decimal_places=2)
-        ),
-        n_consultas_nao_pagas=ExpressionWrapper(
-            Count('id', filter=Q(valor_pagamento__lt=F('valor'))),
-            output_field=DecimalField(max_digits=10, decimal_places=2)
-        ),
+        # Total de consultas
+        n_consultas=Count('id'),
+        # Lista de psicólogas distintas para o paciente
         psicologas=ArrayAgg('psicologa__nome', distinct=True)
     ).order_by('paciente__nome')
-    
-    # Cálculo de dívidas por psicóloga para cada paciente
+
+    # Para cada paciente, calcule os valores e contagens de consultas manualmente
     for paciente_data in receita_por_paciente:
-        paciente_nome = paciente_data['paciente__nome']
+        paciente_id = paciente_data['paciente__id']
+        financeiros_paciente = financeiros.filter(paciente__id=paciente_id)
         
-        # Cálculo das dívidas por psicóloga
-        dividas = financeiros.filter(
-            paciente__nome=paciente_nome,
-            valor_pagamento__lt=F('valor')  # Consultas não pagas ou parcialmente pagas
-        ).values('psicologa__nome').annotate(
-            valor=Sum(F('valor') - Coalesce(F('valor_pagamento'), 0), 
-                    output_field=DecimalField(max_digits=10, decimal_places=2))
-        )
+        # Calcular valor a receber e crédito
+        receita_bruta = paciente_data['receita_bruta'] or Decimal('0.00')
+        valor_recebido = paciente_data['valor_recebido'] or Decimal('0.00')
         
-        # Lista de psicólogas com dívidas
-        dividas_por_psicologa = [
-            {'psicologa': item['psicologa__nome'], 'valor': item['valor']} 
-            for item in dividas if item['valor'] > 0
-        ]
+        if valor_recebido > receita_bruta:
+            paciente_data['valor_a_receber'] = Decimal('0.00')
+            paciente_data['valor_credito'] = valor_recebido - receita_bruta
+        else:
+            paciente_data['valor_a_receber'] = receita_bruta - valor_recebido
+            paciente_data['valor_credito'] = Decimal('0.00')
+        
+        # Contar consultas pagas e não pagas
+        consultas_pagas = 0
+        consultas_nao_pagas = 0
+        
+        for f in financeiros_paciente:
+            # Valor da consulta
+            valor = f.valor or Decimal('0.00')
+            # Valor pago
+            valor_pagamento = f.valor_pagamento or Decimal('0.00')
+            # Verifica se a presença é relevante (Sim ou Falta Injustificada)
+            presenca_relevante = f.presenca in ['Sim', 'Falta Inj']
+            
+            # Se a presença é relevante para pagamento
+            if presenca_relevante:
+                # Se pagou o valor integral
+                if valor_pagamento >= valor:
+                    consultas_pagas += 1
+                else:
+                    # Se não pagou integralmente, é uma consulta não paga
+                    consultas_nao_pagas += 1
+            else:
+                # Faltas justificadas não contam como não pagas
+                if f.presenca == 'Nao':
+                    consultas_pagas += 1
+        
+        # Atualiza as contagens no objeto do paciente
+        paciente_data['n_consultas_pagas'] = consultas_pagas
+        paciente_data['n_consultas_nao_pagas'] = consultas_nao_pagas
+        
+        # Calcular dívidas por psicóloga
+        # Nova implementação: cálculo direto de dívidas por psicóloga
+        dividas_por_psicologa = []
+        
+        # Obter todas as psicólogas que atenderam este paciente
+        todas_psicologas = Psicologa.objects.filter(
+            financeiro__paciente__id=paciente_id
+        ).distinct()
+        
+        # Para cada psicóloga, verificar se existe dívida específica
+        for psicologa in todas_psicologas:
+            # Consultas relevantes desta psicóloga com este paciente
+            consultas_relevantes = Financeiro.objects.filter(
+                paciente__id=paciente_id,
+                psicologa=psicologa
+            ).filter(
+                # Consultas que geram cobrança: presença ou falta injustificada
+                Q(presenca='Sim') | Q(presenca='FALTA') | Q(presenca='Falta Inj')
+            )
+            
+            # Calcular o total que deveria ser pago
+            total_devido = sum([
+                c.valor or Decimal('0.00') for c in consultas_relevantes
+            ])
+            
+            # Calcular o total efetivamente pago
+            total_pago = sum([
+                c.valor_pagamento or Decimal('0.00') for c in consultas_relevantes
+            ])
+            
+            # Calcular a dívida real com esta psicóloga específica
+            divida_real = max(Decimal('0.00'), total_devido - total_pago)
+            
+            # Adicionar à lista apenas se houver dívida real
+            if divida_real > Decimal('0.00'):
+                dividas_por_psicologa.append({
+                    'psicologa': psicologa.nome,
+                    'valor': divida_real
+                })
+        
+        # Atribuir a lista de dívidas calculadas corretamente ao paciente
         paciente_data['dividas_por_psicologa'] = dividas_por_psicologa
-        
-        # Lista de nomes de psicólogas com dívidas
+    
         psicologas_com_divida = [d['psicologa'] for d in dividas_por_psicologa]
         
-        # Lista de psicólogas sem dívidas (todas as psicólogas MENOS as que têm dívida)
+        # Lista de psicólogas sem dívidas
         psicologas_sem_divida = [
             p for p in paciente_data['psicologas'] if p not in psicologas_com_divida
         ]
         paciente_data['psicologas_sem_divida'] = psicologas_sem_divida
 
-    total_bruto = financeiros.aggregate(Sum('valor'))['valor__sum'] or 0
-    total_recebido = financeiros.aggregate(Sum('valor_pagamento'))['valor_pagamento__sum'] or 0
+    # Calcular totais gerais
+    total_bruto = financeiros.aggregate(Sum('valor'))['valor__sum'] or Decimal('0.00')
+    total_recebido = financeiros.aggregate(Sum('valor_pagamento'))['valor_pagamento__sum'] or Decimal('0.00')
+    valor_a_receber = max(Decimal('0.00'), total_bruto - total_recebido)
 
-    # Calcular o valor a receber
-    valor_a_receber = total_bruto - total_recebido
+    # Pacientes Ativos
+    pacientes_ativos = pacientes.count()
 
-    #Pacientes Ativos
-    pacientes_ativos = Paciente.objects.filter(deletado=False).order_by('nome').count()
-    
-    #Valor recebido no mês atual
-    valor_recebido_mes = financeiros.filter(data__month=datetime.now().month).aggregate(Sum('valor_pagamento'))['valor_pagamento__sum'] or 0
+    # Valor recebido no mês atual
+    hoje = datetime.now()
+    valor_recebido_mes = financeiros.filter(
+        data_pagamento__year=hoje.year,
+        data_pagamento__month=hoje.month
+    ).aggregate(Sum('valor_pagamento'))['valor_pagamento__sum'] or Decimal('0.00')
 
     # Aplicação dos filtros
     if request.method == 'POST':
@@ -1962,41 +2024,74 @@ def consulta_financeira_pacientes(request):
 
         # Filtro por nome de paciente
         if nome_paciente:
-            try:
-                paciente = Paciente.objects.get(nome=nome_paciente)
-            except Paciente.DoesNotExist or paciente.deletado == True:
+            receita_por_paciente = [
+                p for p in receita_por_paciente 
+                if p['paciente__nome'] and nome_paciente.lower() in p['paciente__nome'].lower()
+            ]
+            
+            # Se não encontrou nenhum paciente com esse nome
+            if not receita_por_paciente:
                 return render(request, 'pages/error_paciente_nao_encontrado_financeiro.html', {
                     'nome_cliente': nome_paciente
                 })
-                
-            receita_por_paciente = [p for p in receita_por_paciente if p['paciente__nome'].lower().find(nome_paciente.lower()) >= 0]
         
-        # Filtro por psicóloga - CORREÇÃO AQUI
+        # Filtro por psicóloga
         if psicologa_id:
-            # Cria uma lista de IDs de pacientes que têm consultas com a psicóloga selecionada
-            pacientes_com_psicologa = financeiros.filter(
-                psicologa_id=psicologa_id
-            ).values_list('paciente__id', flat=True).distinct()
+            filtered_pacientes = []
+            for p in receita_por_paciente:
+                # Verifica se esta psicóloga aparece nas consultas deste paciente
+                has_psicologa = financeiros.filter(
+                    paciente__id=p['paciente__id'],
+                    psicologa__id=psicologa_id
+                ).exists()
+                
+                if has_psicologa:
+                    filtered_pacientes.append(p)
             
-            # Filtra a lista de resultados para incluir apenas os pacientes da lista acima
-            receita_por_paciente = [p for p in receita_por_paciente if p['paciente__id'] in pacientes_com_psicologa]
+            receita_por_paciente = filtered_pacientes
         
         # Filtro por pacientes com dívida
         if apenas_devedores:
             receita_por_paciente = [p for p in receita_por_paciente if p['valor_a_receber'] > 0]
 
+    # Formatar os valores decimais para evitar problemas de exibição
+    for paciente in receita_por_paciente:
+        paciente['receita_bruta'] = round(paciente['receita_bruta'] or Decimal('0.00'), 2)
+        paciente['valor_recebido'] = round(paciente['valor_recebido'] or Decimal('0.00'), 2)
+        paciente['valor_a_receber'] = round(paciente['valor_a_receber'] or Decimal('0.00'), 2)
+        paciente['valor_credito'] = round(paciente['valor_credito'] or Decimal('0.00'), 2)
+        
+        # Formatar valores das dívidas
+        for divida in paciente['dividas_por_psicologa']:
+            divida['valor'] = round(divida['valor'], 2)
+        
+        # Verificar consistência: se valor a receber > 0, deve haver pelo menos uma consulta não paga
+        if paciente['valor_a_receber'] > 0 and paciente['n_consultas_nao_pagas'] == 0:
+            # Garante que haja pelo menos uma consulta não paga se houver valor a receber
+            paciente['n_consultas_nao_pagas'] = max(1, paciente['n_consultas_nao_pagas'])
+        
+        # Verificar consistência: se todas as consultas estão pagas, não deve haver valor a receber
+        if paciente['n_consultas_nao_pagas'] == 0 and paciente['valor_a_receber'] > 0:
+            paciente['valor_a_receber'] = Decimal('0.00')
+        
+        # Verificar consistência: se há valor a receber, deve haver consultas não pagas
+        if paciente['valor_a_receber'] > 0 and paciente['n_consultas_nao_pagas'] == 0:
+            paciente['n_consultas_nao_pagas'] = 1
+            # Ajusta o total de consultas pagas se necessário
+            if paciente['n_consultas_pagas'] + paciente['n_consultas_nao_pagas'] > paciente['n_consultas']:
+                paciente['n_consultas_pagas'] = paciente['n_consultas'] - paciente['n_consultas_nao_pagas']
+
     return render(request, 'pages/financeiro_paciente.html', {
         'receita_por_paciente': receita_por_paciente,
         'pacientes': pacientes,
         'psicologas': psicologas,
-        'apenas_devedores': apenas_devedores,  # Enviar para template
-        'total_bruto': total_bruto,
-        'total_recebido': total_recebido,
-        'valor_a_receber': valor_a_receber,
+        'apenas_devedores': apenas_devedores,
+        'total_bruto': round(total_bruto, 2),
+        'total_recebido': round(total_recebido, 2),
+        'valor_a_receber': round(valor_a_receber, 2),
         'pacientes_ativos': pacientes_ativos,
-        'valor_recebido_mes': valor_recebido_mes,
+        'valor_recebido_mes': round(valor_recebido_mes, 2),
     })
-
 
 @login_required(login_url='login1')
 def financeiro_cliente_individual(request, id_paciente):
