@@ -92,7 +92,7 @@
                         {% for agenda in agendas %}
                             {% if agenda.dia_semana == dia  %}
                             <tr style="background-color: {{agenda.psicologo.cor}};">
-                                <td class="align-middle text-center text-white">{{ agenda.horario }}</td>
+                                <td class="align-middle text-center text-white">{{ agenda.horario|time:"H:i" }}</td>
                                 {% if agenda.semanal %}
                                 <td class="align-middle text-center text-white"></td>
                                 {% else %}

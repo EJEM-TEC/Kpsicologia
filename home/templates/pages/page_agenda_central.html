@@ -253,7 +253,7 @@
                           {% if consulta.sala == sala and consulta.dia_semana == dia %}
                             {% if consulta.psicologo %}
                               <tr style="background-color: {{ consulta.psicologo.cor }};">
-                                <td class="align-middle text-center text-white">{{ consulta.horario }}</td>
+                                <td class="align-middle text-center text-white">{{ consulta.horario|time:"H:i" }}</td>
                                 {% if consulta.semanal %}
                                 <td class="align-middle text-center text-white">{{ consulta.semanal }}</td>
                                 {% else %}
@@ -267,7 +267,7 @@
                               </tr>
                             {% else %}
                               <tr style="background-color: #f8f9fa;">
-                                <td class="align-middle text-center">{{ consulta.horario }}</td>
+                                <td class="align-middle text-center">{{ consulta.horario|time:"H:i" }}</td>
                                 {% if consulta.semanal %}
                                 <td class="align-middle text-center">{{ consulta.semanal }}</td>
                                 {% else %}
@@ -366,7 +366,7 @@
                         {% for consulta in consultas_online %}
                           {% if consulta.psicologo == psicologa and consulta.dia_semana == dia %}
                             <tr style="background-color: {{ consulta.psicologo.cor }};">
-                              <td class="align-middle text-center text-white">{{ consulta.horario }}</td>
+                              <td class="align-middle text-center text-white">{{ consulta.horario|time:"H:i" }}</td>
                               {% if consulta.semanal %}
                               <td class="align-middle text-center text-white">{{ consulta.semanal }}</td>
                               {% else %}

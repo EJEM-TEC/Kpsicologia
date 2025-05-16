@@ -51,6 +51,7 @@ urlpatterns = [
     path("cadastrar_salas/<int:id_sala>/update/", views.update_sala, name="update_sala"),
     path("cadastrar_salas/<int:id_sala>/delete/", views.delete_sala, name="delete_sala"),
     path('salas/<int:id_sala>/disponibilidade/', views.definir_horario_sala, name='horario_sala'),
+    path('salas/<int:id_sala>/disponibilidade/<int:horario_id>/delete/', views.delete_horario_sala, name='delete_horario_sala'),
     
     #PERFIL DE USUÁRIO
     path('perfil_usuario/', views.perfil, name='perfil_usuario'),

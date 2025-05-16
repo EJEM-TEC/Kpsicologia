@@ -187,7 +187,12 @@ def users(request):
         group, created = Group.objects.get_or_create(name=cargo)
         user.groups.add(group)
 
-            # Salva o usuário
+        #Se for um administrador será um superuser
+        if cargo == 'administrador':
+            user.is_superuser = True
+            user.is_staff = True
+
+        # Salva o usuário
         user.save()
 
         assign_role(user, cargo)
@@ -483,6 +488,21 @@ def definir_horario_sala(request, id_sala):
         'horarios_agrupados': horarios_agrupados,
         'sala': sala
     })
+
+@login_required(login_url='login1')
+def delete_horario_sala(request, id_sala, horario_id):
+
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+
+    sala = get_object_or_404(Sala, id_sala=id_sala)
+    horario = get_object_or_404(Consulta, id=horario_id)
+
+    if request.method == 'POST':
+        horario.delete()
+        return redirect('horario_sala', id_sala=sala.id_sala)
+
+    return render(request, 'pages/delete_horario_sala.html', {'sala': sala, 'horario': horario})
 
 
 # AGENDA CENTRAL

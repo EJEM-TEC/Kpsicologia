@@ -120,7 +120,7 @@
                             <tbody>
                                 {% for agenda in horarios %}
                                 <tr>
-                                    <td style="background-color: {{ agenda.psicologo.cor }};" class="align-middle text-center text-white;">{{ agenda.horario }}</td>
+                                    <td style="background-color: {{ agenda.psicologo.cor }};" class="align-middle text-center text-white;">{{ agenda.horario|time:"H:i" }}</td>
                                     <td style="background-color: {{ agenda.psicologo.cor }};" class="align-middle text-center text-white">{{ agenda.sala.numero_sala }}</td>
                                     {% if agenda.semanal %}
                                     <td style="background-color: {{ agenda.psicologo.cor }};" class="align-middle text-center text-white"></td>

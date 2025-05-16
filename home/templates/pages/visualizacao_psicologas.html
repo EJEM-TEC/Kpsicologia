@@ -53,7 +53,7 @@
                       {{item.psicologo.ultima_atualizacao_agenda}}
                     </p>
                   </div>
-                  
+                  {% if user.is_superuser %}
                   <div class="mb-2">
                     <div class="d-flex">
                       <a href="{% url 'psicoEspecialidades' psicologo_id=item.psicologo.id %}" class="badge badge-sm bg-gradient-light text-dark me-2 mb-1">Especialização</a>
@@ -61,6 +61,7 @@
                       <a href="{% url 'psicoUnidades' psicologo_id=item.psicologo.id %}" class="badge badge-sm bg-gradient-light text-dark mb-1">Unidade</a>
                     </div>
                   </div>
+                  {% endif %}
                   
                   <hr class="horizontal dark my-3">
                   

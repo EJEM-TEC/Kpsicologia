@@ -1,0 +1,30 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+
+
+    <div class="container-fluid py-4">
+      <div class="col-6">
+        <div>
+          <h2>
+            Excluir Horário da Sala
+          </h2>
+        </div>
+      </div>
+      <section class="section dashboard">
+        <div class="card">
+          <div class="card-body">
+            <form method="post"> {% csrf_token %}
+              <h5 class="card-title">Deletando horário da sala {{ sala.numero_sala }}</h5>
+              <p class="card-text">Tem certeza que quer deletar esse horário da sala?</p>
+              <p class="card-text"><button type="submit" class="btn btn-danger">Confirmar</button></p>
+              <p class="card-text"><a href="{% url 'horario_sala' sala.id_sala %}" class="btn btn-secondary">Cancelar</a></p>
+            </form>
+          </div>
+        </div><!-- End Card with titles, buttons, and links -->
+      </section>
+      
+
+{% endblock content %}
+

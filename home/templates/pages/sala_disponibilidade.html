@@ -90,9 +90,9 @@
                             <tbody>
                                 {% for agenda in horarios %}
                                 <tr>
-                                    <td class="align-middle text-center">{{ agenda.horario }}</td>
+                                    <td class="align-middle text-center">{{ agenda.horario|time:"H:i" }}</td>
                                     <td class="align-middle text-center">
-                                        <a href="#" class="text-secondary font-weight-bold text-xs text-center " data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
+                                        <a href="{% url 'delete_horario_sala' id_sala=agenda.sala.id_sala horario_id=agenda.id %}" class="text-secondary font-weight-bold text-xs text-center " data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
                                     </td>
                                 </tr>
                                 {% endfor %}
