@@ -9,7 +9,7 @@ class Usuario(models.Model):
     email = models.EmailField()
     cargo = models.CharField(max_length=100)
     telefone = models.IntegerField()
-    rg = models.CharField(max_length=12)
+    rg = models.CharField(max_length=100)
 
     def __str__(self):
         return self.nome
@@ -36,8 +36,8 @@ class Sala(models.Model):
         return f"Sala {self.numero_sala} - {self.cor_sala}"
     
 class Psicologa(models.Model):
-    nome=models.CharField(max_length=32)
-    cor = models.CharField(max_length=16)
+    nome=models.CharField(max_length=100)
+    cor = models.CharField(max_length=100)
     email=models.CharField(max_length=100)
     abordagem = models.CharField(max_length=100)
     senha=models.CharField(max_length=100)

@@ -937,7 +937,7 @@ def psicologa(request):
         psicologa.save()
         #usuario.save()
 
-        redirect('psicologa')
+        return redirect('psicologa')
 
     # Obtém o grupo 'psicologa' ou retorna 404 se não existir
     
