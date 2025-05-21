@@ -29,8 +29,9 @@ class Sala(models.Model):
     cor_sala = models.CharField(max_length=16)
     #numero_sala = models.PositiveIntegerField()
     numero_sala = models.CharField(max_length=100)
-
     id_unidade = models.ForeignKey(Unidade, on_delete=models.CASCADE, related_name='salas')
+    horario_inicio = models.TimeField()
+    horario_fim = models.TimeField()
 
     def __str__(self):
         return f"Sala {self.numero_sala} - {self.cor_sala}"

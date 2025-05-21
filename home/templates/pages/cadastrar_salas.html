@@ -46,12 +46,29 @@
                               </select>
                           </div>
                       </div>
-                        <div class="col-md-6">
+                        
+                  </div>
+                  <div class="row">
+                      <div class="col-md-6">
+                          <div class="form-group">
+                              <label for="id_horario_inicio">Horário de Início</label>
+                              <input type="time" class="form-control" id="id_horario_inicio" name="id_horario_inicio" required>
+                          </div>
+                      </div>
+                      <div class="col-md-6">
+                          <div class="form-group">
+                              <label for="id_horario_fim">Horário de Fim</label>
+                              <input type="time" class="form-control" id="id_horario_fim" name="id_horario_fim" required>
+                          </div>
+                      </div>
+                  </div>
+                  <div class="row">
+                      <div class="col-md-6">
                           <div class="d-flex justify-content-center gap-4 align-middle">
                             <button type="submit" class="btn bg-gradient-primary">Registrar</button>
                             <button type="reset" class="btn bg-gradient-secondary">Resetar</button>
                           </div>
-                        </div>
+                      </div>
                   </div>
               </div>
             </form>
@@ -73,7 +90,7 @@
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Número da sala</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Cor da sala</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Unidade</th>
-                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horários</th>
+                      <!-- <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horários</th> -->
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Editar</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Excluir</th>
                     </tr>
@@ -94,10 +111,10 @@
                       <td class="align-middle text-center">
                         <p class="text-xs font-weight-bold mb-0 ">{{sala.id_unidade.nome_unidade}}</p>
                       </td>
-                      <td class="align-middle text-center">
+                      <!-- <td class="align-middle text-center">
                         <a href="{% url 'horario_sala' id_sala=sala.id_sala %}" class="btn btn-warning" data-toggle="tooltip" data-original-title="Edit user">
                           <i class="bi bi-pencil-fill"></i>
-                        </a> </td>
+                        </a> </td> -->
                       <td class="align-middle text-center">
                         <a href="{% url 'update_sala' id_sala=sala.id_sala %}" class="btn btn-warning" data-toggle="tooltip" data-original-title="Edit user">
                           <i class="bi bi-pencil-fill"></i>

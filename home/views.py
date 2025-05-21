@@ -375,6 +375,8 @@ def cadastrar_sala(request):
         cor_sala = request.POST.get('cor_sala')
         numero_sala = request.POST.get('numero_sala')
         id_unidade = request.POST.get('id_unidade')
+        horario_inicio = request.POST.get('horario_inicio')
+        horario_fim = request.POST.get('horario_fim')
 
         # Verifique se a unidade existe
         unidade = get_object_or_404(Unidade, id_unidade=id_unidade)
@@ -384,6 +386,8 @@ def cadastrar_sala(request):
             Sala.objects.create(
                 cor_sala=cor_sala,
                 numero_sala=numero_sala,
+                horario_inicio=horario_inicio,
+                horario_fim=horario_fim,
                 id_unidade=unidade  # Use a instância da unidade
             )
             return redirect('cadastrar_salas')  # Redirecionar após a criação
@@ -673,6 +677,10 @@ def psico_agenda(request, psicologo_id):
                 return render(request, 'pages/error_cadastro.html', {
                     'psicologo': psicologa
                 })
+        else:
+            return render(request, 'pages/error_cadastro.html', {
+                'psicologo': psicologa
+            })
 
         return redirect('psico_agenda', psicologo_id=psicologo_id)
 
@@ -799,18 +807,20 @@ def definir_disponibilidade_psico(request, psicologo_id):
 
         # Loop para inserir os horários de acordo com a quantidade de atendimentos
         for i in range(qtd_atendimentos):
-            if Consulta.objects.filter(
-                dia_semana=dia_semana,
-                horario=horario_atual,
-                sala=sala
-            ).exists():
+            # if Consulta.objects.filter(
+            #     dia_semana=dia_semana,
+            #     horario=horario_atual,
+            #     sala=sala
+            # ).exists():
                 
-                consulta = Consulta.objects.get(
+                consulta = Consulta.objects.create(
                     dia_semana=dia_semana,
                     horario=horario_atual,
-                    sala=sala
+                    sala=sala,
+                    psicologo=psicologa,
+                    semanal="",
+                    quinzenal="",
                 )
-                consulta.psicologo = psicologa
                 
                 if semanal_quinzenal == 'Semanal':
                     consulta.semanal = "Semanal"
@@ -820,12 +830,12 @@ def definir_disponibilidade_psico(request, psicologo_id):
                     consulta.save()
 
                 consulta.save()
-            else:
-                return render(request, 'pages/error_disponibilidade_sala.html', {
-                    'psicologo': psicologa,
-                })
+            # else:
+            #     return render(request, 'pages/error_disponibilidade_sala.html', {
+            #         'psicologo': psicologa,
+            #     })
             # Incrementa o horário atual pelo tempo de atendimento (em minutos)
-            horario_atual = (datetime.combine(datetime.today(), horario_atual) + timedelta(minutes=tempo_atendimento)).time()
+                horario_atual = (datetime.combine(datetime.today(), horario_atual) + timedelta(minutes=tempo_atendimento)).time()
 
         return redirect('psico_disponibilidade', psicologo_id=psicologa.id)  # Altere para a view de sucesso
 

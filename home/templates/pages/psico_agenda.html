@@ -2,156 +2,254 @@
 {% load static %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        {% if user.is_superuser %}
-            <button type="button" class="btn bg-gradient-primary"><a class="text-white" href="{% url 'visualizar_psicologas' %}">
-                Voltar
-            </a></button>
-        {% else %}
-            <button type="button" class="btn bg-gradient-primary"><a class="text-white" href="{% url 'index' %}">
-                Voltar
-            </a></button>
-        {% endif %}
-    </div>
-  </div>
-<div class="row">
-    <div class="col-12">
-        <div class="card mb-4">
-            <div class="card-header pb-0">
-                <div class="card-body p-4">
-                    <h6>Última atualização da agenda: 
-                        {% if verificaco_agenda %}
-                            <span class="text-success fw-bold"> {{ psicologo.ultima_atualizacao_agenda }}</span>
-                        {% else %}
-                           <span class="text-red fw-bold"> {{ psicologo.ultima_atualizacao_agenda }}</span>
-                        {% endif %}
-                    </h6>
-                </div>
+<div class="container-fluid py-3">
+    <!-- Botão de Voltar e Cabeçalho da Página -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                {% if user.is_superuser %}
+                    <button type="button" class="btn btn-outline-primary btn-sm px-3">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        <a class="text-primary" href="{% url 'visualizar_psicologas' %}">Voltar</a>
+                    </button>
+                {% else %}
+                    <button type="button" class="btn btn-outline-primary btn-sm px-3">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        <a class="text-primary" href="{% url 'index' %}">Voltar</a>
+                    </button>
+                {% endif %}
+                <h4 class="m-0 fw-bold text-primary">Agenda de <span class="text-dark">{{psicologo.nome}}</span></h4>
+                <div></div> <!-- Espaço para manter o cabeçalho centralizado -->
+            </div>
         </div>
     </div>
-</div>
-<div class="row">
-    <div class="col-12">
-        <div class="card mb-4">
-            <div class="card-header pb-0">
-                <h6>Agenda de {{psicologo.nome}}</h6>
+
+    <!-- Status da agenda com ícone visual -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center">
+                        {% if verificaco_agenda %}
+                            <div class="icon icon-shape bg-success text-white rounded-circle shadow me-3">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs mb-0">Última atualização da agenda</p>
+                                <h6 class="text-success mb-0 fw-bold">{{ psicologo.ultima_atualizacao_agenda }}</h6>
+                            </div>
+                        {% else %}
+                            <div class="icon icon-shape bg-danger text-white rounded-circle shadow me-3">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs mb-0">Atualização pendente</p>
+                                <h6 class="text-danger mb-0 fw-bold">{{ psicologo.ultima_atualizacao_agenda }}</h6>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
-            <div class="card-body p-4">
+        </div>
+    </div>
+
+    <!-- Formulário de Registro de Consulta -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light p-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-calendar-plus me-2 text-primary"></i>
+                        Registrar Nova Consulta
+                    </h5>
+                </div>
+                <div class="card-body p-4">
                     <form method="POST" action="{% url 'psico_agenda' psicologo_id=psicologo.id  %}">
                         {% csrf_token %}
     
-                        <div class="row">
+                        <div class="row mb-3">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="nome_cliente">Nome do Paciente</label>
-                                    <input type="text" class="form-control" id="nome_cliente" name="nome_cliente" required>                              
+                                    <label for="nome_cliente" class="form-control-label text-sm">Nome do Paciente</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                        <input type="text" class="form-control" id="nome_cliente" name="nome_cliente" placeholder="Nome completo do paciente" required>                              
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="horario_consulta">Horário</label>
-                                    <input type="time" class="form-control" id="horario_consulta" name="horario_consulta" required>
+                                    <label for="horario_consulta" class="form-control-label text-sm">Horário da Consulta</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-clock"></i></span>
+                                        <input type="time" class="form-control" id="horario_consulta" name="horario_consulta" required>
+                                    </div>
                                 </div>
                             </div>
                         </div>
     
-                        <div class="row">
+                        <div class="row mb-4">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="dia_semana">Dia da Semana</label>
-                                    <select class="form-control" id="dia_semana" name="dia_semana">
-                                        <option value="Segunda">Segunda</option>
-                                        <option value="Terça">Terça</option>
-                                        <option value="Quarta">Quarta</option>
-                                        <option value="Quinta">Quinta</option>
-                                        <option value="Sexta">Sexta</option>
-                                        <option value="Sábado">Sábado</option>
-                                    </select>
+                                    <label for="dia_semana" class="form-control-label text-sm">Dia da Semana</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-calendar-day"></i></span>
+                                        <select class="form-select" id="dia_semana" name="dia_semana">
+                                            <option value="Segunda">Segunda-feira</option>
+                                            <option value="Terça">Terça-feira</option>
+                                            <option value="Quarta">Quarta-feira</option>
+                                            <option value="Quinta">Quinta-feira</option>
+                                            <option value="Sexta">Sexta-feira</option>
+                                            <option value="Sábado">Sábado</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="sala_atendimento">Sala de Atendimento</label>
-                                    <select class="form-control" id="sala_atendimento" name="sala_atendimento" required>
-                                        {% for sala in salas %}
-                                            <option value="{{ sala.id_sala }}">{{ sala.numero_sala }}</option>
-                                            {% empty %}
-                                            <option>"não encontrado"</option>
-                                        {% endfor %}
-                                    </select>
+                                    <label for="sala_atendimento" class="form-control-label text-sm">Sala de Atendimento</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-door-open"></i></span>
+                                        <select class="form-select" id="sala_atendimento" name="sala_atendimento" required>
+                                            {% for sala in salas %}
+                                                <option value="{{ sala.id_sala }}">{{ sala.numero_sala }}</option>
+                                                {% empty %}
+                                                <option disabled>Nenhuma sala disponível</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                         </div>
     
                         <div class="row">                            
-                            <div class="col-md-12">
-                                <div class="d-flex justify-content-center gap-4 align-middle">
-                                    <button type="submit" class="btn btn-primary">Registrar</button>
-                                    <button type="reset" class="btn btn-secondary">Resetar</button>
+                            <div class="col-12">
+                                <div class="d-flex justify-content-end">
+                                    <button type="reset" class="btn btn-outline-secondary me-2">
+                                        <i class="fas fa-undo me-1"></i> Limpar
+                                    </button>
+                                    <button type="submit" class="btn bg-gradient-primary">
+                                        <i class="fas fa-save me-1"></i> Registrar
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-{% for dia in dias_da_semana %}
-<div class="row">
-    <div class="col-12">
-        <div class="card mb-4">
-            <div class="card-header pb-0">
-                <h6>{{ dia }}</h6>
-            </div>
-            <div class="card-body px-0 pt-0 pb-2">
-                <div class="table-responsive p-0">
-                    <table class="table align-items-center mb-0">
-                        <thead>
-                            <tr>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Sala</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Semanal</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Quinzenal</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Deletar</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        {% for agenda in agendas %}
-                            {% if agenda.dia_semana == dia  %}
-                            <tr>
-                                <td style="background-color: {{agenda.psicologo.cor}};" class="align-middle text-center text-white">{{ agenda.horario|time:"H:i" }}</td>
-                                <td style="background-color: {{agenda.psicologo.cor}};" class="align-middle text-center text-white">{{ agenda.sala.numero_sala }}</td>
-                                {% if agenda.semanal %}
-                                <td style="background-color: {{agenda.psicologo.cor}};" class="align-middle text-center text-white">{{ agenda.semanal }}</td>
-                                {% else %}
-                                <td style="background-color: gray;" class="align-middle text-center text-white"></td>
-                                {% endif %}
-                                {% if agenda.quinzenal %}
-                                <td style="background-color: {{agenda.psicologo.cor}};" class="align-middle text-center text-white">{{ agenda.quinzenal }}</td>
-                                {% else %}
-                                <td style="background-color: gray;" class="align-middle text-center text-white"></td>
-                                {% endif %} 
-                                <td style="background-color: {{agenda.psicologo.cor}};" class="align-middle">
-                                    <a href="{% url  'delete_consulta' id_consulta=agenda.id %}" class="text-secondary font-weight-bold text-xs text-center text-white" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
-                                </td>
-                            </tr>
-                            {% endif %}
-                        {% empty %}
-                            <tr>
-                                <td colspan="7" class="text-center">
-                                    <p class="text-secondary font-weight-bold text-xs">Nenhuma consulta encontrada.</p>
-                                </td>
-                            </tr>
+    <!-- Navegação por abas para os dias da semana -->
+    <div class="row mb-1">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light p-0">
+                    <ul class="nav nav-tabs" id="diaSemanaTab" role="tablist">
+                        {% for dia in dias_da_semana %}
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link {% if forloop.first %}active{% endif %}" 
+                                    id="tab-{{ dia|slugify }}" 
+                                    data-bs-toggle="tab" 
+                                    data-bs-target="#content-{{ dia|slugify }}" 
+                                    type="button" 
+                                    role="tab" 
+                                    aria-controls="content-{{ dia|slugify }}" 
+                                    aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
+                                <i class="fas fa-calendar-day me-1"></i> {{ dia }}
+                            </button>
+                        </li>
                         {% endfor %}
-                        </tbody>
-                    </table>
+                    </ul>
+                </div>
+                <div class="card-body p-0">
+                    <div class="tab-content" id="diaSemanaTabContent">
+                        {% for dia in dias_da_semana %}
+                        <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" 
+                             id="content-{{ dia|slugify }}" 
+                             role="tabpanel" 
+                             aria-labelledby="tab-{{ dia|slugify }}">
+                            <div class="table-responsive">
+                                <table class="table align-items-center mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center text-uppercase text-xs font-weight-bolder opacity-7">Horário</th>
+                                            <th class="text-center text-uppercase text-xs font-weight-bolder opacity-7">Sala</th>
+                                            <th class="text-center text-uppercase text-xs font-weight-bolder opacity-7">Semanal</th>
+                                            <th class="text-center text-uppercase text-xs font-weight-bolder opacity-7">Quinzenal</th>
+                                            <th class="text-center text-uppercase text-xs font-weight-bolder opacity-7">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for agenda in agendas %}
+                                        {% if agenda.dia_semana == dia %}
+                                        <tr>
+                                            <td style="background-color: {{agenda.psicologo.cor}}80;" class="align-middle text-center">
+                                                <span class="badge bg-dark">{{ agenda.horario|time:"H:i" }}</span>
+                                            </td>
+                                            <td style="background-color: {{agenda.psicologo.cor}}80;" class="align-middle text-center">
+                                                <span class="badge bg-dark">{{ agenda.sala.numero_sala }}</span>
+                                            </td>
+                                            {% if agenda.semanal %}
+                                            <td style="background-color: {{agenda.psicologo.cor}}80;" class="align-middle text-center">
+                                                <span class="badge bg-success">{{ agenda.semanal }}</span>
+                                            </td>
+                                            {% else %}
+                                            <td style="background-color: {{agenda.psicologo.cor}}20;" class="align-middle text-center">
+                                                <span class="badge bg-secondary">Não agendado</span>
+                                            </td>
+                                            {% endif %}
+                                            {% if agenda.quinzenal %}
+                                            <td style="background-color: {{agenda.psicologo.cor}}80;" class="align-middle text-center">
+                                                <span class="badge bg-info">{{ agenda.quinzenal }}</span>
+                                            </td>
+                                            {% else %}
+                                            <td style="background-color: {{agenda.psicologo.cor}}20;" class="align-middle text-center">
+                                                <span class="badge bg-secondary">Não agendado</span>
+                                            </td>
+                                            {% endif %} 
+                                            <td style="background-color: {{agenda.psicologo.cor}}80;" class="align-middle text-center">
+                                                <a href="{% url 'delete_consulta' id_consulta=agenda.id %}" 
+                                                   class="btn btn-sm btn-danger" 
+                                                   data-toggle="tooltip" 
+                                                   data-original-title="Deletar consulta">
+                                                    <i class="bi bi-trash"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endif %}
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="5" class="text-center p-4">
+                                                <div class="d-flex flex-column align-items-center">
+                                                    <i class="fas fa-calendar-times fa-3x text-secondary mb-2"></i>
+                                                    <p class="text-secondary font-weight-bold">Nenhuma consulta encontrada para {{ dia }}</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-{% endfor %}
 
 {% endblock content %}
+
+{% block scripts %}
+<script>
+    // Inicializar todos os tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+    });
+</script>
+{% endblock scripts %}
