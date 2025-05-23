@@ -53,6 +53,25 @@
         </div>
     </div>
 
+      <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light p-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-calendar-plus me-2 text-primary"></i>
+                        Deletar Múltiplas Consultas
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <button type="button" class="btn btn-outline-danger btn-sm px-3">
+                        <i class="fas fa-trash-alt me-2"></i>
+                        <a class="text-danger" href="{% url 'delete_multiple_consultas' psicologo_id=psicologo.id %}">Deletar Consultas</a>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Formulário de Registro de Consulta -->
     <div class="row mb-4">
         <div class="col-12">
@@ -140,6 +159,7 @@
         </div>
     </div>
 
+  
     <!-- Navegação por abas para os dias da semana -->
     <div class="row mb-1">
         <div class="col-12">

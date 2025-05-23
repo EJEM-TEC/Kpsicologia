@@ -1,0 +1,37 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<h1>Deletar Disponibilidades</h1>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+               <form method="POST" action="{% url 'delete_multiple_disponibilidades' psicologo_id=psicologa.id %}">
+                    {% csrf_token %}
+
+                    <label for="dia_semana" class="my-3">Dia da Semana</label>
+                    <select name="dia_semana" id="dia_semana" class="form-control">
+                        <option value="">Selecione o dia da semana</option>
+                        <option value="Segunda">Segunda-feira</option>
+                        <option value="Terça">Terça-feira</option>
+                        <option value="Quarta">Quarta-feira</option>
+                        <option value="Quinta">Quinta-feira</option>
+                        <option value="Sexta">Sexta-feira</option>
+                        <option value="Sábado">Sábado</option>
+                    </select>
+                    <div class="my-3 "> 
+                        <button type="submit" class="btn bg-gradient-primary">Deletar</button>
+                        <button type="button" class="btn bg-gradient-secondary"><a href="{% url 'psico_agenda' psicologo_id=psicologa.id %}" style="color: white; text-decoration: none;">Cancelar</a></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>    
+</div>
+
+
+
+{% endblock content %}

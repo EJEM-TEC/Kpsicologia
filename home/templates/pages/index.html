@@ -2,150 +2,362 @@
 {% load static %}
 
 {% block content %}
-
-    <div class="container-fluid py-4">
-
-      <div class="row">
-
-        <div class="col-6">
-          <div>
-            <h2>
-              Olá {{user.username}}
-            </h2>
-          </div>
-        </div>
-      </div>
-      
-      <div class="row g-4 my-4">
-        <!-- Card 1 -->
-        <div class="col-lg-4 col-md-6 col-sm-12">
-          <div class="card card-background card-background-mask-primary move-on-hover align-items-start h-100">
-            <div class="cursor-pointer">
-              <div class="full-background" style="background-image: url('{% static "img/curved-images/curved3.jpg" %}'); background-size: cover; background-position: center;"></div>
-              <div class="card-body d-flex flex-column justify-content-between">
-                <h5 class="text-white mb-3">Agenda Central</h5>
-                <div class="mt-auto">
-                  <a href="{% url 'agenda_central' %}" class="btn btn-outline-white text-white p-2 mb-0">Acessar</a>
+<div class="container-fluid py-4">
+    <!-- Cabeçalho da Dashboard -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="text-primary mb-0">Olá, {{user.username}}!</h2>
+                    <p class="text-muted mb-0">Bem-vindo ao sistema de gestão KPsicologia</p>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card 2 -->
-        <div class="col-lg-4 col-md-6 col-sm-12">
-          <div class="card card-background card-background-mask-primary move-on-hover align-items-start h-100">
-            <div class="cursor-pointer">
-              <div class="full-background" style="background-image: url('{% static "img/curved-images/curved6.jpg" %}'); background-size: cover; background-position: center;"></div>
-              <div class="card-body d-flex flex-column justify-content-between">
-                <h5 class="text-white mb-3">Psicologas</h5>
-                <div class="mt-auto">
-                  <a href="{% url 'visualizar_psicologas' %}" class="btn btn-outline-white text-white p-2 mb-0">Acessar</a>
+                <div class="text-end">
+                    <p class="text-muted text-sm mb-0">Último acesso</p>
+                    <p class="text-primary fw-bold mb-0" id="current-time"></p>
                 </div>
-              </div>
             </div>
-          </div>
         </div>
-
-        <!-- Card 3 -->
-        <div class="col-lg-4 col-md-6 col-sm-12">
-          <div class="card card-background card-background-mask-primary move-on-hover align-items-start h-100">
-            <div class="cursor-pointer">
-              <div class="full-background" style="background-image: url('{% static "img/curved-images/curved7.jpg" %}'); background-size: cover; background-position: center;"></div>
-              <div class="card-body d-flex flex-column justify-content-between">
-                <h5 class="text-white mb-3">Financeiro</h5>
-                <div class="mt-auto">
-                  <a href="{% url 'consultar_financeiro'  %}" class="btn btn-outline-white text-white p-2 mb-0">Acessar</a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Adicione mais cards aqui, se necessário -->
-      </div>
-      <div class="row g-4 my-4">
-        <!-- Card 1 -->
-        <div class="col-lg-4 col-md-6 col-sm-12">
-          <div class="card card-background card-background-mask-primary move-on-hover align-items-start h-100">
-            <div class="cursor-pointer">
-              <div class="full-background" style="background-image: url('{% static "img/curved-images/curved3.jpg" %}'); background-size: cover; background-position: center;"></div>
-              <div class="card-body d-flex flex-column justify-content-between">
-                <h5 class="text-white mb-3">Disponibilidade - Geral</h5>
-                <div class="mt-auto">
-                  <a href="{% url 'consultar_disponibilidade' %}" class="btn btn-outline-white text-white p-2 mb-0">Acessar</a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card 2 -->
-        <div class="col-lg-4 col-md-6 col-sm-12">
-          <div class="card card-background card-background-mask-primary move-on-hover align-items-start h-100">
-            <div class="cursor-pointer">
-              <div class="full-background" style="background-image: url('{% static "img/curved-images/curved6.jpg" %}'); background-size: cover; background-position: center;"></div>
-              <div class="card-body d-flex flex-column justify-content-between">
-                <h5 class="text-white mb-3">Disponibilidade - Psico</h5>
-                <div class="mt-auto">
-                  <a href="{% url 'disponibilidades_psicologos' %}" class="btn btn-outline-white text-white p-2 mb-0">Acessar</a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card 3 -->
-        <div class="col-lg-4 col-md-6 col-sm-12">
-          <div class="card card-background card-background-mask-primary move-on-hover align-items-start h-100">
-            <div class="cursor-pointer">
-              <div class="full-background" style="background-image: url('{% static "img/curved-images/curved7.jpg" %}'); background-size: cover; background-position: center;"></div>
-              <div class="card-body d-flex flex-column justify-content-between">
-                <h5 class="text-white mb-3">Pacientes</h5>
-                <div class="mt-auto">
-                  <a href="{% url 'pacientes' %}" class="btn btn-outline-white text-white p-2 mb-0">Acessar</a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Adicione mais cards aqui, se necessário -->
-      </div>
-
-      <div class="row g-4 my-4">
-        <!-- Card 1 -->
-        <div class="col-lg-4 col-md-6 col-sm-12">
-          <div class="card card-background card-background-mask-primary move-on-hover align-items-start h-100">
-            <div class="cursor-pointer">
-              <div class="full-background" style="background-image: url('{% static "img/curved-images/curved7.jpg" %}'); background-size: cover; background-position: center;"></div>
-              <div class="card-body d-flex flex-column justify-content-between">
-                <h5 class="text-white mb-3">Cadastros</h5>
-                <div class="mt-auto">
-                  <a href="{% url 'cadastros' %}" class="btn btn-outline-white text-white p-2 mb-0">Acessar</a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-lg-4 col-md-6 col-sm-12">
-          <div class="card card-background card-background-mask-primary move-on-hover align-items-start h-100">
-            <div class="cursor-pointer">
-              <div class="full-background" style="background-image: url('{% static "img/curved-images/curved7.jpg" %}'); background-size: cover; background-position: center;"></div>
-              <div class="card-body d-flex flex-column justify-content-between">
-                <h5 class="text-white mb-3">Perfil</h5>
-                <div class="mt-auto">
-                  <a href="{% url 'perfil_usuario' %}" class="btn btn-outline-white text-white p-2 mb-0">Acessar</a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- Adicione mais cards aqui, se necessário -->
-      </div>
     </div>
-    
 
+    <!-- Menu Principal -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card border-0 bg-gradient-primary shadow-lg">
+                <div class="card-body p-4">
+                    <h5 class="text-white mb-4">
+                        <i class="bi bi-tachometer-alt me-2"></i>
+                        Menu Principal
+                    </h5>
+                    <div class="row g-4">
+                        <!-- Agenda Central -->
+                        <div class="col-lg-4 col-md-6">
+                            <div class="card bg-white border-radius-lg h-100 shadow-sm hover-lift">
+                                <div class="card-body p-4 text-center">
+                                    <div class="icon icon-shape bg-gradient-info shadow text-center border-radius-xl mb-3 mx-auto">
+                                        <i class="bi bi-calendar-alt text-white"></i>
+                                    </div>
+                                    <h6 class="text-dark font-weight-bold mb-2">Agenda Central</h6>
+                                    <p class="text-sm text-muted mb-3">Visualize e gerencie todas as consultas agendadas</p>
+                                    <a href="{% url 'agenda_central' %}" class="btn btn-outline-primary btn-sm w-100">
+                                        <i class="bi bi-arrow-right me-1"></i> Acessar
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Psicólogas -->
+                        <div class="col-lg-4 col-md-6">
+                            <div class="card bg-white border-radius-lg h-100 shadow-sm hover-lift">
+                                <div class="card-body p-4 text-center">
+                                    <div class="icon icon-shape bg-gradient-success shadow text-center border-radius-xl mb-3 mx-auto">
+                                        <i class="bi bi-user-md text-white"></i>
+                                    </div>
+                                    <h6 class="text-dark font-weight-bold mb-2">Psicólogas</h6>
+                                    <p class="text-sm text-muted mb-3">Gerencie informações e horários das psicólogas</p>
+                                    <a href="{% url 'visualizar_psicologas' %}" class="btn btn-outline-success btn-sm w-100">
+                                        <i class="bi bi-arrow-right me-1"></i> Acessar
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Financeiro -->
+                        <div class="col-lg-4 col-md-6">
+                            <div class="card bg-white border-radius-lg h-100 shadow-sm hover-lift">
+                                <div class="card-body p-4 text-center">
+                                    <div class="icon icon-shape bg-gradient-warning shadow text-center border-radius-xl mb-3 mx-auto">
+                                        <i class="bi bi-chart-line text-white"></i>
+                                    </div>
+                                    <h6 class="text-dark font-weight-bold mb-2">Financeiro</h6>
+                                    <p class="text-sm text-muted mb-3">Controle financeiro e relatórios de receita</p>
+                                    <a href="{% url 'consultar_financeiro' %}" class="btn btn-outline-warning btn-sm w-100">
+                                        <i class="bi bi-arrow-right me-1"></i> Acessar
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <!-- Seção Disponibilidades -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h4 class="text-dark fw-bold mb-4">
+                <i class="bi bi-clock me-2 text-primary"></i>
+                Gestão de Disponibilidades
+            </h4>
+        </div>
+        
+        <div class="col-lg-6 col-md-12 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="icon icon-shape bg-gradient-dark shadow text-center border-radius-lg me-3">
+                            <i class="bi bi-globe text-white"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">Disponibilidade Geral</h6>
+                            <p class="text-sm text-muted mb-0">Visualize horários disponíveis de todas as profissionais</p>
+                        </div>
+                    </div>
+                    <a href="{% url 'consultar_disponibilidade' %}" class="btn bg-gradient-dark w-100">
+                        <i class="bi bi-search me-1"></i> Consultar Disponibilidades
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 col-md-12 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="icon icon-shape bg-gradient-secondary shadow text-center border-radius-lg me-3">
+                            <i class="bi bi-users text-white"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">Disponibilidade por Psicóloga</h6>
+                            <p class="text-sm text-muted mb-0">Configure horários específicos de cada profissional</p>
+                        </div>
+                    </div>
+                    <a href="{% url 'disponibilidades_psicologos' %}" class="btn bg-gradient-secondary w-100">
+                        <i class="bi bi-cog me-1"></i> Configurar Horários
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seção Gestão -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h4 class="text-dark fw-bold mb-4">
+                <i class="bi bi-tasks me-2 text-primary"></i>
+                Gestão do Sistema
+            </h4>
+        </div>
+
+        <!-- Pacientes -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100 hover-lift">
+                <div class="card-body p-4 text-center">
+                    <div class="icon icon-shape bg-gradient-info shadow text-center border-radius-xl mb-3 mx-auto">
+                        <i class="bi bi-user-friends text-white"></i>
+                    </div>
+                    <h6 class="text-dark font-weight-bold mb-2">Pacientes</h6>
+                    <p class="text-sm text-muted mb-3">Cadastre e gerencie informações dos pacientes</p>
+                    <a href="{% url 'pacientes' %}" class="btn btn-outline-info btn-sm w-100">
+                        <i class="bi bi-plus me-1"></i> Gerenciar
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cadastros -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100 hover-lift">
+                <div class="card-body p-4 text-center">
+                    <div class="icon icon-shape bg-gradient-primary shadow text-center border-radius-xl mb-3 mx-auto">
+                        <i class="bi bi-database text-white"></i>
+                    </div>
+                    <h6 class="text-dark font-weight-bold mb-2">Cadastros</h6>
+                    <p class="text-sm text-muted mb-3">Gerencie usuários, salas, unidades e especialidades</p>
+                    <a href="{% url 'cadastros' %}" class="btn btn-outline-primary btn-sm w-100">
+                        <i class="bi bi-cogs me-1"></i> Configurar
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Perfil -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100 hover-lift">
+                <div class="card-body p-4 text-center">
+                    <div class="icon icon-shape bg-gradient-success shadow text-center border-radius-xl mb-3 mx-auto">
+                        <i class="bi bi-user-circle text-white"></i>
+                    </div>
+                    <h6 class="text-dark font-weight-bold mb-2">Meu Perfil</h6>
+                    <p class="text-sm text-muted mb-3">Visualize e edite suas informações pessoais</p>
+                    <a href="{% url 'perfil_usuario' %}" class="btn btn-outline-success btn-sm w-100">
+                        <i class="bi bi-edit me-1"></i> Editar Perfil
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards de Estatísticas Rápidas -->
+    <div class="row">
+        <div class="col-12">
+            <h4 class="text-dark fw-bold mb-4">
+                <i class="bi bi-chart-bar me-2 text-primary"></i>
+                Visão Geral
+            </h4>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card border-0 bg-gradient-primary shadow-sm">
+                <div class="card-body p-3 position-relative">
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="numbers">
+                                <p class="text-white text-sm mb-0 text-capitalize font-weight-bold">Consultas Hoje</p>
+                                <h5 class="text-white font-weight-bolder mb-0">--</h5>
+                            </div>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="icon icon-shape bg-white shadow text-center border-radius-md">
+                                <i class="bi bi-calendar-check text-dark"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card border-0 bg-gradient-success shadow-sm">
+                <div class="card-body p-3 position-relative">
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="numbers">
+                                <p class="text-white text-sm mb-0 text-capitalize font-weight-bold">Pacientes Ativos</p>
+                                <h5 class="text-white font-weight-bolder mb-0">--</h5>
+                            </div>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="icon icon-shape bg-white shadow text-center border-radius-md">
+                                <i class="bi bi-users text-dark"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card border-0 bg-gradient-info shadow-sm">
+                <div class="card-body p-3 position-relative">
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="numbers">
+                                <p class="text-white text-sm mb-0 text-capitalize font-weight-bold">Psicólogas</p>
+                                <h5 class="text-white font-weight-bolder mb-0">--</h5>
+                            </div>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="icon icon-shape bg-white shadow text-center border-radius-md">
+                                <i class="bi bi-user-md text-dark"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card border-0 bg-gradient-warning shadow-sm">
+                <div class="card-body p-3 position-relative">
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="numbers">
+                                <p class="text-white text-sm mb-0 text-capitalize font-weight-bold">Receita Mensal</p>
+                                <h5 class="text-white font-weight-bolder mb-0">R$ --</h5>
+                            </div>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="icon icon-shape bg-white shadow text-center border-radius-md">
+                                <i class="bi bi-dollar-sign text-dark"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% endblock content %}
+
+{% block scripts %}
+<script>
+    // Atualizar horário atual
+    function updateCurrentTime() {
+        const now = new Date();
+        const options = { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        };
+        document.getElementById('current-time').textContent = now.toLocaleDateString('pt-BR', options);
+    }
+
+    // Atualizar a cada minuto
+    updateCurrentTime();
+    setInterval(updateCurrentTime, 60000);
+
+    // Adicionar efeitos de hover aos cards
+    document.addEventListener('DOMContentLoaded', function() {
+        const cards = document.querySelectorAll('.hover-lift');
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+                this.style.transition = 'transform 0.3s ease';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    });
+</script>
+
+<style>
+    .hover-lift {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .hover-lift:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+    }
+    
+    .icon-shape {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .card-body {
+        transition: all 0.3s ease;
+    }
+    
+    .btn:hover {
+        transform: translateY(-1px);
+        transition: transform 0.2s ease;
+    }
+    
+    /* Animação para os cards de estatísticas */
+    @keyframes bideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .card {
+        animation: bideInUp 0.6s ease-out;
+    }
+</style>
+{% endblock scripts %}

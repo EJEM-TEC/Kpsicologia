@@ -767,6 +767,28 @@ def delete_consulta(request, id_consulta):
     return render(request, 'pages/deletar_agenda_central.html', {'consulta': consulta})
 
 
+@login_required(login_url='login1')
+def delete_multiple_consultas(request, psicologo_id):
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+    
+    dia_semana = request.POST.get('dia_semana')
+    psicologa = get_object_or_404(Psicologa, id=psicologo_id)
+    consultas = Consulta.objects.filter(psicologo=psicologa, dia_semana=dia_semana)
+
+    if request.method == 'POST':
+        # Obter os IDs das consultas a serem excluídas
+        consultas.exclude(id__in=request.POST.getlist('consultas')).delete()
+        # Redirecionar para a página de agenda central
+
+        return redirect('psico_agenda', psicologo_id=psicologa.id)
+
+    return render(request, 'pages/deletar_multiplas_agendas.html', {
+        'consultas': consultas,
+        'psicologa': psicologa,
+    })
+
+
 # DISPONIBILIDADES PSICOLOGAS
 
 @login_required(login_url='login1')
@@ -845,6 +867,8 @@ def definir_disponibilidade_psico(request, psicologo_id):
         'salas': salas,
     })
 
+
+
 @login_required(login_url='login1')
 def remover_disponibilidade(request, disponibilidade_id, psicologo_id):
     disponibilidade = get_object_or_404(Disponibilidade, id=disponibilidade_id)
@@ -857,7 +881,26 @@ def remover_disponibilidade(request, disponibilidade_id, psicologo_id):
 
     return render(request, 'pages/deletar_disponibilidade.html', {'disponibilidade': disponibilidade, 'psicologa': psicologo})
 
+@login_required(login_url='login1')
+def delete_multiple_disponibilidades(request, psicologo_id):
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+    
+    dia_semana = request.POST.get('dia_semana')
+    psicologa = get_object_or_404(Psicologa, id=psicologo_id)
+    consultas = Consulta.objects.filter(psicologo=psicologa, dia_semana=dia_semana).filter(Paciente__isnull=True)
 
+    if request.method == 'POST':
+        # Obter os IDs das consultas a serem excluídas
+        consultas.exclude(id__in=request.POST.getlist('consultas')).delete()
+        # Redirecionar para a página de agenda central
+
+        return redirect('psico_disponibilidade', psicologo_id=psicologa.id)
+
+    return render(request, 'pages/deletar_multiplas_disponibilidades.html', {
+        'consultas': consultas,
+        'psicologa': psicologa,
+    })
 
 # PSICÓLOGAS
 
@@ -1144,7 +1187,6 @@ def restaurar_paciente(request, id_paciente):
 
 
 # CARACTERÍSTICAS PSICÓLOGAS
-
 
 @login_required(login_url='login1')
 def cadastrar_especialidade(request):

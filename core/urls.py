@@ -74,6 +74,7 @@ urlpatterns = [
     path('psicologas/<int:psicologo_id>/agendar/', views.psico_agenda, name='psico_agenda'),
     path('consultas/editar/<int:id_consulta>/', views.update_consulta, name='update_consulta'),  # URL para editar consulta
     path('consultas/deletar/<int:id_consulta>/', views.delete_consulta, name='delete_consulta'),  # URL para deletar consulta
+    path('consultas/<int:psicologo_id>/deletar_multiplas/', views.delete_multiple_consultas, name='delete_multiple_consultas'),
 
     #CONFIMAÇÃO DE CONSULTA - PSICÓLOGO
     path('psicologas/<int:psicologo_id>/confirmar/', views.Confirmar_Consulta, name='confirma_consulta'),
@@ -99,6 +100,7 @@ urlpatterns = [
     #DISPONIBILIDADE PSICÓLOGO
     path('psicologas/<int:psicologo_id>/disponibilidade/', views.definir_disponibilidade_psico, name='psico_disponibilidade'),
     path('deletar_disponibilidade/<int:disponibilidade_id>/<int:psicologo_id>', views.remover_disponibilidade, name='deletar_disponibilidade'),
+    path('psicologas/<int:psicologo_id>/remover_disponibilidades/', views.delete_multiple_disponibilidades, name='delete_multiple_disponibilidades'),
 
     #DISPONIBILIDADE PSICÓLOGO - ONLINE
     path('psicologas/<int:psicologo_id>/disponibilidade_online/', views.disponibilidade_online, name='psico_disponibilidade_online'),
