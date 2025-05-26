@@ -2694,7 +2694,7 @@ def vizualizar_disponibilidade(request):
 @login_required(login_url='login1')
 def disponibilidade_online(request, psicologo_id):
     psicologa = get_object_or_404(Psicologa, id=psicologo_id)
-    horarios = Consulta_Online.objects.filter(psicologo=psicologa)
+    horarios = Consulta_Online.objects.filter(psicologo=psicologa).filter(Paciente__isnull=True)
 
     if request.user.username != psicologa.nome and not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
         return render(request, 'pages/error_permission1.html')
@@ -2752,6 +2752,27 @@ def remover_disponibilidade_online(request, disponibilidade_online_id, psicologo
 
     return render(request, 'pages/deletar_disponibilidade_online.html', {'disponibilidade': disponibilidade, 'psicologa': psicologo})
 
+
+@login_required(login_url='login1')
+def delete_multiple_disponibilidades_online(request, psicologo_id):
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+    
+    dia_semana = request.POST.get('dia_semana')
+    psicologa = get_object_or_404(Psicologa, id=psicologo_id)
+    consultas = Consulta_Online.objects.filter(psicologo=psicologa, dia_semana=dia_semana).filter(Paciente__isnull=True).order_by('horario')
+
+    if request.method == 'POST':
+        # Obter os IDs das consultas a serem excluídas
+        consultas.exclude(id__in=request.POST.getlist('consultas')).delete()
+        # Redirecionar para a página de agenda central
+
+        return redirect('psico_disponibilidade_online', psicologo_id=psicologa.id)
+
+    return render(request, 'pages/deletar_multiplas_disponibilidades_online.html', {
+        'consultas': consultas,
+        'psicologa': psicologa,
+    })
 
 # CONSULTAS ONLINE 
 
@@ -2856,4 +2877,25 @@ def delete_consulta_online(request, consulta_id, psicologo_id):
             return redirect('psico_disponibilidade_online', psicologo_id=psicologo_id)
 
     return render(request, 'pages/deletar_agenda_online.html', {'consulta_online': consulta_online, 'psicologo': psicologa})
+
+@login_required(login_url='login1')
+def delete_multiple_consultas_online(request, psicologo_id):
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+    
+    dia_semana = request.POST.get('dia_semana')
+    psicologa = get_object_or_404(Psicologa, id=psicologo_id)
+    consultas = Consulta_Online.objects.filter(psicologo=psicologa, dia_semana=dia_semana)
+
+    if request.method == 'POST':
+        # Obter os IDs das consultas a serem excluídas
+        consultas.exclude(id__in=request.POST.getlist('consultas')).delete()
+        # Redirecionar para a página de agenda central
+
+        return redirect('psico_agenda_online', psicologo_id=psicologa.id)
+
+    return render(request, 'pages/deletar_multiplas_agendas_online.html', {
+        'consultas': consultas,
+        'psicologa': psicologa,
+    })
 

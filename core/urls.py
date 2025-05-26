@@ -69,7 +69,6 @@ urlpatterns = [
     path('deletar_psicologo/<int:psicologo_id>/delete/', views.deletar_psicologo, name='deletar_psicologo'),
     path('editar_psicologo/<int:psicologo_id>/editar/', views.editar_psicologo, name='editar_psicologo'),
 
-
     #AGENDA PSICÓLOGO - CONSULTAS
     path('psicologas/<int:psicologo_id>/agendar/', views.psico_agenda, name='psico_agenda'),
     path('consultas/editar/<int:id_consulta>/', views.update_consulta, name='update_consulta'),  # URL para editar consulta
@@ -104,10 +103,13 @@ urlpatterns = [
 
     #DISPONIBILIDADE PSICÓLOGO - ONLINE
     path('psicologas/<int:psicologo_id>/disponibilidade_online/', views.disponibilidade_online, name='psico_disponibilidade_online'),
+    path('deletar_disponibilidade_online/<int:disponibilidade_online_id>/<int:psicologo_id>', views.remover_disponibilidade_online, name='deletar_disponibilidade_online'),
+    path('psicologas/<int:psicologo_id>/remover_disponibilidades_online/', views.delete_multiple_disponibilidades_online, name='delete_multiple_disponibilidades_online'),
 
     #CONSULTAS ONLINE - PSICÓLOGO
     path('psicologas/<int:psicologo_id>/agendar_online/', views.psico_agenda_online, name='psico_agenda_online'),
     path('deletar_consulta_online/<int:consulta_id>/<int:psicologo_id>', views.delete_consulta_online, name='deletar_consulta_online'),
+    path('psicologas/<int:psicologo_id>/deletar_multiplas_online/', views.delete_multiple_consultas_online, name='delete_multiple_consultas_online'),
 
     #AGENDA CENTRAL
     path('agenda_central', views.agenda_central, name='agenda_central'),   

@@ -2,126 +2,557 @@
 {% load static %}
 
 {% block content %}
-<div class="row">
+<!-- Header com navegação melhorada -->
+<div class="row mb-4">
     <div class="col-12">
-        {% if user.is_superuser %}
-            <button type="button" class="btn bg-gradient-primary"><a class="text-white" href="{% url 'visualizar_psicologas' %}">
-                Voltar
-            </a></button>
-        {% else %}
-            <button type="button" class="btn bg-gradient-primary"><a class="text-white" href="{% url 'index' %}">
-                Voltar
-            </a></button>
-        {% endif %}
-    </div>
-  </div>
-<div class="row">
-    <div class="col-12">
-        <div class="card mb-4">
-            <div class="card-header pb-0">
-                <h6>Agenda Extra de {{psicologo.nome}}</h6>
-            </div>
-            <div class="card-body p-4">
-                    <form method="POST" action="{% url 'psico_agenda_online' psicologo_id=psicologo.id  %}">
-                        {% csrf_token %}
-    
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="nome_cliente">Nome do Paciente</label>
-                                    <input type="text" class="form-control" id="nome_cliente" name="nome_cliente" required>                              
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="horario_consulta">Horário</label>
-                                    <input type="time" class="form-control" id="horario_consulta" name="horario_consulta" required>
-                                </div>
-                            </div>
-                        </div>
-    
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="dia_semana">Dia da Semana</label>
-                                    <select class="form-control" id="dia_semana" name="dia_semana">
-                                        <option value="Segunda">Segunda</option>
-                                        <option value="Terça">Terça</option>
-                                        <option value="Quarta">Quarta</option>
-                                        <option value="Quinta">Quinta</option>
-                                        <option value="Sexta">Sexta</option>
-                                        <option value="Sábado">Sábado</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-    
-                        <div class="row">                            
-                            <div class="col-md-12">
-                                <div class="d-flex justify-content-center gap-4 align-middle">
-                                    <button type="submit" class="btn btn-primary">Registrar</button>
-                                    <button type="reset" class="btn btn-secondary">Resetar</button>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
+        <div class="d-flex align-items-center justify-content-between">
+            {% if user.is_superuser %}
+                <button type="button" class="btn bg-gradient-primary px-4 py-2 shadow-sm">
+                    <a class="text-white text-decoration-none d-flex align-items-center" href="{% url 'visualizar_psicologas' %}">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Voltar
+                    </a>
+                </button>
+            {% else %}
+                <button type="button" class="btn bg-gradient-primary px-4 py-2 shadow-sm">
+                    <a class="text-white text-decoration-none d-flex align-items-center" href="{% url 'index' %}">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Voltar
+                    </a>
+                </button>
+            {% endif %}
+            
+            <!-- Indicador de status da psicóloga -->
+            <div class="d-flex align-items-center">
+                <div class="avatar avatar-sm me-3">
+                    <div class="avatar-initial rounded-circle" style="background-color: {{psicologo.cor}};">
+                        <i class="fas fa-user-md text-white"></i>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-{% for dia in dias_da_semana %}
-<div class="row">
-    <div class="col-12">
-        <div class="card mb-4">
-            <div class="card-header pb-0">
-                <h6>{{ dia }}</h6>
+<div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light p-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-calendar-plus me-2 text-primary"></i>
+                        Deletar Múltiplas Consultas
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <button type="button" class="btn btn-outline-danger btn-sm px-3">
+                        <i class="fas fa-trash-alt me-2"></i>
+                        <a href="{% url 'delete_multiple_consultas_online' psicologo_id=psicologo.id %}" class="text-decoration-none text-danger">
+                            Deletar Consultas
+                        </a>
+                    </button>
+                </div>
             </div>
-            <div class="card-body px-0 pt-0 pb-2">
-                <div class="table-responsive p-0">
+        </div>
+</div>
+
+<!-- Card principal para formulário -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-lg border-0">
+            <div class="card-header bg-gradient-primary p-4">
+                <div class="d-flex align-items-center">
+                    <div class="icon icon-shape icon-sm bg-white shadow text-center rounded-circle me-3">
+                        <i class="fas fa-calendar-plus text-primary"></i>
+                    </div>
+                    <div>
+                        <h5 class="text-white mb-0 font-weight-bold">Agenda Extra Online</h5>
+                        <p class="text-white text-sm mb-0 opacity-8">Adicionar novo agendamento online para {{psicologo.nome}}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-body p-4">
+                <form method="POST" action="{% url 'psico_agenda_online' psicologo_id=psicologo.id %}">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-lg-4 col-md-6">
+                            <div class="form-group">
+                                <label for="nome_cliente" class="form-label text-dark font-weight-bold">
+                                    <i class="fas fa-user text-primary me-2"></i>
+                                    Nome do Paciente
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-search text-muted"></i>
+                                    </span>
+                                    <input type="text" 
+                                           class="form-control form-control-lg" 
+                                           id="nome_cliente" 
+                                           name="nome_cliente" 
+                                           placeholder="Digite o nome do paciente..." 
+                                           required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-4 col-md-6">
+                            <div class="form-group">
+                                <label for="horario_consulta" class="form-label text-dark font-weight-bold">
+                                    <i class="fas fa-clock text-primary me-2"></i>
+                                    Horário
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-clock text-muted"></i>
+                                    </span>
+                                    <input type="time" 
+                                           class="form-control form-control-lg" 
+                                           id="horario_consulta" 
+                                           name="horario_consulta" 
+                                           required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-4 col-md-12">
+                            <div class="form-group">
+                                <label for="dia_semana" class="form-label text-dark font-weight-bold">
+                                    <i class="fas fa-calendar-day text-primary me-2"></i>
+                                    Dia da Semana
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-calendar text-muted"></i>
+                                    </span>
+                                    <select class="form-select form-control form-control-lg" id="dia_semana" name="dia_semana">
+                                        <option value="Segunda">Segunda-feira</option>
+                                        <option value="Terça">Terça-feira</option>
+                                        <option value="Quarta">Quarta-feira</option>
+                                        <option value="Quinta">Quinta-feira</option>
+                                        <option value="Sexta">Sexta-feira</option>
+                                        <option value="Sábado">Sábado</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-center gap-3">
+                                <button type="submit" class="btn bg-gradient-success btn-lg px-5 shadow-sm">
+                                    <i class="fas fa-plus me-2"></i>
+                                    Registrar Agendamento
+                                </button>
+                                <button type="reset" class="btn btn-outline-secondary btn-lg px-4 shadow-sm">
+                                    <i class="fas fa-undo me-2"></i>
+                                    Limpar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Agenda semanal com design melhorado -->
+<div class="row">
+    {% for dia in dias_da_semana %}
+    <div class="col-12 mb-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-gradient-light pb-0">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <div class="icon icon-shape icon-sm bg-gradient-primary shadow-primary text-center rounded-circle me-3">
+                            <i class="fas fa-calendar-day text-white text-xs"></i>
+                        </div>
+                        <h6 class="mb-0 text-dark font-weight-bold">{{ dia }}</h6>
+                    </div>
+                    
+                </div>
+            </div>
+            
+            <div class="card-body p-0">
+                <div class="table-responsive">
                     <table class="table align-items-center mb-0">
                         <thead>
                             <tr>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Semanal</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Quinzenal</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Deletar</th>
+                                <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7 border-bottom">
+                                    <i class="fas fa-clock me-1"></i>Horário
+                                </th>
+                                <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7 border-bottom">
+                                    <i class="fas fa-calendar-week me-1"></i>Semanal
+                                </th>
+                                <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7 border-bottom">
+                                    <i class="fas fa-calendar-alt me-1"></i>Quinzenal
+                                </th>
+                                <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7 border-bottom">
+                                    <i class="fas fa-cog me-1"></i>Ações
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
-                        {% for agenda in agendas %}
-                            {% if agenda.dia_semana == dia  %}
-                            <tr style="background-color: {{agenda.psicologo.cor}};">
-                                <td class="align-middle text-center text-white">{{ agenda.horario|time:"H:i" }}</td>
-                                {% if agenda.semanal %}
-                                <td class="align-middle text-center text-white"></td>
+                            {% for agenda in agendas %}
+                                {% if agenda.dia_semana == dia %}
+                                <tr class="hover-shadow">
+                                    <td class="align-middle text-center">
+                                        <div class="d-flex align-items-center justify-content-center">
+                                            <div class="icon icon-shape icon-xs rounded-circle me-2" style="background-color: {{agenda.psicologo.cor}};">
+                                                <i class="fas fa-clock text-white text-xs"></i>
+                                            </div>
+                                            <span class="text-sm font-weight-bold text-dark">
+                                                {{ agenda.horario|time:"H:i" }}
+                                            </span>
+                                        </div>
+                                    </td>
+                                    
+                                    <td class="align-middle text-center">
+                                        {% if agenda.semanal %}
+                                            <span class="badge bg-gradient-success px-3 py-2">
+                                                <i class="fas fa-user me-1"></i>
+                                                {{ agenda.semanal }}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-gradient-secondary opacity-6 px-3 py-2">
+                                                <i class="fas fa-minus me-1"></i>
+                                                Disponível
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    
+                                    <td class="align-middle text-center">
+                                        {% if agenda.quinzenal %}
+                                            <span class="badge bg-gradient-info px-3 py-2">
+                                                <i class="fas fa-user me-1"></i>
+                                                {{ agenda.quinzenal }}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-gradient-secondary opacity-6 px-3 py-2">
+                                                <i class="fas fa-minus me-1"></i>
+                                                Disponível
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    
+                                    <td class="align-middle text-center">
+                                        <a class="dropdown-item d-flex align-items-center justify-content-center" 
+                                            href="{% url 'deletar_consulta_online' consulta_id=agenda.id psicologo_id=agenda.psicologo.id %}">
+                                            <i class="fas fa-trash text-danger me-2"></i>
+                                           <button type="button" 
+                                                    class="btn btn-sm btn-outline-danger" 
+                                                    data-bs-toggle="tooltip" 
+                                                    data-bs-placement="top" 
+                                                    title="Remover horário">
+                                                Deletar
+                                            </button>
+                                        </a>
+                                    </td>
+                                </tr>
                                 {% else %}
-                                <td style="background-color: #aaaaaa" class="align-middle text-center text-white">{{ agenda.semanal }}</td>
+                                <tr class="hover-shadow">
+                                    <td colspan="4" class="text-center text-muted">
+                                        Nenhum agendamento encontrado para este dia.
+                                    </td>
+                                </tr>
                                 {% endif %}
-                                {% if agenda.quinzenal %}
-                                <td class="align-middle text-center text-white">{{ agenda.quinzenal }}</td>
-                                {% else %}
-                                <td style="background-color: #aaaaaa" class="align-middle text-center text-white"></td>
-                                {% endif %} 
-                                <td class="align-middle">
-                                    <a href="{% url 'deletar_consulta_online' consulta_id=agenda.id psicologo_id=agenda.psicologo.id %}" class="text-secondary font-weight-bold text-xs text-center text-white" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
-                                </td>
-                            </tr>
-                            {% endif %}
-                        {% empty %}
-                            <tr>
-                                <td colspan="7" class="text-center">
-                                    <p class="text-secondary font-weight-bold text-xs">Nenhuma consulta encontrada.</p>
-                                </td>
-                            </tr>
-                        {% endfor %}
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
+    {% endfor %}
 </div>
-{% endfor %}
+
+<!-- Modal de Confirmação de Remoção -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-gradient-danger">
+                <h5 class="modal-title text-white">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Confirmar Remoção
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center">
+                    <div class="icon icon-shape icon-lg bg-gradient-danger shadow mx-auto mb-3">
+                        <i class="fas fa-trash text-white"></i>
+                    </div>
+                    <h6 id="modal-message">Tem certeza que deseja remover este agendamento?</h6>
+                    <p class="text-sm text-muted">Esta ação não pode ser desfeita.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>
+                    Cancelar
+                </button>
+                <a href="#" id="confirm-link" class="btn bg-gradient-danger">
+                    <i class="fas fa-trash me-2"></i>
+                    Confirmar Remoção
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Detalhes do Paciente -->
+<div class="modal fade" id="detailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-gradient-info">
+                <h5 class="modal-title text-white">
+                    <i class="fas fa-user me-2"></i>
+                    Detalhes do Agendamento
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center">
+                    <div class="icon icon-shape icon-lg bg-gradient-info shadow mx-auto mb-3">
+                        <i class="fas fa-calendar-check text-white"></i>
+                    </div>
+                    <h6 id="patient-name" class="text-dark mb-2"></h6>
+                    <p id="appointment-details" class="text-muted mb-0"></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="fixed-bottom-right">
+    <button type="button" class="btn bg-gradient-primary btn-floating shadow-lg" onclick="scrollToTop()" style="display: none;" id="scrollBtn">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+</div>
+
+<!-- Estilos customizados -->
+<style>
+.hover-shadow:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #CB0C9F;
+    box-shadow: 0 0 0 0.2rem rgba(203, 12, 159, 0.25);
+}
+
+.card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.btn-floating {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    border-radius: 50%;
+    width: 3.5rem;
+    height: 3.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.fixed-bottom-right {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+.bg-gradient-light {
+    background: linear-gradient(87deg, #f8f9fa 0, #dee2e6 100%);
+}
+
+.input-group .form-control {
+    border-left: 0;
+}
+
+.input-group .input-group-text {
+    background-color: #fff;
+    border-right: 0;
+}
+
+@media (max-width: 768px) {
+    .btn-floating {
+        bottom: 1rem;
+        right: 1rem;
+        width: 3rem;
+        height: 3rem;
+    }
+    
+    .card-header .d-flex {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+    
+    .badge {
+        margin-top: 0.5rem;
+    }
+}
+
+.table td {
+    border-top: 1px solid #f1f3f4;
+    padding: 1rem 0.5rem;
+}
+
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.btn-group .btn {
+    border-radius: 0.375rem;
+    margin: 0 2px;
+}
+
+.btn-group .btn:hover {
+    transform: translateY(-1px);
+    transition: all 0.2s ease;
+}
+
+.alert {
+    border: none;
+    border-radius: 0.75rem;
+}
+
+.modal-content {
+    border: none;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
+}
+</style>
+
+<!-- JavaScript para funcionalidades extras -->
+<script>
+// Scroll to top functionality
+window.onscroll = function() {
+    const scrollBtn = document.getElementById("scrollBtn");
+    if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+        scrollBtn.style.display = "flex";
+    } else {
+        scrollBtn.style.display = "none";
+    }
+};
+
+function scrollToTop() {
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+}
+
+// Auto-complete para nome do paciente (simulado)
+document.getElementById('nome_cliente').addEventListener('input', function(e) {
+    // Aqui poderia ser implementada uma funcionalidade de autocomplete
+    // conectando com uma API para buscar nomes de pacientes
+});
+
+// Validação do formulário
+document.querySelector('form').addEventListener('submit', function(e) {
+    const nomeCliente = document.getElementById('nome_cliente').value.trim();
+    const horario = document.getElementById('horario_consulta').value;
+    
+    if (!nomeCliente || !horario) {
+        e.preventDefault();
+        showNotification('Por favor, preencha todos os campos obrigatórios.', 'error');
+    }
+});
+
+// Função para mostrar notificações
+function showNotification(message, type = 'info') {
+    // Criar elemento de notificação
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'error' ? 'danger' : 'success'} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'check-circle'} me-2"></i>
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto-remover após 5 segundos
+    setTimeout(() => {
+        if (notification && notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+// Confirmação de remoção
+function confirmarRemocao(horario, dia, url) {
+    document.getElementById('modal-message').textContent = 
+        `Tem certeza que deseja remover o agendamento de ${horario} em ${dia}?`;
+    document.getElementById('confirm-link').href = url;
+    new bootstrap.Modal(document.getElementById('confirmModal')).show();
+}
+
+// Ver detalhes do paciente
+function verDetalhes(paciente, horario, dia) {
+    document.getElementById('patient-name').textContent = `Paciente: ${paciente}`;
+    document.getElementById('appointment-details').textContent = 
+        `Agendamento: ${dia} às ${horario} (Online)`;
+    new bootstrap.Modal(document.getElementById('detailsModal')).show();
+}
+
+// Animação smooth para os cards
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Animação dos cards
+    const cards = document.querySelectorAll('.card');
+    cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'all 0.6s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+    
+    // Melhorar comportamento dos botões
+    const submitBtn = document.querySelector('button[type="submit"]');
+    if (submitBtn) {
+        submitBtn.addEventListener('click', function() {
+            this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processando...';
+            this.disabled = true;
+            
+            // Re-habilitar após 3 segundos (caso o form não seja submetido)
+            setTimeout(() => {
+                this.innerHTML = '<i class="fas fa-plus me-2"></i>Registrar Agendamento';
+                this.disabled = false;
+            }, 3000);
+        });
+    }
+});
+</script>
 
 {% endblock content %}

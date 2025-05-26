@@ -2,103 +2,274 @@
 {% load static %}
 
 {% block content %}
-<div class="row">
+<!-- Header com navegação e informações da psicóloga -->
+<div class="row mb-4">
     <div class="col-12">
-        {% if user.is_superuser %}
-            <button type="button" class="btn bg-gradient-primary"><a class="text-white" href="{% url 'visualizar_psicologas' %}">
-                Voltar
-            </a></button>
-        {% else %}
-            <button type="button" class="btn bg-gradient-primary"><a class="text-white" href="{% url 'index' %}">
-                Voltar
-            </a></button>
-        {% endif %}
-    </div>
-  </div>
-<div class="row">
-    <div class="col-12">
-        <div class="card mb-4">
-            <div class="card-header pb-0">
-                <h6>Disponibilidades Extras de {{psicologo.nome}}</h6>
-            </div>
-            <div class="card-body p-4">
-                    <form method="POST" action="#">
-                        {% csrf_token %}
-    
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="horario_inicio">Horário de Início</label>
-                                    <input type="time" class="form-control" id="horario_inicio" name="horario_inicio" required>                              
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="qtd_atendimentos">Quantidade de Atendimentos</label>
-                                    <input type="number" class="form-control" id="qtd_atendimentos" name="qtd_atendimentos" required>
-                                </div>
-                            </div>
-                        </div>
-    
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="tempo_atendimento">Tempo de atendimento ( em minutos )</label>
-                                    <input type="number" class="form-control" id="tempo_atendimento" name="tempo_atendimento" placeholder="Ex: 60" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="dia_semana">Dia da Semana</label>
-                                    <select class="form-control" id="dia_semana" name="dia_semana">
-                                        <option value="Segunda">Segunda</option>
-                                        <option value="Terça">Terça</option>
-                                        <option value="Quarta">Quarta</option>
-                                        <option value="Quinta">Quinta</option>
-                                        <option value="Sexta">Sexta</option>
-                                        <option value="Sábado">Sábado</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-    
-                        <div class="row">                        
-                            <div class="col-md-6">
-                                <div class="d-flex justify-content-center gap-4 align-middle">
-                                    <button type="submit" class="btn btn-primary">Registrar</button>
-                                    <button type="reset" class="btn btn-secondary">Resetar</button>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
+        <div class="d-flex align-items-center justify-content-between">
+            {% if user.is_superuser %}
+                <button type="button" class="btn bg-gradient-primary px-4 py-2 shadow-sm">
+                    <a class="text-white text-decoration-none d-flex align-items-center" href="{% url 'visualizar_psicologas' %}">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Voltar
+                    </a>
+                </button>
+            {% else %}
+                <button type="button" class="btn bg-gradient-primary px-4 py-2 shadow-sm">
+                    <a class="text-white text-decoration-none d-flex align-items-center" href="{% url 'index' %}">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Voltar
+                    </a>
+                </button>
+            {% endif %}
+            
+            <!-- Info da psicóloga com status visual -->
+            <div class="d-flex align-items-center">
+                <div class="avatar avatar-sm me-3">
+                    <div class="avatar-initial rounded-circle shadow" style="background-color: {{psicologo.cor}};">
+                        <i class="fas fa-user-clock text-white"></i>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-{% for dia, horarios in horarios_agrupados %}
-    {% if horarios.exists %} <!-- Verifica se há horários cadastrados para o dia -->
-    <div class="row">
+
+<div class="row mb-4">
         <div class="col-12">
-            <div class="card mb-4">
-                <div class="card-header pb-0">
-                    <h6>{{ dia }}</h6>
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light p-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-calendar-plus me-2 text-primary"></i>
+                        Deletar Múltiplas Disponibilidades Online
+                    </h5>
                 </div>
-                <div class="card-body px-0 pt-0 pb-2">
-                    <div class="table-responsive p-0">
+                <div class="card-body p-4">
+                    <button type="button" class="btn btn-outline-danger btn-sm px-3">
+                        <i class="fas fa-trash-alt me-2"></i>
+                        <a href="{% url 'delete_multiple_disponibilidades_online' psicologo_id=psicologo.id %}" class="text-decoration-none text-danger">
+                            Deletar Disponibilidades
+                        </a>
+                    </button>
+                </div>
+            </div>
+        </div>
+</div>
+
+<!-- Card principal para configuração de horários -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-lg border-0">
+            <div class="card-header bg-gradient-info p-4">
+                <div class="d-flex align-items-center">
+                    <div class="icon icon-shape icon-md bg-white shadow text-center rounded-circle me-3">
+                        <i class="fas fa-clock text-info text-lg"></i>
+                    </div>
+                    <div>
+                        <h5 class="text-white mb-0 font-weight-bold">Configurar Horários Extras</h5>
+                        <p class="text-white text-sm mb-0 opacity-8">Defina novos horários de disponibilidade para atendimentos online</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-body p-4">
+                <form method="POST" action="#" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    
+                    <!-- Primeira linha de campos -->
+                    <div class="row">
+                        <div class="col-lg-6 col-md-6">
+                            <div class="form-group">
+                                <label for="horario_inicio" class="form-label text-dark font-weight-bold">
+                                    <i class="fas fa-play-circle text-info me-2"></i>
+                                    Horário de Início
+                                </label>
+                                <div class="input-group">
+                                    <input type="time" 
+                                           class="form-control form-control-lg" 
+                                           id="horario_inicio" 
+                                           name="horario_inicio" 
+                                           required>
+                                    <div class="invalid-feedback">
+                                        Por favor, selecione o horário de início.
+                                    </div>
+                                </div>
+                                <small class="text-muted">Defina o primeiro horário do bloco</small>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-6 col-md-6">
+                            <div class="form-group">
+                                <label for="qtd_atendimentos" class="form-label text-dark font-weight-bold">
+                                    Quantidade de Atendimentos
+                                </label>
+                                <div class="input-group">
+                                    <input type="number" 
+                                           class="form-control form-control-lg" 
+                                           id="qtd_atendimentos" 
+                                           name="qtd_atendimentos" 
+                                           min="1" 
+                                           max="20"
+                                           placeholder="Ex: 5"
+                                           required>
+                                    <div class="invalid-feedback">
+                                        Informe a quantidade de atendimentos (1-20).
+                                    </div>
+                                </div>
+                                <small class="text-muted">Quantos horários consecutivos criar</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Segunda linha de campos -->
+                    <div class="row">
+                        <div class="col-lg-6 col-md-6">
+                            <div class="form-group">
+                                <label for="tempo_atendimento" class="form-label text-dark font-weight-bold">
+                                    <i class="fas fa-stopwatch text-info me-2"></i>
+                                    Duração do Atendimento ( minutos )
+                                </label>
+                                <div class="input-group">
+                                    <input type="number" 
+                                           class="form-control form-control-lg" 
+                                           id="tempo_atendimento" 
+                                           name="tempo_atendimento" 
+                                           min="15" 
+                                           max="180"
+                                           placeholder="60" 
+                                           value="60"
+                                           required>
+                                    <div class="invalid-feedback">
+                                        Duração deve estar entre 15 e 180 minutos.
+                                    </div>
+                                </div>
+                                <small class="text-muted">Tempo em minutos para cada atendimento</small>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-6 col-md-6">
+                            <div class="form-group">
+                                <label for="dia_semana" class="form-label text-dark font-weight-bold">
+                                    <i class="fas fa-calendar-week text-info me-2"></i>
+                                    Dia da Semana
+                                </label>
+                                <div class="input-group">
+                                    <select class="form-select form-control form-control-lg" id="dia_semana" name="dia_semana">
+                                        <option value="Segunda">Segunda-feira</option>
+                                        <option value="Terça">Terça-feira</option>
+                                        <option value="Quarta">Quarta-feira</option>
+                                        <option value="Quinta">Quinta-feira</option>
+                                        <option value="Sexta">Sexta-feira</option>
+                                        <option value="Sábado">Sábado</option>
+                                    </select>
+                                </div>
+                                <small class="text-muted">Selecione o dia para os novos horários</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Preview dos horários que serão criados -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="alert alert-info d-none" id="preview-horarios">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-eye text-info me-2"></i>
+                                    <strong>Preview dos horários que serão criados:</strong>
+                                </div>
+                                <div id="preview-list" class="d-flex flex-wrap gap-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Botões de ação -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-center gap-3">
+                                <button type="submit" class="btn bg-gradient-success btn-lg px-5 shadow-sm">
+                                    <i class="fas fa-plus-circle me-2"></i>
+                                    Criar Horários
+                                </button>
+                                <button type="reset" class="btn btn-outline-secondary btn-lg px-4 shadow-sm">
+                                    <i class="fas fa-undo me-2"></i>
+                                    Limpar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Grid de horários por dia da semana -->
+<div class="row">
+    {% for dia, horarios in horarios_agrupados %}
+        {% if horarios.exists %}
+        <div class="col-lg-6 col-md-12 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-gradient-light">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <div class="icon icon-shape icon-sm shadow-primary text-center rounded-circle me-3" 
+                                 style="background-color: {{psicologo.cor}};">
+                                <i class="fas fa-calendar-day text-white text-xs"></i>
+                            </div>
+                            <h6 class="mb-0 text-dark font-weight-bold">{{ dia }}</h6>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body p-0">
+                    <div class="table-responsive">
                         <table class="table align-items-center mb-0">
-                            <thead>
+                            <thead class="bg-light">
                                 <tr>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Deletar</th>
+                                    <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder border-bottom">
+                                        <i class="fas fa-clock me-1"></i>Horário
+                                    </th>
+                                    <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder border-bottom">
+                                        <i class="fas fa-wifi me-1"></i>Status
+                                    </th>
+                                    <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder border-bottom">
+                                        <i class="fas fa-cog me-1"></i>Ações
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for agenda in horarios %}
-                                <tr style="background-color: {{ agenda.psicologo.cor }};">
-                                    <td class="align-middle text-center text-white">{{ agenda.horario|time:"H:i" }}</td>
+                                <tr class="hover-row">
                                     <td class="align-middle text-center">
-                                        <a href="{% url 'deletar_consulta_online' consulta_id=agenda.id psicologo_id=agenda.psicologo.id %}" class="text-secondary font-weight-bold text-xs text-center text-white" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
+                                        <div class="d-flex align-items-center justify-content-center">
+                                            <div class="icon icon-shape icon-xs rounded-circle me-2" 
+                                                 style="background-color: {{ agenda.psicologo.cor }};">
+                                                <i class="fas fa-clock text-white text-xs"></i>
+                                            </div>
+                                            <span class="text-sm font-weight-bold text-dark">
+                                                {{ agenda.horario|time:"H:i" }}
+                                            </span>
+                                        </div>
+                                    </td>
+                                    
+                                    <td class="align-middle text-center">
+                                        <span class="badge bg-gradient-success px-3 py-2">
+                                            <i class="fas fa-check-circle me-1"></i>
+                                            Disponível
+                                        </span>
+                                    </td>
+                                    
+                                    <td class="align-middle text-center">
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'deletar_disponibilidade_online' disponibilidade_online_id=agenda.id psicologo_id=agenda.psicologo.id %}">
+                                                <button type="button" 
+                                                    class="btn btn-sm btn-outline-danger" 
+                                                    data-bs-toggle="tooltip" 
+                                                    data-bs-placement="top" 
+                                                    title="Remover horário">
+                                                    Remover
+                                                </button>
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -108,9 +279,251 @@
                 </div>
             </div>
         </div>
-    </div>
-    {% endif %}
-{% endfor %}
+        {% endif %}
+    {% empty %}
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center py-5">
+                    <div class="icon icon-shape icon-lg bg-gradient-secondary shadow mx-auto mb-4">
+                        <i class="fas fa-calendar-plus text-white"></i>
+                    </div>
+                    <h5 class="text-muted mb-3">Nenhum horário extra configurado</h5>
+                    <p class="text-sm text-muted mb-4">
+                        Use o formulário acima para criar novos horários de disponibilidade extra para atendimentos online.
+                    </p>
+                    <button class="btn bg-gradient-info" onclick="document.getElementById('horario_inicio').focus()">
+                        <i class="fas fa-plus me-2"></i>
+                        Criar Primeiro Horário
+                    </button>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
 
+<!-- Modal de Confirmação -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-gradient-danger">
+                <h5 class="modal-title text-white">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Confirmar Remoção
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center">
+                    <div class="icon icon-shape icon-lg bg-gradient-danger shadow mx-auto mb-3">
+                        <i class="fas fa-trash text-white"></i>
+                    </div>
+                    <h6 id="modal-message">Tem certeza que deseja remover este horário?</h6>
+                    <p class="text-sm text-muted">Esta ação não pode ser desfeita.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>
+                    Cancelar
+                </button>
+                <a href="#" id="confirm-link" class="btn bg-gradient-danger">
+                    <i class="fas fa-trash me-2"></i>
+                    Confirmar Remoção
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Floating Action Button -->
+<div class="fixed-bottom-right">
+    <button type="button" class="btn bg-gradient-info btn-floating shadow-lg" onclick="scrollToTop()" style="display: none;" id="scrollBtn">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+</div>
+
+<!-- Estilos customizados -->
+<style>
+.hover-row:hover {
+    background-color: #f8f9fa;
+    transform: translateX(3px);
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #17a2b8;
+    box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.25);
+}
+
+.card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.btn-floating {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    border-radius: 50%;
+    width: 3.5rem;
+    height: 3.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.bg-gradient-light {
+    background: linear-gradient(87deg, #f8f9fa 0, #dee2e6 100%);
+}
+
+.input-group .form-control {
+    border-left: 0;
+}
+
+.input-group .input-group-text {
+    background-color: #f8f9fa;
+    border-right: 0;
+}
+
+.preview-badge {
+    background: linear-gradient(87deg, #17a2b8 0, #138496 100%);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .btn-floating {
+        bottom: 1rem;
+        right: 1rem;
+        width: 3rem;
+        height: 3rem;
+    }
+    
+    .card-header .d-flex {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+    
+    .badge {
+        margin-top: 0.5rem;
+    }
+}
+
+.table td {
+    border-top: 1px solid #f1f3f4;
+    padding: 1rem 0.5rem;
+}
+
+.needs-validation .form-control:invalid {
+    border-color: #dc3545;
+}
+
+.needs-validation .form-control:valid {
+    border-color: #28a745;
+}
+</style>
+
+<!-- JavaScript para funcionalidades -->
+<script>
+// Scroll to top functionality
+window.onscroll = function() {
+    const scrollBtn = document.getElementById("scrollBtn");
+    if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+        scrollBtn.style.display = "flex";
+    } else {
+        scrollBtn.style.display = "none";
+    }
+};
+
+function scrollToTop() {
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+}
+
+// Preview de horários
+function updatePreview() {
+    const horarioInicio = document.getElementById('horario_inicio').value;
+    const qtdAtendimentos = document.getElementById('qtd_atendimentos').value;
+    const tempoAtendimento = document.getElementById('tempo_atendimento').value;
+    const previewDiv = document.getElementById('preview-horarios');
+    const previewList = document.getElementById('preview-list');
+    
+    if (horarioInicio && qtdAtendimentos && tempoAtendimento) {
+        previewDiv.classList.remove('d-none');
+        previewList.innerHTML = '';
+        
+        let currentTime = new Date('2000-01-01T' + horarioInicio + ':00');
+        
+        for (let i = 0; i < parseInt(qtdAtendimentos); i++) {
+            const timeString = currentTime.toTimeString().substring(0, 5);
+            const badge = document.createElement('span');
+            badge.className = 'preview-badge';
+            badge.innerHTML = `<i class="fas fa-clock me-1"></i>${timeString}`;
+            previewList.appendChild(badge);
+            
+            currentTime.setMinutes(currentTime.getMinutes() + parseInt(tempoAtendimento));
+        }
+    } else {
+        previewDiv.classList.add('d-none');
+    }
+}
+
+// Event listeners para preview
+document.getElementById('horario_inicio').addEventListener('change', updatePreview);
+document.getElementById('qtd_atendimentos').addEventListener('input', updatePreview);
+document.getElementById('tempo_atendimento').addEventListener('input', updatePreview);
+
+// Validação do formulário
+document.querySelector('form').addEventListener('submit', function(e) {
+    if (!this.checkValidity()) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    this.classList.add('was-validated');
+});
+
+// Confirmação de remoção
+function confirmarRemocao(horario, dia, url) {
+    document.getElementById('modal-message').textContent = 
+        `Tem certeza que deseja remover o horário ${horario} de ${dia}?`;
+    document.getElementById('confirm-link').href = url;
+    new bootstrap.Modal(document.getElementById('confirmModal')).show();
+}
+
+function confirmarRemocaoTodos(dia) {
+    document.getElementById('modal-message').textContent = 
+        `Tem certeza que deseja remover TODOS os horários de ${dia}?`;
+    // Aqui você implementaria a funcionalidade para remover todos os horários do dia
+    new bootstrap.Modal(document.getElementById('confirmModal')).show();
+}
+
+// Inicialização de tooltips
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Animação dos cards
+    const cards = document.querySelectorAll('.card');
+    cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.classList.add('animate__animated', 'animate__fadeInUp');
+    });
+});
+
+// Reset do formulário
+document.querySelector('button[type="reset"]').addEventListener('click', function() {
+    document.getElementById('preview-horarios').classList.add('d-none');
+    document.querySelector('form').classList.remove('was-validated');
+});
+</script>
 
 {% endblock content %}
