@@ -15,14 +15,14 @@
                               <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="numero_sala">Número da sala</label>
-                                    <input type="text"class="form-control" id="numero_sala" name="numero_sala" value="{{sala.numero_sala}}" required>
+                                    <input type="text"class="form-control" id="numero_sala" name="numero_sala" value="{{sala.numero_sala}}">
                             </div>
                             </div>
                             <div class="col-md-6">
                               <div class="form-group">
                                   <div class="input-group mb-4">
                                       <span class="input-group-text"><i class="ni ni-palette"></i></span>
-                                      <input type="color" class="form-control" name="cor_sala" value="{{ sala.cor_sala }}" required>
+                                      <input type="color" class="form-control" name="cor_sala" value="{{ sala.cor_sala }}">
                                       <small class="form-text text-muted">Escolha uma cor de identificação</small>
                                   </div>
                               </div>
@@ -32,21 +32,35 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="id_unidade">Unidade</label>
-                                    <select class="form-control" id="id_unidade" name="id_unidade" required>
+                                    <select class="form-control" id="id_unidade" name="id_unidade">
                                       {% for unidade in unidades %}
                                       <option value="{{unidade.id_unidade}}">{{ unidade.nome_unidade }}</option>
                                       {% endfor %}
                                     </select>
                                 </div>
                             </div>
-                              <div class="col-md-6">
-                                <div class="d-flex justify-content-center gap-4 align-middle">
-                                  <button type="submit" class="btn bg-gradient-primary">Atualizar</button>
-                                  <button type="reset" class="btn bg-gradient-secondary">Resetar</button>
-                                </div>
-                              </div>
+                            <div class="col-md-6">
+                                <div class="form-group ">
+                                    <label for="id_horario_inicio">Horário de Início</label>
+                                    <input type="time" class="form-control" id="id_horario_inicio" name="id_horario_inicio" value="{{ sala.horario_inicio|time:'H:i' }}">
+                            </div>
+                             
                         </div>
                     </div>
+                    <div class="row">
+                      <div class="col-md-6">
+                          <div class="form-group ">
+                              <label for="id_horario_fim">Horário de Fim</label>
+                              <input type="time" class="form-control" id="id_horario_fim" name="id_horario_fim" value="{{ sala.horario_fim|time:'H:i' }}">
+                          </div>
+                      </div>
+                       <div class="col-md-6">
+                            <div class="d-flex justify-content-center gap-4 align-middle">
+                              <button type="submit" class="btn bg-gradient-primary">Atualizar</button>
+                              <button type="reset" class="btn bg-gradient-secondary">Resetar</button>
+                            </div>
+                       </div>
+                  </div>
                   </form>
             </div>
           </div>

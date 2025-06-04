@@ -90,6 +90,8 @@
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Número da sala</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Cor da sala</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Unidade</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário Início</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário Fim</th>
                       <!-- <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horários</th> -->
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Editar</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Excluir</th>
@@ -115,6 +117,12 @@
                         <a href="{% url 'horario_sala' id_sala=sala.id_sala %}" class="btn btn-warning" data-toggle="tooltip" data-original-title="Edit user">
                           <i class="bi bi-pencil-fill"></i>
                         </a> </td> -->
+                       <td class="align-middle text-center">
+                        <p class="text-xs font-weight-bold mb-0 ">{{sala.horario_inicio}}</p>
+                      </td>
+                       <td class="align-middle text-center">
+                        <p class="text-xs font-weight-bold mb-0 ">{{sala.horario_fim}}</p>
+                      </td>
                       <td class="align-middle text-center">
                         <a href="{% url 'update_sala' id_sala=sala.id_sala %}" class="btn btn-warning" data-toggle="tooltip" data-original-title="Edit user">
                           <i class="bi bi-pencil-fill"></i>
