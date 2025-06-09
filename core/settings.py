@@ -135,6 +135,15 @@ DATABASES = {
         'PASSWORD': tmpPostgres.password,
         'HOST': tmpPostgres.hostname,
         'PORT': tmpPostgres.port or 5432,  # Pega a porta ou usa 5432 como default
+        'CONN_MAX_AGE': 600,  # Apenas esta opção é válida
+        'ATOMIC_REQUESTS': True,  # Garante que cada requisição seja atômica
+    }
+}
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
     }
 }
 

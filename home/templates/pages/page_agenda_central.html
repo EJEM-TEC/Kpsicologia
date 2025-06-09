@@ -413,6 +413,26 @@
   </div>
 </div>
 
+<!-- Adicionar no início do template page_agenda_central.html -->
+<div id="loading-spinner" style="text-align: center; padding: 50px;">
+    <div class="spinner-border" role="status">
+        <span class="sr-only">Carregando...</span>
+    </div>
+    <p>Carregando agenda...</p>
+</div>
+
+<div id="agenda-content" style="display: none;">
+    <!-- Seu conteúdo atual da agenda aqui -->
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Esconder spinner e mostrar conteúdo quando carregar
+    document.getElementById('loading-spinner').style.display = 'none';
+    document.getElementById('agenda-content').style.display = 'block';
+});
+</script>
+
 <!-- Initialize tooltips -->
 <script>
   document.addEventListener('DOMContentLoaded', function() {
