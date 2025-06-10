@@ -5,6 +5,7 @@ from time import strptime
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.views import PasswordResetView, PasswordChangeView, PasswordResetConfirmView
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.urls import reverse
 from home.forms import UserPasswordResetForm, UserSetPasswordForm, UserPasswordChangeForm
 from django.contrib.auth import logout, authenticate, login as login_django
@@ -557,19 +558,41 @@ def agenda_central(request):
         consulta_online__in=consultas_online
     ).distinct()
 
-    # Aplicar filtros se for POST
-    if request.method == "POST":
+    # Variáveis para manter os filtros durante a paginação
+    filtros_aplicados = {}
+    
+    # Aplicar filtros se for POST ou GET (para manter filtros na paginação)
+    if request.method == "POST" or request.GET:
+        # Usar GET para manter filtros durante paginação
+        params = request.POST if request.method == "POST" else request.GET
+        
+        psicologa_id = params.get('psicologa_id')
+        especialidade_id = params.get('especialidade_id')
+        publico_id = params.get('publico')
+        dia_da_semana = params.get("dia_semana")
+        horario_inicio = params.get("horario_inicio")
+        horario_fim = params.get("horario_fim")
+        unidade_id = params.get("unidade_id")
+
+        # Armazenar filtros para manter na paginação
+        if psicologa_id:
+            filtros_aplicados['psicologa_id'] = psicologa_id
+        if especialidade_id:
+            filtros_aplicados['especialidade_id'] = especialidade_id
+        if publico_id:
+            filtros_aplicados['publico'] = publico_id
+        if dia_da_semana:
+            filtros_aplicados['dia_semana'] = dia_da_semana
+        if horario_inicio:
+            filtros_aplicados['horario_inicio'] = horario_inicio
+        if horario_fim:
+            filtros_aplicados['horario_fim'] = horario_fim
+        if unidade_id:
+            filtros_aplicados['unidade_id'] = unidade_id
+
+        # Construir filtros de forma eficiente usando Q objects
         filtros = Q()
         
-        psicologa_id = request.POST.get('psicologa_id')
-        especialidade_id = request.POST.get('especialidade_id')
-        publico_id = request.POST.get('publico')
-        dia_da_semana = request.POST.get("dia_semana")
-        horario_inicio = request.POST.get("horario_inicio")
-        horario_fim = request.POST.get("horario_fim")
-        unidade_id = request.POST.get("unidade_id")
-
-        # Construir filtros de forma eficiente
         if psicologa_id and psicologa_id != 'todos':
             filtros &= Q(psicologo_id=psicologa_id)
 
@@ -577,13 +600,13 @@ def agenda_central(request):
             filtros &= Q(sala__id_unidade_id=unidade_id)
 
         if especialidade_id and especialidade_id != 'todos':
-            filtros &= Q(psicologo__especialidadepsico_set__especialidade_id=especialidade_id)
+            filtros &= Q(psicologo__especialidadepsico__especialidade_id=especialidade_id)
 
         if publico_id and publico_id != 'todos':
-            filtros &= Q(psicologo__publicopsico_set__publico_id=publico_id)
+            filtros &= Q(psicologo__publicopsico__publico_id=publico_id)
 
         if dia_da_semana != "todos" and dia_da_semana in static_data['dias_da_semana']:
-            filtros &= Q(dia_da_semana=dia_da_semana)
+            filtros &= Q(dia_semana=dia_da_semana)
 
         if horario_inicio and horario_fim:
             filtros &= Q(horario__gte=horario_inicio, horario__lte=horario_fim)
@@ -591,25 +614,65 @@ def agenda_central(request):
         # Aplicar todos os filtros de uma vez
         if filtros:
             consultas = consultas.filter(filtros).distinct()
+            consultas_online = consultas_online.filter(filtros).distinct()
 
-    # Otimização: buscar salas com consultas em uma única query
-    salas_ids_com_consultas = consultas.values_list('sala_id', flat=True).distinct()
-    salas_com_consultas = Sala.objects.filter(
-        id_sala__in=salas_ids_com_consultas
-    ).select_related('id_unidade')
+    # Criar chave de cache única para os filtros aplicados
+    filtros_str = '_'.join([f"{k}_{v}" for k, v in sorted(filtros_aplicados.items())])
+    salas_cache_key = f'salas_com_consultas_{filtros_str}'
+    
+    # Tentar obter salas do cache
+    salas_com_consultas = cache.get(salas_cache_key)
+    
+    if not salas_com_consultas:
+        # Otimização: buscar salas com consultas em uma única query
+        salas_ids_com_consultas = consultas.values_list('sala_id', flat=True).distinct()
+        salas_com_consultas = list(Sala.objects.filter(
+            id_sala__in=salas_ids_com_consultas
+        ).select_related('id_unidade').order_by('numero_sala'))
+        # Cache por 10 minutos
+        cache.set(salas_cache_key, salas_com_consultas, 600)
 
-    return render(request, 'pages/page_agenda_central.html', {
-        'consultas': consultas,
-        'salas': salas_com_consultas,
+    # Implementar paginação POR SALAS
+    # Número de salas por página
+    salas_por_pagina = 2
+    
+    # Criar o paginador para as salas
+    paginator = Paginator(salas_com_consultas, salas_por_pagina)
+    
+    # Obter o número da página da requisição
+    page = request.GET.get('page', 1)
+    
+    try:
+        salas_paginadas = paginator.page(page)
+    except PageNotAnInteger:
+        # Se a página não for um inteiro, exibir a primeira página
+        salas_paginadas = paginator.page(1)
+    except EmptyPage:
+        # Se a página estiver fora do intervalo, exibir a última página
+        salas_paginadas = paginator.page(paginator.num_pages)
+
+    # Filtrar consultas apenas para as salas da página atual
+    salas_ids_pagina = [sala.id_sala for sala in salas_paginadas]
+    consultas_pagina = consultas.filter(sala_id__in=salas_ids_pagina)
+
+    # Contexto para o template
+    context = {
+        'consultas': consultas_pagina,  # Apenas consultas das salas da página atual
+        'salas': salas_paginadas,  # Salas paginadas
         'dias_da_semana': static_data['dias_da_semana'],
         'psicologas': static_data['psicologas'],
         'especialidades': static_data['especialidades'],
         'publicos': static_data['publicos'],
         'unidades': static_data['unidades'],
         'consultas_online': consultas_online,
-        'psicologas_online': psicologas_com_consultas_online
-    })
+        'psicologas_online': psicologas_com_consultas_online,
+        'filtros_aplicados': filtros_aplicados,  # Para manter filtros na paginação
+        'total_salas': paginator.count,
+        'pagina_atual': salas_paginadas.number,
+        'total_paginas': paginator.num_pages,
+    }
 
+    return render(request, 'pages/page_agenda_central.html', context)
 
 # VERSÃO ALTERNATIVA: Com paginação para casos extremos
 @login_required(login_url='login1')

@@ -21,6 +21,21 @@
     </div>
   </div>
 
+  <!-- Informações da paginação -->
+  <div class="row mb-3">
+    <div class="col-12">
+      <div class="alert alert-info d-flex justify-content-between align-items-center">
+        <div>
+          <strong>Total de salas:</strong> {{ total_salas }} | 
+          <strong>Página:</strong> {{ pagina_atual }} de {{ total_paginas }}
+        </div>
+        <div>
+          <span class="badge bg-primary">{{ salas|length }} salas nesta página</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Filter Modal -->
   <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -41,7 +56,7 @@
                     <select class="form-select" id="psicologa_id" name="psicologa_id">
                       <option value="todos">Todos</option>
                       {% for psicologa in psicologas %}
-                      <option value="{{psicologa.id}}">{{psicologa.nome}}</option>
+                      <option value="{{psicologa.id}}" {% if filtros_aplicados.psicologa_id == psicologa.id|stringformat:"s" %}selected{% endif %}>{{psicologa.nome}}</option>
                       {% endfor %}
                     </select>
                   </div>
@@ -52,10 +67,10 @@
                   <label for="unidade_id" class="form-control-label text-xs text-uppercase">Unidade</label>
                   <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-building"></i></span>
-                    <select class="form-select" id="unidade_id" name="paciente_id">
-                      <option value="todos">Todos</option>
+                    <select class="form-select" id="unidade_id" name="unidade_id">
+                      <option value="todas">Todas</option>
                       {% for unidade in unidades %}
-                      <option value="{{unidade.id_unidade}}">{{unidade.nome_unidade}}</option>
+                      <option value="{{unidade.id_unidade}}" {% if filtros_aplicados.unidade_id == unidade.id_unidade|stringformat:"s" %}selected{% endif %}>{{unidade.nome_unidade}}</option>
                       {% endfor %}
                     </select>
                   </div>
@@ -71,7 +86,7 @@
                     <select class="form-select" id="especialidade_id" name="especialidade_id">
                       <option value="todos">Todos</option>
                       {% for especialidade in especialidades %}
-                      <option value="{{especialidade.id}}">{{especialidade.especialidade}}</option>
+                      <option value="{{especialidade.id}}" {% if filtros_aplicados.especialidade_id == especialidade.id|stringformat:"s" %}selected{% endif %}>{{especialidade.especialidade}}</option>
                       {% endfor %}
                     </select>
                   </div>
@@ -85,7 +100,7 @@
                     <select class="form-select" id="publico_id" name="publico">
                       <option value="todos">Todos</option>
                       {% for publico in publicos %}
-                      <option value="{{ publico.id }}">{{ publico.publico }}</option>
+                      <option value="{{ publico.id }}" {% if filtros_aplicados.publico == publico.id|stringformat:"s" %}selected{% endif %}>{{ publico.publico }}</option>
                       {% endfor %}
                     </select>
                   </div>
@@ -98,7 +113,7 @@
                   <label for="horario_inicio" class="form-control-label text-xs text-uppercase">Horário Início</label>
                   <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-clock"></i></span>
-                    <input type="time" class="form-control" id="horario_inicio" name="horario_inicio">
+                    <input type="time" class="form-control" id="horario_inicio" name="horario_inicio" value="{{ filtros_aplicados.horario_inicio|default:'' }}">
                   </div>
                 </div>
               </div>
@@ -107,7 +122,7 @@
                   <label for="horario_fim" class="form-control-label text-xs text-uppercase">Horário Fim</label>
                   <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-clock"></i></span>
-                    <input type="time" class="form-control" id="horario_fim" name="horario_fim">
+                    <input type="time" class="form-control" id="horario_fim" name="horario_fim" value="{{ filtros_aplicados.horario_fim|default:'' }}">
                   </div>
                 </div>
               </div>
@@ -121,7 +136,7 @@
                     <select class="form-select" id="dia_semana" name="dia_semana">
                       <option value="todos">Todos</option>
                       {% for dia in dias_da_semana %}
-                      <option value="{{ dia }}">{{ dia }}</option>
+                      <option value="{{ dia }}" {% if filtros_aplicados.dia_semana == dia %}selected{% endif %}>{{ dia }}</option>
                       {% endfor %}
                     </select>
                   </div>
@@ -132,7 +147,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-          <button type="reset" form="filterForm" class="btn btn-outline-secondary">Resetar</button>
+          <a href="{% url 'agenda_central' %}" class="btn btn-outline-secondary">Limpar Filtros</a>
           <button type="submit" form="filterForm" class="btn bg-gradient-primary">Aplicar Filtros</button>
         </div>
       </div>
@@ -411,29 +426,69 @@
       </div>
     </div>
   </div>
-</div>
 
-<!-- Adicionar no início do template page_agenda_central.html -->
-<div id="loading-spinner" style="text-align: center; padding: 50px;">
-    <div class="spinner-border" role="status">
-        <span class="sr-only">Carregando...</span>
+  <!-- Controles de paginação -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <nav aria-label="Navegação de páginas">
+        <ul class="pagination justify-content-center">
+          {% if salas.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page=1{% for key, value in filtros_aplicados.items %}&{{ key }}={{ value }}{% endfor %}" aria-label="Primeira">
+                <span aria-hidden="true">&laquo;&laquo;</span>
+              </a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="?page={{ salas.previous_page_number }}{% for key, value in filtros_aplicados.items %}&{{ key }}={{ value }}{% endfor %}" aria-label="Anterior">
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
+          {% else %}
+            <li class="page-item disabled">
+              <span class="page-link">&laquo;&laquo;</span>
+            </li>
+            <li class="page-item disabled">
+              <span class="page-link">&laquo;</span>
+            </li>
+          {% endif %}
+
+          <!-- Páginas numeradas -->
+          {% for num in salas.paginator.page_range %}
+            {% if salas.number == num %}
+              <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% elif num > salas.number|add:'-3' and num < salas.number|add:'3' %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ num }}{% for key, value in filtros_aplicados.items %}&{{ key }}={{ value }}{% endfor %}">{{ num }}</a>
+              </li>
+            {% endif %}
+          {% endfor %}
+
+          {% if salas.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ salas.next_page_number }}{% for key, value in filtros_aplicados.items %}&{{ key }}={{ value }}{% endfor %}" aria-label="Próxima">
+                <span aria-hidden="true">&raquo;</span>
+              </a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="?page={{ salas.paginator.num_pages }}{% for key, value in filtros_aplicados.items %}&{{ key }}={{ value }}{% endfor %}" aria-label="Última">
+                <span aria-hidden="true">&raquo;&raquo;</span>
+              </a>
+            </li>
+          {% else %}
+            <li class="page-item disabled">
+              <span class="page-link">&raquo;</span>
+            </li>
+            <li class="page-item disabled">
+              <span class="page-link">&raquo;&raquo;</span>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
     </div>
-    <p>Carregando agenda...</p>
+  </div>
 </div>
 
-<div id="agenda-content" style="display: none;">
-    <!-- Seu conteúdo atual da agenda aqui -->
-</div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Esconder spinner e mostrar conteúdo quando carregar
-    document.getElementById('loading-spinner').style.display = 'none';
-    document.getElementById('agenda-content').style.display = 'block';
-});
-</script>
-
-<!-- Initialize tooltips -->
+<!-- Initialize tooltips and loading script -->
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     // Initialize tooltips
@@ -460,6 +515,16 @@ document.addEventListener('DOMContentLoaded', function() {
     tabs.forEach(function(tab) {
       tab.addEventListener('shown.bs.tab', function(event) {
         localStorage.setItem(tabStorageKey, '#' + event.target.id);
+      });
+    });
+
+    // Adicionar indicador de carregamento ao mudar de página
+    var paginationLinks = document.querySelectorAll('.pagination a');
+    paginationLinks.forEach(function(link) {
+      link.addEventListener('click', function() {
+        // Mostrar loading
+        var loadingHtml = '<div class="text-center p-5"><div class="spinner-border" role="status"><span class="visually-hidden">Carregando...</span></div><p class="mt-2">Carregando página...</p></div>';
+        document.querySelector('.tab-content').innerHTML = loadingHtml;
       });
     });
   });
