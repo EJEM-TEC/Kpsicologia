@@ -9,6 +9,8 @@
         </a></button>
     </div>
 </div>
+
+<!-- Formulário de Criação de Pacientes -->
 <div class="row">
     <div class="col-12">
         <div class="card mb-4">
@@ -41,42 +43,39 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="valor">Valor ( R$ )</label>
-                                <input type="number" class="form-control" id="valor" name="valor" required>      
+                                <input type="number" class="form-control" id="valor" name="valor" step="0.01" min="0" required>      
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="telefone_paciente">Telefone</label>
-                                <input type="number" class="form-control" id="telefone_paciente" name="telefone_paciente" required>
+                                <label for="periodo_paciente">Período de Atendimento</label>
+                                <select class="form-control" id="periodo_paciente" name="periodo_paciente" required>
+                                    <option value="Manhã">Manhã</option>
+                                    <option value="Tarde">Tarde</option>
+                                    <option value="Noite">Noite</option>
+                                </select>
                             </div>
                         </div>
                     </div>
 
                     <div class="row">
-                        
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="periodo_paciente">Período de atendimento</label>
-                                <select class="form-control" id="periodo_paciente" name="periodo_paciente">
-                                  <option value="Semanal">Semanal</option>
-                                  <option value="Quinzenal">Quinzenal</option>
-                                  <!-- <option value="nao_fixo">Sem horário fixo</option> -->
-                                </select>
-                              </div>
+                                <label for="nome_responsavel">Nome do Responsável (Opcional)</label>
+                                <input type="text" class="form-control" id="nome_responsavel" name="nome_responsavel">
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="nome_responsavel">Nome Responsável</label>
-                                <input type="text" class="form-control" id="nome_responsavel" name="nome_responsavel">
+                                <label for="telefone_paciente">Telefone</label>
+                                <input type="text" class="form-control" id="telefone_paciente" name="telefone_paciente" required>
                             </div>
-                        </div>                        
+                        </div>
                     </div>
+
                     <div class="row">
-                        <div class="col-md-12">
-                            <div class="d-flex justify-content-center gap-4 align-middle">
-                                <button type="submit" class="btn btn-primary">Registrar</button>
-                                <button type="reset" class="btn btn-secondary">Resetar</button>
-                            </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">Criar Paciente</button>
                         </div>
                     </div>
                 </form>
@@ -85,12 +84,113 @@
     </div>
 </div>
 
+<!-- Filtros para Pacientes Ativos -->
 <div class="row">
     <div class="col-12">
         <div class="card mb-4">
             <div class="card-header pb-0">
-                <h6>Pacientes Cadastrados</h6>
+                <h6>Filtros de Busca - Pacientes Ativos</h6>
             </div>
+            <div class="card-body p-4">
+                <form method="get" id="filterForm">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="nome_filtro">Nome do Paciente</label>
+                                <input type="text" class="form-control" id="nome_filtro" name="nome_filtro" value="{{ nome_filtro }}" placeholder="Digite o nome...">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="idade_filtro">Idade</label>
+                                <select class="form-select" id="idade_filtro" name="idade_filtro">
+                                    <option value="">Todas as idades</option>
+                                    <option value="Adulto" {% if idade_filtro == 'Adulto' %}selected{% endif %}>Adulto</option>
+                                    <option value="Criança" {% if idade_filtro == 'Criança' %}selected{% endif %}>Criança</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="periodo_filtro">Período</label>
+                                <select class="form-select" id="periodo_filtro" name="periodo_filtro">
+                                    <option value="">Todos os períodos</option>
+                                    <option value="Manhã" {% if periodo_filtro == 'Manhã' %}selected{% endif %}>Manhã</option>
+                                    <option value="Tarde" {% if periodo_filtro == 'Tarde' %}selected{% endif %}>Tarde</option>
+                                    <option value="Noite" {% if periodo_filtro == 'Noite' %}selected{% endif %}>Noite</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary me-2">
+                                <i class="fas fa-search"></i> Filtrar
+                            </button>
+                            <a href="{% url 'pacientes' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Limpar Filtros
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Manter paginação quando filtrar -->
+                    {% if request.GET.items_per_page_ativos %}
+                        <input type="hidden" name="items_per_page_ativos" value="{{ request.GET.items_per_page_ativos }}">
+                    {% endif %}
+                    {% if request.GET.items_per_page_deletados %}
+                        <input type="hidden" name="items_per_page_deletados" value="{{ request.GET.items_per_page_deletados }}">
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pacientes Cadastrados (Ativos) -->
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+                <h6>Pacientes Cadastrados</h6>
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-success me-2">{{ total_pacientes_ativos }} paciente{{ total_pacientes_ativos|pluralize }}</span>
+                    <!-- Controle de itens por página -->
+                    <form method="get" class="d-flex align-items-center">
+                        <!-- Manter filtros existentes -->
+                        {% if nome_filtro %}
+                            <input type="hidden" name="nome_filtro" value="{{ nome_filtro }}">
+                        {% endif %}
+                        {% if idade_filtro %}
+                            <input type="hidden" name="idade_filtro" value="{{ idade_filtro }}">
+                        {% endif %}
+                        {% if periodo_filtro %}
+                            <input type="hidden" name="periodo_filtro" value="{{ periodo_filtro }}">
+                        {% endif %}
+                        {% if request.GET.items_per_page_deletados %}
+                            <input type="hidden" name="items_per_page_deletados" value="{{ request.GET.items_per_page_deletados }}">
+                        {% endif %}
+                        
+                        <label for="items_per_page_ativos" class="form-label me-2 mb-0 text-sm">Por página:</label>
+                        <select name="items_per_page_ativos" id="items_per_page_ativos" class="form-select form-select-sm" style="width: auto;" onchange="this.form.submit()">
+                            <option value="10" {% if request.GET.items_per_page_ativos == '10' %}selected{% endif %}>10</option>
+                            <option value="15" {% if request.GET.items_per_page_ativos == '15' or not request.GET.items_per_page_ativos %}selected{% endif %}>15</option>
+                            <option value="25" {% if request.GET.items_per_page_ativos == '25' %}selected{% endif %}>25</option>
+                            <option value="50" {% if request.GET.items_per_page_ativos == '50' %}selected{% endif %}>50</option>
+                        </select>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Informações de paginação -->
+            <div class="card-body py-2">
+                <p class="mb-0 text-sm text-muted">
+                    Mostrando {{ pacientes.start_index }} - {{ pacientes.end_index }} 
+                    de {{ total_pacientes_ativos }} paciente{{ total_pacientes_ativos|pluralize }}
+                    (Página {{ pacientes.number }} de {{ pacientes.paginator.num_pages }})
+                </p>
+            </div>
+            
             <div class="card-body px-0 pt-0 pb-2">
                 <div class="table-responsive p-0">
                     <table class="table align-items-center mb-0">
@@ -100,7 +200,7 @@
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Idade</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor ( R$ )</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Período de Atendimento</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nome Resposnável</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nome Responsável</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Telefone</th>
                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ações</th>
                             </tr>
@@ -109,20 +209,38 @@
                         {% for paciente in pacientes %}
                             <tr>
                                 <td class="align-middle text-center">{{ paciente.nome }}</td>
-                                <td class="align-middle text-center">{{ paciente.idade }}</td>
-                                <td class="align-middle text-center">{{ paciente.valor }}</td>
-                                <td class="align-middle text-center">{{ paciente.periodo }}</td>
-                                <td class="align-middle text-center">{{ paciente.nome_responsavel }}</td>
+                                <td class="align-middle text-center">
+                                    <span class="badge {% if paciente.idade == 'Criança' %}bg-info{% else %}bg-primary{% endif %}">
+                                        {{ paciente.idade }}
+                                    </span>
+                                </td>
+                                <td class="align-middle text-center">R$ {{ paciente.valor|floatformat:2 }}</td>
+                                <td class="align-middle text-center">
+                                    <span class="badge {% if paciente.periodo == 'Manhã' %}bg-success{% elif paciente.periodo == 'Tarde' %}bg-warning{% else %}bg-dark{% endif %}">
+                                        {{ paciente.periodo }}
+                                    </span>
+                                </td>
+                                <td class="align-middle text-center">{{ paciente.nome_responsavel|default:"-" }}</td>
                                 <td class="align-middle text-center">{{ paciente.telefone }}</td>
                                 <td class="align-middle">
-                                    <a href="{% url 'update_paciente' id_paciente=paciente.id %}" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Edit consulta">Editar</a>
-                                    <a href="{% url 'delete_paciente' id_paciente=paciente.id %}" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Delete consulta">Remover</a>
+                                    <a href="{% url 'update_paciente' id_paciente=paciente.id %}" class="text-primary font-weight-bold text-xs me-2" data-toggle="tooltip" data-original-title="Editar paciente">
+                                        <i class="fas fa-edit"></i> Editar
+                                    </a>
+                                    <a href="{% url 'delete_paciente' id_paciente=paciente.id %}" class="text-danger font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Remover paciente">
+                                        <i class="fas fa-trash"></i> Remover
+                                    </a>
                                 </td>
                             </tr>
                         {% empty %}
                             <tr>
                                 <td colspan="7" class="text-center">
-                                    <p class="text-secondary font-weight-bold text-xs">Nenhuma consulta encontrada.</p>
+                                    <p class="text-secondary font-weight-bold text-xs py-3">
+                                        {% if nome_filtro or idade_filtro or periodo_filtro %}
+                                            Nenhum paciente encontrado com os filtros aplicados.
+                                        {% else %}
+                                            Nenhum paciente cadastrado.
+                                        {% endif %}
+                                    </p>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -130,15 +248,124 @@
                     </table>
                 </div>
             </div>
+            
+            <!-- Paginação para Pacientes Ativos -->
+            {% if pacientes.has_other_pages %}
+            <div class="card-footer">
+                <nav aria-label="Navegação de páginas - Pacientes Ativos">
+                    <ul class="pagination justify-content-center mb-0">
+                        
+                        <!-- Botão Primeira Página -->
+                        {% if pacientes.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page_ativos=1{% for key, value in query_params_ativos.items %}&{{ key }}={{ value }}{% endfor %}{% if request.GET.page_deletados %}&page_deletados={{ request.GET.page_deletados }}{% endif %}" aria-label="Primeira página">
+                                    <span aria-hidden="true">&laquo;&laquo;</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link" aria-hidden="true">&laquo;&laquo;</span>
+                            </li>
+                        {% endif %}
+
+                        <!-- Botão Página Anterior -->
+                        {% if pacientes.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page_ativos={{ pacientes.previous_page_number }}{% for key, value in query_params_ativos.items %}&{{ key }}={{ value }}{% endfor %}{% if request.GET.page_deletados %}&page_deletados={{ request.GET.page_deletados }}{% endif %}" aria-label="Página anterior">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link" aria-hidden="true">&laquo;</span>
+                            </li>
+                        {% endif %}
+
+                        <!-- Números das páginas -->
+                        {% for num in pacientes.paginator.page_range %}
+                            {% if pacientes.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > pacientes.number|add:'-3' and num < pacientes.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page_ativos={{ num }}{% for key, value in query_params_ativos.items %}&{{ key }}={{ value }}{% endfor %}{% if request.GET.page_deletados %}&page_deletados={{ request.GET.page_deletados }}{% endif %}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        <!-- Botão Próxima Página -->
+                        {% if pacientes.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page_ativos={{ pacientes.next_page_number }}{% for key, value in query_params_ativos.items %}&{{ key }}={{ value }}{% endfor %}{% if request.GET.page_deletados %}&page_deletados={{ request.GET.page_deletados }}{% endif %}" aria-label="Próxima página">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link" aria-hidden="true">&raquo;</span>
+                            </li>
+                        {% endif %}
+
+                        <!-- Botão Última Página -->
+                        {% if pacientes.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page_ativos={{ pacientes.paginator.num_pages }}{% for key, value in query_params_ativos.items %}&{{ key }}={{ value }}{% endfor %}{% if request.GET.page_deletados %}&page_deletados={{ request.GET.page_deletados }}{% endif %}" aria-label="Última página">
+                                    <span aria-hidden="true">&raquo;&raquo;</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link" aria-hidden="true">&raquo;&raquo;</span>
+                            </li>
+                        {% endif %}
+
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>
+
+<!-- Pacientes Deletados -->
 <div class="row">
     <div class="col-12">
         <div class="card mb-4">
-            <div class="card-header pb-0">
+            <div class="card-header pb-0 d-flex justify-content-between align-items-center">
                 <h6>Pacientes Deletados</h6>
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-danger me-2">{{ total_pacientes_deletados }} paciente{{ total_pacientes_deletados|pluralize }}</span>
+                    <!-- Controle de itens por página para deletados -->
+                    <form method="get" class="d-flex align-items-center">
+                        <!-- Manter outros parâmetros -->
+                        {% for key, value in query_params_ativos.items %}
+                            <input type="hidden" name="{{ key }}" value="{{ value }}">
+                        {% endfor %}
+                        {% if request.GET.page_ativos %}
+                            <input type="hidden" name="page_ativos" value="{{ request.GET.page_ativos }}">
+                        {% endif %}
+                        
+                        <label for="items_per_page_deletados" class="form-label me-2 mb-0 text-sm">Por página:</label>
+                        <select name="items_per_page_deletados" id="items_per_page_deletados" class="form-select form-select-sm" style="width: auto;" onchange="this.form.submit()">
+                            <option value="5" {% if request.GET.items_per_page_deletados == '5' %}selected{% endif %}>5</option>
+                            <option value="10" {% if request.GET.items_per_page_deletados == '10' or not request.GET.items_per_page_deletados %}selected{% endif %}>10</option>
+                            <option value="20" {% if request.GET.items_per_page_deletados == '20' %}selected{% endif %}>20</option>
+                            <option value="30" {% if request.GET.items_per_page_deletados == '30' %}selected{% endif %}>30</option>
+                        </select>
+                    </form>
+                </div>
             </div>
+            
+            <!-- Informações de paginação para deletados -->
+            <div class="card-body py-2">
+                <p class="mb-0 text-sm text-muted">
+                    Mostrando {{ pacientes_deletados.start_index }} - {{ pacientes_deletados.end_index }} 
+                    de {{ total_pacientes_deletados }} paciente{{ total_pacientes_deletados|pluralize }} deletado{{ total_pacientes_deletados|pluralize }}
+                    (Página {{ pacientes_deletados.number }} de {{ pacientes_deletados.paginator.num_pages }})
+                </p>
+            </div>
+            
             <div class="card-body px-0 pt-0 pb-2">
                 <div class="table-responsive p-0">
                     <table class="table align-items-center mb-0">
@@ -148,28 +375,34 @@
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Idade</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor ( R$ )</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Período de Atendimento</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nome Resposnável</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nome Responsável</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Telefone</th>
                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Restaurar</th>
                             </tr>
                         </thead>
                         <tbody>
                         {% for paciente in pacientes_deletados %}
-                            <tr>
+                            <tr class="table-secondary">
                                 <td class="align-middle text-center">{{ paciente.nome }}</td>
-                                <td class="align-middle text-center">{{ paciente.idade }}</td>
-                                <td class="align-middle text-center">{{ paciente.valor }}</td>
-                                <td class="align-middle text-center">{{ paciente.periodo }}</td>
-                                <td class="align-middle text-center">{{ paciente.nome_responsavel }}</td>
+                                <td class="align-middle text-center">
+                                    <span class="badge bg-secondary">{{ paciente.idade }}</span>
+                                </td>
+                                <td class="align-middle text-center">R$ {{ paciente.valor|floatformat:2 }}</td>
+                                <td class="align-middle text-center">
+                                    <span class="badge bg-secondary">{{ paciente.periodo }}</span>
+                                </td>
+                                <td class="align-middle text-center">{{ paciente.nome_responsavel|default:"-" }}</td>
                                 <td class="align-middle text-center">{{ paciente.telefone }}</td>
                                 <td class="align-middle">
-                                    <a href="{% url 'restaurar_paciente' id_paciente=paciente.id %}" class="text-secondary font-weight-bold text-xs text-center" data-toggle="tooltip" data-original-title="Restaurar consulta">Restaurar</a>
+                                    <a href="{% url 'restaurar_paciente' id_paciente=paciente.id %}" class="text-success font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Restaurar paciente">
+                                        <i class="fas fa-undo"></i> Restaurar
+                                    </a>
                                 </td>
                             </tr>
                         {% empty %}
                             <tr>
                                 <td colspan="7" class="text-center">
-                                    <p class="text-secondary font-weight-bold text-xs">Nenhuma consulta encontrada.</p>
+                                    <p class="text-secondary font-weight-bold text-xs py-3">Nenhum paciente deletado.</p>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -177,7 +410,294 @@
                     </table>
                 </div>
             </div>
+            
+            <!-- Paginação para Pacientes Deletados -->
+            {% if pacientes_deletados.has_other_pages %}
+            <div class="card-footer">
+                <nav aria-label="Navegação de páginas - Pacientes Deletados">
+                    <ul class="pagination justify-content-center mb-0">
+                        
+                        <!-- Botão Primeira Página -->
+                        {% if pacientes_deletados.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page_deletados=1{% for key, value in query_params_deletados.items %}&{{ key }}={{ value }}{% endfor %}{% for key, value in query_params_ativos.items %}&{{ key }}={{ value }}{% endfor %}{% if request.GET.page_ativos %}&page_ativos={{ request.GET.page_ativos }}{% endif %}" aria-label="Primeira página">
+                                    <span aria-hidden="true">&laquo;&laquo;</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link" aria-hidden="true">&laquo;&laquo;</span>
+                            </li>
+                        {% endif %}
+
+                        <!-- Botão Página Anterior -->
+                        {% if pacientes_deletados.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page_deletados={{ pacientes_deletados.previous_page_number }}{% for key, value in query_params_deletados.items %}&{{ key }}={{ value }}{% endfor %}{% for key, value in query_params_ativos.items %}&{{ key }}={{ value }}{% endfor %}{% if request.GET.page_ativos %}&page_ativos={{ request.GET.page_ativos }}{% endif %}" aria-label="Página anterior">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link" aria-hidden="true">&laquo;</span>
+                            </li>
+                        {% endif %}
+
+                        <!-- Números das páginas -->
+                        {% for num in pacientes_deletados.paginator.page_range %}
+                            {% if pacientes_deletados.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > pacientes_deletados.number|add:'-3' and num < pacientes_deletados.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page_deletados={{ num }}{% for key, value in query_params_deletados.items %}&{{ key }}={{ value }}{% endfor %}{% for key, value in query_params_ativos.items %}&{{ key }}={{ value }}{% endfor %}{% if request.GET.page_ativos %}&page_ativos={{ request.GET.page_ativos }}{% endif %}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        <!-- Botão Próxima Página -->
+                        {% if pacientes_deletados.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page_deletados={{ pacientes_deletados.next_page_number }}{% for key, value in query_params_deletados.items %}&{{ key }}={{ value }}{% endfor %}{% for key, value in query_params_ativos.items %}&{{ key }}={{ value }}{% endfor %}{% if request.GET.page_ativos %}&page_ativos={{ request.GET.page_ativos }}{% endif %}" aria-label="Próxima página">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link" aria-hidden="true">&raquo;</span>
+                            </li>
+                        {% endif %}
+
+                        <!-- Botão Última Página -->
+                        {% if pacientes_deletados.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page_deletados={{ pacientes_deletados.paginator.num_pages }}{% for key, value in query_params_deletados.items %}&{{ key }}={{ value }}{% endfor %}{% for key, value in query_params_ativos.items %}&{{ key }}={{ value }}{% endfor %}{% if request.GET.page_ativos %}&page_ativos={{ request.GET.page_ativos }}{% endif %}" aria-label="Última página">
+                                    <span aria-hidden="true">&raquo;&raquo;</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link" aria-hidden="true">&raquo;&raquo;</span>
+                            </li>
+                        {% endif %}
+
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>
+
+<style>
+/* Estilos customizados para a paginação */
+.pagination .page-link {
+    color: #495057;
+    border: 1px solid #dee2e6;
+    padding: 0.5rem 0.75rem;
+    margin: 0 0.1rem;
+    border-radius: 0.25rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.pagination .page-link:hover {
+    color: #007bff;
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+
+.pagination .page-item.disabled .page-link {
+    color: #6c757d;
+    background-color: #fff;
+    border-color: #dee2e6;
+    cursor: not-allowed;
+}
+
+/* Melhorias visuais para badges */
+.badge {
+    font-size: 0.75em;
+    padding: 0.35em 0.65em;
+}
+
+/* Hover effect para as linhas da tabela */
+.table tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+/* Estilo especial para pacientes deletados */
+.table-secondary {
+    background-color: rgba(108, 117, 125, 0.1) !important;
+}
+
+.table-secondary:hover {
+    background-color: rgba(108, 117, 125, 0.2) !important;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .pagination {
+        font-size: 0.875rem;
+    }
+    
+    .pagination .page-link {
+        padding: 0.25rem 0.5rem;
+    }
+    
+    /* Ocultar alguns botões em telas pequenas */
+    .pagination .page-item:first-child,
+    .pagination .page-item:last-child {
+        display: none;
+    }
+    
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .form-select-sm {
+        font-size: 0.875rem;
+    }
+}
+
+/* Animações suaves */
+.card {
+    transition: box-shadow 0.15s ease-in-out;
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.btn {
+    transition: all 0.15s ease-in-out;
+}
+
+/* Estilos para os ícones das ações */
+.fas {
+    font-size: 0.875rem;
+}
+
+/* Melhorar o espaçamento dos badges de contagem */
+.badge.bg-success,
+.badge.bg-danger {
+    font-weight: 600;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit quando filtros mudarem
+    document.getElementById('idade_filtro').addEventListener('change', function() {
+        document.getElementById('filterForm').submit();
+    });
+    
+    document.getElementById('periodo_filtro').addEventListener('change', function() {
+        document.getElementById('filterForm').submit();
+    });
+    
+    // Enter key no campo de nome para submeter
+    document.getElementById('nome_filtro').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            document.getElementById('filterForm').submit();
+        }
+    });
+    
+    // Função para smooth scroll até o topo quando mudar de página
+    const pageLinks = document.querySelectorAll('.pagination .page-link');
+    pageLinks.forEach(function(link) {
+        link.addEventListener('click', function() {
+            setTimeout(function() {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            }, 100);
+        });
+    });
+    
+    // Tooltip initialization (se estiver usando Bootstrap tooltips)
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Confirmação antes de deletar paciente
+    const deleteLinks = document.querySelectorAll('a[href*="delete_paciente"]');
+    deleteLinks.forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const pacienteName = this.closest('tr').querySelector('td:first-child').textContent.trim();
+            
+            if (confirm(`Tem certeza que deseja remover o paciente "${pacienteName}"?`)) {
+                window.location.href = this.href;
+            }
+        });
+    });
+    
+    // Confirmação antes de restaurar paciente
+    const restoreLinks = document.querySelectorAll('a[href*="restaurar_paciente"]');
+    restoreLinks.forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const pacienteName = this.closest('tr').querySelector('td:first-child').textContent.trim();
+            
+            if (confirm(`Tem certeza que deseja restaurar o paciente "${pacienteName}"?`)) {
+                window.location.href = this.href;
+            }
+        });
+    });
+    
+    // Validação do formulário de criação
+    const createForm = document.querySelector('form[method="POST"]');
+    if (createForm) {
+        createForm.addEventListener('submit', function(e) {
+            const nome = document.getElementById('nome_paciente').value.trim();
+            const telefone = document.getElementById('telefone_paciente').value.trim();
+            const valor = document.getElementById('valor').value;
+            
+            if (!nome) {
+                alert('Por favor, insira o nome do paciente.');
+                e.preventDefault();
+                return;
+            }
+            
+            if (!telefone) {
+                alert('Por favor, insira o telefone do paciente.');
+                e.preventDefault();
+                return;
+            }
+            
+            if (!valor || parseFloat(valor) < 0) {
+                alert('Por favor, insira um valor válido.');
+                e.preventDefault();
+                return;
+            }
+        });
+    }
+    
+    // Máscara para telefone (opcional)
+    const telefoneInput = document.getElementById('telefone_paciente');
+    if (telefoneInput) {
+        telefoneInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 11) {
+                value = value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+            } else if (value.length >= 7) {
+                value = value.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+            } else if (value.length >= 3) {
+                value = value.replace(/(\d{2})(\d{0,5})/, '($1) $2');
+            }
+            e.target.value = value;
+        });
+    }
+});
+</script>
+
 {% endblock content %}

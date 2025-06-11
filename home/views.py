@@ -1216,9 +1216,60 @@ def pacientes(request):
     
     if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
         return render(request, 'pages/error_permission.html')
-    pacientes = Paciente.objects.all().filter(deletado=False)
-    pacientes_deletados = Paciente.objects.all().filter(deletado=True)
+    
+    # Capturar parâmetros de filtro para pacientes ativos
+    nome_filtro = request.GET.get('nome_filtro', '').strip()
+    idade_filtro = request.GET.get('idade_filtro', '')
+    periodo_filtro = request.GET.get('periodo_filtro', '')
+    
+    # Query base para pacientes ativos
+    pacientes_query = Paciente.objects.filter(deletado=False)
+    
+    # Aplicar filtros se fornecidos
+    if nome_filtro:
+        pacientes_query = pacientes_query.filter(nome__icontains=nome_filtro)
+    
+    if idade_filtro:
+        pacientes_query = pacientes_query.filter(idade=idade_filtro)
+    
+    if periodo_filtro:
+        pacientes_query = pacientes_query.filter(periodo=periodo_filtro)
+    
+    # Ordenar por nome
+    pacientes_query = pacientes_query.order_by('nome')
+    
+    # Paginação para pacientes ativos
+    itens_por_pagina_ativos = int(request.GET.get('items_per_page_ativos', 15))
+    itens_por_pagina_ativos = max(10, min(50, itens_por_pagina_ativos))
+    
+    paginator_ativos = Paginator(pacientes_query, itens_por_pagina_ativos)
+    page_number_ativos = request.GET.get('page_ativos', 1)
+    
+    try:
+        pacientes_paginados = paginator_ativos.page(page_number_ativos)
+    except PageNotAnInteger:
+        pacientes_paginados = paginator_ativos.page(1)
+    except EmptyPage:
+        pacientes_paginados = paginator_ativos.page(paginator_ativos.num_pages)
+    
+    # Pacientes deletados (com paginação separada)
+    pacientes_deletados_query = Paciente.objects.filter(deletado=True).order_by('nome')
+    
+    # Paginação para pacientes deletados
+    itens_por_pagina_deletados = int(request.GET.get('items_per_page_deletados', 10))
+    itens_por_pagina_deletados = max(5, min(30, itens_por_pagina_deletados))
+    
+    paginator_deletados = Paginator(pacientes_deletados_query, itens_por_pagina_deletados)
+    page_number_deletados = request.GET.get('page_deletados', 1)
+    
+    try:
+        pacientes_deletados_paginados = paginator_deletados.page(page_number_deletados)
+    except PageNotAnInteger:
+        pacientes_deletados_paginados = paginator_deletados.page(1)
+    except EmptyPage:
+        pacientes_deletados_paginados = paginator_deletados.page(paginator_deletados.num_pages)
 
+    # Tratamento de criação de paciente (POST)
     if request.method == 'POST':
         nome_paciente = request.POST.get('nome_paciente')
         idade_paciente = request.POST.get('idade_paciente')
@@ -1227,8 +1278,6 @@ def pacientes(request):
         nome_responsavel = request.POST.get('nome_responsavel')
         periodo_paciente = request.POST.get('periodo_paciente')
 
-        print(valor)
-
         if not nome_responsavel:
             nome_responsavel = ""
 
@@ -1236,7 +1285,6 @@ def pacientes(request):
         try:
             valor_decimal = Decimal(valor) if valor else Decimal("0")
         except InvalidOperation:
-            # Defina um valor padrão ou trate o erro
             valor_decimal = Decimal("0")
 
         # Criação do paciente
@@ -1253,8 +1301,36 @@ def pacientes(request):
         paciente.save()
         return redirect('pacientes')
     
-    return render(request, 'pages/pacientes.html', {'pacientes': pacientes,
-                                                    'pacientes_deletados': pacientes_deletados})
+    # Preparar parâmetros de query para manter filtros na paginação
+    query_params_ativos = {}
+    if nome_filtro:
+        query_params_ativos['nome_filtro'] = nome_filtro
+    if idade_filtro:
+        query_params_ativos['idade_filtro'] = idade_filtro
+    if periodo_filtro:
+        query_params_ativos['periodo_filtro'] = periodo_filtro
+    if request.GET.get('items_per_page_ativos'):
+        query_params_ativos['items_per_page_ativos'] = request.GET.get('items_per_page_ativos')
+    
+    query_params_deletados = {}
+    if request.GET.get('items_per_page_deletados'):
+        query_params_deletados['items_per_page_deletados'] = request.GET.get('items_per_page_deletados')
+    
+    # Estatísticas
+    total_pacientes_ativos = pacientes_query.count()
+    total_pacientes_deletados = pacientes_deletados_query.count()
+    
+    return render(request, 'pages/pacientes.html', {
+        'pacientes': pacientes_paginados,
+        'pacientes_deletados': pacientes_deletados_paginados,
+        'query_params_ativos': query_params_ativos,
+        'query_params_deletados': query_params_deletados,
+        'total_pacientes_ativos': total_pacientes_ativos,
+        'total_pacientes_deletados': total_pacientes_deletados,
+        'nome_filtro': nome_filtro,
+        'idade_filtro': idade_filtro,
+        'periodo_filtro': periodo_filtro,
+    })
 
 @login_required(login_url='login1')
 def editar_paciente(request, id_paciente):
@@ -2097,8 +2173,16 @@ def consulta_financeira_pacientes(request):
     pacientes = Paciente.objects.filter(deletado=False)
     psicologas = Psicologa.objects.all()
 
-    # Opção de filtro "apenas devedores"
-    apenas_devedores = request.POST.get('apenas_devedores') == 'on'
+    # Capturar parâmetros de filtro
+    apenas_devedores = request.GET.get('apenas_devedores') == 'on'
+    nome_paciente = request.GET.get('nome_paciente', '').strip()
+    psicologa_id = request.GET.get('psicologa_id', '')
+    
+    # Para manter compatibilidade com POST (se necessário)
+    if request.method == 'POST':
+        apenas_devedores = request.POST.get('apenas_devedores') == 'on'
+        nome_paciente = request.POST.get('nome_paciente', '').strip()
+        psicologa_id = request.POST.get('psicologa_id', '')
 
     # Base da consulta para receita por paciente
     receita_query = financeiros.values('paciente__nome', 'paciente__id')
@@ -2162,7 +2246,6 @@ def consulta_financeira_pacientes(request):
         paciente_data['n_consultas_nao_pagas'] = consultas_nao_pagas
         
         # Calcular dívidas por psicóloga
-        # Nova implementação: cálculo direto de dívidas por psicóloga
         dividas_por_psicologa = []
         
         # Obter todas as psicólogas que atenderam este paciente
@@ -2212,7 +2295,85 @@ def consulta_financeira_pacientes(request):
         ]
         paciente_data['psicologas_sem_divida'] = psicologas_sem_divida
 
-    # Calcular totais gerais
+    # Aplicação dos filtros
+    receita_filtrada = list(receita_por_paciente)
+    
+    # Filtro por nome de paciente
+    if nome_paciente:
+        receita_filtrada = [
+            p for p in receita_filtrada 
+            if p['paciente__nome'] and nome_paciente.lower() in p['paciente__nome'].lower()
+        ]
+        
+        # Se não encontrou nenhum paciente com esse nome
+        if not receita_filtrada:
+            return render(request, 'pages/error_paciente_nao_encontrado_financeiro.html', {
+                'nome_cliente': nome_paciente
+            })
+    
+    # Filtro por psicóloga
+    if psicologa_id:
+        filtered_pacientes = []
+        for p in receita_filtrada:
+            # Verifica se esta psicóloga aparece nas consultas deste paciente
+            has_psicologa = financeiros.filter(
+                paciente__id=p['paciente__id'],
+                psicologa__id=psicologa_id
+            ).exists()
+            
+            if has_psicologa:
+                filtered_pacientes.append(p)
+        
+        receita_filtrada = filtered_pacientes
+    
+    # Filtro por pacientes com dívida
+    if apenas_devedores:
+        receita_filtrada = [p for p in receita_filtrada if p['valor_a_receber'] > 0]
+
+    # Formatar os valores decimais para evitar problemas de exibição
+    for paciente in receita_filtrada:
+        paciente['receita_bruta'] = round(paciente['receita_bruta'] or Decimal('0.00'), 2)
+        paciente['valor_recebido'] = round(paciente['valor_recebido'] or Decimal('0.00'), 2)
+        paciente['valor_a_receber'] = round(paciente['valor_a_receber'] or Decimal('0.00'), 2)
+        paciente['valor_credito'] = round(paciente['valor_credito'] or Decimal('0.00'), 2)
+        
+        # Formatar valores das dívidas
+        for divida in paciente['dividas_por_psicologa']:
+            divida['valor'] = round(divida['valor'], 2)
+        
+        # Verificações de consistência
+        if paciente['valor_a_receber'] > 0 and paciente['n_consultas_nao_pagas'] == 0:
+            paciente['n_consultas_nao_pagas'] = max(1, paciente['n_consultas_nao_pagas'])
+        
+        if paciente['n_consultas_nao_pagas'] == 0 and paciente['valor_a_receber'] > 0:
+            paciente['valor_a_receber'] = Decimal('0.00')
+        
+        if paciente['valor_a_receber'] > 0 and paciente['n_consultas_nao_pagas'] == 0:
+            paciente['n_consultas_nao_pagas'] = 1
+            if paciente['n_consultas_pagas'] + paciente['n_consultas_nao_pagas'] > paciente['n_consultas']:
+                paciente['n_consultas_pagas'] = paciente['n_consultas'] - paciente['n_consultas_nao_pagas']
+
+    # CONFIGURAÇÃO DA PAGINAÇÃO
+    # Permitir que o usuário escolha quantos itens por página
+    itens_por_pagina = int(request.GET.get('items_per_page', 20))
+    # Limitar entre 10 e 100 itens por página
+    itens_por_pagina = max(10, min(100, itens_por_pagina))
+    
+    paginator = Paginator(receita_filtrada, itens_por_pagina)
+    
+    # Capturar o número da página da URL
+    page_number = request.GET.get('page', 1)
+    
+    try:
+        receita_paginada = paginator.page(page_number)
+    except PageNotAnInteger:
+        # Se a página não for um inteiro, mostrar a primeira página
+        receita_paginada = paginator.page(1)
+    except EmptyPage:
+        # Se a página estiver fora do range, mostrar a última página
+        receita_paginada = paginator.page(paginator.num_pages)
+
+    # Calcular totais gerais (usando todos os dados, não apenas a página atual)
     total_bruto = financeiros.aggregate(Sum('valor'))['valor__sum'] or Decimal('0.00')
     total_recebido = financeiros.aggregate(Sum('valor_pagamento'))['valor_pagamento__sum'] or Decimal('0.00')
     valor_a_receber = max(Decimal('0.00'), total_bruto - total_recebido)
@@ -2227,80 +2388,31 @@ def consulta_financeira_pacientes(request):
         data_pagamento__month=hoje.month
     ).aggregate(Sum('valor_pagamento'))['valor_pagamento__sum'] or Decimal('0.00')
 
-    # Aplicação dos filtros
-    if request.method == 'POST':
-        nome_paciente = request.POST.get('nome_paciente')
-        psicologa_id = request.POST.get('psicologa_id')
-
-        # Filtro por nome de paciente
-        if nome_paciente:
-            receita_por_paciente = [
-                p for p in receita_por_paciente 
-                if p['paciente__nome'] and nome_paciente.lower() in p['paciente__nome'].lower()
-            ]
-            
-            # Se não encontrou nenhum paciente com esse nome
-            if not receita_por_paciente:
-                return render(request, 'pages/error_paciente_nao_encontrado_financeiro.html', {
-                    'nome_cliente': nome_paciente
-                })
-        
-        # Filtro por psicóloga
-        if psicologa_id:
-            filtered_pacientes = []
-            for p in receita_por_paciente:
-                # Verifica se esta psicóloga aparece nas consultas deste paciente
-                has_psicologa = financeiros.filter(
-                    paciente__id=p['paciente__id'],
-                    psicologa__id=psicologa_id
-                ).exists()
-                
-                if has_psicologa:
-                    filtered_pacientes.append(p)
-            
-            receita_por_paciente = filtered_pacientes
-        
-        # Filtro por pacientes com dívida
-        if apenas_devedores:
-            receita_por_paciente = [p for p in receita_por_paciente if p['valor_a_receber'] > 0]
-
-    # Formatar os valores decimais para evitar problemas de exibição
-    for paciente in receita_por_paciente:
-        paciente['receita_bruta'] = round(paciente['receita_bruta'] or Decimal('0.00'), 2)
-        paciente['valor_recebido'] = round(paciente['valor_recebido'] or Decimal('0.00'), 2)
-        paciente['valor_a_receber'] = round(paciente['valor_a_receber'] or Decimal('0.00'), 2)
-        paciente['valor_credito'] = round(paciente['valor_credito'] or Decimal('0.00'), 2)
-        
-        # Formatar valores das dívidas
-        for divida in paciente['dividas_por_psicologa']:
-            divida['valor'] = round(divida['valor'], 2)
-        
-        # Verificar consistência: se valor a receber > 0, deve haver pelo menos uma consulta não paga
-        if paciente['valor_a_receber'] > 0 and paciente['n_consultas_nao_pagas'] == 0:
-            # Garante que haja pelo menos uma consulta não paga se houver valor a receber
-            paciente['n_consultas_nao_pagas'] = max(1, paciente['n_consultas_nao_pagas'])
-        
-        # Verificar consistência: se todas as consultas estão pagas, não deve haver valor a receber
-        if paciente['n_consultas_nao_pagas'] == 0 and paciente['valor_a_receber'] > 0:
-            paciente['valor_a_receber'] = Decimal('0.00')
-        
-        # Verificar consistência: se há valor a receber, deve haver consultas não pagas
-        if paciente['valor_a_receber'] > 0 and paciente['n_consultas_nao_pagas'] == 0:
-            paciente['n_consultas_nao_pagas'] = 1
-            # Ajusta o total de consultas pagas se necessário
-            if paciente['n_consultas_pagas'] + paciente['n_consultas_nao_pagas'] > paciente['n_consultas']:
-                paciente['n_consultas_pagas'] = paciente['n_consultas'] - paciente['n_consultas_nao_pagas']
+    # Preparar parâmetros de query para manter filtros na paginação
+    query_params = {}
+    if apenas_devedores:
+        query_params['apenas_devedores'] = 'on'
+    if nome_paciente:
+        query_params['nome_paciente'] = nome_paciente
+    if psicologa_id:
+        query_params['psicologa_id'] = psicologa_id
+    if request.GET.get('items_per_page'):
+        query_params['items_per_page'] = request.GET.get('items_per_page')
 
     return render(request, 'pages/financeiro_paciente.html', {
-        'receita_por_paciente': receita_por_paciente,
+        'receita_por_paciente': receita_paginada,
         'pacientes': pacientes,
         'psicologas': psicologas,
         'apenas_devedores': apenas_devedores,
+        'nome_paciente': nome_paciente,
+        'psicologa_id': psicologa_id,
         'total_bruto': round(total_bruto, 2),
         'total_recebido': round(total_recebido, 2),
         'valor_a_receber': round(valor_a_receber, 2),
         'pacientes_ativos': pacientes_ativos,
         'valor_recebido_mes': round(valor_recebido_mes, 2),
+        'query_params': query_params,  # Para manter filtros na paginação
+        'total_pacientes': len(receita_filtrada),  # Total de pacientes filtrados
     })
 
 @login_required(login_url='login1')
