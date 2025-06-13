@@ -1,4 +1,4 @@
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
 from decimal import Decimal
 from pyexpat.errors import messages
 from time import strptime
@@ -38,6 +38,12 @@ from django.db.models import Sum, F, ExpressionWrapper, DecimalField
 from django.db.models.functions import Coalesce
 from django.db.models import OuterRef, Subquery
 from django.core.cache import cache
+from django.http import HttpResponse
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+from io import BytesIO
+import os
+from django.conf import settings
 
 cards = [
     {"title": "Agenda", "url_name": 'psico_agenda', "image": "img/curved-images/curved3.jpg"},
@@ -422,6 +428,8 @@ def update_sala(request, id_sala):
             sala.horario_inicio = horario_inicio
         if horario_fim:
             sala.horario_fim = horario_fim
+        if unidade:
+            sala.id_unidade = unidade
 
         sala.save()
         return redirect("cadastrar_salas")
@@ -742,6 +750,180 @@ def agenda_central_paginated(request):
         'consultas_online': consultas_online,
         'psicologas_online': Psicologa.objects.filter(consulta_online__in=consultas_online).distinct()
     })
+
+
+@login_required(login_url='login1')
+def gerar_relatorio_pdf_agenda(request):
+    """
+    Gera um relatório PDF completo da agenda central com todos os horários cadastrados
+    """
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+
+    # Obter dados estáticos do cache (reutilizar a mesma lógica da agenda_central)
+    cache_key = 'agenda_central_static_data'
+    static_data = cache.get(cache_key)
+    
+    if not static_data:
+        static_data = {
+            'psicologas': list(Psicologa.objects.all()),
+            'especialidades': list(Especialidade.objects.all()),
+            'publicos': list(Publico.objects.all()),
+            'unidades': list(Unidade.objects.all()),
+            'dias_da_semana': ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"]
+        }
+        cache.set(cache_key, static_data, 1800)  # 30 minutos
+
+    # Buscar todas as consultas sem paginação para o relatório
+    consultas = Consulta.objects.select_related(
+        'psicologo', 
+        'sala', 
+        'sala__id_unidade',
+        'Paciente'
+    ).prefetch_related(
+        'psicologo__especialidadepsico_set__especialidade',
+        'psicologo__publicopsico_set__publico'
+    ).order_by('sala__id_unidade__nome_unidade', 'sala__numero_sala', 'dia_semana', 'horario')
+
+    # Consultas online
+    consultas_online = Consulta_Online.objects.select_related(
+        'Paciente'
+    ).filter(
+        Paciente__isnull=False
+    ).order_by('psicologo__nome', 'dia_semana', 'horario')
+
+    # Buscar todas as salas com consultas
+    salas_ids_com_consultas = consultas.values_list('sala_id', flat=True).distinct()
+    salas_com_consultas = Sala.objects.filter(
+        id_sala__in=salas_ids_com_consultas
+    ).select_related('id_unidade').order_by('id_unidade__nome_unidade', 'numero_sala')
+
+    # Organizar dados por unidade, sala e dia da semana para melhor visualização no PDF
+    dados_organizados = {}
+    for sala in salas_com_consultas:
+        unidade_nome = sala.id_unidade.nome_unidade
+        if unidade_nome not in dados_organizados:
+            dados_organizados[unidade_nome] = {}
+        
+        # Obter consultas da sala agrupadas por dia da semana
+        consultas_sala = consultas.filter(sala=sala)
+        
+        # Organizar por dia da semana
+        dados_por_dia = {}
+        for dia in static_data['dias_da_semana']:
+            consultas_do_dia = consultas_sala.filter(dia_semana=dia).order_by('horario')
+            if consultas_do_dia.exists():
+                dados_por_dia[dia] = consultas_do_dia
+        
+        if dados_por_dia:  # Só adiciona se tiver consultas
+            dados_organizados[unidade_nome][sala] = dados_por_dia
+
+    # Estatísticas para o relatório
+    total_consultas = consultas.count()
+    total_consultas_ocupadas = consultas.filter(Paciente__isnull=False).count()
+    total_consultas_livres = consultas.filter(Paciente__isnull=True).count()
+    total_consultas_online = consultas_online.count()
+
+    # Contexto para o template PDF
+    context = {
+        'dados_organizados': dados_organizados,
+        'consultas_online': consultas_online,
+        'static_data': static_data,
+        'total_consultas': total_consultas,
+        'total_consultas_ocupadas': total_consultas_ocupadas,
+        'total_consultas_livres': total_consultas_livres,
+        'total_consultas_online': total_consultas_online,
+        'data_geracao': datetime.now(),
+        'usuario_gerador': request.user.username,
+    }
+
+    # Renderizar template HTML
+    template = get_template('relatorios/agenda_central_pdf.html')
+    html = template.render(context)
+
+    # Criar o PDF
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="relatorio_agenda_central_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf"'
+
+    # Converter HTML para PDF
+    pisa_status = pisa.CreatePDF(
+        html, 
+        dest=response,
+        encoding='utf-8'
+    )
+
+    if pisa_status.err:
+        return HttpResponse('Erro ao gerar PDF', status=400)
+
+    return response
+
+# Função alternativa para visualizar o relatório na tela antes de baixar
+@login_required(login_url='login1')
+def visualizar_relatorio_agenda(request):
+    """
+    Visualiza o relatório da agenda em HTML antes de gerar o PDF
+    """
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+
+    # Reutilizar a mesma lógica da função PDF
+    cache_key = 'agenda_central_static_data'
+    static_data = cache.get(cache_key)
+    
+    if not static_data:
+        static_data = {
+            'psicologas': list(Psicologa.objects.all()),
+            'especialidades': list(Especialidade.objects.all()),
+            'publicos': list(Publico.objects.all()),
+            'unidades': list(Unidade.objects.all()),
+            'dias_da_semana': ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"]
+        }
+        cache.set(cache_key, static_data, 1800)
+
+    consultas = Consulta.objects.select_related(
+        'psicologo', 
+        'sala', 
+        'sala__id_unidade',
+        'Paciente'
+    ).prefetch_related(
+        'psicologo__especialidadepsico_set__especialidade',
+        'psicologo__publicopsico_set__publico'
+    ).order_by('sala__id_unidade__nome_unidade', 'sala__numero_sala', 'dia_semana', 'horario')
+
+    consultas_online = Consulta_Online.objects.select_related(
+        'Paciente'
+    ).filter(
+        Paciente__isnull=False
+    ).order_by('psicologo__nome', 'dia_semana', 'horario')
+
+    salas_ids_com_consultas = consultas.values_list('sala_id', flat=True).distinct()
+    salas_com_consultas = Sala.objects.filter(
+        id_sala__in=salas_ids_com_consultas
+    ).select_related('id_unidade').order_by('id_unidade__nome_unidade', 'numero_sala')
+
+    dados_organizados = {}
+    for sala in salas_com_consultas:
+        unidade_nome = sala.id_unidade.nome_unidade
+        if unidade_nome not in dados_organizados:
+            dados_organizados[unidade_nome] = {}
+        
+        consultas_sala = consultas.filter(sala=sala)
+        dados_organizados[unidade_nome][sala] = consultas_sala
+
+    context = {
+        'dados_organizados': dados_organizados,
+        'consultas_online': consultas_online,
+        'static_data': static_data,
+        'total_consultas': consultas.count(),
+        'total_consultas_ocupadas': consultas.filter(Paciente__isnull=False).count(),
+        'total_consultas_livres': consultas.filter(Paciente__isnull=True).count(),
+        'total_consultas_online': consultas_online.count(),
+        'data_geracao': datetime.now(),
+        'usuario_gerador': request.user.username,
+        'visualizacao': True  # Flag para indicar que é visualização
+    }
+
+    return render(request, 'relatorios/agenda_central_pdf.html', context)
 
 
 # CONSULTAS - AGENDA PSICÓLOGA
@@ -2857,7 +3039,6 @@ def deletar_despesa(request, despesa_id):
 
 # DISPONIBILIDADE PSICOLOGOS - GERAL
 
-
 @login_required(login_url='login1')
 def vizualizar_disponibilidade(request):
     if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
@@ -2876,7 +3057,7 @@ def vizualizar_disponibilidade(request):
             'especialidades': list(Especialidade.objects.all()),
             'publicos': list(Publico.objects.all()),
             'unidades': list(Unidade.objects.all()),
-            'dias_da_semana': ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
+            'dias_da_semana': ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo']
         }
         cache.set(cache_key, static_data, 1800)  # 30 minutos
 
@@ -2923,38 +3104,72 @@ def vizualizar_disponibilidade(request):
         if filtros:
             horarios = horarios.filter(filtros).distinct()
 
-    # OTIMIZAÇÃO: Agrupamento eficiente em Python (uma passada só)
-    horarios_semanal = defaultdict(lambda: defaultdict(list))
-    horarios_quinzenal = defaultdict(lambda: defaultdict(list))
+    # NOVA ESTRUTURA: Agrupamento otimizado por unidade → dia → psicóloga → horários
+    horarios_semanal = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
+    horarios_quinzenal = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
     psicologos_com_horarios_ids = set()
 
     for horario in horarios:
-        if not horario.psicologo or not horario.sala:
+        if not horario.psicologo or not horario.sala or not horario.sala.id_unidade:
             continue
             
         unidade_nome = horario.sala.id_unidade.nome_unidade
         dia = horario.dia_semana
         psicologa_nome = horario.psicologo.nome
+        psicologa_cor = horario.psicologo.cor if horario.psicologo.cor else '#FFA500'  # Cor padrão laranja
         hora_str = horario.horario.strftime('%H:%M')
-        
-        psicologa_e_hora = {
-            'psicologa': psicologa_nome,
-            'hora': hora_str,
-            'psicologo_id': horario.psicologo.id
-        }
         
         # Adicionar à lista de psicólogos com horários
         psicologos_com_horarios_ids.add(horario.psicologo.id)
         
-        # Agrupar por semanal/quinzenal
+        # Agrupar por semanal/quinzenal → unidade → dia → psicóloga
         if horario.semanal:
-            horarios_semanal[unidade_nome][dia].append(psicologa_e_hora)
+            horarios_semanal[unidade_nome][dia][psicologa_nome].append({
+                'hora': hora_str,
+                'cor': psicologa_cor,
+                'psicologo_id': horario.psicologo.id
+            })
         else:
-            horarios_quinzenal[unidade_nome][dia].append(psicologa_e_hora)
+            horarios_quinzenal[unidade_nome][dia][psicologa_nome].append({
+                'hora': hora_str,
+                'cor': psicologa_cor,
+                'psicologo_id': horario.psicologo.id
+            })
 
-    # Converter defaultdict para dict normal para o template
-    horarios_semanal = {k: dict(v) for k, v in horarios_semanal.items()}
-    horarios_quinzenal = {k: dict(v) for k, v in horarios_quinzenal.items()}
+    # Converter para estrutura final otimizada para o template com ordem correta dos dias
+    def formatar_horarios_agrupados(horarios_dict):
+        # Ordem correta dos dias da semana
+        ordem_dias = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo']
+        resultado = {}
+        
+        for unidade, dias in horarios_dict.items():
+            # Usar OrderedDict para manter a ordem dos dias
+            resultado[unidade] = OrderedDict()
+            
+            # Iterar pelos dias na ordem correta
+            for dia in ordem_dias:
+                if dia in dias:
+                    psicologas = dias[dia]
+                    resultado[unidade][dia] = []
+                    
+                    for psicologa_nome, horarios_list in psicologas.items():
+                        # Ordenar horários
+                        horarios_list.sort(key=lambda x: x['hora'])
+                        horarios_str = ', '.join([h['hora'] for h in horarios_list])
+                        cor = horarios_list[0]['cor'] if horarios_list else '#FFA500'
+                        
+                        # Formato: "🟠Renata- 14:00, 15:00, 16:00, 17:00"
+                        resultado[unidade][dia].append({
+                            'psicologa': psicologa_nome,
+                            'horarios_formatados': f"{psicologa_nome}- {horarios_str}",
+                            'cor': cor,
+                            'horarios_lista': [h['hora'] for h in horarios_list],
+                            'psicologo_id': horarios_list[0]['psicologo_id'] if horarios_list else None
+                        })
+        return resultado
+
+    horarios_semanal_formatados = formatar_horarios_agrupados(horarios_semanal)
+    horarios_quinzenal_formatados = formatar_horarios_agrupados(horarios_quinzenal)
 
     # Buscar apenas psicólogos que têm horários disponíveis
     psicologos_com_horarios = [
@@ -2962,16 +3177,27 @@ def vizualizar_disponibilidade(request):
         if psico.id in psicologos_com_horarios_ids
     ]
 
+    # Debug: Verificar quantas unidades estão sendo processadas
+    print("=== DEBUG DISPONIBILIDADE ===")
+    print(f"Horários encontrados: {horarios.count()}")
+    print(f"Unidades em horários semanais: {list(horarios_semanal_formatados.keys())}")
+    print(f"Unidades em horários quinzenais: {list(horarios_quinzenal_formatados.keys())}")
+    
+    # Verificar se há dados para ambas as unidades
+    for unidade, dias in horarios_semanal_formatados.items():
+        print(f"Unidade {unidade}: {len(dias)} dias com horários")
+        for dia, psicologas in dias.items():
+            print(f"  - {dia}: {len(psicologas)} psicólogas")
+
     return render(request, 'pages/disponibilidades.html', {
         'psicologos': psicologos_com_horarios,
         'especialidades': static_data['especialidades'],
         'publicos': static_data['publicos'],
         'unidades': static_data['unidades'],
-        'horarios_semanal': horarios_semanal,
-        'horarios_quinzenal': horarios_quinzenal,
+        'horarios_semanal': horarios_semanal_formatados,
+        'horarios_quinzenal': horarios_quinzenal_formatados,
         'dias_da_semana': static_data['dias_da_semana'],
     })
-
 
 
 # DISPONIBILIDADE PSICOLOGOS - ONLINE

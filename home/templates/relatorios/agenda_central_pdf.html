@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório - Agenda Central</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #007bff;
+            margin: 0;
+            font-size: 24px;
+        }
+        
+        .header .info {
+            margin-top: 10px;
+            font-size: 11px;
+            color: #666;
+        }
+        
+        .summary {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 25px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .summary h2 {
+            margin-top: 0;
+            color: #007bff;
+            font-size: 16px;
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .summary-item {
+            text-align: center;
+            padding: 10px;
+            background: white;
+            border-radius: 3px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .summary-item .number {
+            font-size: 18px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        
+        .summary-item .label {
+            font-size: 10px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .unidade-section {
+            margin-bottom: 30px;
+            page-break-inside: avoid;
+        }
+        
+        .unidade-title {
+            background-color: #007bff;
+            color: white;
+            padding: 12px;
+            margin: 0;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .sala-section {
+            margin-bottom: 20px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .sala-header {
+            background-color: #e9ecef;
+            padding: 8px 12px;
+            font-weight: bold;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .sala-stats {
+            font-size: 10px;
+            color: #666;
+        }
+        
+        .agenda-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 2px solid #333;
+        }
+        
+        .agenda-table th {
+            background-color: #6c757d;
+            color: white;
+            padding: 12px 8px;
+            text-align: center;
+            border: 1px solid #333;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .agenda-table td {
+            padding: 8px;
+            border: 1px solid #333;
+            text-align: center;
+            font-size: 11px;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .horario-cell {
+            background-color: #333;
+            color: white;
+            font-weight: bold;
+            width: 15%;
+        }
+        
+        .periodo-cell {
+            width: 42.5%;
+            position: relative;
+        }
+        
+        .periodo-vazio {
+            background-color: #8b8b8b !important;
+            color: #ddd;
+        }
+        
+        .psicologa-info {
+            display: block;
+            font-size: 10px;
+            margin-top: 2px;
+            opacity: 0.9;
+        }
+        
+        .online-section {
+            margin-top: 30px;
+            page-break-inside: avoid;
+        }
+        
+        .online-title {
+            background-color: #28a745;
+            color: white;
+            padding: 12px;
+            margin: 0;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 10px;
+            color: #666;
+            border-top: 1px solid #dee2e6;
+            padding-top: 15px;
+        }
+        
+        @media print {
+            body {
+                margin: 0;
+                padding: 15px;
+            }
+            
+            .unidade-section {
+                page-break-inside: avoid;
+            }
+            
+            .sala-section {
+                page-break-inside: avoid;
+            }
+        }
+        
+        .btn-download {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        
+        .btn-download:hover {
+            background-color: #0056b3;
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Relatório da Agenda Central</h1>
+        <div class="info">
+            <strong>Data de Geração:</strong> {{ data_geracao|date:"d/m/Y H:i" }}<br>
+            <strong>Gerado por:</strong> {{ usuario_gerador }}
+        </div>
+    </div>
+
+    {% if visualizacao %}
+    <div style="text-align: center; margin-bottom: 20px;">
+        <a href="{% url 'gerar_relatorio_pdf_agenda' %}" class="btn-download">
+            📄 Baixar PDF
+        </a>
+    </div>
+    {% endif %}
+
+    <div class="summary">
+        <h2>📊 Resumo Geral</h2>
+        <div class="summary-grid">
+            <div class="summary-item">
+                <div class="number">{{ total_consultas }}</div>
+                <div class="label">Total de Horários</div>
+            </div>
+            <div class="summary-item">
+                <div class="number">{{ total_consultas_ocupadas }}</div>
+                <div class="label">Horários Ocupados</div>
+            </div>
+            <div class="summary-item">
+                <div class="number">{{ total_consultas_livres }}</div>
+                <div class="label">Horários Livres</div>
+            </div>
+            <div class="summary-item">
+                <div class="number">{{ total_consultas_online }}</div>
+                <div class="label">Consultas Online</div>
+            </div>
+        </div>
+    </div>
+
+    {% for unidade_nome, salas in dados_organizados.items %}
+    <div class="unidade-section">
+        <h2 class="unidade-title">🏢 {{ unidade_nome }}</h2>
+        
+        {% for sala, dados_por_dia in salas.items %}
+            {% for dia, consultas_do_dia in dados_por_dia.items %}
+            <div class="sala-section">
+                <div class="sala-header">
+                    <span>🏠 Sala {{ sala.numero_sala }} - {{ sala.cor_sala }} | {{ dia }}</span>
+                    <span class="sala-stats">
+                        {{ consultas_do_dia.count }} horários
+                    </span>
+                </div>
+                
+                {% if consultas_do_dia %}
+                <table class="agenda-table">
+                    <thead>
+                        <tr>
+                            <th>HORÁRIO</th>
+                            <th>SEMANAL</th>
+                            <th>QUINZENAL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for consulta in consultas_do_dia %}
+                        <tr>
+                            <td class="horario-cell">{{ consulta.horario|time:"H:i" }}</td>
+                            
+                            <!-- Célula SEMANAL -->
+                            <td class="periodo-cell {% if not consulta.semanal %}periodo-vazio{% endif %}" 
+                                {% if consulta.psicologo.cor and consulta.semanal %}
+                                    style="background-color: {{ consulta.psicologo.cor }};"
+                                {% endif %}>
+                                {% if consulta.semanal %}
+                                    Semanal
+                                    <span class="psicologa-info">{{ consulta.psicologo.nome }}</span>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            
+                            <!-- Célula QUINZENAL -->
+                            <td class="periodo-cell {% if not consulta.quinzenal %}periodo-vazio{% endif %}" 
+                                {% if consulta.psicologo.cor and consulta.quinzenal %}
+                                    style="background-color: {{ consulta.psicologo.cor }};"
+                                {% endif %}>
+                                {% if consulta.quinzenal %}
+                                    Quinzenal
+                                    <span class="psicologa-info">{{ consulta.psicologo.nome }}</span>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% empty %}
+        <div class="no-data">Nenhuma sala com consultas cadastradas para esta unidade</div>
+        {% endfor %}
+    </div>
+    {% empty %}
+    <div class="no-data">Nenhuma consulta cadastrada no sistema</div>
+    {% endfor %}
+
+    {% if consultas_online %}
+    <div class="online-section">
+        <h2 class="online-title">💻 Consultas Online</h2>
+        <table class="consultas-table">
+            <thead>
+                <tr>
+                    <th>Dia</th>
+                    <th>Horário</th>
+                    <th>Psicóloga</th>
+                    <th>Paciente</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for consulta in consultas_online %}
+                <tr>
+                    <td>{{ consulta.dia_semana }}</td>
+                    <td>{{ consulta.horario|default:'' }}</td>
+                    <td>{{ consulta.psicologo.nome }}</td>
+                    <td>
+                        {% if consulta.Paciente %}
+                            {{ consulta.Paciente.nome }}
+                        {% else %}
+                            <span class="status-livre">Horário Livre</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if consulta.Paciente %}
+                            <span class="status-ocupado">Ocupado</span>
+                        {% else %}
+                            <span class="status-livre">Livre</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <div class="footer">
+        <p>Relatório gerado automaticamente pelo sistema de agenda | {{ data_geracao|date:"d/m/Y H:i" }}</p>
+        <p>Total de registros: {{ total_consultas }} horários presenciais + {{ total_consultas_online }} horários online</p>
+    </div>
+</body>
+</html>

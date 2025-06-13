@@ -112,7 +112,9 @@ urlpatterns = [
     path('psicologas/<int:psicologo_id>/deletar_multiplas_online/', views.delete_multiple_consultas_online, name='delete_multiple_consultas_online'),
 
     #AGENDA CENTRAL
-    path('agenda_central', views.agenda_central, name='agenda_central'),   
+    path('agenda_central', views.agenda_central, name='agenda_central'),
+    path('agenda/relatorio/pdf/', views.gerar_relatorio_pdf_agenda, name='gerar_relatorio_pdf_agenda'),
+    path('agenda/relatorio/visualizar/', views.visualizar_relatorio_agenda, name='visualizar_relatorio_agenda'),   
     
     #PÁGINAS DE ERRO
     path('handler404/', views.handler404, name='handler404'),

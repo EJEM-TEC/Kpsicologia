@@ -45,7 +45,7 @@
                       <select class="form-select" id="unidade_id" name="unidade_id">
                         <option value="todos">Todos</option>
                         {% for unidade in unidades %}
-                        <option value="{{unidade.id_unidade}}">{{unidade.nome_unidade}}</option>
+                        <option value="{{unidade.id}}">{{unidade.nome_unidade}}</option>
                         {% endfor %}
                       </select>
                     </div>
@@ -153,7 +153,7 @@
   <div class="tab-content" id="frequencyTabContent">
     <!-- Weekly Tab -->
     <div class="tab-pane fade show active" id="weekly-tab-pane" role="tabpanel" aria-labelledby="weekly-tab" tabindex="0">
-      {% for unidade, dias in horarios_semanal.items %}
+      {% for unidade_nome, dias in horarios_semanal.items %}
         <div class="row mb-4">
           <div class="col-12">
             <div class="card shadow-sm">
@@ -162,70 +162,37 @@
                   <div class="icon icon-shape bg-gradient-primary shadow text-center rounded-circle me-3">
                     <i class="fas fa-building text-white opacity-10"></i>
                   </div>
-                  <h5 class="mb-0">{{ unidade }}</h5>
+                  <h5 class="mb-0">{{ unidade_nome }}</h5>
                 </div>
               </div>
               <div class="card-body">
-                {% for dia, horarios in dias.items %}
-                  <div class="card mb-4 border-0 shadow-none">
-                    <div class="card-header p-3 border-bottom">
-                      <div class="d-flex align-items-center">
-                        <div class="icon icon-shape bg-gradient-info shadow text-center rounded-circle me-2" style="width: 30px; height: 30px; line-height: 30px;">
-                          <i class="fas fa-calendar-day text-white opacity-10" style="font-size: 12px;"></i>
+                {% for dia, psicologas_data in dias.items %}
+                  {% if psicologas_data %}
+                    <div class="card mb-4 border-0 shadow-none">
+                      <div class="card-header p-3 border-bottom">
+                        <div class="d-flex align-items-center">
+                          <div class="icon icon-shape bg-gradient-info shadow text-center rounded-circle me-2" style="width: 30px; height: 30px; line-height: 30px;">
+                            <i class="fas fa-calendar-day text-white opacity-10" style="font-size: 12px;"></i>
+                          </div>
+                          <h6 class="mb-0">{{ dia }}</h6>
                         </div>
-                        <h6 class="mb-0">{{ dia }}</h6>
                       </div>
-                    </div>
-                    <div class="card-body p-0">
-                      <div class="accordion" id="accordion-{{ unidade|slugify }}-{{ dia|slugify }}-semanal">
-                        {% for psicologa in psicologos %}
-                          {% with horarios_psicologa=horarios|dictsort:"psicologa" %}
-                            {% with psicologa_horarios=0 %}
-                              {% for item in horarios %}
-                                {% if psicologa.nome == item.psicologa %}
-                                  {% with psicologa_horarios=1 %}{% endwith %}
-                                {% endif %}
-                              {% endfor %}
-                              
-                              <div class="accordion-item border-0 psicologa-group" id="semanal-{{ unidade|slugify }}-{{ dia|slugify }}-{{ psicologa.id }}">
-                                <h2 class="accordion-header" id="heading-{{ unidade|slugify }}-{{ dia|slugify }}-{{ psicologa.id }}-semanal">
-                                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ unidade|slugify }}-{{ dia|slugify }}-{{ psicologa.id }}-semanal" aria-expanded="false" aria-controls="collapse-{{ unidade|slugify }}-{{ dia|slugify }}-{{ psicologa.id }}-semanal">
-                                    <div class="d-flex align-items-center">
-                                      <div style="width: 16px; height: 16px; background-color: {{ psicologa.cor }}; border-radius: 50%; margin-right: 10px;"></div>
-                                      <span>{{ psicologa.nome }}</span>
-                                    </div>
-                                  </button>
-                                </h2>
-                                <div id="collapse-{{ unidade|slugify }}-{{ dia|slugify }}-{{ psicologa.id }}-semanal" class="accordion-collapse collapse" aria-labelledby="heading-{{ unidade|slugify }}-{{ dia|slugify }}-{{ psicologa.id }}-semanal">
-                                  <div class="accordion-body">
-                                    <div class="horarios-container">
-                                      <div class="row g-3">
-                                        {% for item in horarios %}
-                                          {% if psicologa.nome == item.psicologa %}
-                                            <div class="col-md-3 col-sm-4 col-6">
-                                              <div class="card border-0 shadow-sm">
-                                                <div class="card-body py-2 px-3 text-center" style="background-color: {{ psicologa.cor }}; color: white; border-radius: 10px;">
-                                                  <p class="mb-0 font-weight-bold">{{ item.hora }}</p>
-                                                </div>
-                                              </div>
-                                            </div>
-                                          {% endif %}
-                                        {% empty %}
-                                          <div class="col-12">
-                                            <p class="text-muted text-center mb-0">Nenhum horário disponível.</p>
-                                          </div>
-                                        {% endfor %}
-                                      </div>
-                                    </div>
-                                  </div>
+                      <div class="card-body p-3">
+                        <div class="row g-3">
+                          {% for psicologa_info in psicologas_data %}
+                            <div class="col-12">
+                              <div class="alert mb-2 p-3 border-0 shadow-sm" style="background-color: {{ psicologa_info.cor }}15; border-left: 4px solid {{ psicologa_info.cor }} !important;">
+                                <div class="d-flex align-items-center">
+                                  <div style="width: 20px; height: 20px; background-color: {{ psicologa_info.cor }}; border-radius: 50%; margin-right: 15px;"></div>
+                                  <h6 class="mb-0 text-dark font-weight-bold">{{ psicologa_info.horarios_formatados }}</h6>
                                 </div>
                               </div>
-                            {% endwith %}
-                          {% endwith %}
-                        {% endfor %}
+                            </div>
+                          {% endfor %}
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  {% endif %}
                 {% endfor %}
               </div>
             </div>
@@ -252,7 +219,7 @@
 
     <!-- Biweekly Tab -->
     <div class="tab-pane fade" id="biweekly-tab-pane" role="tabpanel" aria-labelledby="biweekly-tab" tabindex="0">
-      {% for unidade, dias in horarios_quinzenal.items %}
+      {% for unidade_nome, dias in horarios_quinzenal.items %}
         <div class="row mb-4">
           <div class="col-12">
             <div class="card shadow-sm">
@@ -261,60 +228,37 @@
                   <div class="icon icon-shape bg-gradient-primary shadow text-center rounded-circle me-3">
                     <i class="fas fa-building text-white opacity-10"></i>
                   </div>
-                  <h5 class="mb-0">{{ unidade }}</h5>
+                  <h5 class="mb-0">{{ unidade_nome }}</h5>
                 </div>
               </div>
               <div class="card-body">
-                {% for dia, horarios in dias.items %}
-                  <div class="card mb-4 border-0 shadow-none">
-                    <div class="card-header p-3 border-bottom">
-                      <div class="d-flex align-items-center">
-                        <div class="icon icon-shape bg-gradient-info shadow text-center rounded-circle me-2" style="width: 30px; height: 30px; line-height: 30px;">
-                          <i class="fas fa-calendar-day text-white opacity-10" style="font-size: 12px;"></i>
+                {% for dia, psicologas_data in dias.items %}
+                  {% if psicologas_data %}
+                    <div class="card mb-4 border-0 shadow-none">
+                      <div class="card-header p-3 border-bottom">
+                        <div class="d-flex align-items-center">
+                          <div class="icon icon-shape bg-gradient-info shadow text-center rounded-circle me-2" style="width: 30px; height: 30px; line-height: 30px;">
+                            <i class="fas fa-calendar-day text-white opacity-10" style="font-size: 12px;"></i>
+                          </div>
+                          <h6 class="mb-0">{{ dia }}</h6>
                         </div>
-                        <h6 class="mb-0">{{ dia }}</h6>
                       </div>
-                    </div>
-                    <div class="card-body p-0">
-                      <div class="accordion" id="accordion-{{ unidade|slugify }}-{{ dia|slugify }}-quinzenal">
-                        {% for psicologa in psicologos %}
-                          <div class="accordion-item border-0 psicologa-group" id="quinzenal-{{ unidade|slugify }}-{{ dia|slugify }}-{{ psicologa.id }}">
-                            <h2 class="accordion-header" id="heading-{{ unidade|slugify }}-{{ dia|slugify }}-{{ psicologa.id }}-quinzenal">
-                              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ unidade|slugify }}-{{ dia|slugify }}-{{ psicologa.id }}-quinzenal" aria-expanded="false" aria-controls="collapse-{{ unidade|slugify }}-{{ dia|slugify }}-{{ psicologa.id }}-quinzenal">
+                      <div class="card-body p-3">
+                        <div class="row g-3">
+                          {% for psicologa_info in psicologas_data %}
+                            <div class="col-12">
+                              <div class="alert mb-2 p-3 border-0 shadow-sm" style="background-color: {{ psicologa_info.cor }}15; border-left: 4px solid {{ psicologa_info.cor }} !important;">
                                 <div class="d-flex align-items-center">
-                                  <div style="width: 16px; height: 16px; background-color: {{ psicologa.cor }}; border-radius: 50%; margin-right: 10px;"></div>
-                                  <span>{{ psicologa.nome }}</span>
-                                </div>
-                              </button>
-                            </h2>
-                            <div id="collapse-{{ unidade|slugify }}-{{ dia|slugify }}-{{ psicologa.id }}-quinzenal" class="accordion-collapse collapse" aria-labelledby="heading-{{ unidade|slugify }}-{{ dia|slugify }}-{{ psicologa.id }}-quinzenal">
-                              <div class="accordion-body">
-                                <div class="horarios-container">
-                                  <div class="row g-3">
-                                    {% for item in horarios %}
-                                      {% if psicologa.nome == item.psicologa %}
-                                        <div class="col-md-3 col-sm-4 col-6">
-                                          <div class="card border-0 shadow-sm">
-                                            <div class="card-body py-2 px-3 text-center" style="background-color: {{ psicologa.cor }}; color: white; border-radius: 10px;">
-                                              <p class="mb-0 font-weight-bold">{{ item.hora }}</p>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      {% endif %}
-                                    {% empty %}
-                                      <div class="col-12">
-                                        <p class="text-muted text-center mb-0">Nenhum horário disponível.</p>
-                                      </div>
-                                    {% endfor %}
-                                  </div>
+                                  <div style="width: 20px; height: 20px; background-color: {{ psicologa_info.cor }}; border-radius: 50%; margin-right: 15px;"></div>
+                                  <h6 class="mb-0 text-dark font-weight-bold">{{ psicologa_info.horarios_formatados }}</h6>
                                 </div>
                               </div>
                             </div>
-                          </div>
-                        {% endfor %}
+                          {% endfor %}
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  {% endif %}
                 {% endfor %}
               </div>
             </div>
@@ -337,6 +281,45 @@
           </div>
         </div>
       {% endfor %}
+    </div>
+  </div>
+
+  <!-- Resumo de Estatísticas -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header pb-0">
+          <h6>📊 Resumo</h6>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-3">
+              <div class="text-center">
+                <h4 class="text-primary">{{ psicologos|length }}</h4>
+                <p class="text-sm mb-0">Psicólogos com Horários</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="text-center">
+                <h4 class="text-info">{{ horarios_semanal|length }}</h4>
+                <p class="text-sm mb-0">Unidades (Semanal)</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="text-center">
+                <h4 class="text-warning">{{ horarios_quinzenal|length }}</h4>
+                <p class="text-sm mb-0">Unidades (Quinzenal)</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="text-center">
+                <h4 class="text-success">{{ unidades|length }}</h4>
+                <p class="text-sm mb-0">Total de Unidades</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -370,33 +353,53 @@
         localStorage.setItem(tabStorageKey, '#' + event.target.id);
       });
     });
-    
-    // Function to hide psychologists without available hours
-    function ocultarPsicologasSemHorarios() {
-      // Select all psychologist containers
-      const containers = document.querySelectorAll('.psicologa-group');
-      
-      // For each container
-      containers.forEach(container => {
-        // Count how many hours exist within the container
-        const horariosCount = container.querySelector('.horarios-container').querySelectorAll('.col-md-3, .col-sm-4, .col-6').length;
-        
-        // If there are no hours, hide the container
-        if (horariosCount === 0) {
-          container.style.display = 'none';
-        }
-      });
-    }
-    
-    // Run the function when the page loads
-    ocultarPsicologasSemHorarios();
-    
-    // Also run when switching tabs to ensure proper display
-    tabs.forEach(function(tab) {
-      tab.addEventListener('shown.bs.tab', function(event) {
-        setTimeout(ocultarPsicologasSemHorarios, 100);
-      });
-    });
   });
 </script>
+
+<style>
+.alert {
+  transition: all 0.3s ease;
+  border-radius: 10px !important;
+}
+
+.alert:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+
+.card {
+  border-radius: 15px;
+}
+
+.card-header {
+  border-radius: 15px 15px 0 0 !important;
+}
+
+.nav-tabs .nav-link {
+  border-radius: 10px 10px 0 0;
+  margin-bottom: -1px;
+}
+
+.nav-tabs .nav-link.active {
+  background-color: #fff;
+  border-color: #dee2e6 #dee2e6 #fff;
+}
+
+.form-select, .form-control {
+  border-radius: 8px;
+}
+
+.btn {
+  border-radius: 8px;
+}
+
+.icon-shape {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>
 {% endblock content %}
