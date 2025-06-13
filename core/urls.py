@@ -113,8 +113,8 @@ urlpatterns = [
 
     #AGENDA CENTRAL
     path('agenda_central', views.agenda_central, name='agenda_central'),
-    path('agenda/relatorio/pdf/', views.gerar_relatorio_pdf_agenda, name='gerar_relatorio_pdf_agenda'),
-    path('agenda/relatorio/visualizar/', views.visualizar_relatorio_agenda, name='visualizar_relatorio_agenda'),   
+    # path('agenda/relatorio/pdf/', views.gerar_relatorio_pdf_agenda, name='gerar_relatorio_pdf_agenda'),
+    # path('agenda/relatorio/visualizar/', views.visualizar_relatorio_agenda, name='visualizar_relatorio_agenda'),   
     
     #PÁGINAS DE ERRO
     path('handler404/', views.handler404, name='handler404'),
