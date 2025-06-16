@@ -34,7 +34,7 @@
         </div>
         <div class="collapse show" id="filterCollapse">
           <div class="card-body p-3">
-            <form method="POST" action="#">
+            <form method="POST" action="#" id="filtroForm">
               {% csrf_token %}
               <div class="row g-3">
                 <div class="col-md-6">
@@ -45,7 +45,8 @@
                       <select class="form-select" id="unidade_id" name="unidade_id">
                         <option value="todos">Todos</option>
                         {% for unidade in unidades %}
-                        <option value="{{unidade.id}}">{{unidade.nome_unidade}}</option>
+                        <!-- CORREÇÃO: Usar id_unidade ao invés de id -->
+                        <option value="{{unidade.id_unidade}}">{{unidade.nome_unidade}}</option>
                         {% endfor %}
                       </select>
                     </div>
@@ -115,7 +116,7 @@
                   <button type="submit" class="btn bg-gradient-primary btn-sm me-2">
                     <i class="fas fa-search me-1"></i> Aplicar Filtros
                   </button>
-                  <button type="reset" class="btn btn-outline-secondary btn-sm">
+                  <button type="button" class="btn btn-outline-secondary btn-sm" id="limparFiltros">
                     <i class="fas fa-eraser me-1"></i> Limpar
                   </button>
                 </div>
@@ -123,6 +124,16 @@
             </form>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Debug Info (remover em produção) -->
+  <div class="row mb-4" id="debugInfo" style="display: none;">
+    <div class="col-12">
+      <div class="alert alert-info">
+        <h6>Debug Info:</h6>
+        <p id="debugContent"></p>
       </div>
     </div>
   </div>
@@ -136,11 +147,13 @@
             <li class="nav-item" role="presentation">
               <button class="nav-link active" id="weekly-tab" data-bs-toggle="tab" data-bs-target="#weekly-tab-pane" type="button" role="tab" aria-controls="weekly-tab-pane" aria-selected="true">
                 <i class="fas fa-calendar-week me-2"></i>Disponibilidade Semanal
+                <span class="badge bg-primary ms-1" id="countSemanal">{{ horarios_semanal|length }}</span>
               </button>
             </li>
             <li class="nav-item" role="presentation">
               <button class="nav-link" id="biweekly-tab" data-bs-toggle="tab" data-bs-target="#biweekly-tab-pane" type="button" role="tab" aria-controls="biweekly-tab-pane" aria-selected="false">
                 <i class="fas fa-calendar-alt me-2"></i>Disponibilidade Quinzenal
+                <span class="badge bg-warning ms-1" id="countQuinzenal">{{ horarios_quinzenal|length }}</span>
               </button>
             </li>
           </ul>
@@ -324,13 +337,12 @@
   </div>
 </div>
 
-<!-- Initialize tooltips and maintain existing functionality -->
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() {
     // Initialize tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
-      return new bootstrap.Tooltip(tooltipTriggerEl);
+        return new bootstrap.Tooltip(tooltipTriggerEl);
     });
     
     // Save active tab state
@@ -339,21 +351,45 @@
     // Set initial tab state from storage if available
     var storedTab = localStorage.getItem(tabStorageKey);
     if (storedTab) {
-      var tabToActivate = document.querySelector(storedTab);
-      if (tabToActivate) {
-        var tab = new bootstrap.Tab(tabToActivate);
-        tab.show();
-      }
+        var tabToActivate = document.querySelector(storedTab);
+        if (tabToActivate) {
+            var tab = new bootstrap.Tab(tabToActivate);
+            tab.show();
+        }
     }
     
     // Save tab state when changed
     var tabs = document.querySelectorAll('button[data-bs-toggle="tab"]');
     tabs.forEach(function(tab) {
-      tab.addEventListener('shown.bs.tab', function(event) {
-        localStorage.setItem(tabStorageKey, '#' + event.target.id);
-      });
+        tab.addEventListener('shown.bs.tab', function(event) {
+            localStorage.setItem(tabStorageKey, '#' + event.target.id);
+        });
     });
-  });
+
+    // Botão limpar filtros
+    const limparBtn = document.getElementById('limparFiltros');
+    if (limparBtn) {
+        limparBtn.addEventListener('click', function() {
+            // Resetar todos os selects para "todos"
+            const selects = document.querySelectorAll('select');
+            selects.forEach(select => {
+                if (select.querySelector('option[value="todos"]')) {
+                    select.value = 'todos';
+                }
+            });
+            
+            // Resetar campos de horário
+            document.getElementById('horario_inicio').value = '';
+            document.getElementById('horario_fim').value = '';
+            
+            // Esconder debug info
+            const debugInfo = document.getElementById('debugInfo');
+            if (debugInfo) {
+                debugInfo.style.display = 'none';
+            }
+        });
+    }
+});
 </script>
 
 <style>
@@ -400,6 +436,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Debug styles */
+#debugInfo {
+  margin-top: 1rem;
+}
+
+.badge {
+  font-size: 0.7rem;
 }
 </style>
 {% endblock content %}

@@ -641,7 +641,7 @@ def agenda_central(request):
 
     # Implementar paginação POR SALAS
     # Número de salas por página
-    salas_por_pagina = 2
+    salas_por_pagina = 3
     
     # Criar o paginador para as salas
     paginator = Paginator(salas_com_consultas, salas_por_pagina)
@@ -2977,35 +2977,29 @@ def vizualizar_disponibilidade(request):
     request.session['mes'] = None
     request.session['ano'] = None
 
-    # Cache dos dados estáticos por 30 minutos
-    cache_key = 'disponibilidade_static_data'
-    static_data = cache.get(cache_key)
-    
-    if not static_data:
-        static_data = {
-            'psicologos': list(Psicologa.objects.all()),
-            'especialidades': list(Especialidade.objects.all()),
-            'publicos': list(Publico.objects.all()),
-            'unidades': list(Unidade.objects.all()),
-            'dias_da_semana': ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo']
-        }
-        cache.set(cache_key, static_data, 1800)  # 30 minutos
+    # REMOVENDO O CACHE - dados sempre atualizados
+    psicologos = list(Psicologa.objects.all())
+    especialidades = list(Especialidade.objects.all())
+    publicos = list(Publico.objects.all())
+    unidades = list(Unidade.objects.all())
+    dias_da_semana = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo']
 
-    # OTIMIZAÇÃO PRINCIPAL: Uma única consulta com todos os relacionamentos
+    # CONSULTA BASE: horários disponíveis (sem paciente)
     horarios = Consulta.objects.filter(
         Paciente__isnull=True
     ).select_related(
         'psicologo',
         'sala',
         'sala__id_unidade'
-    ).prefetch_related(
-        'psicologo__especialidadepsico_set__especialidade',
-        'psicologo__publicopsico_set__publico'
-    ).order_by('sala__id_unidade__nome_unidade', 'dia_semana', 'horario')
+    )
 
-    # Aplicar filtros se for POST
+    print("=== DEBUG INICIAL ===")
+    print(f"Total de horários disponíveis (sem paciente): {horarios.count()}")
+    
+    # APLICAR FILTROS se for POST
+    filtros_aplicados = []
     if request.method == 'POST':
-        filtros = Q()
+        print("=== RECEBENDO FILTROS POST ===")
         
         especialidade_id = request.POST.get('especialidade_id')
         publico_id = request.POST.get('publico')
@@ -3014,81 +3008,170 @@ def vizualizar_disponibilidade(request):
         horario_fim = request.POST.get("horario_fim")
         unidade_id = request.POST.get("unidade_id")
 
-        # Construir filtros com relacionamentos corretos
+        # print(f"Especialidade ID: '{especialidade_id}'")
+        # print(f"Público ID: '{publico_id}'")
+        # print(f"Dia da semana: '{dia_da_semana}'")
+        # print(f"Horário início: '{horario_inicio}'")
+        # print(f"Horário fim: '{horario_fim}'")
+        # print(f"Unidade ID: '{unidade_id}'")
+
+        # FILTRO POR ESPECIALIDADE
         if especialidade_id and especialidade_id != 'todos':
-            filtros &= Q(psicologo__especialidadepsico_set__especialidade_id=especialidade_id)
+            try:
+                especialidade_id = int(especialidade_id)
+                print(f"Filtrando por especialidade ID: {especialidade_id}")
+                
+                # Buscar psicólogos que têm essa especialidade
+                from home.models import EspecialidadePsico
+                psicologos_especialidade = EspecialidadePsico.objects.filter(
+                    especialidade_id=especialidade_id
+                ).values_list('psicologo_id', flat=True)
+                
+                print(f"Psicólogos com essa especialidade: {list(psicologos_especialidade)}")
+                
+                horarios = horarios.filter(psicologo_id__in=psicologos_especialidade)
+                filtros_aplicados.append(f"Especialidade: {especialidade_id}")
+                print(f"Horários após filtro especialidade: {horarios.count()}")
+                
+            except (ValueError, TypeError) as e:
+                print(f"Erro no filtro especialidade: {e}")
 
+        # FILTRO POR PÚBLICO
         if publico_id and publico_id != 'todos':
-            filtros &= Q(psicologo__publicopsico_set__publico_id=publico_id)
+            try:
+                publico_id = int(publico_id)
+                print(f"Filtrando por público ID: {publico_id}")
+                
+                # Buscar psicólogos que atendem esse público
+                from home.models import PublicoPsico
+                psicologos_publico = PublicoPsico.objects.filter(
+                    publico_id=publico_id
+                ).values_list('psicologo_id', flat=True)
+                
+                print(f"Psicólogos com esse público: {list(psicologos_publico)}")
+                
+                horarios = horarios.filter(psicologo_id__in=psicologos_publico)
+                filtros_aplicados.append(f"Público: {publico_id}")
+                print(f"Horários após filtro público: {horarios.count()}")
+                
+            except (ValueError, TypeError) as e:
+                print(f"Erro no filtro público: {e}")
 
-        if dia_da_semana != "todos" and dia_da_semana in static_data['dias_da_semana']:
-            filtros &= Q(dia_semana=dia_da_semana)
+        # FILTRO POR DIA DA SEMANA
+        if dia_da_semana and dia_da_semana != "todos":
+            print(f"Filtrando por dia: {dia_da_semana}")
+            horarios = horarios.filter(dia_semana=dia_da_semana)
+            filtros_aplicados.append(f"Dia: {dia_da_semana}")
+            print(f"Horários após filtro dia: {horarios.count()}")
 
+        # FILTRO POR HORÁRIO
         if horario_inicio and horario_fim:
-            filtros &= Q(horario__gte=horario_inicio, horario__lte=horario_fim)
+            try:
+                print(f"Filtrando por horário: {horario_inicio} - {horario_fim}")
+                horarios = horarios.filter(horario__gte=horario_inicio, horario__lte=horario_fim)
+                filtros_aplicados.append(f"Horário: {horario_inicio}-{horario_fim}")
+                print(f"Horários após filtro horário: {horarios.count()}")
+            except Exception as e:
+                print(f"Erro no filtro horário: {e}")
 
+        # FILTRO POR UNIDADE
         if unidade_id and unidade_id != 'todos':
-            filtros &= Q(sala__id_unidade_id=unidade_id)
+            try:
+                unidade_id = int(unidade_id)
+                print(f"Filtrando por unidade ID: {unidade_id}")
+                horarios = horarios.filter(sala__id_unidade_id=unidade_id)
+                filtros_aplicados.append(f"Unidade: {unidade_id}")
+                print(f"Horários após filtro unidade: {horarios.count()}")
+            except (ValueError, TypeError) as e:
+                print(f"Erro no filtro unidade: {e}")
 
-        # Aplicar filtros
-        if filtros:
-            horarios = horarios.filter(filtros).distinct()
+        print(f"Filtros aplicados: {filtros_aplicados}")
 
-    # NOVA ESTRUTURA: Agrupamento otimizado por unidade → dia → psicóloga → horários
+    # Verificar se temos dados
+    total_horarios = horarios.count()
+    print(f"TOTAL FINAL DE HORÁRIOS: {total_horarios}")
+    
+    if total_horarios == 0:
+        print("ATENÇÃO: Nenhum horário encontrado após filtros!")
+        # Vamos verificar alguns dados básicos
+        print(f"Total de consultas no sistema: {Consulta.objects.count()}")
+        print(f"Consultas sem paciente: {Consulta.objects.filter(Paciente__isnull=True).count()}")
+
+    # Ordenar por unidade, dia e horário
+    horarios = horarios.order_by('sala__id_unidade__nome_unidade', 'dia_semana', 'horario')
+
+    # LÓGICA PARA SEPARAR SEMANAIS E QUINZENAIS
     horarios_semanal = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
     horarios_quinzenal = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
     psicologos_com_horarios_ids = set()
 
     for horario in horarios:
+        # Verificar se o horário tem todos os dados necessários
         if not horario.psicologo or not horario.sala or not horario.sala.id_unidade:
+            print(f"Horário com dados incompletos: {horario.id}")
             continue
             
         unidade_nome = horario.sala.id_unidade.nome_unidade
         dia = horario.dia_semana
         psicologa_nome = horario.psicologo.nome
-        psicologa_cor = horario.psicologo.cor if horario.psicologo.cor else '#FFA500'  # Cor padrão laranja
+        psicologa_cor = horario.psicologo.cor if horario.psicologo.cor else '#FFA500'
         hora_str = horario.horario.strftime('%H:%M')
         
-        # Adicionar à lista de psicólogos com horários
         psicologos_com_horarios_ids.add(horario.psicologo.id)
         
-        # Agrupar por semanal/quinzenal → unidade → dia → psicóloga
-        if horario.semanal:
-            horarios_semanal[unidade_nome][dia][psicologa_nome].append({
-                'hora': hora_str,
-                'cor': psicologa_cor,
-                'psicologo_id': horario.psicologo.id
-            })
-        else:
-            horarios_quinzenal[unidade_nome][dia][psicologa_nome].append({
-                'hora': hora_str,
-                'cor': psicologa_cor,
-                'psicologo_id': horario.psicologo.id
-            })
+        # DEBUG: Mostrar valores dos campos semanal/quinzenal
+        # print(f"Horário {horario.id}: semanal='{horario.semanal}', quinzenal='{horario.quinzenal}'")
+        
+        # LÓGICA CORRIGIDA: Um horário pode aparecer em ambas as categorias
+        # se ambos os campos estiverem preenchidos
+        
+        horario_info = {
+            'hora': hora_str,
+            'cor': psicologa_cor,
+            'psicologo_id': horario.psicologo.id
+        }
+        
+        # Verificar se é semanal (campo semanal tem valor)
+        e_semanal = horario.semanal and str(horario.semanal).strip().lower() not in ['', 'none', 'null']
+        # Verificar se é quinzenal (campo quinzenal tem valor)
+        e_quinzenal = horario.quinzenal and str(horario.quinzenal).strip().lower() not in ['', 'none', 'null']
+        
+        print(f"Horário {horario.id}: semanal={e_semanal}, quinzenal={e_quinzenal}")
+        
+        # Adicionar aos grupos correspondentes
+        if e_semanal:
+            horarios_semanal[unidade_nome][dia][psicologa_nome].append(horario_info)
+        
+        if e_quinzenal:
+            horarios_quinzenal[unidade_nome][dia][psicologa_nome].append(horario_info)
+        
+        # Se nenhum dos dois estiver definido, adicionar como semanal por padrão
+        if not e_semanal and not e_quinzenal:
+            print(f"ATENÇÃO: Horário {horario.id} sem definição de periodicidade, colocando como semanal")
+            horarios_semanal[unidade_nome][dia][psicologa_nome].append(horario_info)
 
-    # Converter para estrutura final otimizada para o template com ordem correta dos dias
+    # Função para formatar horários agrupados
     def formatar_horarios_agrupados(horarios_dict):
-        # Ordem correta dos dias da semana
+        from collections import OrderedDict
         ordem_dias = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo']
         resultado = {}
         
         for unidade, dias in horarios_dict.items():
-            # Usar OrderedDict para manter a ordem dos dias
             resultado[unidade] = OrderedDict()
             
-            # Iterar pelos dias na ordem correta
             for dia in ordem_dias:
                 if dia in dias:
                     psicologas = dias[dia]
                     resultado[unidade][dia] = []
                     
-                    for psicologa_nome, horarios_list in psicologas.items():
-                        # Ordenar horários
+                    for psicologa_nome in sorted(psicologas.keys()):
+                        horarios_list = psicologas[psicologa_nome]
+                        
+                        # Ordenar horários por hora
                         horarios_list.sort(key=lambda x: x['hora'])
                         horarios_str = ', '.join([h['hora'] for h in horarios_list])
                         cor = horarios_list[0]['cor'] if horarios_list else '#FFA500'
                         
-                        # Formato: "🟠Renata- 14:00, 15:00, 16:00, 17:00"
                         resultado[unidade][dia].append({
                             'psicologa': psicologa_nome,
                             'horarios_formatados': f"{psicologa_nome}- {horarios_str}",
@@ -3103,32 +3186,44 @@ def vizualizar_disponibilidade(request):
 
     # Buscar apenas psicólogos que têm horários disponíveis
     psicologos_com_horarios = [
-        psico for psico in static_data['psicologos'] 
+        psico for psico in psicologos 
         if psico.id in psicologos_com_horarios_ids
     ]
 
-    # Debug: Verificar quantas unidades estão sendo processadas
-    print("=== DEBUG DISPONIBILIDADE ===")
-    print(f"Horários encontrados: {horarios.count()}")
-    print(f"Unidades em horários semanais: {list(horarios_semanal_formatados.keys())}")
-    print(f"Unidades em horários quinzenais: {list(horarios_quinzenal_formatados.keys())}")
+    # # Debug final
+    # print("=== RESULTADO FINAL ===")
+    # print(f"Psicólogos com horários: {len(psicologos_com_horarios_ids)}")
+    # print(f"Unidades com horários semanais: {list(horarios_semanal_formatados.keys())}")
+    # print(f"Unidades com horários quinzenais: {list(horarios_quinzenal_formatados.keys())}")
     
-    # Verificar se há dados para ambas as unidades
-    for unidade, dias in horarios_semanal_formatados.items():
-        print(f"Unidade {unidade}: {len(dias)} dias com horários")
-        for dia, psicologas in dias.items():
-            print(f"  - {dia}: {len(psicologas)} psicólogas")
+    # # Estatísticas detalhadas
+    # for tipo, dados in [('SEMANAL', horarios_semanal_formatados), ('QUINZENAL', horarios_quinzenal_formatados)]:
+    #     print(f"\n=== HORÁRIOS {tipo} ===")
+    #     total_horarios_tipo = 0
+    #     for unidade, dias in dados.items():
+    #         total_dias = len(dias)
+    #         total_psicologas = sum(len(psicologas) for psicologas in dias.values())
+    #         print(f"Unidade {unidade}: {total_dias} dias, {total_psicologas} entradas de psicólogas")
+    #         total_horarios_tipo += total_psicologas
+    #     print(f"Total {tipo}: {total_horarios_tipo} entradas")
+
+    # # Se não há horários, vamos investigar
+    # if not horarios_semanal_formatados and not horarios_quinzenal_formatados:
+    #     print("=== INVESTIGAÇÃO: NENHUM HORÁRIO ENCONTRADO ===")
+    #     sample_consultas = Consulta.objects.filter(Paciente__isnull=True)[:5]
+    #     for consulta in sample_consultas:
+    #         print(f"Consulta {consulta.id}: psicologo={consulta.psicologo}, sala={consulta.sala}, "
+    #               f"semanal='{consulta.semanal}', quinzenal='{consulta.quinzenal}'")
 
     return render(request, 'pages/disponibilidades.html', {
         'psicologos': psicologos_com_horarios,
-        'especialidades': static_data['especialidades'],
-        'publicos': static_data['publicos'],
-        'unidades': static_data['unidades'],
+        'especialidades': especialidades,
+        'publicos': publicos,
+        'unidades': unidades,
         'horarios_semanal': horarios_semanal_formatados,
         'horarios_quinzenal': horarios_quinzenal_formatados,
-        'dias_da_semana': static_data['dias_da_semana'],
+        'dias_da_semana': dias_da_semana,
     })
-
 
 # DISPONIBILIDADE PSICOLOGOS - ONLINE
 @login_required(login_url='login1')
