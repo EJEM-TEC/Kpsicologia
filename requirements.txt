@@ -100,7 +100,6 @@ wcwidth==0.2.13
 websocket-client==1.8.0
 websockets==11.0.3
 whitenoise==6.7.0
-xhtml2pdf==0.2.5
 yarl==1.17.1
 zipp==3.21.0
 

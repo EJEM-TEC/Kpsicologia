@@ -40,7 +40,6 @@ from django.db.models import OuterRef, Subquery
 from django.core.cache import cache
 from django.http import HttpResponse
 from django.template.loader import get_template
-from xhtml2pdf import pisa
 from io import BytesIO
 import os
 from django.conf import settings
@@ -856,75 +855,6 @@ def gerar_relatorio_pdf_agenda(request):
         return HttpResponse('Erro ao gerar PDF', status=400)
 
     return response
-
-# Função alternativa para visualizar o relatório na tela antes de baixar
-# @login_required(login_url='login1')
-# def visualizar_relatorio_agenda(request):
-#     """
-#     Visualiza o relatório da agenda em HTML antes de gerar o PDF
-#     """
-#     if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
-#         return render(request, 'pages/error_permission.html')
-
-#     # Reutilizar a mesma lógica da função PDF
-#     cache_key = 'agenda_central_static_data'
-#     static_data = cache.get(cache_key)
-    
-#     if not static_data:
-#         static_data = {
-#             'psicologas': list(Psicologa.objects.all()),
-#             'especialidades': list(Especialidade.objects.all()),
-#             'publicos': list(Publico.objects.all()),
-#             'unidades': list(Unidade.objects.all()),
-#             'dias_da_semana': ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"]
-#         }
-#         cache.set(cache_key, static_data, 1800)
-
-#     consultas = Consulta.objects.select_related(
-#         'psicologo', 
-#         'sala', 
-#         'sala__id_unidade',
-#         'Paciente'
-#     ).prefetch_related(
-#         'psicologo__especialidadepsico_set__especialidade',
-#         'psicologo__publicopsico_set__publico'
-#     ).order_by('sala__id_unidade__nome_unidade', 'sala__numero_sala', 'dia_semana', 'horario')
-
-#     consultas_online = Consulta_Online.objects.select_related(
-#         'Paciente'
-#     ).filter(
-#         Paciente__isnull=False
-#     ).order_by('psicologo__nome', 'dia_semana', 'horario')
-
-#     salas_ids_com_consultas = consultas.values_list('sala_id', flat=True).distinct()
-#     salas_com_consultas = Sala.objects.filter(
-#         id_sala__in=salas_ids_com_consultas
-#     ).select_related('id_unidade').order_by('id_unidade__nome_unidade', 'numero_sala')
-
-#     dados_organizados = {}
-#     for sala in salas_com_consultas:
-#         unidade_nome = sala.id_unidade.nome_unidade
-#         if unidade_nome not in dados_organizados:
-#             dados_organizados[unidade_nome] = {}
-        
-#         consultas_sala = consultas.filter(sala=sala)
-#         dados_organizados[unidade_nome][sala] = consultas_sala
-
-#     context = {
-#         'dados_organizados': dados_organizados,
-#         'consultas_online': consultas_online,
-#         'static_data': static_data,
-#         'total_consultas': consultas.count(),
-#         'total_consultas_ocupadas': consultas.filter(Paciente__isnull=False).count(),
-#         'total_consultas_livres': consultas.filter(Paciente__isnull=True).count(),
-#         'total_consultas_online': consultas_online.count(),
-#         'data_geracao': datetime.now(),
-#         'usuario_gerador': request.user.username,
-#         'visualizacao': True  # Flag para indicar que é visualização
-#     }
-
-#     return render(request, 'relatorios/agenda_central_pdf.html', context)
-
 
 # CONSULTAS - AGENDA PSICÓLOGA
 
