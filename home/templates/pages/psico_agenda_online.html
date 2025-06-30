@@ -162,106 +162,91 @@
 <div class="row">
     {% for dia in dias_da_semana %}
     <div class="col-12 mb-4">
-        <div class="card shadow-sm border-0 h-100">
-            <div class="card-header bg-gradient-light pb-0">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div class="d-flex align-items-center">
-                        <div class="icon icon-shape icon-sm bg-gradient-primary shadow-primary text-center rounded-circle me-3">
-                            <i class="fas fa-calendar-day text-white text-xs"></i>
-                        </div>
-                        <h6 class="mb-0 text-dark font-weight-bold">{{ dia }}</h6>
-                    </div>
-                    
-                </div>
+        <div class="card border-0 shadow-sm">
+            <!-- Header do dia -->
+            <div class="card-header bg-white border-bottom-0 pb-2">
+                <h6 class="text-uppercase font-weight-bold mb-0" style="color: {{psicologo.cor}}; letter-spacing: 1px;">
+                    {{ dia }}
+                </h6>
             </div>
             
             <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table align-items-center mb-0">
-                        <thead>
-                            <tr>
-                                <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7 border-bottom">
-                                    <i class="fas fa-clock me-1"></i>Horário
-                                </th>
-                                <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7 border-bottom">
-                                    <i class="fas fa-calendar-week me-1"></i>Semanal
-                                </th>
-                                <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7 border-bottom">
-                                    <i class="fas fa-calendar-alt me-1"></i>Quinzenal
-                                </th>
-                                <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7 border-bottom">
-                                    <i class="fas fa-cog me-1"></i>Ações
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for agenda in agendas %}
-                                {% if agenda.dia_semana == dia %}
-                                <tr class="hover-shadow">
-                                    <td class="align-middle text-center">
-                                        <div class="d-flex align-items-center justify-content-center">
-                                            <div class="icon icon-shape icon-xs rounded-circle me-2" style="background-color: {{agenda.psicologo.cor}};">
-                                                <i class="fas fa-clock text-white text-xs"></i>
-                                            </div>
-                                            <span class="text-sm font-weight-bold text-dark">
-                                                {{ agenda.horario|time:"H:i" }}
-                                            </span>
-                                        </div>
-                                    </td>
-                                    
-                                    <td class="align-middle text-center">
-                                        {% if agenda.semanal %}
-                                            <span class="badge bg-gradient-success px-3 py-2">
-                                                <i class="fas fa-user me-1"></i>
-                                                {{ agenda.semanal }}
-                                            </span>
-                                        {% else %}
-                                            <span class="badge bg-gradient-secondary opacity-6 px-3 py-2">
-                                                <i class="fas fa-minus me-1"></i>
-                                                Disponível
-                                            </span>
-                                        {% endif %}
-                                    </td>
-                                    
-                                    <td class="align-middle text-center">
-                                        {% if agenda.quinzenal %}
-                                            <span class="badge bg-gradient-info px-3 py-2">
-                                                <i class="fas fa-user me-1"></i>
-                                                {{ agenda.quinzenal }}
-                                            </span>
-                                        {% else %}
-                                            <span class="badge bg-gradient-secondary opacity-6 px-3 py-2">
-                                                <i class="fas fa-minus me-1"></i>
-                                                Disponível
-                                            </span>
-                                        {% endif %}
-                                    </td>
-                                    
-                                    <td class="align-middle text-center">
-                                        <a class="dropdown-item d-flex align-items-center justify-content-center" 
-                                            href="{% url 'deletar_consulta_online' consulta_id=agenda.id psicologo_id=agenda.psicologo.id %}">
-                                            <i class="fas fa-trash text-danger me-2"></i>
-                                           <button type="button" 
-                                                    class="btn btn-sm btn-outline-danger" 
-                                                    data-bs-toggle="tooltip" 
-                                                    data-bs-placement="top" 
-                                                    title="Remover horário">
-                                                Deletar
-                                            </button>
-                                        </a>
-                                    </td>
-                                </tr>
-                                {% else %}
-                                <tr class="hover-shadow">
-                                    <td colspan="4" class="text-center text-muted">
-                                        Nenhum agendamento encontrado para este dia.
-                                    </td>
-                                </tr>
-                                {% endif %}
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                <!-- Cabeçalho da tabela -->
+                <div class="row text-center py-3 bg-light border-bottom" style="margin: 0;">
+                    <div class="col-2">
+                        <span class="text-uppercase font-weight-bold text-muted small">Horário</span>
+                    </div>
+                    <div class="col-3">
+                        <span class="text-uppercase font-weight-bold text-muted small">Semanal</span>
+                    </div>
+                    <div class="col-3">
+                        <span class="text-uppercase font-weight-bold text-muted small">Quinzenal</span>
+                    </div>
+                    <div class="col-4">
+                        <span class="text-uppercase font-weight-bold text-muted small">Ações</span>
+                    </div>
                 </div>
+
+                {% with dia_has_appointments=False %}
+                    {% for agenda in agendas %}
+                        {% if agenda.dia_semana == dia %}
+                            {% if not dia_has_appointments %}
+                                {% with dia_has_appointments=True %}{% endwith %}
+                            {% endif %}
+                            
+                            <!-- Linha do agendamento -->
+                            <div class="row align-items-center py-3 border-bottom border-light hover-row" style="margin: 0;">
+                                <!-- Horário -->
+                                <div class="col-2 text-center">
+                                    <span class="badge px-3 py-2 text-white font-weight-bold" 
+                                          style="background-color: {{agenda.psicologo.cor}}; font-size: 0.9rem;">
+                                        {{ agenda.horario|time:"H:i" }}
+                                    </span>
+                                </div>
+                                
+                                <!-- Semanal -->
+                                <div class="col-3 text-center">
+                                    {% if agenda.semanal %}
+                                        <span class="badge bg-success px-3 py-2 text-white font-weight-bold" style="font-size: 0.85rem;">
+                                            {{ agenda.semanal|upper }}
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-light text-muted px-3 py-2 font-weight-bold" style="font-size: 0.85rem;">
+                                            DISPONÍVEL
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Quinzenal -->
+                                <div class="col-3 text-center">
+                                    {% if agenda.quinzenal %}
+                                        <span class="badge bg-info px-3 py-2 text-white font-weight-bold" style="font-size: 0.85rem;">
+                                            {{ agenda.quinzenal|upper }}
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-light text-muted px-3 py-2 font-weight-bold" style="font-size: 0.85rem;">
+                                            DISPONÍVEL
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Ações -->
+                                <div class="col-4 text-center">
+                                    <div class="btn-group" role="group">
+                                        
+                                        <a href="{% url 'deletar_consulta_online' consulta_id=agenda.id psicologo_id=agenda.psicologo.id %}" 
+                                           class="btn btn-sm btn-danger px-3" 
+                                            data-bs-toggle="tooltip" 
+                                            data-bs-placement="top" 
+                                            title="Remover este horário">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endwith %}
             </div>
         </div>
     </div>
@@ -442,6 +427,128 @@
     font-size: 0.75rem;
     padding: 0.375rem 0.75rem;
 }
+
+.hover-row {
+    transition: background-color 0.2s ease;
+}
+
+.hover-row:hover {
+    background-color: rgba(0, 0, 0, 0.02) !important;
+}
+
+/* Badges personalizados */
+.badge {
+    border-radius: 20px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* Botões de ação */
+.btn-group .btn {
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.btn-group .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Card styling */
+.card {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.card-header {
+    padding: 1rem 1.5rem;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .row > div[class*="col-"] {
+        margin-bottom: 0.5rem;
+        text-align: center !important;
+    }
+    
+    .btn-group {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-group .btn {
+        margin: 0 2px;
+    }
+}
+
+@media (max-width: 576px) {
+    /* Em telas muito pequenas, empilhar verticalmente */
+    .row.align-items-center > div {
+        margin-bottom: 0.75rem;
+    }
+    
+    .row.align-items-center > div:last-child {
+        margin-bottom: 0;
+    }
+    
+    .badge {
+        font-size: 0.75rem !important;
+        padding: 0.5rem 0.75rem !important;
+    }
+}
+
+/* Animação suave para os cards */
+.card {
+    animation: fadeInUp 0.5s ease forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.card:nth-child(1) { animation-delay: 0.1s; }
+.card:nth-child(2) { animation-delay: 0.2s; }
+.card:nth-child(3) { animation-delay: 0.3s; }
+.card:nth-child(4) { animation-delay: 0.4s; }
+.card:nth-child(5) { animation-delay: 0.5s; }
+.card:nth-child(6) { animation-delay: 0.6s; }
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Cores dos badges */
+.bg-success {
+    background-color: #28a745 !important;
+}
+
+.bg-info {
+    background-color: #17a2b8 !important;
+}
+
+.bg-light {
+    background-color: #f8f9fa !important;
+    border: 1px solid #dee2e6;
+}
+
+/* Tooltip styling */
+.tooltip {
+    font-size: 0.875rem;
+}
+
+.tooltip-inner {
+    background-color: #343a40;
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+}
+
 </style>
 
 <!-- JavaScript para funcionalidades extras -->
@@ -538,20 +645,29 @@ document.addEventListener('DOMContentLoaded', function() {
         }, index * 100);
     });
     
-    // Melhorar comportamento dos botões
-    const submitBtn = document.querySelector('button[type="submit"]');
-    if (submitBtn) {
-        submitBtn.addEventListener('click', function() {
-            this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processando...';
-            this.disabled = true;
+    // // Melhorar comportamento dos botões
+    // const submitBtn = document.querySelector('button[type="submit"]');
+    // if (submitBtn) {
+    //     submitBtn.addEventListener('click', function() {
+    //         this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processando...';
+    //         //this.disabled = true;
             
-            // Re-habilitar após 3 segundos (caso o form não seja submetido)
-            setTimeout(() => {
-                this.innerHTML = '<i class="fas fa-plus me-2"></i>Registrar Agendamento';
-                this.disabled = false;
-            }, 3000);
-        });
-    }
+    //         // Re-habilitar após 3 segundos (caso o form não seja submetido)
+    //         setTimeout(() => {
+    //             this.innerHTML = '<i class="fas fa-plus me-2"></i>Registrar Agendamento';
+    //             this.disabled = false;
+    //         }, 3000);
+    //     });
+    // }
+
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
 });
 </script>
 

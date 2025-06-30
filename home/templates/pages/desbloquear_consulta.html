@@ -2,205 +2,83 @@
 {% load static %}
 
 {% block content %}
-
-
-    <div class="container-fluid py-4">
-      <div class="col-6">
-        <div>
-          <h2>
-            Desbloquear Consultas
-          </h2>
-        </div>
-      </div>
-      <section class="section dashboard">
-        <div class="card">
-          <div class="card-body">
-            <form method="post"> {% csrf_token %}
-              <h5 class="card-title">Desbloquear a edição das consultas da psicóloga {{ psicologo.nome }}</h5>
-              <p class="card-text">Tem certeza que quer desbloquear essas consultas?</p>
-              <p class="card-text"><button type="submit" class="btn btn-danger">Confirmar</button></p>
-              <p class="card-text"><a href="{% url 'editar_consultas' psicologo.id %}" class="btn btn-secondary">Cancelar</a></p>
-            </form>
+<div class="container-fluid py-4">
+  <div class="col-6">
+    <div>
+      <h2>Desbloquear Consultas</h2>
+    </div>
+  </div>
+  
+  <section class="section dashboard">
+    <div class="card">
+      <div class="card-body">
+        <form method="post"> 
+          {% csrf_token %}
+          <h5 class="card-title">Desbloquear consultas da psicóloga {{ psicologo.nome }}</h5>
+          
+          <div class="mb-3">
+            <label for="data_selecionada" class="form-label">
+              Selecione um dia da semana que deseja desbloquear:
+            </label>
+            <input type="date" 
+                   class="form-control" 
+                   id="data_selecionada" 
+                   name="data_selecionada" 
+                   required>
+            <div class="form-text">
+              Serão desbloqueadas todas as consultas bloqueadas da semana (segunda a sábado) 
+              que contém o dia selecionado.
+            </div>
           </div>
-        </div><!-- End Card with titles, buttons, and links -->
-      </section>
-      
+          
+          <div class="alert alert-warning" role="alert">
+            <strong>Atenção:</strong> Esta ação irá desbloquear APENAS as consultas bloqueadas 
+            da semana correspondente ao dia selecionado.
+          </div>
+          
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-danger">
+              <i class="bi bi-unlock"></i> Desbloquear Consultas
+            </button>
+            <a href="{% url 'editar_consultas' psicologo.id %}" class="btn btn-secondary">
+              <i class="bi bi-arrow-left"></i> Cancelar
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+</div>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Define a data de hoje como valor padrão
+    const hoje = new Date().toISOString().split('T')[0];
+    document.getElementById('data_selecionada').value = hoje;
+    
+    // Adiciona evento para mostrar informações da semana selecionada
+    document.getElementById('data_selecionada').addEventListener('change', function() {
+        const dataSelecionada = new Date(this.value);
+        if (!isNaN(dataSelecionada)) {
+            // Calcula o início da semana (segunda-feira)
+            const diasParaSegunda = dataSelecionada.getDay() === 0 ? 6 : dataSelecionada.getDay() - 1;
+            const inicioSemana = new Date(dataSelecionada);
+            inicioSemana.setDate(dataSelecionada.getDate() - diasParaSegunda);
+            
+            // Calcula o fim da semana (sábado)
+            const fimSemana = new Date(inicioSemana);
+            fimSemana.setDate(inicioSemana.getDate() + 5);
+            
+            // Formata as datas
+            const opcoes = { day: '2-digit', month: '2-digit', year: 'numeric' };
+            const inicioFormatado = inicioSemana.toLocaleDateString('pt-BR', opcoes);
+            const fimFormatado = fimSemana.toLocaleDateString('pt-BR', opcoes);
+            
+            // Atualiza o texto informativo
+            const textoInfo = document.querySelector('.form-text');
+            textoInfo.innerHTML = `Serão desbloqueadas todas as consultas bloqueadas da semana de <strong>${inicioFormatado}</strong> a <strong>${fimFormatado}</strong>.`;
+        }
+    });
+});
+</script>
 {% endblock content %}
-
-<!-- Specific JS goes HERE --> 
-{% block scripts %}
-
-  <script src="{% static 'js/plugins/chartjs.min.js' %}"></script>
-  <script>
-    var ctx = document.getElementById("chart-bars").getContext("2d");
-
-    new Chart(ctx, {
-      type: "bar",
-      data: {
-        labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-        datasets: [{
-          label: "Sales",
-          tension: 0.4,
-          borderWidth: 0,
-          borderRadius: 4,
-          borderSkipped: false,
-          backgroundColor: "#fff",
-          data: [450, 200, 100, 220, 500, 100, 400, 230, 500],
-          maxBarThickness: 6
-        }, ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: false,
-          }
-        },
-        interaction: {
-          intersect: false,
-          mode: 'index',
-        },
-        scales: {
-          y: {
-            grid: {
-              drawBorder: false,
-              display: false,
-              drawOnChartArea: false,
-              drawTicks: false,
-            },
-            ticks: {
-              suggestedMin: 0,
-              suggestedMax: 500,
-              beginAtZero: true,
-              padding: 15,
-              font: {
-                size: 14,
-                family: "Open Sans",
-                style: 'normal',
-                lineHeight: 2
-              },
-              color: "#fff"
-            },
-          },
-          x: {
-            grid: {
-              drawBorder: false,
-              display: false,
-              drawOnChartArea: false,
-              drawTicks: false
-            },
-            ticks: {
-              display: false
-            },
-          },
-        },
-      },
-    });
-
-
-    var ctx2 = document.getElementById("chart-line").getContext("2d");
-
-    var gradientStroke1 = ctx2.createLinearGradient(0, 230, 0, 50);
-
-    gradientStroke1.addColorStop(1, 'rgba(203,12,159,0.2)');
-    gradientStroke1.addColorStop(0.2, 'rgba(72,72,176,0.0)');
-    gradientStroke1.addColorStop(0, 'rgba(203,12,159,0)'); //purple colors
-
-    var gradientStroke2 = ctx2.createLinearGradient(0, 230, 0, 50);
-
-    gradientStroke2.addColorStop(1, 'rgba(20,23,39,0.2)');
-    gradientStroke2.addColorStop(0.2, 'rgba(72,72,176,0.0)');
-    gradientStroke2.addColorStop(0, 'rgba(20,23,39,0)'); //purple colors
-
-    new Chart(ctx2, {
-      type: "line",
-      data: {
-        labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-        datasets: [{
-            label: "Mobile apps",
-            tension: 0.4,
-            borderWidth: 0,
-            pointRadius: 0,
-            borderColor: "#cb0c9f",
-            borderWidth: 3,
-            backgroundColor: gradientStroke1,
-            fill: true,
-            data: [50, 40, 300, 220, 500, 250, 400, 230, 500],
-            maxBarThickness: 6
-
-          },
-          {
-            label: "Websites",
-            tension: 0.4,
-            borderWidth: 0,
-            pointRadius: 0,
-            borderColor: "#575f9a",
-            borderWidth: 3,
-            backgroundColor: gradientStroke2,
-            fill: true,
-            data: [30, 90, 40, 140, 290, 290, 340, 230, 400],
-            maxBarThickness: 6
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: false,
-          }
-        },
-        interaction: {
-          intersect: false,
-          mode: 'index',
-        },
-        scales: {
-          y: {
-            grid: {
-              drawBorder: false,
-              display: true,
-              drawOnChartArea: true,
-              drawTicks: false,
-              borderDash: [5, 5]
-            },
-            ticks: {
-              display: true,
-              padding: 10,
-              color: '#b2b9bf',
-              font: {
-                size: 11,
-                family: "Open Sans",
-                style: 'normal',
-                lineHeight: 2
-              },
-            }
-          },
-          x: {
-            grid: {
-              drawBorder: false,
-              display: false,
-              drawOnChartArea: false,
-              drawTicks: false,
-              borderDash: [5, 5]
-            },
-            ticks: {
-              display: true,
-              color: '#b2b9bf',
-              padding: 20,
-              font: {
-                size: 11,
-                family: "Open Sans",
-                style: 'normal',
-                lineHeight: 2
-              },
-            }
-          },
-        },
-      },
-    });
-  </script>
-
-{% endblock scripts %}

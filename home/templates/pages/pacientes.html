@@ -50,9 +50,8 @@
                             <div class="form-group">
                                 <label for="periodo_paciente">Período de Atendimento</label>
                                 <select class="form-control" id="periodo_paciente" name="periodo_paciente" required>
-                                    <option value="Manhã">Manhã</option>
-                                    <option value="Tarde">Tarde</option>
-                                    <option value="Noite">Noite</option>
+                                    <option value="Semanal">Semanal</option>
+                                    <option value="Quinzenal">Quinzenal</option>
                                 </select>
                             </div>
                         </div>
@@ -115,9 +114,8 @@
                                 <label for="periodo_filtro">Período</label>
                                 <select class="form-select" id="periodo_filtro" name="periodo_filtro">
                                     <option value="">Todos os períodos</option>
-                                    <option value="Manhã" {% if periodo_filtro == 'Manhã' %}selected{% endif %}>Manhã</option>
-                                    <option value="Tarde" {% if periodo_filtro == 'Tarde' %}selected{% endif %}>Tarde</option>
-                                    <option value="Noite" {% if periodo_filtro == 'Noite' %}selected{% endif %}>Noite</option>
+                                    <option value="Semanal" {% if periodo_filtro == 'Semanal' %}selected{% endif %}>Semanal</option>
+                                    <option value="Quinzenal" {% if periodo_filtro == 'Quinzenal' %}selected{% endif %}>Quinzenal</option>
                                 </select>
                             </div>
                         </div>

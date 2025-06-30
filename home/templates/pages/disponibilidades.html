@@ -11,7 +11,15 @@
           <i class="fas fa-arrow-left me-1"></i>
           <a class="text-white text-decoration-none" href="{% url 'index' %}">Voltar</a>
         </button>
-        <h4 class="mb-0">Disponibilidades de Horários</h4>
+        <div>
+          <h4 class="mb-0">Disponibilidades de Horários</h4>
+          <p class="text-sm text-muted mb-0">
+            <i class="fas fa-calendar-check me-1"></i>
+            Presencial: {{ total_presencial }} | 
+            <i class="fas fa-laptop me-1"></i>
+            Online: {{ total_online }}
+          </p>
+        </div>
       </div>
     </div>
   </div>
@@ -37,6 +45,21 @@
             <form method="POST" action="#" id="filtroForm">
               {% csrf_token %}
               <div class="row g-3">
+                <!-- NOVO FILTRO: Modalidade -->
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="modalidade" class="form-control-label text-xs text-uppercase">Modalidade</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="fas fa-desktop"></i></span>
+                      <select class="form-select" id="modalidade" name="modalidade">
+                        <option value="todos">Todos</option>
+                        <option value="presencial">Presencial</option>
+                        <option value="online">Online</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                
                 <div class="col-md-6">
                   <div class="form-group">
                     <label for="unidade_id" class="form-control-label text-xs text-uppercase">Unidade</label>
@@ -45,13 +68,14 @@
                       <select class="form-select" id="unidade_id" name="unidade_id">
                         <option value="todos">Todos</option>
                         {% for unidade in unidades %}
-                        <!-- CORREÇÃO: Usar id_unidade ao invés de id -->
                         <option value="{{unidade.id_unidade}}">{{unidade.nome_unidade}}</option>
                         {% endfor %}
                       </select>
                     </div>
+                    <small class="text-muted">Filtro aplicado apenas a horários presenciais</small>
                   </div>
                 </div>
+                
                 <div class="col-md-6">
                   <div class="form-group">
                     <label for="especialidade_id" class="form-control-label text-xs text-uppercase">Especialização</label>
@@ -66,38 +90,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="col-md-6">
-                  <div class="form-group">
-                    <label for="horario_inicio" class="form-control-label text-xs text-uppercase">Horário Início</label>
-                    <div class="input-group">
-                      <span class="input-group-text"><i class="fas fa-clock"></i></span>
-                      <input type="time" class="form-control" id="horario_inicio" name="horario_inicio">
-                    </div>
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="form-group">
-                    <label for="horario_fim" class="form-control-label text-xs text-uppercase">Horário Fim</label>
-                    <div class="input-group">
-                      <span class="input-group-text"><i class="fas fa-clock"></i></span>
-                      <input type="time" class="form-control" id="horario_fim" name="horario_fim">
-                    </div>
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="form-group">
-                    <label for="dia_semana" class="form-control-label text-xs text-uppercase">Dia da Semana</label>
-                    <div class="input-group">
-                      <span class="input-group-text"><i class="fas fa-calendar-day"></i></span>
-                      <select class="form-select" id="dia_semana" name="dia_semana">
-                        <option value="todos">Todos</option>
-                        {% for dia in dias_da_semana %}
-                        <option value="{{ dia }}">{{ dia }}</option>
-                        {% endfor %}
-                      </select>
-                    </div>
-                  </div>
-                </div>
+                
                 <div class="col-md-6">
                   <div class="form-group">
                     <label for="publico_id" class="form-control-label text-xs text-uppercase">Público</label>
@@ -112,6 +105,38 @@
                     </div>
                   </div>
                 </div>
+                
+                <!-- NOVO FILTRO: Período do Dia -->
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="periodo_dia" class="form-control-label text-xs text-uppercase">Período do Dia</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="fas fa-sun"></i></span>
+                      <select class="form-select" id="periodo_dia" name="periodo_dia">
+                        <option value="todos">Todos os Períodos</option>
+                        <option value="manha">Manhã (06:00 - 11:59)</option>
+                        <option value="tarde">Tarde (12:00 - 17:59)</option>
+                        <option value="noite">Noite (18:00 - 23:59)</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="dia_semana" class="form-control-label text-xs text-uppercase">Dia da Semana</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="fas fa-calendar-day"></i></span>
+                      <select class="form-select" id="dia_semana" name="dia_semana">
+                        <option value="todos">Todos</option>
+                        {% for dia in dias_da_semana %}
+                        <option value="{{ dia }}">{{ dia }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                
                 <div class="col-12 text-center">
                   <button type="submit" class="btn bg-gradient-primary btn-sm me-2">
                     <i class="fas fa-search me-1"></i> Aplicar Filtros
@@ -124,16 +149,6 @@
             </form>
           </div>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Debug Info (remover em produção) -->
-  <div class="row mb-4" id="debugInfo" style="display: none;">
-    <div class="col-12">
-      <div class="alert alert-info">
-        <h6>Debug Info:</h6>
-        <p id="debugContent"></p>
       </div>
     </div>
   </div>
@@ -170,12 +185,27 @@
         <div class="row mb-4">
           <div class="col-12">
             <div class="card shadow-sm">
-              <div class="card-header p-3 bg-gradient-light">
+              <div class="card-header p-3 {% if unidade_nome == 'Online' %}bg-gradient-info{% else %}bg-gradient-light{% endif %}">
                 <div class="d-flex align-items-center">
-                  <div class="icon icon-shape bg-gradient-primary shadow text-center rounded-circle me-3">
-                    <i class="fas fa-building text-white opacity-10"></i>
+                  <div class="icon icon-shape {% if unidade_nome == 'Online' %}bg-white{% else %}bg-gradient-primary{% endif %} shadow text-center rounded-circle me-3">
+                    {% if unidade_nome == "Online" %}
+                      <i class="fas fa-laptop {% if unidade_nome == 'Online' %}text-info{% else %}text-white{% endif %} opacity-10"></i>
+                    {% else %}
+                      <i class="fas fa-building text-white opacity-10"></i>
+                    {% endif %}
                   </div>
-                  <h5 class="mb-0">{{ unidade_nome }}</h5>
+                  <div>
+                    <h5 class="mb-0 {% if unidade_nome == 'Online' %}text-white{% endif %}">
+                      {% if unidade_nome == "Online" %}
+                        <i class="fas fa-wifi me-2"></i>{{ unidade_nome }}
+                      {% else %}
+                        {{ unidade_nome }}
+                      {% endif %}
+                    </h5>
+                    {% if unidade_nome == "Online" %}
+                      <p class="text-white text-sm mb-0 opacity-8">Atendimentos virtuais</p>
+                    {% endif %}
+                  </div>
                 </div>
               </div>
               <div class="card-body">
@@ -194,7 +224,19 @@
                         <div class="row g-3">
                           {% for psicologa_info in psicologas_data %}
                             <div class="col-12">
-                              <div class="alert mb-2 p-3 border-0 shadow-sm" style="background-color: {{ psicologa_info.cor }}15; border-left: 4px solid {{ psicologa_info.cor }} !important;">
+                              <div class="alert mb-2 p-3 border-0 shadow-sm position-relative" style="background-color: {{ psicologa_info.cor }}15; border-left: 4px solid {{ psicologa_info.cor }} !important;">
+                                <!-- Badge de modalidade -->
+                                {% if "Online" in psicologa_info.horarios_formatados %}
+                                  <span class="badge bg-info position-absolute top-0 end-0 m-2">
+                                    <i class="fas fa-laptop me-1"></i>Online
+                                  </span>
+                                {% endif %}
+                                {% if "Presencial" in psicologa_info.horarios_formatados %}
+                                  <span class="badge bg-success position-absolute top-0 end-0 m-2" style="margin-right: {% if 'Online' in psicologa_info.horarios_formatados %}4rem{% else %}0.5rem{% endif %} !important;">
+                                    <i class="fas fa-building me-1"></i>Presencial
+                                  </span>
+                                {% endif %}
+                                
                                 <div class="d-flex align-items-center">
                                   <div style="width: 20px; height: 20px; background-color: {{ psicologa_info.cor }}; border-radius: 50%; margin-right: 15px;"></div>
                                   <h6 class="mb-0 text-dark font-weight-bold">{{ psicologa_info.horarios_formatados }}</h6>
@@ -236,12 +278,27 @@
         <div class="row mb-4">
           <div class="col-12">
             <div class="card shadow-sm">
-              <div class="card-header p-3 bg-gradient-light">
+              <div class="card-header p-3 {% if unidade_nome == 'Online' %}bg-gradient-info{% else %}bg-gradient-light{% endif %}">
                 <div class="d-flex align-items-center">
-                  <div class="icon icon-shape bg-gradient-primary shadow text-center rounded-circle me-3">
-                    <i class="fas fa-building text-white opacity-10"></i>
+                  <div class="icon icon-shape {% if unidade_nome == 'Online' %}bg-white{% else %}bg-gradient-primary{% endif %} shadow text-center rounded-circle me-3">
+                    {% if unidade_nome == "Online" %}
+                      <i class="fas fa-laptop {% if unidade_nome == 'Online' %}text-info{% else %}text-white{% endif %} opacity-10"></i>
+                    {% else %}
+                      <i class="fas fa-building text-white opacity-10"></i>
+                    {% endif %}
                   </div>
-                  <h5 class="mb-0">{{ unidade_nome }}</h5>
+                  <div>
+                    <h5 class="mb-0 {% if unidade_nome == 'Online' %}text-white{% endif %}">
+                      {% if unidade_nome == "Online" %}
+                        <i class="fas fa-wifi me-2"></i>{{ unidade_nome }}
+                      {% else %}
+                        {{ unidade_nome }}
+                      {% endif %}
+                    </h5>
+                    {% if unidade_nome == "Online" %}
+                      <p class="text-white text-sm mb-0 opacity-8">Atendimentos virtuais</p>
+                    {% endif %}
+                  </div>
                 </div>
               </div>
               <div class="card-body">
@@ -260,7 +317,19 @@
                         <div class="row g-3">
                           {% for psicologa_info in psicologas_data %}
                             <div class="col-12">
-                              <div class="alert mb-2 p-3 border-0 shadow-sm" style="background-color: {{ psicologa_info.cor }}15; border-left: 4px solid {{ psicologa_info.cor }} !important;">
+                              <div class="alert mb-2 p-3 border-0 shadow-sm position-relative" style="background-color: {{ psicologa_info.cor }}15; border-left: 4px solid {{ psicologa_info.cor }} !important;">
+                                <!-- Badge de modalidade -->
+                                {% if "Online" in psicologa_info.horarios_formatados %}
+                                  <span class="badge bg-info position-absolute top-0 end-0 m-2">
+                                    <i class="fas fa-laptop me-1"></i>Online
+                                  </span>
+                                {% endif %}
+                                {% if "Presencial" in psicologa_info.horarios_formatados %}
+                                  <span class="badge bg-success position-absolute top-0 end-0 m-2" style="margin-right: {% if 'Online' in psicologa_info.horarios_formatados %}4rem{% else %}0.5rem{% endif %} !important;">
+                                    <i class="fas fa-building me-1"></i>Presencial
+                                  </span>
+                                {% endif %}
+                                
                                 <div class="d-flex align-items-center">
                                   <div style="width: 20px; height: 20px; background-color: {{ psicologa_info.cor }}; border-radius: 50%; margin-right: 15px;"></div>
                                   <h6 class="mb-0 text-dark font-weight-bold">{{ psicologa_info.horarios_formatados }}</h6>
@@ -297,7 +366,7 @@
     </div>
   </div>
 
-  <!-- Resumo de Estatísticas -->
+  <!-- Resumo de Estatísticas Atualizado -->
   <div class="row">
     <div class="col-12">
       <div class="card">
@@ -306,27 +375,39 @@
         </div>
         <div class="card-body">
           <div class="row">
-            <div class="col-md-3">
+            <div class="col-md-2">
               <div class="text-center">
                 <h4 class="text-primary">{{ psicologos|length }}</h4>
                 <p class="text-sm mb-0">Psicólogos com Horários</p>
               </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
               <div class="text-center">
-                <h4 class="text-info">{{ horarios_semanal|length }}</h4>
+                <h4 class="text-success">{{ total_presencial }}</h4>
+                <p class="text-sm mb-0">Horários Presenciais</p>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="text-center">
+                <h4 class="text-info">{{ total_online }}</h4>
+                <p class="text-sm mb-0">Horários Online</p>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="text-center">
+                <h4 class="text-warning">{{ horarios_semanal|length }}</h4>
                 <p class="text-sm mb-0">Unidades (Semanal)</p>
               </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
               <div class="text-center">
-                <h4 class="text-warning">{{ horarios_quinzenal|length }}</h4>
+                <h4 class="text-secondary">{{ horarios_quinzenal|length }}</h4>
                 <p class="text-sm mb-0">Unidades (Quinzenal)</p>
               </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
               <div class="text-center">
-                <h4 class="text-success">{{ unidades|length }}</h4>
+                <h4 class="text-dark">{{ unidades|length }}</h4>
                 <p class="text-sm mb-0">Total de Unidades</p>
               </div>
             </div>
@@ -377,15 +458,49 @@ document.addEventListener('DOMContentLoaded', function() {
                     select.value = 'todos';
                 }
             });
+        });
+    }
+
+    // Funcionalidade especial para filtro de modalidade
+    const modalidadeSelect = document.getElementById('modalidade');
+    const unidadeSelect = document.getElementById('unidade_id');
+    
+    if (modalidadeSelect && unidadeSelect) {
+        modalidadeSelect.addEventListener('change', function() {
+            if (this.value === 'online') {
+                // Se selecionar online, desabilitar filtro de unidade
+                unidadeSelect.value = 'todos';
+                unidadeSelect.disabled = true;
+                unidadeSelect.parentElement.style.opacity = '0.5';
+            } else {
+                // Reabilitar filtro de unidade
+                unidadeSelect.disabled = false;
+                unidadeSelect.parentElement.style.opacity = '1';
+            }
+        });
+    }
+
+    // Adicionar ícones dinâmicos para o filtro de período
+    const periodoSelect = document.getElementById('periodo_dia');
+    const periodoIcon = periodoSelect.previousElementSibling.querySelector('i');
+    
+    if (periodoSelect && periodoIcon) {
+        periodoSelect.addEventListener('change', function() {
+            // Resetar classes
+            periodoIcon.className = 'fas';
             
-            // Resetar campos de horário
-            document.getElementById('horario_inicio').value = '';
-            document.getElementById('horario_fim').value = '';
-            
-            // Esconder debug info
-            const debugInfo = document.getElementById('debugInfo');
-            if (debugInfo) {
-                debugInfo.style.display = 'none';
+            switch(this.value) {
+                case 'manha':
+                    periodoIcon.classList.add('fa-sun');
+                    break;
+                case 'tarde':
+                    periodoIcon.classList.add('fa-sun-o');
+                    break;
+                case 'noite':
+                    periodoIcon.classList.add('fa-moon');
+                    break;
+                default:
+                    periodoIcon.classList.add('fa-sun');
             }
         });
     }
@@ -438,13 +553,52 @@ document.addEventListener('DOMContentLoaded', function() {
   justify-content: center;
 }
 
-/* Debug styles */
-#debugInfo {
-  margin-top: 1rem;
-}
-
 .badge {
   font-size: 0.7rem;
+}
+
+/* Estilo especial para seção online */
+.bg-gradient-info {
+  background: linear-gradient(87deg, #11cdef 0, #1171ef 100%) !important;
+}
+
+/* Indicadores de modalidade */
+.position-relative .badge {
+  z-index: 10;
+}
+
+/* Hover effect nos cards de horário */
+.alert:hover {
+  transform: translateX(5px);
+}
+
+/* Animation para badges */
+.badge {
+  animation: fadeInScale 0.5s ease forwards;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Estilo especial para o filtro de período */
+#periodo_dia option[value="manha"] {
+  background-color: #fff3cd;
+}
+
+#periodo_dia option[value="tarde"] {
+  background-color: #d1ecf1;
+}
+
+#periodo_dia option[value="noite"] {
+  background-color: #d4d4d8;
 }
 </style>
 {% endblock content %}

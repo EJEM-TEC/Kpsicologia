@@ -74,6 +74,7 @@ urlpatterns = [
     path('consultas/editar/<int:id_consulta>/', views.update_consulta, name='update_consulta'),  # URL para editar consulta
     path('consultas/deletar/<int:id_consulta>/', views.delete_consulta, name='delete_consulta'),  # URL para deletar consulta
     path('consultas/<int:psicologo_id>/deletar_multiplas/', views.delete_multiple_consultas, name='delete_multiple_consultas'),
+    path('consultas/editar-multiplas-agendas/<int:psicologo_id>/', views.editar_multiplas_agendas, name='editar_multiplas_agendas'),
 
     #CONFIMAÇÃO DE CONSULTA - PSICÓLOGO
     path('psicologas/<int:psicologo_id>/confirmar/', views.Confirmar_Consulta, name='confirma_consulta'),
@@ -83,6 +84,7 @@ urlpatterns = [
     path('adicionar_consulta_emergencial/<int:psicologo_id>', views.adicionarConsultaEmergencial, name='adicionar_consulta_emergencial'),
     path("bloquear_consulta/<int:psicologo_id>/", views.bloquear_consulta, name="bloquear_consulta"),
     path("desbloquear_consulta/<int:psicologo_id>/", views.desbloquear_consulta, name="desbloquear_consulta"),
+    path('psicologas/<int:psicologo_id>/historico/', views.historico_confirmacao_consultas, name='historico_consultas'),
 
     #CARACTERÍSTICAS PSICÓLOGO
     path('especialidades', views.cadastrar_especialidade, name='especialidades'),
@@ -134,6 +136,12 @@ urlpatterns = [
      
     #DISPONIBILIDADE HORÁRIOS ATENDIMENTO
     path('consultar_disponibilidade', views.vizualizar_disponibilidade, name='consultar_disponibilidade'),
+
+    #API
+    path('api/pacientes/', views.api_pacientes, name='api_pacientes'),
+
+    #AJAX
+    path('validar-conflitos-agenda/', views.validar_conflitos_agenda, name='validar_conflitos_agenda'),
 
     #path('cadastrar_salas/', views.sala, name='salas'),
 

@@ -77,6 +77,18 @@ class Consulta(models.Model):
     semanal = models.CharField(max_length=32, null=True)
     quinzenal = models.CharField(max_length=32, null=True)
     sala=models.ForeignKey(Sala, on_delete=models.CASCADE)
+    METODO_CHOICES = [
+        ('padrao', 'Padrão'),
+        ('livre', 'Livre'),
+        ('fechado', 'Fechado'),
+    ]
+    
+    metodo = models.CharField(
+        max_length=20,
+        choices=METODO_CHOICES,
+        default='livre',
+        help_text='Método de agendamento para este horário'
+    )
 
 
 class Despesas(models.Model):

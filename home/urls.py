@@ -6,6 +6,4 @@ from .views import lista_consultas, create_consulta, update_consulta, delete_con
 
 urlpatterns = [
     path('', views.index, name='index'),   
-    
-    
 ]

@@ -1,0 +1,834 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-color: #CB0C9F;
+        --primary-hover: #A80A84;
+        --success-color: #10B981;
+        --warning-color: #F59E0B;
+        --danger-color: #EF4444;
+        --info-color: #3B82F6;
+        --gray-50: #F9FAFB;
+        --gray-100: #F3F4F6;
+        --gray-200: #E5E7EB;
+        --gray-300: #D1D5DB;
+        --gray-500: #6B7280;
+        --gray-700: #374151;
+        --gray-900: #111827;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+        color: white;
+        padding: 2.5rem 0;
+        margin-bottom: 2rem;
+        border-radius: 1rem;
+        text-align: center;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .page-subtitle {
+        opacity: 0.9;
+        margin-top: 0.5rem;
+        font-size: 1.2rem;
+    }
+
+    .stats-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        border: none;
+        text-align: center;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px -3px rgb(0 0 0 / 0.1);
+    }
+
+    .stats-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .stats-label {
+        color: var(--gray-600);
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .filter-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        margin-bottom: 2rem;
+    }
+
+    .month-section {
+        background: white;
+        border-radius: 1rem;
+        margin-bottom: 2rem;
+        overflow: hidden;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .month-section:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    }
+
+    .month-header {
+        background: linear-gradient(135deg, var(--gray-700), var(--gray-900));
+        color: white;
+        padding: 1.5rem;
+        font-size: 1.5rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .month-icon {
+        width: 24px;
+        height: 24px;
+        fill: currentColor;
+    }
+
+    .week-section {
+        border-bottom: 1px solid var(--gray-200);
+        transition: background-color 0.2s;
+    }
+
+    .week-section:last-child {
+        border-bottom: none;
+    }
+
+    .week-section:hover {
+        background-color: var(--gray-50);
+    }
+
+    .week-header {
+        background: var(--gray-100);
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--gray-200);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .week-header:hover {
+        background: var(--gray-200);
+    }
+
+    .week-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--gray-900);
+        margin: 0;
+    }
+
+    .week-stats {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+    }
+
+    .week-stat {
+        text-align: center;
+    }
+
+    .week-stat-value {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .week-stat-label {
+        font-size: 0.75rem;
+        color: var(--gray-500);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin: 0;
+    }
+
+    .week-content {
+        padding: 0;
+        display: none;
+    }
+
+    .week-content.show {
+        display: block;
+    }
+
+    .consultas-table {
+        width: 100%;
+        font-size: 0.9rem;
+    }
+
+    .consultas-table th {
+        background-color: var(--gray-50);
+        color: var(--gray-700);
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 1rem 0.75rem;
+        border: none;
+    }
+
+    .consultas-table td {
+        padding: 1rem 0.75rem;
+        border-bottom: 1px solid var(--gray-100);
+        vertical-align: middle;
+    }
+
+    .consultas-table tbody tr:hover {
+        background-color: var(--gray-50);
+    }
+
+    .day-badge {
+        display: inline-block;
+        width: 35px;
+        height: 35px;
+        line-height: 35px;
+        text-align: center;
+        border-radius: 50%;
+        font-weight: 600;
+        color: white;
+        font-size: 0.75rem;
+    }
+
+    .day-segunda { background-color: #EF4444; }
+    .day-terca { background-color: #F59E0B; }
+    .day-quarta { background-color: #10B981; }
+    .day-quinta { background-color: #3B82F6; }
+    .day-sexta { background-color: #8B5CF6; }
+    .day-sabado { background-color: #EC4899; }
+
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .status-sim {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: var(--success-color);
+    }
+
+    .status-nao {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: var(--danger-color);
+    }
+
+    .status-falta {
+        background-color: rgba(245, 158, 11, 0.1);
+        color: var(--warning-color);
+    }
+
+    .status-aberto {
+        background-color: rgba(59, 130, 246, 0.1);
+        color: var(--info-color);
+    }
+
+    .modalidade-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .modalidade-presencial {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: var(--success-color);
+    }
+
+    .modalidade-online {
+        background-color: rgba(59, 130, 246, 0.1);
+        color: var(--info-color);
+    }
+
+    .form-control {
+        border: 2px solid var(--gray-200);
+        border-radius: 0.75rem;
+        padding: 0.75rem;
+        font-size: 0.9rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(203, 12, 159, 0.1);
+    }
+
+    .btn {
+        border-radius: 0.75rem;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+        transition: all 0.2s;
+        border: none;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(203, 12, 159, 0.3);
+    }
+
+    .btn-secondary {
+        background: linear-gradient(135deg, var(--gray-500), var(--gray-700));
+        color: white;
+    }
+
+    .pagination-container {
+        background: white;
+        border-radius: 1rem;
+        padding: 2rem;
+        margin-top: 2rem;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .pagination {
+        margin: 0;
+    }
+
+    .page-link {
+        border: 2px solid var(--gray-200);
+        color: var(--gray-700);
+        padding: 0.5rem 1rem;
+        margin: 0 0.25rem;
+        border-radius: 0.5rem;
+        transition: all 0.2s;
+    }
+
+    .page-link:hover {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+        background-color: rgba(203, 12, 159, 0.1);
+    }
+
+    .page-item.active .page-link {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+        border-color: var(--primary-color);
+        color: white;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--gray-500);
+    }
+
+    .empty-state svg {
+        width: 64px;
+        height: 64px;
+        margin-bottom: 1rem;
+        fill: var(--gray-400);
+    }
+
+    .toggle-arrow {
+        transition: transform 0.3s ease;
+    }
+
+    .toggle-arrow.rotated {
+        transform: rotate(180deg);
+    }
+
+    @media (max-width: 768px) {
+        .page-title {
+            font-size: 1.8rem;
+        }
+        
+        .week-stats {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .week-stat {
+            text-align: left;
+        }
+        
+        .pagination-container {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .consultas-table {
+            font-size: 0.8rem;
+        }
+        
+        .filter-card {
+            padding: 1rem;
+        }
+    }
+</style>
+
+<!-- Header da Página -->
+<div class="row">
+    <div class="col-12">
+       <button type="button" class="btn bg-gradient-primary"><a class="text-white" href="{% url 'confirma_consulta' psicologo_id=psicologa.id %}">
+            Voltar
+        </a></button>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Estatísticas Gerais -->
+    <div class="row mb-4">
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stats-card">
+                <div class="stats-value text-primary">{{ total_consultas_geral }}</div>
+                <div class="stats-label">Total de Consultas</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stats-card">
+                <div class="stats-value text-success">{{ total_presentes }}</div>
+                <div class="stats-label">Consultas Realizadas</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stats-card">
+                <div class="stats-value text-warning">R$ {{ valor_total_geral|floatformat:2 }}</div>
+                <div class="stats-label">Total Recebido</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stats-card">
+                <div class="stats-value text-info">{{ taxa_presenca_geral|floatformat:1 }}%</div>
+                <div class="stats-label">Taxa de Presença</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filter-card">
+        <h5 class="mb-3">🔍 Filtros</h5>
+        <form method="POST" id="filterForm">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-2 col-sm-6 mb-3">
+                    <label for="ano" class="form-label">Ano</label>
+                    <select class="form-control" name="ano" id="ano">
+                        <option value="todos">Todos</option>
+                        {% for ano in anos_disponiveis %}
+                            <option value="{{ ano }}" {% if filtros_aplicados.ano == ano|stringformat:"s" %}selected{% endif %}>{{ ano }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 col-sm-6 mb-3">
+                    <label for="mes" class="form-label">Mês</label>
+                    <select class="form-control" name="mes" id="mes">
+                        <option value="todos">Todos</option>
+                        {% for mes_num, mes_nome in meses_disponiveis %}
+                            <option value="{{ mes_num }}" {% if filtros_aplicados.mes == mes_num|stringformat:"s" %}selected{% endif %}>{{ mes_nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 col-sm-6 mb-3">
+                    <label for="semana" class="form-label">Semana</label>
+                    <select class="form-control" name="semana" id="semana">
+                        <option value="todos">Todas</option>
+                        {% for semana_num in semanas_disponiveis %}
+                            <option value="{{ semana_num }}" {% if filtros_aplicados.semana == semana_num|stringformat:"s" %}selected{% endif %}>{{ semana_num }}ª Semana</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 col-sm-6 mb-3">
+                    <label for="modalidade" class="form-label">Modalidade</label>
+                    <select class="form-control" name="modalidade" id="modalidade">
+                        <option value="todos">Todas</option>
+                        {% for modalidade in modalidades_disponiveis %}
+                            <option value="{{ modalidade }}" {% if filtros_aplicados.modalidade == modalidade %}selected{% endif %}>{{ modalidade }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 col-sm-6 mb-3">
+                    <label for="presenca" class="form-label">Presença</label>
+                    <select class="form-control" name="presenca" id="presenca">
+                        <option value="todos">Todas</option>
+                        {% for presenca_val in presencas_disponiveis %}
+                            <option value="{{ presenca_val }}" {% if filtros_aplicados.presenca == presenca_val %}selected{% endif %}>
+                                {% if presenca_val == 'Sim' %}✅ Presente
+                                {% elif presenca_val == 'Nao' %}❌ Ausente
+                                {% elif presenca_val == 'Falta Inj' %}⚠️ Falta Injustificada
+                                {% elif presenca_val == 'Falta Psico' %}🩺 Falta Psicóloga
+                                {% elif presenca_val == 'Feriado' %}🎉 Feriado
+                                {% else %}🔄 Em Aberto{% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 col-sm-6 mb-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+                </div>
+            </div>
+            
+            <!-- Filtro por Data -->
+            <div class="row mt-3">
+                <div class="col-md-3 col-sm-6 mb-3">
+                    <label for="data_inicio" class="form-label">Data Início</label>
+                    <input type="date" class="form-control" name="data_inicio" id="data_inicio" value="{{ filtros_aplicados.data_inicio }}">
+                </div>
+                <div class="col-md-3 col-sm-6 mb-3">
+                    <label for="data_fim" class="form-label">Data Fim</label>
+                    <input type="date" class="form-control" name="data_fim" id="data_fim" value="{{ filtros_aplicados.data_fim }}">
+                </div>
+                <div class="col-md-3 col-sm-6 mb-3">
+                    <label for="items_per_page" class="form-label">Meses por Página</label>
+                    <select class="form-control" name="items_per_page" id="items_per_page" onchange="updatePagination()">
+                        <option value="3" {% if itens_por_pagina == 3 %}selected{% endif %}>3</option>
+                        <option value="6" {% if itens_por_pagina == 6 %}selected{% endif %}>6</option>
+                        <option value="9" {% if itens_por_pagina == 9 %}selected{% endif %}>9</option>
+                        <option value="12" {% if itens_por_pagina == 12 %}selected{% endif %}>12</option>
+                    </select>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-3 d-flex align-items-end">
+                    <a href="{% url 'confirma_consulta' psicologo_id=psicologa.id %}" class="btn btn-secondary w-100">
+                        <i class="fas fa-arrow-left me-2"></i>Voltar
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Histórico de Consultas -->
+    {% if grupos_consultas %}
+        {% for grupo in grupos_consultas %}
+            <div class="month-section">
+                <div class="month-header">
+                    <svg class="month-icon" viewBox="0 0 24 24">
+                        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/>
+                    </svg>
+                    {{ grupo.mes_ano }}
+                </div>
+                
+                {% for semana in grupo.semanas %}
+                    <div class="week-section">
+                        <div class="week-header" onclick="toggleWeek('week-{{ grupo.mes_ano_key }}-{{ semana.numero }}')">
+                            <div class="week-title">
+                                📅 {{ semana.numero }}ª Semana
+                            </div>
+                            <div class="week-stats">
+                                <div class="week-stat">
+                                    <div class="week-stat-value text-primary">{{ semana.total_consultas }}</div>
+                                    <div class="week-stat-label">Consultas</div>
+                                </div>
+                                <div class="week-stat">
+                                    <div class="week-stat-value text-success">{{ semana.consultas_presentes }}</div>
+                                    <div class="week-stat-label">Presentes</div>
+                                </div>
+                                <div class="week-stat">
+                                    <div class="week-stat-value text-warning">R$ {{ semana.valor_total|floatformat:2 }}</div>
+                                    <div class="week-stat-label">Recebido</div>
+                                </div>
+                                <div class="week-stat">
+                                    <div class="week-stat-value text-info">{{ semana.taxa_presenca|floatformat:1 }}%</div>
+                                    <div class="week-stat-label">Taxa</div>
+                                </div>
+                                <svg class="toggle-arrow" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        
+                        <div class="week-content" id="week-{{ grupo.mes_ano_key }}-{{ semana.numero }}">
+                            <div class="table-responsive">
+                                <table class="consultas-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Cliente</th>
+                                            <th>Dia</th>
+                                            <th>Horário</th>
+                                            <th>Data</th>
+                                            <th>Modalidade</th>
+                                            <th>Presença</th>
+                                            <th>Forma Pagto</th>
+                                            <th>Valor Pago</th>
+                                            <th>Data Pagto</th>
+                                            <th>Observações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for consulta in semana.consultas %}
+                                            <tr>
+                                                <td>
+                                                    <strong>{{ consulta.paciente.nome }}</strong>
+                                                </td>
+                                                <td>
+                                                    {% if consulta.dia_semana == 'Segunda' %}
+                                                        <span class="day-badge day-segunda">SEG</span>
+                                                    {% elif consulta.dia_semana == 'Terça' %}
+                                                        <span class="day-badge day-terca">TER</span>
+                                                    {% elif consulta.dia_semana == 'Quarta' %}
+                                                        <span class="day-badge day-quarta">QUA</span>
+                                                    {% elif consulta.dia_semana == 'Quinta' %}
+                                                        <span class="day-badge day-quinta">QUI</span>
+                                                    {% elif consulta.dia_semana == 'Sexta' %}
+                                                        <span class="day-badge day-sexta">SEX</span>
+                                                    {% else %}
+                                                        <span class="day-badge day-sabado">SÁB</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <strong>{{ consulta.horario }}</strong>
+                                                </td>
+                                                <td>{{ consulta.data|date:"d/m/Y" }}</td>
+                                                <td>
+                                                    {% if consulta.modalidade == 'Presencial' %}
+                                                        <span class="modalidade-badge modalidade-presencial">🏢 Presencial</span>
+                                                    {% else %}
+                                                        <span class="modalidade-badge modalidade-online">💻 Online</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if consulta.presenca == 'Sim' %}
+                                                        <span class="status-badge status-sim">✅ Presente</span>
+                                                    {% elif consulta.presenca == 'Nao' %}
+                                                        <span class="status-badge status-nao">❌ Ausente</span>
+                                                    {% elif consulta.presenca == 'Falta Inj' %}
+                                                        <span class="status-badge status-falta">⚠️ Falta Inj</span>
+                                                    {% elif consulta.presenca == 'Falta Psico' %}
+                                                        <span class="status-badge status-falta">🩺 Falta Psico</span>
+                                                    {% elif consulta.presenca == 'Feriado' %}
+                                                        <span class="status-badge status-falta">🎉 Feriado</span>
+                                                    {% else %}
+                                                        <span class="status-badge status-aberto">🔄 Em Aberto</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if consulta.forma %}
+                                                        {% if consulta.forma == 'Dinheiro' %}💵 Dinheiro
+                                                        {% elif consulta.forma == 'Cartão' %}💳 Cartão
+                                                        {% elif consulta.forma == 'Pix' %}📱 Pix
+                                                        {% else %}{{ consulta.forma }}{% endif %}
+                                                    {% else %}-{% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if consulta.valor_pagamento %}
+                                                        <span class="text-success fw-bold">R$ {{ consulta.valor_pagamento|floatformat:2 }}</span>
+                                                    {% else %}
+                                                        <span class="text-muted">-</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if consulta.data_pagamento %}
+                                                        {{ consulta.data_pagamento|date:"d/m/Y" }}
+                                                    {% else %}
+                                                        <span class="text-muted">-</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if consulta.observacoes %}
+                                                        <span title="{{ consulta.observacoes }}">
+                                                            {{ consulta.observacoes|truncatechars:30 }}
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="text-muted">-</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <svg viewBox="0 0 24 24">
+                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/>
+            </svg>
+            <h5>Nenhuma consulta encontrada</h5>
+            <p>Não há consultas no histórico que correspondam aos filtros aplicados.</p>
+        </div>
+    {% endif %}
+
+    <!-- Paginação -->
+    {% if grupos_consultas.has_other_pages %}
+        <div class="pagination-container">
+            <div class="pagination-info">
+                <span class="text-muted">
+                    Mostrando {{ grupos_consultas.start_index }} a {{ grupos_consultas.end_index }} 
+                    de {{ grupos_consultas.paginator.count }} meses
+                </span>
+            </div>
+            
+            <nav aria-label="Paginação do histórico">
+                <ul class="pagination">
+                    {% if grupos_consultas.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% for key, value in filtros_aplicados.items %}&{{ key }}={{ value }}{% endfor %}&items_per_page={{ itens_por_pagina }}" aria-label="Primeira">
+                                <i class="fas fa-angle-double-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ grupos_consultas.previous_page_number }}{% for key, value in filtros_aplicados.items %}&{{ key }}={{ value }}{% endfor %}&items_per_page={{ itens_por_pagina }}" aria-label="Anterior">
+                                <i class="fas fa-angle-left"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% for num in grupos_consultas.paginator.page_range %}
+                        {% if num == grupos_consultas.number %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > grupos_consultas.number|add:'-3' and num < grupos_consultas.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% for key, value in filtros_aplicados.items %}&{{ key }}={{ value }}{% endfor %}&items_per_page={{ itens_por_pagina }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if grupos_consultas.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ grupos_consultas.next_page_number }}{% for key, value in filtros_aplicados.items %}&{{ key }}={{ value }}{% endfor %}&items_per_page={{ itens_por_pagina }}" aria-label="Próxima">
+                                <i class="fas fa-angle-right"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ grupos_consultas.paginator.num_pages }}{% for key, value in filtros_aplicados.items %}&{{ key }}={{ value }}{% endfor %}&items_per_page={{ itens_por_pagina }}" aria-label="Última">
+                                <i class="fas fa-angle-double-right"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit dos filtros quando alterados
+    const filterElements = ['#ano', '#mes', '#semana', '#modalidade', '#presenca'];
+    filterElements.forEach(selector => {
+        const element = document.querySelector(selector);
+        if (element) {
+            element.addEventListener('change', function() {
+                document.getElementById('filterForm').submit();
+            });
+        }
+    });
+
+    // Auto-submit para filtros de data
+    const dataElements = ['#data_inicio', '#data_fim'];
+    dataElements.forEach(selector => {
+        const element = document.querySelector(selector);
+        if (element) {
+            element.addEventListener('change', function() {
+                // Pequeno delay para permitir seleção de ambas as datas
+                setTimeout(() => {
+                    document.getElementById('filterForm').submit();
+                }, 500);
+            });
+        }
+    });
+});
+
+// Função para alternar exibição das semanas
+function toggleWeek(weekId) {
+    const weekContent = document.getElementById(weekId);
+    const arrow = weekContent.previousElementSibling.querySelector('.toggle-arrow');
+    
+    if (weekContent.classList.contains('show')) {
+        weekContent.classList.remove('show');
+        arrow.classList.remove('rotated');
+    } else {
+        weekContent.classList.add('show');
+        arrow.classList.add('rotated');
+    }
+}
+
+// Função para atualizar paginação com novo valor de itens por página
+function updatePagination() {
+    const form = document.getElementById('filterForm');
+    const pageInput = document.createElement('input');
+    pageInput.type = 'hidden';
+    pageInput.name = 'page';
+    pageInput.value = '1'; // Resetar para primeira página
+    form.appendChild(pageInput);
+    form.submit();
+}
+
+// Expandir/colapsar todas as semanas
+document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.key === 'e') {
+        e.preventDefault();
+        const allWeekContents = document.querySelectorAll('.week-content');
+        const allArrows = document.querySelectorAll('.toggle-arrow');
+        const anyExpanded = Array.from(allWeekContents).some(content => content.classList.contains('show'));
+        
+        allWeekContents.forEach((content, index) => {
+            if (anyExpanded) {
+                content.classList.remove('show');
+                allArrows[index].classList.remove('rotated');
+            } else {
+                content.classList.add('show');
+                allArrows[index].classList.add('rotated');
+            }
+        });
+    }
+});
+
+// Tooltip para atalho de teclado
+document.addEventListener('DOMContentLoaded', function() {
+    const tooltip = document.createElement('div');
+    tooltip.innerHTML = '<small class="text-muted"><i class="fas fa-keyboard me-1"></i>Ctrl+E para expandir/colapsar todas as semanas</small>';
+    tooltip.style.position = 'fixed';
+    tooltip.style.bottom = '20px';
+    tooltip.style.right = '20px';
+    tooltip.style.background = 'rgba(0,0,0,0.8)';
+    tooltip.style.color = 'white';
+    tooltip.style.padding = '8px 12px';
+    tooltip.style.borderRadius = '8px';
+    tooltip.style.fontSize = '12px';
+    tooltip.style.zIndex = '9999';
+    tooltip.style.opacity = '0';
+    tooltip.style.transition = 'opacity 0.3s';
+    
+    document.body.appendChild(tooltip);
+    
+    // Mostrar tooltip por 3 segundos após carregar
+    setTimeout(() => {
+        tooltip.style.opacity = '1';
+        setTimeout(() => {
+            tooltip.style.opacity = '0';
+        }, 3000);
+    }, 1000);
+});
+</script>
+{% endblock content %}

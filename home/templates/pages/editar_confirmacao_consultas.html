@@ -2,130 +2,500 @@
 {% load static %}
 
 {% block content %}
+<style>
+    :root {
+        --primary-color: #CB0C9F;
+        --primary-hover: #A80A84;
+        --success-color: #10B981;
+        --warning-color: #F59E0B;
+        --danger-color: #EF4444;
+        --gray-50: #F9FAFB;
+        --gray-100: #F3F4F6;
+        --gray-200: #E5E7EB;
+        --gray-300: #D1D5DB;
+        --gray-500: #6B7280;
+        --gray-700: #374151;
+        --gray-900: #111827;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        border-radius: 1rem;
+    }
+
+    .page-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        text-align: center;
+    }
+
+    .page-subtitle {
+        text-align: center;
+        opacity: 0.9;
+        margin-top: 0.5rem;
+        font-size: 1.1rem;
+    }
+
+    .section-card {
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        border: none;
+        margin-bottom: 2rem;
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .section-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    }
+
+    .section-header {
+        background: var(--gray-50);
+        padding: 1.5rem;
+        border-bottom: 2px solid var(--gray-200);
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--gray-900);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .section-icon {
+        width: 24px;
+        height: 24px;
+        fill: var(--primary-color);
+    }
+
+    .editable-table {
+        font-size: 0.9rem;
+    }
+
+    .table th {
+        background-color: var(--gray-100);
+        color: var(--gray-700);
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 1rem 0.75rem;
+        border: none;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .table td {
+        padding: 1rem 0.75rem;
+        border-bottom: 1px solid var(--gray-200);
+        vertical-align: middle;
+    }
+
+    .table tbody tr:hover {
+        background-color: var(--gray-50);
+    }
+
+    .form-control {
+        border: 2px solid var(--gray-200);
+        border-radius: 0.75rem;
+        padding: 0.75rem;
+        font-size: 0.9rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(203, 12, 159, 0.1);
+    }
+
+    .btn {
+        border-radius: 0.75rem;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+        transition: all 0.2s;
+        border: none;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn:hover::before {
+        left: 100%;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(203, 12, 159, 0.3);
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, var(--success-color), #059669);
+        color: white;
+    }
+
+    .btn-warning {
+        background: linear-gradient(135deg, var(--warning-color), #D97706);
+        color: white;
+    }
+
+    .btn-secondary {
+        background: linear-gradient(135deg, var(--gray-500), var(--gray-700));
+        color: white;
+    }
+
+    .action-buttons {
+        background: var(--gray-50);
+        padding: 2rem;
+        margin-top: 2rem;
+        border-radius: 1rem;
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .status-presente {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: var(--success-color);
+    }
+
+    .status-ausente {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: var(--danger-color);
+    }
+
+    .status-falta {
+        background-color: rgba(245, 158, 11, 0.1);
+        color: var(--warning-color);
+    }
+
+    .day-abbreviation {
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        line-height: 40px;
+        text-align: center;
+        border-radius: 50%;
+        font-weight: 600;
+        color: white;
+        font-size: 0.8rem;
+    }
+
+    .day-seg { background-color: #EF4444; }
+    .day-ter { background-color: #F59E0B; }
+    .day-qua { background-color: #10B981; }
+    .day-qui { background-color: #3B82F6; }
+    .day-sex { background-color: #8B5CF6; }
+    .day-sab { background-color: #EC4899; }
+
+    .value-display {
+        font-weight: 600;
+        color: var(--success-color);
+        font-size: 1.1em;
+    }
+
+    .week-badge {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        white-space: nowrap;
+    }
+
+    .table-wrapper {
+        border-radius: 1rem;
+        overflow: hidden;
+        background: white;
+    }
+
+    .loading-spinner {
+        display: none;
+        text-align: center;
+        padding: 2rem;
+    }
+
+    .spinner {
+        border: 3px solid var(--gray-200);
+        border-top: 3px solid var(--primary-color);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .blocked-section {
+        position: relative;
+    }
+
+    @media (max-width: 768px) {
+        .page-title {
+            font-size: 1.5rem;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .btn {
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        .table-responsive {
+            font-size: 0.8rem;
+        }
+
+        .section-title {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .week-badge {
+            font-size: 0.75rem;
+            padding: 0.4rem 0.8rem;
+        }
+    }
+</style>
+
+<!-- Header da Página -->
+<div class="row mb-4">
+    <div class="col-md-8">
+      <div class="d-flex align-items-center">
+        <button type="button" class="btn bg-gradient-primary btn-sm me-3">
+          <i class="fas fa-arrow-left me-1"></i>
+          <a class="text-white text-decoration-none" href="{% url 'confirma_consulta' psicologo_id=psicologa.id %}">Voltar</a>
+        </button>
+      </div>
+    </div>
+  </div>
+
+<!-- Seção de Consultas Editáveis -->
 <div class="row">
     <div class="col-12">
-        <div class="card mb-4">
-            <div class="card-header pb-0">
-                <h6>Editar Consultas</h6>
+        <div class="section-card">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <svg class="section-icon" viewBox="0 0 24 24">
+                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                    </svg>
+                    Consultas para Edição
+                    {% if semanas_info and mes_ano_info %}
+                        <span class="week-badge ms-3">{{ semanas_info }} - {{ mes_ano_info }}</span>
+                    {% endif %}
+                </h2>
             </div>
             <div class="card-body px-0 pt-0 pb-2">
                 <form method="POST" action="#">
                     {% csrf_token %}
-                    <div class="table-responsive p-0">
-                        <table class="table align-items-center mb-0">
-                            <thead>
-                                <tr>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Forma Pagamento</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Presença</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor Pago ( R$ )</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Data de Pagamento</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Observações</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nome do Cliente</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Modalidade</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Dia Semana</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Periodo de Atendimento</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor (R$)</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Data</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Semana Mês</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for financeiro in financeiros %}
+                    <div class="table-wrapper">
+                        <div class="table-responsive">
+                            <table class="table align-items-center mb-0 editable-table">
+                                <thead>
                                     <tr>
-                                        <td class="align-middle text-center">
-                                            <select class="form-control" id="forma_pagamento_{{ financeiro.id }}" name="forma_pagamento_{{ financeiro.id }}">
-                                                <option value="Dinheiro" {% if financeiro.forma_pagamento == 'Dinheiro' %}selected{% endif %}>Dinheiro</option>
-                                                <option value="Cartão" {% if financeiro.forma_pagamento == 'Cartão' %}selected{% endif %}>Cartão</option>
-                                                <option value="Pix" {% if financeiro.forma_pagamento == 'Pix' %}selected{% endif %}>Pix</option>  
-                                            </select>
-                                        </td>
-                                        <td class="align-middle text-center">
-                                            <select class="form-control" id="presenca_{{ financeiro.id }}" name="presenca_{{ financeiro.id }}">
-                                                <option value="Sim" {% if financeiro.presenca == 'Sim' %}selected{% endif %}>Sim</option>
-                                                <option value="Nao" {% if financeiro.presenca == 'Nao' %}selected{% endif %}>Não</option>
-                                                <option value="Falta Inj" {% if financeiro.presenca == 'Falta Inj' %}selected{% endif %}>Falta Injustificada</option>
-                                                <option value="class" {% if financeiro.presenca == 'Falta Psico' %}selected{% endif %}>Falta Psicóloga</option>
-                                                <option value="Feriado" {% if financeiro.presenca == 'Feriado' %}selected{% endif %}>Feriado</option>
-                                            </select>
-                                        </td>
-                                        <td class="align-middle text-center">
-                                            {% if financeiro.valor_pagamento %}
-                                            <input class="form-control" id="valor_pagamento{{ financeiro.id }}" name="valor_pagamento_{{ financeiro.id }}" value="{{ financeiro.valor_pagamento }}" />
-                                            {% else %}
-                                            <input class="form-control" id="valor_pagamento{{ financeiro.id }}" name="valor_pagamento_{{ financeiro.id }}" value="" />
-                                            {% endif %}
-                                        </td>
-                                        <td class="align-middle text-center">
-                                            {% if financeiro.data_pagamento %}
-                                            <input type="date" class="form-control" id="data_pagamento{{ financeiro.id }}" 
-                                                   name="data_pagamento_{{ financeiro.id }}" 
-                                                   value="{{ financeiro.data_pagamento|date:'Y-m-d' }}" />
-                                            {% else %}
-                                            <input type="date" class="form-control" id="data_pagamento{{ financeiro.id }}" 
-                                                   name="data_pagamento_{{ financeiro.id }}" 
-                                                   value="" />
-                                            {% endif %}
-                                        </td>
-                                        <td class="align-middle text-center">
-                                            {% if financeiro.observacoes %}
-                                            <input class="form-control" id="observacoes_{{ financeiro.id }}" name="observacoes_{{ financeiro.id }}" value="{{ financeiro.observacoes }}" />
-                                            {% else %}
-                                            <input class="form-control" id="observacoes_{{ financeiro.id }}" name="observacoes_{{ financeiro.id }}" value="" />
-                                            {% endif %}
-                                        </td>
-                                        <td class="align-middle text-center">{{ financeiro.paciente.nome }}</td>
-                                        <td class="align-middle text-center">{{financeiro.modalidade}}</td>
-                                        {% if financeiro.dia_semana == 'Segunda' %}
-                                        <td class="align-middle text-center">Seg</td>
-                                        {% elif financeiro.dia_semana == 'Terça' %}
-                                        <td class="align-middle text-center">Ter</td>
-                                        {% elif financeiro.dia_semana == 'Quarta' %}
-                                        <td class="align-middle text-center">Qua</td>
-                                        {% elif financeiro.dia_semana == 'Quinta' %}
-                                        <td class="align-middle text-center">Qui</td>
-                                        {% elif financeiro.dia_semana == 'Sexta' %}
-                                        <td class="align-middle text-center">Sex</td>
-                                        {% else %}
-                                        <td class="align-middle text-center">Sáb</td>
-                                        {% endif %}
-                                        <td class="align-middle text-center">{{ financeiro.horario }}</td>
-                                        <td class="align-middle text-center">{{ financeiro.periodo_atendimento }}</td>
-                                        <td class="align-middle text-center">R$ {{ financeiro.paciente.valor }}</td>
-                                        <td class="align-middle text-center">{{ financeiro.data }}</td>
-                                        <td class="align-middle text-center">Semana {{ financeiro.semana }}</td>
-                                        
+                                        <th class="text-center">Cliente</th>
+                                        <th class="text-center">Dia</th>
+                                        <th class="text-center">Horário</th>
+                                        <th class="text-center">Pagamento</th>
+                                        <th class="text-center">Presença</th>
+                                        <th class="text-center">Valor Pago</th>
+                                        <th class="text-center">Data Pagamento</th>
+                                        <th class="text-center">Observações</th>
+                                        <th class="text-center">Valor</th>
+                                        <th class="text-center">Data</th>
+                                        <th class="text-center">Modalidade</th>
+                                        <th class="text-center">Período</th>
                                     </tr>
-                                {% empty %}
-                                    <tr>
-                                        <td colspan="8" class="text-center">
-                                            <p class="text-secondary font-weight-bold text-xs">Nenhuma consulta encontrada.</p>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="form-group text-center mt-4">
-                                <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-                            </div>
+                                </thead>
+                                <tbody>
+                                    {% for financeiro in financeiros %}
+                                        <tr>
+                                            <td class="align-middle text-center">
+                                                <strong>{{ financeiro.paciente.nome }}</strong>
+                                            </td>
+                                            <td class="align-middle text-center">
+                                                {% if financeiro.dia_semana == 'Segunda' %}
+                                                    <span class="day-abbreviation day-seg">SEG</span>
+                                                {% elif financeiro.dia_semana == 'Terça' %}
+                                                    <span class="day-abbreviation day-ter">TER</span>
+                                                {% elif financeiro.dia_semana == 'Quarta' %}
+                                                    <span class="day-abbreviation day-qua">QUA</span>
+                                                {% elif financeiro.dia_semana == 'Quinta' %}
+                                                    <span class="day-abbreviation day-qui">QUI</span>
+                                                {% elif financeiro.dia_semana == 'Sexta' %}
+                                                    <span class="day-abbreviation day-sex">SEX</span>
+                                                {% else %}
+                                                    <span class="day-abbreviation day-sab">SÁB</span>
+                                                {% endif %}
+                                            </td>
+                                             <td class="align-middle text-center">
+                                                <strong>{{ financeiro.horario }}</strong>
+                                            </td>
+
+                                             <td class="align-middle text-center">
+                                                <select class="form-control" id="forma_{{ financeiro.id }}" name="forma_{{ financeiro.id }}">
+                                                    <option value="Dinheiro" {% if financeiro.forma == 'Dinheiro' %}selected{% endif %}>💵 Dinheiro</option>
+                                                    <option value="Cartão" {% if financeiro.forma == 'Cartão' %}selected{% endif %}>💳 Cartão</option>
+                                                    <option value="Pix" {% if financeiro.forma == 'Pix' %}selected{% endif %}>📱 Pix</option>  
+                                                    <option value="Sem Valor" {% if financeiro.forma == 'Sem Valor' %}selected{% endif %}> Sem Valor</option>
+                                                </select>
+                                            </td>
+                                            <td class="align-middle text-center">
+                                                <select class="form-control" id="presenca_{{ financeiro.id }}" name="presenca_{{ financeiro.id }}">
+                                                    <option value="Sim" {% if financeiro.presenca == 'Sim' %}selected{% endif %}>✅ Presente</option>
+                                                    <option value="Nao" {% if financeiro.presenca == 'Nao' %}selected{% endif %}>❌ Ausente</option>
+                                                    <option value="Falta Inj" {% if financeiro.presenca == 'Falta Inj' %}selected{% endif %}>⚠️ Falta Injustificada</option>
+                                                    <option value="Falta Psico" {% if financeiro.presenca == 'Falta Psico' %}selected{% endif %}>🩺 Falta Psicóloga</option>
+                                                    <option value="Feriado" {% if financeiro.presenca == 'Feriado' %}selected{% endif %}>🎉 Feriado</option>
+                                                    <option value="Em Aberto" {% if financeiro.presenca == 'Em Aberto' %}selected{% endif %}>🔄 Em Aberto</option>
+                                                </select>
+                                            </td>
+                                            <td class="align-middle text-center">
+                                                <input class="form-control" 
+                                                       id="valor_pagamento{{ financeiro.id }}" 
+                                                       name="valor_pagamento_{{ financeiro.id }}" 
+                                                       value="{{ financeiro.valor_pagamento|default:'' }}" 
+                                                       placeholder="R$ 0,00"
+                                                       type="number" 
+                                                       step="0.01" />
+                                            </td>
+                                            <td class="align-middle text-center">
+                                                <input type="date" 
+                                                       class="form-control" 
+                                                       id="data_pagamento{{ financeiro.id }}" 
+                                                       name="data_pagamento_{{ financeiro.id }}" 
+                                                       value="{{ financeiro.data_pagamento|date:'Y-m-d'|default:'' }}" />
+                                            </td>
+                                            <td class="align-middle text-center">
+                                                <input class="form-control" 
+                                                       id="observacoes_{{ financeiro.id }}" 
+                                                       name="observacoes_{{ financeiro.id }}" 
+                                                       value="{{ financeiro.observacoes|default:'' }}" 
+                                                       placeholder="Observações..." />
+                                            </td>
+                                            
+                                            <td class="align-middle text-center">
+                                                <span class="value-display">R$ {{ financeiro.paciente.valor }}</span>
+                                            </td>
+                                            <td class="align-middle text-center">{{ financeiro.data }}</td>
+                                            <td class="align-middle text-center">
+                                                <span class="status-badge">{{ financeiro.modalidade }}</span>
+                                            </td>
+                                            <td class="align-middle text-center">{{ financeiro.periodo_atendimento }}</td>
+                                        </tr>
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="13" class="text-center" style="padding: 3rem;">
+                                                <div style="opacity: 0.6;">
+                                                    <svg style="width: 64px; height: 64px; margin-bottom: 1rem; fill: var(--gray-400);" viewBox="0 0 24 24">
+                                                        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/>
+                                                    </svg>
+                                                    <h5 style="color: var(--gray-500); margin: 0;">Nenhuma consulta encontrada</h5>
+                                                    <p style="color: var(--gray-400); margin-top: 0.5rem;">Não há consultas disponíveis para edição no momento.</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
-                        <div class="col-md-4">
-                            <div class="text-center mt-4">
-                                <button type="button" class="btn bg-gradient-primary">
-                                    <a class="text-white" href="{% url 'bloquear_consulta' psicologa.id %}">
-                                        Enviar Consultas
+                    </div>
+                    
+                    <!-- Botões de Ação -->
+                    <div class="action-buttons">
+                        <button type="submit" class="btn btn-success">
+                            <svg style="width: 20px; height: 20px; margin-right: 0.5rem; fill: currentColor;" viewBox="0 0 24 24">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                            </svg>
+                            Salvar Alterações
+                        </button>
+                        
+                        <button type="button" class="btn btn-primary">
+                            <a class="text-white text-decoration-none" href="{% url 'bloquear_consulta' psicologa.id %}">
+                                <svg style="width: 20px; height: 20px; margin-right: 0.5rem; fill: currentColor;" viewBox="0 0 24 24">
+                                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                                </svg>
+                                Enviar Consultas
+                            </a>
+                        </button>
+                        
+                        <button type="button" class="btn btn-secondary">
+                            <a class="text-white text-decoration-none" href="{% url 'confirma_consulta' psicologo_id=psicologa.id %}">
+                                <svg style="width: 20px; height: 20px; margin-right: 0.5rem; fill: currentColor;" viewBox="0 0 24 24">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                </svg>
+                                Cancelar
+                            </a>
+                        </button>
+                        {% if user.is_superuser %}
+                                <button type="button" class="btn btn-warning">
+                                    <a class="text-white text-decoration-none" href="{% url 'desbloquear_consulta' psicologa.id %}">
+                                        <svg style="width: 20px; height: 20px; margin-right: 0.5rem; fill: currentColor;" viewBox="0 0 24 24">
+                                            <path d="M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V10A2,2 0 0,1 6,8H15V6A3,3 0 0,0 12,3A3,3 0 0,0 9,6H7A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18Z"/>
+                                        </svg>
+                                        Desbloquear Edição
                                     </a>
                                 </button>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group text-center mt-4">
-                                <button type="button" class="btn bg-gradient-secondary"><a href="{% url 'confirma_consulta' psicologo_id=psicologa.id %}">Cancelar</a></button>
-                            </div>
-                        </div>
+                        {% else %}
+                            {% for group in user.groups.all %}
+                                {% if group.name == 'administrador' %}
+                                        <button type="button" class="btn btn-warning">
+                                            <a class="text-white text-decoration-none" href="{% url 'desbloquear_consulta' psicologa.id %}">
+                                                <svg style="width: 20px; height: 20px; margin-right: 0.5rem; fill: currentColor;" viewBox="0 0 24 24">
+                                                    <path d="M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V10A2,2 0 0,1 6,8H15V6A3,3 0 0,0 12,3A3,3 0 0,0 9,6H7A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18Z"/>
+                                                </svg>
+                                                Desbloquear Edição
+                                            </a>
+                                        </button>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
                     </div>
                 </form>
             </div>
@@ -133,102 +503,125 @@
     </div>
 </div>
 
-
-<div class="row my-4">
-    <div class="col-12">
-        <div class="card mb-4">
-            <div class="card-header pb-0">
-                <h6>Consultas Blqueadas</h6>
-            </div>
-            <div class="card-body px-0 pt-0 pb-2">
-                    <div class="table-responsive p-0">
-                        <table class="table align-items-center mb-0">
-                            <thead>
-                                <tr>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nome do Cliente</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Dia Semana</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Modalidade</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Periodo de Atendimento</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor (R$)</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Data</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Semana Mês</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Forma Pagamento</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Presença</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor Pago ( R$ )</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Data de Pagamento</th>
-                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Observações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for financeiro in financeiros_bloqueados %}
-                                    <tr>
-                                        <td class="align-middle text-center">{{ financeiro.paciente.nome }}</td>
-                                        <td class="align-middle text-center">{{ financeiro.modalidade }}</td>
-                                        {% if financeiro.dia_semana == 'Segunda' %}
-                                        <td class="align-middle text-center">Seg</td>
-                                        {% elif financeiro.dia_semana == 'Terça' %}
-                                        <td class="align-middle text-center">Ter</td>
-                                        {% elif financeiro.dia_semana == 'Quarta' %}
-                                        <td class="align-middle text-center">Qua</td>
-                                        {% elif financeiro.dia_semana == 'Quinta' %}
-                                        <td class="align-middle text-center">Qui</td>
-                                        {% elif financeiro.dia_semana == 'Sexta' %}
-                                        <td class="align-middle text-center">Sex</td>
-                                        {% else %}
-                                        <td class="align-middle text-center">Sáb</td>
-                                        {% endif %}
-                                        <td class="align-middle text-center">{{ financeiro.horario }}</td>
-                                        <td class="align-middle text-center">{{ financeiro.periodo_atendimento }}</td>
-                                        <td class="align-middle text-center">R$ {{ financeiro.paciente.valor }}</td>
-                                        <td class="align-middle text-center">{{ financeiro.data }}</td>
-                                        <td class="align-middle text-center">Semana {{ financeiro.semana }}</td>
-                                        <td class="align-middle text-center"> {{ financeiro.forma_pagamento }} </td>
-                                        <td class="align-middle text-center">{{ financeiro.presenca }}</td>
-                                        <td class="align-middle text-center"> {{ financeiro.valor_pagamento }} </td>
-                                        <td class="align-middle text-center"> {{ financeiro.data_pagamento }} </td>
-                                        <td class="align-middle text-center"> {{ financeiro.observacoes }} </td>
-                                    </tr>
-                                {% empty %}
-                                    <tr>
-                                        <td colspan="8" class="text-center">
-                                            <p class="text-secondary font-weight-bold text-xs">Nenhuma consulta encontrada.</p>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    {% if user.is_superuser %}
-                        <!-- Mostra o botão para superusuários -->
-                        <div class="row mt-3">
-                            <div class="col-12 text-center">
-                                <button type="button" class="btn bg-gradient-primary">
-                                    <a class="text-white" href="{% url 'desbloquear_consulta' psicologa.id %}">
-                                        Desbloquear Edição
-                                    </a>
-                                </button>
-                            </div>
-                        </div>
-                    {% else %}
-                        <!-- Verifica se o usuário pertence ao grupo 'administrador' -->
-                        {% for group in user.groups.all %}
-                            {% if group.name == 'administrador' %}
-                                <div class="row mt-3">
-                                    <div class="col-12 text-center">
-                                        <button type="button" class="btn bg-gradient-primary">
-                                            <a class="text-white" href="{% url 'desbloquear_consulta' psicologa.id %}">
-                                                Desbloquear Edição
-                                            </a>
-                                        </button>
-                                    </div>
-                                </div>
-                            {% endif %}
-                        {% endfor %}
-                    {% endif %}
-
-            </div>
-        </div>
-    </div>
+<!-- Loading Spinner (para futuras implementações AJAX) -->
+<div class="loading-spinner" id="loadingSpinner">
+    <div class="spinner"></div>
+    <p style="margin-top: 1rem; color: var(--gray-500);">Processando...</p>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Adicionar validação de formulário
+    const form = document.querySelector('form[method="POST"]');
+    const submitBtn = document.querySelector('button[type="submit"]');
+    
+    if (form && submitBtn) {
+        form.addEventListener('submit', function(e) {
+            // Mostrar loading
+            submitBtn.innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                    <div style="width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top: 2px solid white; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                    Salvando...
+                </div>
+            `;
+            submitBtn.disabled = true;
+        });
+    }
+    
+    // Adicionar máscaras de entrada para valores monetários
+    const valorInputs = document.querySelectorAll('input[name*="valor_pagamento"]');
+    valorInputs.forEach(input => {
+        input.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = (parseInt(value) / 100).toFixed(2);
+            if (value !== '0.00') {
+                e.target.value = value;
+            }
+        });
+    });
+    
+    // Adicionar indicadores visuais para campos obrigatórios
+    const presencaSelects = document.querySelectorAll('select[name*="presenca"]');
+    presencaSelects.forEach(select => {
+        select.addEventListener('change', function(e) {
+            const row = e.target.closest('tr');
+            const valorPagoInput = row.querySelector('input[name*="valor_pagamento"]');
+            const dataPagamentoInput = row.querySelector('input[name*="data_pagamento"]');
+            
+            if (e.target.value === 'Sim') {
+                valorPagoInput.style.borderColor = 'var(--warning-color)';
+                dataPagamentoInput.style.borderColor = 'var(--warning-color)';
+                valorPagoInput.setAttribute('required', 'required');
+                dataPagamentoInput.setAttribute('required', 'required');
+            } else {
+                valorPagoInput.style.borderColor = 'var(--gray-200)';
+                dataPagamentoInput.style.borderColor = 'var(--gray-200)';
+                valorPagoInput.removeAttribute('required');
+                dataPagamentoInput.removeAttribute('required');
+            }
+        });
+    });
+    
+    // Adicionar tooltips informativos
+    const tooltipElements = document.querySelectorAll('[title]');
+    tooltipElements.forEach(element => {
+        element.style.cursor = 'help';
+    });
+    
+    // Adicionar confirmação para ações importantes
+    const enviarBtn = document.querySelector('a[href*="bloquear_consulta"]');
+    if (enviarBtn) {
+        enviarBtn.addEventListener('click', function(e) {
+            if (!confirm('Tem certeza que deseja enviar as consultas? Esta ação irá bloquear a edição.')) {
+                e.preventDefault();
+            }
+        });
+    }
+    
+    const desbloquearBtn = document.querySelector('a[href*="desbloquear_consulta"]');
+    if (desbloquearBtn) {
+        desbloquearBtn.addEventListener('click', function(e) {
+            if (!confirm('Tem certeza que deseja desbloquear as consultas para edição?')) {
+                e.preventDefault();
+            }
+        });
+    }
+    
+    // Adicionar feedback visual para mudanças não salvas
+    let hasUnsavedChanges = false;
+    const formInputs = document.querySelectorAll('form input, form select');
+    
+    formInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            hasUnsavedChanges = true;
+            document.querySelector('button[type="submit"]').style.animation = 'pulse 2s infinite';
+        });
+    });
+    
+    window.addEventListener('beforeunload', function(e) {
+        if (hasUnsavedChanges) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
+    
+    // Reset do indicador quando o formulário é submetido
+    if (form) {
+        form.addEventListener('submit', function() {
+            hasUnsavedChanges = false;
+        });
+    }
+});
+
+// Adicionar animação de pulse para o botão salvar
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+`;
+document.head.appendChild(style);
+</script>
 {% endblock content %}
