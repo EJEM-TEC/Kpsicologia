@@ -10,7 +10,7 @@
     <form method="POST">
         {% csrf_token %}
         <button type="submit" class="btn bg-gradient-primary">Deletar</button>
-        <button type="button" class="btn bg-gradient-secondary"><a href="{% url 'psico_disponibilidade' psicologo_id=psicologa.id %}">Cancelar</a></button>
+        <button type="button" class="btn bg-gradient-secondary"><a href="{% url 'disponibilidade_unificada' psicologo_id=psicologa.id %}">Cancelar</a></button>
     </form>
 
 

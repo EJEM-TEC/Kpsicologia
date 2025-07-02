@@ -67,28 +67,18 @@
                   
                   <div class="row text-center">
                     <div class="col-6 mb-2">
-                      <a href="{% url 'psico_agenda' item.psicologo.id %}" class="btn btn-primary btn-sm w-100">
-                        <i class="bi bi-book me-1"></i>Agenda
+                      <a href="{% url 'agenda_unificada' psicologo_id=item.psicologo.id %}" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-calendar-plus me-1"></i>Agenda
+                      </a>
+                    </div>
+                    <div class="col-6 mb-2">
+                      <a href="{% url 'disponibilidade_unificada' psicologo_id=item.psicologo.id %}" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-calendar-plus me-1"></i>Disponibilidade
                       </a>
                     </div>
                     <div class="col-6 mb-2">
                       <a href="{% url 'confirma_consulta' psicologo_id=item.psicologo.id %}" class="btn btn-primary btn-sm w-100">
                         <i class="bi bi-check-circle me-1"></i>Confirmar
-                      </a>
-                    </div>
-                    <div class="col-6 mb-2">
-                      <a href="{% url 'psico_disponibilidade' psicologo_id=item.psicologo.id %}" class="btn btn-primary btn-sm w-100">
-                        <i class="bi bi-calendar-check me-1"></i>Disponib.
-                      </a>
-                    </div>
-                    <div class="col-6 mb-2">
-                      <a href="{% url 'psico_agenda_online' item.psicologo.id %}" class="btn btn-primary btn-sm w-100">
-                        <i class="bi bi-laptop me-1"></i>Agenda Extra
-                      </a>
-                    </div>
-                    <div class="col-6 mb-2">
-                      <a href="{% url 'psico_disponibilidade_online' psicologo_id=item.psicologo.id %}" class="btn btn-primary btn-sm w-100">
-                        <i class="bi bi-calendar-plus me-1"></i>Disp. Extra
                       </a>
                     </div>
                     <div class="col-6 mb-2">

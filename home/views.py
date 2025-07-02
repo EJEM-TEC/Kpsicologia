@@ -1234,7 +1234,7 @@ def editar_multiplas_agendas(request, psicologo_id):
             else:
                 messages.info(request, "Nenhuma alteração foi realizada.")
                 
-            return redirect('psico_agenda', psicologo_id=psicologa.id)
+            return redirect('agenda_unificada', psicologo_id=psicologa.id)
             
         except Exception as e:
             messages.error(
@@ -1407,18 +1407,19 @@ def update_consulta(request, consulta_id):
 
 
 @login_required(login_url='login1')
-def delete_consulta(request, id_consulta):
+def delete_consulta(request, id_consulta, psicologo_id):
 
     if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
         return render(request, 'pages/error_permission.html')
 
     consulta = get_object_or_404(Consulta, id=id_consulta)
+    psicologo = get_object_or_404(Psicologa, id=psicologo_id)
 
     if request.method == 'POST':
         consulta.delete()
-        return redirect('agenda_central')
+        return redirect('agenda_unificada', psicologo_id=psicologo.id)
 
-    return render(request, 'pages/deletar_agenda_central.html', {'consulta': consulta})
+    return render(request, 'pages/deletar_agenda_central.html', {'consulta': consulta, 'psicologo': psicologo})
 
 
 @login_required(login_url='login1')
@@ -1435,7 +1436,7 @@ def delete_multiple_consultas(request, psicologo_id):
         consultas.exclude(id__in=request.POST.getlist('consultas')).delete()
         # Redirecionar para a página de agenda central
 
-        return redirect('psico_agenda', psicologo_id=psicologa.id)
+        return redirect('agenda_unificada', psicologo_id=psicologa.id)
 
     return render(request, 'pages/deletar_multiplas_agendas.html', {
         'consultas': consultas,
@@ -1524,7 +1525,7 @@ def remover_disponibilidade(request, disponibilidade_id, psicologo_id):
     if request.method == "POST":
 
         disponibilidade.delete()
-        return redirect('psico_disponibilidade', psicologo_id=psicologo.id)
+        return redirect('disponibilidade_unificada', psicologo_id=psicologo.id)
 
     return render(request, 'pages/deletar_disponibilidade.html', {'disponibilidade': disponibilidade, 'psicologa': psicologo})
 
@@ -1542,7 +1543,7 @@ def delete_multiple_disponibilidades(request, psicologo_id):
         consultas.exclude(id__in=request.POST.getlist('consultas')).delete()
         # Redirecionar para a página de agenda central
 
-        return redirect('psico_disponibilidade', psicologo_id=psicologa.id)
+        return redirect('disponibilidade_unificada', psicologo_id=psicologa.id)
 
     return render(request, 'pages/deletar_multiplas_disponibilidades.html', {
         'consultas': consultas,
@@ -2015,7 +2016,7 @@ def AssociarPsicoEspecialidade(request, psicologo_id):
     especiadadesPsico = [pe.especialidade for pe in psico_especialidades]
 
     return render(request, 'pages/associar_psicologo_especialidade.html', {'especialidadesGerais': especialidadesGerais, 
-                                                                           'psicologo': psicologo, 'especiadadesPsico': especiadadesPsico})
+                                                                'psicologo': psicologo, 'especiadadesPsico': especiadadesPsico})
 
 @login_required(login_url='login1')
 def DissociarPsicoEspecialidade(request, psicologo_id, especialidade_id):
@@ -4123,7 +4124,7 @@ def remover_disponibilidade_online(request, disponibilidade_online_id, psicologo
     if request.method == "POST":
 
         disponibilidade.delete()
-        return redirect('psico_disponibilidade_online', psicologo_id=psicologo.id)
+        return redirect('disponibilidade_unificada', psicologo_id=psicologo.id)
 
     return render(request, 'pages/deletar_disponibilidade_online.html', {'disponibilidade': disponibilidade, 'psicologa': psicologo})
 
@@ -4142,7 +4143,7 @@ def delete_multiple_disponibilidades_online(request, psicologo_id):
         consultas.exclude(id__in=request.POST.getlist('consultas')).delete()
         # Redirecionar para a página de agenda central
 
-        return redirect('psico_disponibilidade_online', psicologo_id=psicologa.id)
+        return redirect('disponibilidade_unificada', psicologo_id=psicologa.id)
 
     return render(request, 'pages/deletar_multiplas_disponibilidades_online.html', {
         'consultas': consultas,
@@ -4302,7 +4303,7 @@ def delete_consulta_online(request, consulta_id, psicologo_id):
         else:
             consulta_online.delete()
             psicologa.ultima_atualizacao_agenda = hoje
-            return redirect('psico_disponibilidade_online', psicologo_id=psicologo_id)
+            return redirect('agenda_unificada', psicologo_id=psicologo_id)
 
     return render(request, 'pages/deletar_agenda_online.html', {'consulta_online': consulta_online, 'psicologo': psicologa})
 
@@ -4320,10 +4321,395 @@ def delete_multiple_consultas_online(request, psicologo_id):
         consultas.exclude(id__in=request.POST.getlist('consultas')).delete()
         # Redirecionar para a página de agenda central
 
-        return redirect('psico_agenda_online', psicologo_id=psicologa.id)
+        return redirect('agenda_unificada', psicologo_id=psicologa.id)
 
     return render(request, 'pages/deletar_multiplas_agendas_online.html', {
         'consultas': consultas,
         'psicologa': psicologa,
     })
 
+# Disponibilidade Online + Presencial 
+
+# home/views.py - Nova view unificada
+
+@login_required(login_url='login1')
+def disponibilidade_unificada(request, psicologo_id):
+    """
+    View unificada que combina disponibilidade presencial e online
+    """
+    psicologa = get_object_or_404(Psicologa, id=psicologo_id)
+
+    # Verificar se o usuário é a psicóloga ou faz parte do grupo 'Administrador'
+    if request.user.username != psicologa.nome and not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission1.html')
+
+    # Obter salas para disponibilidade presencial
+    salas = Sala.objects.all()
+    
+    # Processar formulários
+    if request.method == 'POST':
+        tipo_disponibilidade = request.POST.get('tipo_disponibilidade')
+        
+        if tipo_disponibilidade == 'presencial':
+            return processar_disponibilidade_presencial(request, psicologa, salas)
+        elif tipo_disponibilidade == 'online':
+            return processar_disponibilidade_online(request, psicologa)
+    
+    # Obter dados para exibição
+    # Disponibilidades presenciais agrupadas por dia
+    consultas_presencial = Consulta.objects.filter(psicologo=psicologa).filter(Paciente__isnull=True).order_by('dia_semana', 'horario')
+    horarios_presencial_agrupados = []
+    dias_da_semana = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"]
+    
+    for dia in dias_da_semana:
+        horarios_do_dia = consultas_presencial.filter(dia_semana=dia)
+        horarios_presencial_agrupados.append((dia, horarios_do_dia))
+    
+    # Disponibilidades online agrupadas por dia
+    consultas_online = Consulta_Online.objects.filter(psicologo=psicologa).filter(Paciente__isnull=True).order_by('dia_semana', 'horario')
+    horarios_online_agrupados = []
+    
+    for dia in dias_da_semana:
+        horarios_do_dia = consultas_online.filter(dia_semana=dia)
+        horarios_online_agrupados.append((dia, horarios_do_dia))
+
+    context = {
+        'psicologo': psicologa,
+        'salas': salas,
+        'horarios_presencial_agrupados': horarios_presencial_agrupados,
+        'horarios_online_agrupados': horarios_online_agrupados,
+        'dias_da_semana': dias_da_semana,
+    }
+
+    return render(request, 'pages/disponibilidade_unificada.html', context)
+
+
+def processar_disponibilidade_presencial(request, psicologa, salas):
+    """
+    Processa o formulário de disponibilidade presencial
+    """
+    dia_semana = request.POST.get('dia_semana')
+    horario_inicio = request.POST.get('horario_inicio')
+    quantidade_atendimentos = int(request.POST.get('quantidade_atendimentos', 1))
+    tempo_atendimento = int(request.POST.get('tempo_atendimento', 60))
+    id_sala = request.POST.get('sala')
+
+    sala = get_object_or_404(Sala, id_sala=id_sala)
+    horario_atual = datetime.strptime(horario_inicio, '%H:%M').time()
+
+    for i in range(quantidade_atendimentos):
+        # Verificar se já existe consulta no mesmo horário e sala
+        consulta_existente = Consulta.objects.filter(
+            dia_semana=dia_semana,
+            horario=horario_atual,
+            sala=sala
+        ).first()
+
+        if not consulta_existente:
+            consulta = Consulta(
+                dia_semana=dia_semana,
+                horario=horario_atual,
+                sala=sala,
+                psicologo=psicologa,
+                semanal="Semanal",
+                quinzenal="Quinzenal",
+            )
+            consulta.save()
+
+        horario_atual = (datetime.combine(datetime.today(), horario_atual) + timedelta(minutes=tempo_atendimento)).time()
+
+    return redirect('disponibilidade_unificada', psicologo_id=psicologa.id)
+
+
+def processar_disponibilidade_online(request, psicologa):
+    """
+    Processa o formulário de disponibilidade online
+    """
+    dia_semana = request.POST.get('dia_semana_online')
+    horario_inicio = request.POST.get('horario_inicio_online')
+    quantidade_atendimentos = int(request.POST.get('quantidade_atendimentos_online', 1))
+    tempo_atendimento = int(request.POST.get('tempo_atendimento_online', 60))
+
+    horario_atual = datetime.strptime(horario_inicio, '%H:%M').time()
+
+    for i in range(quantidade_atendimentos):
+        # Verificar se já existe consulta online no mesmo horário
+        consulta_existente = Consulta_Online.objects.filter(
+            dia_semana=dia_semana,
+            horario=horario_atual,
+            psicologo=psicologa
+        ).first()
+
+        if not consulta_existente:
+            consulta = Consulta_Online(
+                dia_semana=dia_semana,
+                horario=horario_atual,
+                psicologo=psicologa,
+            )
+            consulta.save()
+
+        horario_atual = (datetime.combine(datetime.today(), horario_atual) + timedelta(minutes=tempo_atendimento)).time()
+
+    return redirect('disponibilidade_unificada', psicologo_id=psicologa.id)
+
+# Agendas Unificadas
+
+@login_required(login_url='login1')
+def agenda_unificada(request, psicologo_id):
+    """
+    View unificada que combina agenda presencial e agenda online
+    """
+    psicologa = get_object_or_404(Psicologa, id=psicologo_id)
+
+    # Verificar se o usuário é a psicóloga ou faz parte do grupo 'Administrador'
+    if request.user.username != psicologa.nome and not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission1.html')
+
+    hoje = datetime.now().date()
+    salas_atendimento = Sala.objects.all()
+    pacientes = Paciente.objects.filter(deletado=False)
+    
+    # Verificação de agenda
+    diferenca_ultima_atualizacao = (hoje - psicologa.ultima_atualizacao_agenda).days
+    verificacao_agenda = diferenca_ultima_atualizacao <= 7
+
+    # Processar formulários
+    if request.method == 'POST':
+        tipo_agendamento = request.POST.get('tipo_agendamento')
+        
+        if tipo_agendamento == 'presencial':
+            return processar_agendamento_presencial(request, psicologa, salas_atendimento)
+        elif tipo_agendamento == 'online':
+            return processar_agendamento_online(request, psicologa)
+    
+    # Obter dados para exibição
+    dias_da_semana = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"]
+    
+    # Consultas presenciais agrupadas por dia
+    consultas_presencial = Consulta.objects.filter(psicologo=psicologa).order_by('dia_semana', 'horario')
+    consultas_presencial_agendadas = consultas_presencial.filter(Paciente__isnull=False)
+    consultas_presencial_disponiveis = consultas_presencial.filter(Paciente__isnull=True)
+    
+    # Consultas online agrupadas por dia
+    consultas_online = Consulta_Online.objects.filter(psicologo=psicologa).order_by('dia_semana', 'horario')
+    consultas_online_agendadas = consultas_online.filter(Paciente__isnull=False)
+    consultas_online_disponiveis = consultas_online.filter(Paciente__isnull=True)
+
+    # Agrupar por dia da semana
+    agenda_presencial_por_dia = agrupar_consultas_por_dia(consultas_presencial, dias_da_semana)
+    agenda_online_por_dia = agrupar_consultas_por_dia(consultas_online, dias_da_semana)
+
+    # Estatísticas
+    stats = {
+        'total_presencial': consultas_presencial.count(),
+        'agendadas_presencial': consultas_presencial_agendadas.count(),
+        'disponiveis_presencial': consultas_presencial_disponiveis.count(),
+        'total_online': consultas_online.count(),
+        'agendadas_online': consultas_online_agendadas.count(),
+        'disponiveis_online': consultas_online_disponiveis.count(),
+    }
+
+    context = {
+        'psicologo': psicologa,
+        'salas_atendimento': salas_atendimento,
+        'pacientes': pacientes,
+        'dias_da_semana': dias_da_semana,
+        'agenda_presencial_por_dia': agenda_presencial_por_dia,
+        'agenda_online_por_dia': agenda_online_por_dia,
+        'verificacao_agenda': verificacao_agenda,
+        'stats': stats,
+    }
+
+    return render(request, 'pages/agenda_unificada.html', context)
+
+
+def processar_agendamento_presencial(request, psicologa, salas_atendimento):
+    """
+    Processa o formulário de agendamento presencial
+    """
+    nome_cliente = request.POST.get('nome_cliente')
+    horario_consulta = request.POST.get('horario_consulta')
+    dia_semana = request.POST.get('dia_semana')
+    id_sala = request.POST.get('sala')
+
+    sala_atendimento = get_object_or_404(Sala, id_sala=id_sala)
+
+        # Verificar se o paciente existe
+    try:
+        paciente = Paciente.objects.get(nome=nome_cliente)
+    except Paciente.DoesNotExist or paciente.deletado == True:
+        return render(request, 'pages/error_paciente_nao_encontrado.html', {
+            'nome_cliente': nome_cliente,
+            'psicologo': psicologa
+        })
+
+    # Verificar se uma consulta com esses mesmos critérios já existe
+    consulta_existente = Consulta.objects.filter(
+        psicologo=psicologa,
+        horario=horario_consulta,
+        dia_semana=dia_semana,
+        sala=sala_atendimento,
+        Paciente=paciente
+    ).first()
+
+    if consulta_existente:
+        return render(request, 'consulta_cadastrada2', {
+            "psicologo": psicologa,
+        })
+
+
+    consulta_por_horario = Consulta.objects.get(
+        psicologo=psicologa,
+        horario=horario_consulta,
+        dia_semana=dia_semana,
+        sala=sala_atendimento
+    )
+
+    if consulta_por_horario:
+
+        if paciente.periodo == "Semanal" and consulta_por_horario.semanal:
+            consulta_por_horario.semanal = paciente.nome
+            consulta_por_horario.Paciente = paciente
+            consulta_por_horario.save()
+            psicologa.ultima_atualizacao_agenda = datetime.now().date()
+            psicologa.save()
+        elif paciente.periodo == "Quinzenal" and consulta_por_horario.quinzenal:
+            consulta_por_horario.quinzenal = paciente.nome
+            consulta_por_horario.Paciente = paciente
+            consulta_por_horario.save()
+            psicologa.ultima_atualizacao_agenda = datetime.now().date()
+            psicologa.save()
+        else:
+            return render(request, 'pages/error_cadastro.html', {
+                'psicologo': psicologa
+            })
+    else:
+        return render(request, 'pages/error_cadastro.html', {
+            'psicologo': psicologa
+        })
+
+    return redirect('agenda_unificada', psicologo_id=psicologa.id)
+
+
+def processar_agendamento_online(request, psicologa):
+    """
+    Processa o formulário de agendamento online
+    """
+    nome_cliente = request.POST.get('nome_cliente_online')
+    horario_consulta = request.POST.get('horario_consulta_online')
+    dia_semana = request.POST.get('dia_semana_online')
+
+    try:
+        # Buscar ou criar paciente
+        paciente, created = Paciente.objects.get_or_create(
+            nome=nome_cliente,
+            defaults={'ativo': True}
+        )
+
+        # Verificar se existe horário disponível
+        consulta_disponivel = Consulta_Online.objects.filter(
+            dia_semana=dia_semana,
+            horario=horario_consulta,
+            psicologo=psicologa,
+            Paciente__isnull=True
+        ).first()
+
+        if consulta_disponivel:
+            # Agendar na consulta existente
+            consulta_disponivel.Paciente = paciente
+            consulta_disponivel.save()
+        else:
+            # Criar nova consulta online
+            consulta = Consulta_Online.objects.create(
+                dia_semana=dia_semana,
+                horario=horario_consulta,
+                psicologo=psicologa,
+                Paciente=paciente,
+            )
+
+        # Atualizar data de última atualização
+        psicologa.ultima_atualizacao_agenda = datetime.now().date()
+        psicologa.save()
+
+    except Exception as e:
+        # Em caso de erro, redirecionar com mensagem
+        return render(request, 'pages/consulta_cadastrada2erro.html')
+
+    return redirect('agenda_unificada', psicologo_id=psicologa.id)
+
+
+def agrupar_consultas_por_dia(consultas, dias_da_semana):
+    """
+    Agrupa consultas por dia da semana
+    """
+    consultas_por_dia = []
+    for dia in dias_da_semana:
+        consultas_do_dia = consultas.filter(dia_semana=dia)
+        agendadas = consultas_do_dia.filter(Paciente__isnull=False)
+        disponiveis = consultas_do_dia.filter(Paciente__isnull=True)
+        
+        consultas_por_dia.append({
+            'dia': dia,
+            'todas': consultas_do_dia,
+            'agendadas': agendadas,
+            'disponiveis': disponiveis,
+            'total': consultas_do_dia.count(),
+            'total_agendadas': agendadas.count(),
+            'total_disponiveis': disponiveis.count(),
+        })
+    
+    return consultas_por_dia
+
+# Views auxiliares para ações específicas
+@login_required(login_url='login1')
+def cancelar_consulta_presencial(request, consulta_id, psicologo_id):
+    """
+    Cancela uma consulta presencial (remove o paciente)
+    """
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+
+    consulta = get_object_or_404(Consulta, id=consulta_id)
+    psicologa = get_object_or_404(Psicologa, id=psicologo_id)
+
+    if request.method == 'POST':
+        consulta.Paciente = None
+        consulta.save()
+        
+        psicologa.ultima_atualizacao_agenda = datetime.now().date()
+        psicologa.save()
+        
+        return redirect('agenda_unificada', psicologo_id=psicologo_id)
+
+    return render(request, 'pages/confirmar_cancelamento.html', {
+        'consulta': consulta, 
+        'psicologa': psicologa,
+        'tipo': 'presencial'
+    })
+
+
+@login_required(login_url='login1')
+def cancelar_consulta_online(request, consulta_id, psicologo_id):
+    """
+    Cancela uma consulta online (remove o paciente)
+    """
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+
+    consulta = get_object_or_404(Consulta_Online, id=consulta_id)
+    psicologa = get_object_or_404(Psicologa, id=psicologo_id)
+
+    if request.method == 'POST':
+        consulta.Paciente = None
+        consulta.save()
+        
+        psicologa.ultima_atualizacao_agenda = datetime.now().date()
+        psicologa.save()
+        
+        return redirect('agenda_unificada', psicologo_id=psicologo_id)
+
+    return render(request, 'pages/confirmar_cancelamento.html', {
+        'consulta': consulta, 
+        'psicologa': psicologa,
+        'tipo': 'online'
+    })

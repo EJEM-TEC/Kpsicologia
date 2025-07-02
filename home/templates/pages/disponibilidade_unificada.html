@@ -1,0 +1,393 @@
+<!-- home/templates/pages/disponibilidade_unificada.html -->
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %}Disponibilidade - {{ psicologo.nome }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="col-12">
+        <button type="button" class="btn bg-gradient-primary mb-3">
+          <a class="text-white" href="{% url 'visualizar_psicologas' %}">Voltar</a>
+        </button>
+      </div>
+    </div>
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="icon icon-shape bg-gradient-primary shadow text-center border-radius-md me-3">
+                            <i class="fas fa-calendar-alt text-white text-lg"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-0">Gestão de Disponibilidade</h4>
+                            <p class="text-sm text-muted mb-0">Psicóloga: <strong>{{ psicologo.nome }}</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-gradient-primary p-3">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-trash-alt text-white me-2"></i>
+                        <h5 class="card-title text-white mb-0">Opções</h5>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <button type="button" class="btn btn-outline-danger btn-sm px-3">
+                                <i class="fas fa-trash-alt me-2"></i>
+                                <a class="text-danger" href="{% url 'delete_multiple_disponibilidades' psicologo_id=psicologo.id %}">Deletar Múltiplas Disponibilidades Presenciais</a>
+                            </button>
+                            <button type="button" class="btn btn-outline-danger btn-sm px-3">
+                                <i class="fas fa-trash-alt me-2"></i>
+                                <a class="text-danger" href="{% url 'delete_multiple_disponibilidades_online' psicologo_id=psicologo.id %}">Deletar Múltiplas Disponbilidades Online</a>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs de Navegação -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-0">
+                    <ul class="nav nav-tabs nav-fill" id="disponibilidadeTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="presencial-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#presencial" type="button" role="tab" aria-controls="presencial" 
+                                    aria-selected="true">
+                                <i class="fas fa-building me-2"></i>Atendimento Presencial
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="online-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#online" type="button" role="tab" aria-controls="online" 
+                                    aria-selected="false">
+                                <i class="fas fa-video me-2"></i>Atendimento Online
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="visualizacao-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#visualizacao" type="button" role="tab" aria-controls="visualizacao" 
+                                    aria-selected="false">
+                                <i class="fas fa-eye me-2"></i>Visualizar Horários
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conteúdo das Tabs -->
+    <div class="tab-content" id="disponibilidadeTabsContent">
+        
+        <!-- Tab Presencial -->
+        <div class="tab-pane fade show active" id="presencial" role="tabpanel" aria-labelledby="presencial-tab">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-gradient-primary">
+                            <h5 class="text-white mb-0">
+                                <i class="fas fa-building me-2"></i>Cadastrar Disponibilidade Presencial
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="tipo_disponibilidade" value="presencial">
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Dia da Semana</label>
+                                        <select class="form-select" name="dia_semana" required>
+                                            <option value="">Selecione o dia</option>
+                                            {% for dia in dias_da_semana %}
+                                                <option value="{{ dia }}">{{ dia }}-feira</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Sala</label>
+                                        <select class="form-select" name="sala" required>
+                                            <option value="">Selecione a sala</option>
+                                            {% for sala in salas %}
+                                                <option value="{{ sala.id_sala }}">
+                                                    Sala {{ sala.numero_sala }} - {{ sala.id_unidade.nome_unidade }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Horário de Início</label>
+                                        <input type="time" class="form-control" name="horario_inicio" required>
+                                    </div>
+                                    
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Quantidade de Atendimentos</label>
+                                        <input type="number" class="form-control" name="quantidade_atendimentos" 
+                                               value="1" min="1" max="10" required>
+                                    </div>
+                                    
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Tempo por Atendimento (minutos)</label>
+                                        <select class="form-select" name="tempo_atendimento">
+                                            <option value="30">30 minutos</option>
+                                            <option value="45">45 minutos</option>
+                                            <option value="60" selected>60 minutos</option>
+                                            <option value="90">90 minutos</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-end">
+                                    <button type="reset" class="btn btn-outline-secondary me-2">
+                                        <i class="fas fa-undo me-1"></i>Limpar
+                                    </button>
+                                    <button type="submit" class="btn bg-gradient-primary">
+                                        <i class="fas fa-save me-1"></i>Registrar Disponibilidade
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Online -->
+        <div class="tab-pane fade" id="online" role="tabpanel" aria-labelledby="online-tab">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-gradient-success">
+                            <h5 class="text-white mb-0">
+                                <i class="fas fa-video me-2"></i>Cadastrar Disponibilidade Online
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="tipo_disponibilidade" value="online">
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Dia da Semana</label>
+                                        <select class="form-select" name="dia_semana_online" required>
+                                            <option value="">Selecione o dia</option>
+                                            {% for dia in dias_da_semana %}
+                                                <option value="{{ dia }}">{{ dia }}-feira</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Horário de Início</label>
+                                        <input type="time" class="form-control" name="horario_inicio_online" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Quantidade de Atendimentos</label>
+                                        <input type="number" class="form-control" name="quantidade_atendimentos_online" 
+                                               value="1" min="1" max="10" required>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Tempo por Atendimento (minutos)</label>
+                                        <select class="form-select" name="tempo_atendimento_online">
+                                            <option value="30">30 minutos</option>
+                                            <option value="45">45 minutos</option>
+                                            <option value="60" selected>60 minutos</option>
+                                            <option value="90">90 minutos</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-end">
+                                    <button type="reset" class="btn btn-outline-secondary me-2">
+                                        <i class="fas fa-undo me-1"></i>Limpar
+                                    </button>
+                                    <button type="submit" class="btn bg-gradient-success">
+                                        <i class="fas fa-save me-1"></i>Registrar Disponibilidade Online
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Visualização -->
+        <div class="tab-pane fade" id="visualizacao" role="tabpanel" aria-labelledby="visualizacao-tab">
+            <div class="row">
+                <!-- Horários Presenciais -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-gradient-primary">
+                            <h5 class="text-white mb-0">
+                                <i class="fas fa-building me-2"></i>Horários Presenciais
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% for dia, horarios in horarios_presencial_agrupados %}
+                                {% if horarios.exists %}
+                                <div class="mb-4">
+                                    <h6 class="text-primary fw-bold mb-3">
+                                        <i class="fas fa-calendar-day me-2"></i>{{ dia }}-feira
+                                    </h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-striped">
+                                            <thead class="bg-light">
+                                                <tr>
+                                                    <th class="text-xs text-center">Horário</th>
+                                                    <th class="text-xs text-center">Sala</th>
+                                                    <th class="text-xs text-center">Freq.</th>
+                                                    <th class="text-xs text-center">Ações</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for horario in horarios %}
+                                                <tr>
+                                                    <td class="text-sm text-center">{{ horario.horario|time:"H:i" }}</td>
+                                                    <td class="text-sm text-center">{{ horario.sala.numero_sala }}</td>
+                                                    <td class="text-sm text-center">
+                                                        {% if horario.semanal %}
+                                                            <span class="badge bg-info">Semanal</span>
+                                                        {% endif %}
+                                                        {% if horario.quinzenal %}
+                                                            <span class="badge bg-warning">Quinzenal</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <a href="{% url 'deletar_disponibilidade' disponibilidade_id=horario.id psicologo_id=psicologo.id %}" 
+                                                           class="btn btn-sm btn-danger" 
+                                                           data-bs-toggle="tooltip" 
+                                                           title="Remover">
+                                                           <i class="bi bi-trash"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% empty %}
+                                <div class="text-center py-4">
+                                    <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                                    <p class="text-muted">Nenhum horário presencial cadastrado</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Horários Online -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-gradient-success">
+                            <h5 class="text-white mb-0">
+                                <i class="fas fa-video me-2"></i>Horários Online
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% for dia, horarios in horarios_online_agrupados %}
+                                {% if horarios.exists %}
+                                <div class="mb-4">
+                                    <h6 class="text-success fw-bold mb-3">
+                                        <i class="fas fa-calendar-day me-2"></i>{{ dia }}-feira
+                                    </h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-striped">
+                                            <thead class="bg-light">
+                                                <tr>
+                                                    <th class="text-xs text-center">Horário</th>
+                                                    <th class="text-xs text-center">Status</th>
+                                                    <th class="text-xs text-center">Ações</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for horario in horarios %}
+                                                <tr>
+                                                    <td class="text-sm text-center">{{ horario.horario|time:"H:i"  }}</td>
+                                                    <td class="text-sm text-center">
+                                                        <span class="badge bg-success">Disponível</span>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <a href="{% url 'deletar_disponibilidade_online' disponibilidade_online_id=horario.id psicologo_id=psicologo.id %}" 
+                                                           class="btn btn-sm btn-outline-danger" 
+                                                           data-bs-toggle="tooltip" 
+                                                           title="Remover">
+                                                            <i class="bi bi-trash"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% empty %}
+                                <div class="text-center py-4">
+                                    <i class="fas fa-video-slash fa-3x text-muted mb-3"></i>
+                                    <p class="text-muted">Nenhum horário online cadastrado</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts específicos da página -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Salvar tab ativa no localStorage
+    const triggerTabList = [].slice.call(document.querySelectorAll('#disponibilidadeTabs button'));
+    triggerTabList.forEach(function (triggerEl) {
+        triggerEl.addEventListener('click', function (e) {
+            localStorage.setItem('activeDisponibilidadeTab', e.target.id);
+        });
+    });
+    
+    // Restaurar tab ativa
+    const activeTab = localStorage.getItem('activeDisponibilidadeTab');
+    if (activeTab) {
+        const tabToActivate = document.getElementById(activeTab);
+        if (tabToActivate) {
+            const tab = new bootstrap.Tab(tabToActivate);
+            tab.show();
+        }
+    }
+});
+</script>
+{% endblock %}

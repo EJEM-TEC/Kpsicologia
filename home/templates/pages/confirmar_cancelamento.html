@@ -1,0 +1,90 @@
+<!-- home/templates/pages/confirmar_cancelamento.html -->
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %}Cancelar Consulta{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="card border-0 shadow-lg">
+                <div class="card-header bg-gradient-warning p-4">
+                    <div class="text-center">
+                        <div class="icon icon-shape icon-lg bg-white text-warning shadow mx-auto mb-3">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <h4 class="text-white mb-0">Confirmar Cancelamento</h4>
+                    </div>
+                </div>
+                
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <h5 class="text-dark">Tem certeza que deseja cancelar esta consulta?</h5>
+                        <p class="text-muted">Esta ação removerá o paciente do horário, mas manterá o horário disponível para novos agendamentos.</p>
+                    </div>
+                    
+                    <!-- Detalhes da Consulta -->
+                    <div class="card bg-light border-0 mb-4">
+                        <div class="card-body p-3">
+                            <div class="row">
+                                <div class="col-12 mb-2">
+                                    <strong>Detalhes da Consulta:</strong>
+                                </div>
+                                <div class="col-sm-6">
+                                    <small class="text-muted">Paciente:</small><br>
+                                    <strong>{{ consulta.Paciente.nome }}</strong>
+                                </div>
+                                <div class="col-sm-6">
+                                    <small class="text-muted">Horário:</small><br>
+                                    <strong>{{ consulta.dia_semana }} - {{ consulta.horario|time:"H:i" }}</strong>
+                                </div>
+                                {% if tipo == 'presencial' %}
+                                <div class="col-sm-6 mt-2">
+                                    <small class="text-muted">Sala:</small><br>
+                                    <strong>Sala {{ consulta.sala.numero_sala }}</strong>
+                                </div>
+                                <div class="col-sm-6 mt-2">
+                                    <small class="text-muted">Modalidade:</small><br>
+                                    <span class="badge bg-primary">Presencial</span>
+                                </div>
+                                {% else %}
+                                <div class="col-sm-6 mt-2">
+                                    <small class="text-muted">Modalidade:</small><br>
+                                    <span class="badge bg-success">Online</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Botões de Ação -->
+                    <form method="post" class="d-inline">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-6">
+                                <a href="{% url 'agenda_unificada' psicologo_id=psicologa.id %}" 
+                                   class="btn btn-outline-secondary w-100">
+                                    <i class="fas fa-arrow-left me-2"></i>Voltar
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <button type="submit" class="btn bg-gradient-warning w-100">
+                                    <i class="fas fa-times me-2"></i>Confirmar Cancelamento
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="card-footer bg-light text-center">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        O horário permanecerá disponível para novos agendamentos após o cancelamento.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

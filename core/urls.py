@@ -68,11 +68,13 @@ urlpatterns = [
     path('visualizar_psicologas', views.visualizar_psicologos, name='visualizar_psicologas'),
     path('deletar_psicologo/<int:psicologo_id>/delete/', views.deletar_psicologo, name='deletar_psicologo'),
     path('editar_psicologo/<int:psicologo_id>/editar/', views.editar_psicologo, name='editar_psicologo'),
+    path('psicologas/<int:psicologo_id>/agenda_unificada/', views.agenda_unificada, name='agenda_unificada'),
+
 
     #AGENDA PSICÓLOGO - CONSULTAS
     path('psicologas/<int:psicologo_id>/agendar/', views.psico_agenda, name='psico_agenda'),
     path('consultas/editar/<int:id_consulta>/', views.update_consulta, name='update_consulta'),  # URL para editar consulta
-    path('consultas/deletar/<int:id_consulta>/', views.delete_consulta, name='delete_consulta'),  # URL para deletar consulta
+    path('consultas/deletar/<int:id_consulta>/<int:psicologo_id>', views.delete_consulta, name='delete_consulta'),  # URL para deletar consulta
     path('consultas/<int:psicologo_id>/deletar_multiplas/', views.delete_multiple_consultas, name='delete_multiple_consultas'),
     path('consultas/editar-multiplas-agendas/<int:psicologo_id>/', views.editar_multiplas_agendas, name='editar_multiplas_agendas'),
 
@@ -107,6 +109,9 @@ urlpatterns = [
     path('psicologas/<int:psicologo_id>/disponibilidade_online/', views.disponibilidade_online, name='psico_disponibilidade_online'),
     path('deletar_disponibilidade_online/<int:disponibilidade_online_id>/<int:psicologo_id>', views.remover_disponibilidade_online, name='deletar_disponibilidade_online'),
     path('psicologas/<int:psicologo_id>/remover_disponibilidades_online/', views.delete_multiple_disponibilidades_online, name='delete_multiple_disponibilidades_online'),
+
+    #Disponibilidade Unificada
+    path('psicologas/<int:psicologo_id>/disponibilidade_unificada/', views.disponibilidade_unificada, name='disponibilidade_unificada'),
 
     #CONSULTAS ONLINE - PSICÓLOGO
     path('psicologas/<int:psicologo_id>/agendar_online/', views.psico_agenda_online, name='psico_agenda_online'),
@@ -143,6 +148,9 @@ urlpatterns = [
     #AJAX
     path('validar-conflitos-agenda/', views.validar_conflitos_agenda, name='validar_conflitos_agenda'),
 
+    #AÇÕES CANCELAMENTO
+    path('psicologas/<int:psicologo_id>/cancelar_presencial/<int:consulta_id>/', views.cancelar_consulta_presencial, name='cancelar_consulta_presencial'),
+    path('psicologas/<int:psicologo_id>/cancelar_online/<int:consulta_id>/', views.cancelar_consulta_online, name='cancelar_consulta_online'),
     #path('cadastrar_salas/', views.sala, name='salas'),
 
     #path('agenda_central/<int:user_id>/editar_agenda_central/'),
