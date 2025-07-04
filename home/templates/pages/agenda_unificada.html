@@ -352,18 +352,30 @@
                                                         <span class="badge bg-dark fs-6 px-3 py-2">{{ consulta.horario|time:"H:i" }}</span>
                                                     </td>
                                                     {% if consulta.semanal %}
-                                                    <td style="background-color: {{consulta.psicologo.cor}}80;" class="align-middle text-center py-3">
-                                                        <span class="badge bg-success fs-6 px-3 py-2">{{ consulta.semanal }}</span>
-                                                    </td>
+                                                        {% if consulta.semanal != "Semanal" %}
+                                                        <td style="background-color: {{consulta.psicologo.cor}}80;" class="align-middle text-center py-3">
+                                                            <span class="badge bg-success fs-6 px-3 py-2">{{ consulta.semanal }}</span>
+                                                        </td>
+                                                        {% else %}
+                                                        <td style="background-color: {{consulta.psicologo.cor}}80;" class="align-middle text-center py-3">
+                                                            <span class="badge bg-success fs-6 px-3 py-2"></span>
+                                                        </td>
+                                                        {% endif %}
                                                     {% else %}
                                                     <td style="background-color: {{consulta.psicologo.cor}}20;" class="align-middle text-center py-3">
                                                         <span class="badge bg-secondary fs-6 px-3 py-2">Não agendado</span>
                                                     </td>
                                                     {% endif %}
                                                     {% if consulta.quinzenal %}
-                                                    <td style="background-color: {{consulta.psicologo.cor}}80;" class="align-middle text-center py-3">
-                                                        <span class="badge bg-info fs-6 px-3 py-2">{{ consulta.quinzenal }}</span>
-                                                    </td>
+                                                        {% if consulta.quinzenal != "Quinzenal" %}
+                                                            <td style="background-color: {{consulta.psicologo.cor}}80;" class="align-middle text-center py-3">
+                                                                <span class="badge bg-info fs-6 px-3 py-2">{{ consulta.quinzenal }}</span>
+                                                            </td>
+                                                        {% else %}
+                                                            <td style="background-color: {{consulta.psicologo.cor}}80;" class="align-middle text-center py-3">
+                                                                <span class="badge bg-info fs-6 px-3 py-2"></span>
+                                                            </td>
+                                                        {% endif %}
                                                     {% else %}
                                                     <td style="background-color: {{consulta.psicologo.cor}}20;" class="align-middle text-center py-3">
                                                         <span class="badge bg-secondary fs-6 px-3 py-2">Não agendado</span>

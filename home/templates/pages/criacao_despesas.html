@@ -2,91 +2,670 @@
 {% load static %}
 
 {% block content %}
-<div class="row">
-  <div class="col-12">
-      <button type="button" class="btn bg-gradient-primary"><a class="text-white" href="{% url 'consultar_financeiro' %}">
-          Voltar
-      </a></button>
-  </div>
+<div class="container-fluid mt-4">
+    
+    <!-- Header com botão voltar -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <a href="{% url 'index' %}" class="btn bg-gradient-primary">
+                    <i class="fas fa-arrow-left me-2"></i> Voltar
+                </a>
+                <h3 class="mb-0 text-dark font-weight-bold">
+                    <i class="fas fa-receipt me-2 text-warning"></i>
+                    Gestão de Despesas
+                </h3>
+                <div></div> <!-- Spacer para centralizar o título -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards de Estatísticas -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-3">
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="numbers">
+                                <p class="text-sm mb-0 text-uppercase font-weight-bold opacity-7">Total Geral</p>
+                                <h5 class="font-weight-bolder text-info mb-0">
+                                    {{ count_total_geral }}
+                                </h5>
+                                <p class="mb-0 text-sm">
+                                    <span class="text-success text-sm font-weight-bolder">despesas</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="icon icon-shape bg-gradient-info shadow-primary text-center rounded-circle">
+                                <i class="ni ni-chart-bar-32 text-lg opacity-10" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-3">
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="numbers">
+                                <p class="text-sm mb-0 text-uppercase font-weight-bold opacity-7">Valor Total Geral</p>
+                                <h5 class="font-weight-bolder text-success mb-0">
+                                    R$ {{ valor_total_geral|floatformat:2 }}
+                                </h5>
+                                <p class="mb-0 text-sm">
+                                    <span class="text-success text-sm font-weight-bolder">em despesas</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="icon icon-shape bg-gradient-success shadow-success text-center rounded-circle">
+                                <i class="ni ni-money-coins text-lg opacity-10" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-3">
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="numbers">
+                                <p class="text-sm mb-0 text-uppercase font-weight-bold opacity-7">Filtradas</p>
+                                <h5 class="font-weight-bolder text-warning mb-0">
+                                    {{ total_despesas }}
+                                </h5>
+                                <p class="mb-0 text-sm">
+                                    <span class="text-warning text-sm font-weight-bolder">despesas</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="icon icon-shape bg-gradient-warning shadow-warning text-center rounded-circle">
+                                <i class="ni ni-paper-diploma text-lg opacity-10" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-3">
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="numbers">
+                                <p class="text-sm mb-0 text-uppercase font-weight-bold opacity-7">Valor Filtrado</p>
+                                <h5 class="font-weight-bolder text-primary mb-0">
+                                    R$ {{ valor_total_filtrado|floatformat:2 }}
+                                </h5>
+                                <p class="mb-0 text-sm">
+                                    <span class="text-primary text-sm font-weight-bolder">média: R$ {{ valor_medio|floatformat:2 }}</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="icon icon-shape bg-gradient-primary shadow-primary text-center rounded-circle">
+                                <i class="ni ni-world text-lg opacity-10" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Formulário de Cadastro -->
+        <div class="col-lg-4">
+            <div class="card shadow-lg border-0 h-100">
+                <div class="card-header bg-gradient-primary p-4">
+                    <h5 class="text-white mb-0">
+                        <i class="fas fa-plus-circle me-2"></i>
+                        Nova Despesa
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" id="formDespesa">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="motivo" class="form-label font-weight-bold">
+                                <i class="fas fa-tag me-1 text-primary"></i>
+                                Motivo da Despesa
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="motivo" 
+                                   name="motivo" 
+                                   placeholder="Ex: Material de escritório, conta de luz..."
+                                   maxlength="100"
+                                   required>
+                            <div class="form-text">Máximo 100 caracteres</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="valor" class="form-label font-weight-bold">
+                                <i class="fas fa-dollar-sign me-1 text-success"></i>
+                                Valor (R$)
+                            </label>
+                            <input type="number" 
+                                   class="form-control" 
+                                   id="valor" 
+                                   name="valor" 
+                                   placeholder="0,00"
+                                   step="0.01"
+                                   min="0.01"
+                                   max="999999.99"
+                                   required>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="data" class="form-label font-weight-bold">
+                                <i class="fas fa-calendar me-1 text-info"></i>
+                                Data da Despesa
+                            </label>
+                            <input type="date" 
+                                   class="form-control" 
+                                   id="data" 
+                                   name="data" 
+                                   max="{{ data_hoje }}"
+                                   value="{{ data_hoje }}"
+                                   required>
+                        </div>
+                        
+                        <button type="submit" class="btn bg-gradient-primary w-100 btn-lg">
+                            <i class="fas fa-save me-2"></i>
+                            Cadastrar Despesa
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de Despesas -->
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-gradient-secondary p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="text-white mb-0">
+                            <i class="fas fa-list me-2"></i>
+                            Lista de Despesas
+                        </h5>
+                        <!-- Botão para toggle de filtros -->
+                        <button class="btn btn-outline-light btn-sm" 
+                                type="button" 
+                                data-bs-toggle="collapse" 
+                                data-bs-target="#filtrosCollapse">
+                            <i class="fas fa-filter me-1"></i>
+                            Filtros
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Painel de Filtros Colapsável -->
+                <div class="collapse" id="filtrosCollapse">
+                    <div class="card-body bg-light border-bottom">
+                        <form method="get" class="row g-3">
+                            <div class="col-md-4">
+                                <label for="busca" class="form-label">Buscar por motivo</label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="busca" 
+                                       name="busca" 
+                                       value="{{ filtro_busca }}"
+                                       placeholder="Digite o motivo...">
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label for="data_inicio" class="form-label">Data início</label>
+                                <input type="date" 
+                                       class="form-control" 
+                                       id="data_inicio" 
+                                       name="data_inicio" 
+                                       value="{{ filtro_data_inicio }}">
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label for="data_fim" class="form-label">Data fim</label>
+                                <input type="date" 
+                                       class="form-control" 
+                                       id="data_fim" 
+                                       name="data_fim" 
+                                       value="{{ filtro_data_fim }}">
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <label for="valor_min" class="form-label">Valor mín. (R$)</label>
+                                <input type="number" 
+                                       class="form-control" 
+                                       id="valor_min" 
+                                       name="valor_min" 
+                                       value="{{ filtro_valor_min }}"
+                                       step="0.01"
+                                       min="0"
+                                       placeholder="0,00">
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <label for="valor_max" class="form-label">Valor máx. (R$)</label>
+                                <input type="number" 
+                                       class="form-control" 
+                                       id="valor_max" 
+                                       name="valor_max" 
+                                       value="{{ filtro_valor_max }}"
+                                       step="0.01"
+                                       min="0"
+                                       placeholder="0,00">
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <label for="items_per_page" class="form-label">Itens por página</label>
+                                <select class="form-control" id="items_per_page" name="items_per_page">
+                                    {% for option in items_per_page_options %}
+                                    <option value="{{ option }}" 
+                                            {% if option == items_per_page %}selected{% endif %}>
+                                        {{ option }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-3 d-flex align-items-end">
+                                <div class="btn-group w-100">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-search me-1"></i> Filtrar
+                                    </button>
+                                    <a href="{% url 'cadastro_despesa' %}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-times me-1"></i> Limpar
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Tabela de Despesas -->
+                <div class="card-body px-0">
+                    {% if despesas %}
+                    <div class="table-responsive">
+                        <table class="table align-items-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                        <i class="fas fa-hashtag me-1"></i> ID
+                                    </th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                        <i class="fas fa-tag me-1"></i> Motivo
+                                    </th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                        <i class="fas fa-dollar-sign me-1"></i> Valor
+                                    </th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                        <i class="fas fa-calendar me-1"></i> Data
+                                    </th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                        <i class="fas fa-cog me-1"></i> Ações
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for despesa in despesas %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex px-2 py-1">
+                                            <div class="d-flex flex-column justify-content-center">
+                                                <h6 class="mb-0 text-sm">#{{ despesa.id }}</h6>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex px-2 py-1">
+                                            <div class="d-flex flex-column justify-content-center">
+                                                <h6 class="mb-0 text-sm">{{ despesa.motivo }}</h6>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-gradient-success">
+                                            R$ {{ despesa.valor|floatformat:2 }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="text-secondary text-xs">
+                                            {{ despesa.data|date:"d/m/Y" }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button type="button" 
+                                                    class="btn btn-outline-warning btn-sm btn-editar"
+                                                    data-id="{{ despesa.id }}"
+                                                    data-motivo="{{ despesa.motivo }}"
+                                                    data-valor="{{ despesa.valor }}"
+                                                    data-data="{{ despesa.data|date:'Y-m-d' }}"
+                                                    title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button type="button" 
+                                                    class="btn btn-outline-danger btn-sm btn-excluir"
+                                                    data-id="{{ despesa.id }}"
+                                                    data-motivo="{{ despesa.motivo }}"
+                                                    title="Excluir">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginação -->
+                    {% if despesas.has_other_pages %}
+                    <div class="card-footer d-flex justify-content-between align-items-center">
+                        <div class="text-muted">
+                            Mostrando {{ despesas.start_index }} a {{ despesas.end_index }} 
+                            de {{ despesas.paginator.count }} despesas
+                        </div>
+                        
+                        <nav aria-label="Paginação de despesas">
+                            <ul class="pagination pagination-sm mb-0">
+                                {% if despesas.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% if request.GET.busca %}&busca={{ request.GET.busca }}{% endif %}{% if request.GET.data_inicio %}&data_inicio={{ request.GET.data_inicio }}{% endif %}{% if request.GET.data_fim %}&data_fim={{ request.GET.data_fim }}{% endif %}{% if request.GET.valor_min %}&valor_min={{ request.GET.valor_min }}{% endif %}{% if request.GET.valor_max %}&valor_max={{ request.GET.valor_max }}{% endif %}&items_per_page={{ items_per_page }}">
+                                        <i class="fas fa-angle-double-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ despesas.previous_page_number }}{% if request.GET.busca %}&busca={{ request.GET.busca }}{% endif %}{% if request.GET.data_inicio %}&data_inicio={{ request.GET.data_inicio }}{% endif %}{% if request.GET.data_fim %}&data_fim={{ request.GET.data_fim }}{% endif %}{% if request.GET.valor_min %}&valor_min={{ request.GET.valor_min }}{% endif %}{% if request.GET.valor_max %}&valor_max={{ request.GET.valor_max }}{% endif %}&items_per_page={{ items_per_page }}">
+                                        <i class="fas fa-angle-left"></i>
+                                    </a>
+                                </li>
+                                {% endif %}
+                                
+                                {% for num in despesas.paginator.page_range %}
+                                    {% if despesas.number|add:'-4' <= num <= despesas.number|add:'4' %}
+                                        {% if num == despesas.number %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ num }}</span>
+                                        </li>
+                                        {% else %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ num }}{% if request.GET.busca %}&busca={{ request.GET.busca }}{% endif %}{% if request.GET.data_inicio %}&data_inicio={{ request.GET.data_inicio }}{% endif %}{% if request.GET.data_fim %}&data_fim={{ request.GET.data_fim }}{% endif %}{% if request.GET.valor_min %}&valor_min={{ request.GET.valor_min }}{% endif %}{% if request.GET.valor_max %}&valor_max={{ request.GET.valor_max }}{% endif %}&items_per_page={{ items_per_page }}">
+                                                {{ num }}
+                                            </a>
+                                        </li>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if despesas.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ despesas.next_page_number }}{% if request.GET.busca %}&busca={{ request.GET.busca }}{% endif %}{% if request.GET.data_inicio %}&data_inicio={{ request.GET.data_inicio }}{% endif %}{% if request.GET.data_fim %}&data_fim={{ request.GET.data_fim }}{% endif %}{% if request.GET.valor_min %}&valor_min={{ request.GET.valor_min }}{% endif %}{% if request.GET.valor_max %}&valor_max={{ request.GET.valor_max }}{% endif %}&items_per_page={{ items_per_page }}">
+                                        <i class="fas fa-angle-right"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ despesas.paginator.num_pages }}{% if request.GET.busca %}&busca={{ request.GET.busca }}{% endif %}{% if request.GET.data_inicio %}&data_inicio={{ request.GET.data_inicio }}{% endif %}{% if request.GET.data_fim %}&data_fim={{ request.GET.data_fim }}{% endif %}{% if request.GET.valor_min %}&valor_min={{ request.GET.valor_min }}{% endif %}{% if request.GET.valor_max %}&valor_max={{ request.GET.valor_max }}{% endif %}&items_per_page={{ items_per_page }}">
+                                        <i class="fas fa-angle-double-right"></i>
+                                    </a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                    {% endif %}
+                    {% else %}
+                    <!-- Estado vazio -->
+                    <div class="text-center py-5">
+                        <div class="icon icon-shape bg-gradient-secondary shadow text-center border-radius-xl mb-4 mx-auto" style="width: 80px; height: 80px;">
+                            <i class="fas fa-receipt text-white text-lg" style="line-height: 80px;"></i>
+                        </div>
+                        <h5 class="text-muted mb-3">Nenhuma despesa encontrada</h5>
+                        <p class="text-sm text-muted mb-4">
+                            {% if request.GET.busca or request.GET.data_inicio or request.GET.data_fim or request.GET.valor_min or request.GET.valor_max %}
+                                Tente ajustar seus filtros ou 
+                                <a href="{% url 'cadastro_despesa' %}" class="text-primary">limpar os filtros</a>
+                            {% else %}
+                                Cadastre sua primeira despesa usando o formulário ao lado
+                            {% endif %}
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação para Exclusão -->
+    <div class="modal fade" id="modalExcluir" tabindex="-1" aria-labelledby="modalExcluirLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-gradient-danger">
+                    <h5 class="modal-title text-white" id="modalExcluirLabel">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Confirmar Exclusão
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-3">Tem certeza que deseja excluir esta despesa?</p>
+                    <div class="alert alert-warning">
+                        <strong>Motivo:</strong> <span id="motivoExcluir"></span><br>
+                        <strong>Esta ação não pode ser desfeita.</strong>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i> Cancelar
+                    </button>
+                    <form method="post" id="formExcluir" style="display: inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="excluir">
+                        <input type="hidden" name="despesa_id" id="despesaIdExcluir">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-1"></i> Excluir
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Edição de Despesa -->
+    <div class="modal fade" id="modalEditar" tabindex="-1" aria-labelledby="modalEditarLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-gradient-warning">
+                    <h5 class="modal-title text-white" id="modalEditarLabel">
+                        <i class="fas fa-edit me-2"></i>
+                        Editar Despesa
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formEditarDespesa" method="post">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <input type="hidden" name="action" value="editar">
+                        <input type="hidden" id="editDespesaId" name="despesa_id">
+                        
+                        <div class="mb-3">
+                            <label for="editMotivo" class="form-label font-weight-bold">
+                                <i class="fas fa-tag me-1 text-primary"></i>
+                                Motivo da Despesa
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="editMotivo" 
+                                   name="motivo" 
+                                   maxlength="100"
+                                   required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="editValor" class="form-label font-weight-bold">
+                                <i class="fas fa-dollar-sign me-1 text-success"></i>
+                                Valor (R$)
+                            </label>
+                            <input type="number" 
+                                   class="form-control" 
+                                   id="editValor" 
+                                   name="valor" 
+                                   step="0.01"
+                                   min="0.01"
+                                   max="999999.99"
+                                   required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="editData" class="form-label font-weight-bold">
+                                <i class="fas fa-calendar me-1 text-info"></i>
+                                Data da Despesa
+                            </label>
+                            <input type="date" 
+                                   class="form-control" 
+                                   id="editData" 
+                                   name="data" 
+                                   max="{{ data_hoje }}"
+                                   required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-1"></i> Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-save me-1"></i> Salvar Alterações
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 
-    <div class="container-fluid py-4">
-      <div class="col-6">
-        <div>
-          <h2>
-            Despesas Kpsicologia
-          </h2>
-        </div>
-      </div>
-    </div>
-    <div class="card m-4">
-      <div class="card-body p-4">
-        <form method="POST" action="{% url 'cadastro_despesa' %}">
-          {% csrf_token %}
-          <div class="row">
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="motivo">Motivo</label>
-                <input type="text" class="form-control" id="motivo" name="motivo" required>
-              </div>
-            </div> 
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="valor">Valor (R$)</label>
-                <input type="text" class="form-control" step="0.01" id="valor" name="valor" required>
-              </div>
-            </div>
-          </div> 
-          <div class="row">
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="data">Data</label>
-                <input type="date" class="form-control" id="data" name="data" required>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="form-group">
-                <button type="submit" class="btn btn-primary">Cadastrar Despesa</button>
-                <button type="reset" class="btn btn-secondary">Resetar</button>
-              </div>
-            </div>
-          </div>
-        </form>
-      </div>
-    </div> 
-    <div class="card m-4">
-      <div class="card-body p-4">
-        <div class="table-responsive">
-          <table class="table align-items-center mb-0">
-            <thead>
-              <tr>
-                <th class="text-secondary text-xxs font-weight-bolder opacity-7 text-center">Motivo</th>
-                <th class="text-secondary text-xxs font-weight-bolder opacity-7 text-center">Valor ( R$ )</th>
-                <th class="text-secondary text-xxs font-weight-bolder opacity-7 text-center">Data</th>
-                <th class="text-secondary text-xxs font-weight-bolder opacity-7 text-center">Excluir</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for despesa in despesas %}
-              <tr>
-                <td class="align-middle text-center">
-                  {{ despesa.motivo }}
-                </td>
-                <td class="align-middle text-center">
-                  {{ despesa.valor }}
-                </td>
-                <td class="align-middle text-center">
-                  {{ despesa.data }}
-                </td>
-                <td class="align-middle text-center">
-                  <a href="{% url 'deletar_despesa' despesa_id=despesa.id %}">Remover</a>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
 {% endblock content %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validação do formulário de cadastro
+    const formDespesa = document.getElementById('formDespesa');
+    if (formDespesa) {
+        formDespesa.addEventListener('submit', function(e) {
+            const motivo = document.getElementById('motivo').value.trim();
+            const valor = parseFloat(document.getElementById('valor').value);
+            const data = document.getElementById('data').value;
+            
+            let errors = [];
+            
+            if (!motivo) {
+                errors.push('O motivo da despesa é obrigatório');
+            }
+            
+            if (!valor || valor <= 0) {
+                errors.push('O valor deve ser maior que zero');
+            }
+            
+            if (!data) {
+                errors.push('A data da despesa é obrigatória');
+            }
+            
+            if (errors.length > 0) {
+                e.preventDefault();
+                alert('Erros encontrados:\n' + errors.join('\n'));
+                return false;
+            }
+        });
+    }
+    
+    // Formatação automática do campo valor
+    const campoValor = document.getElementById('valor');
+    if (campoValor) {
+        campoValor.addEventListener('blur', function() {
+            const valor = parseFloat(this.value);
+            if (!isNaN(valor)) {
+                this.value = valor.toFixed(2);
+            }
+        });
+    }
+    
+    // Funcionalidade de edição de despesas
+    const botoesEditar = document.querySelectorAll('.btn-editar');
+    botoesEditar.forEach(function(botao) {
+        botao.addEventListener('click', function() {
+            const id = this.dataset.id;
+            const motivo = this.dataset.motivo;
+            const valor = this.dataset.valor;
+            const data = this.dataset.data;
+            
+            // Preencher campos do modal
+            document.getElementById('editDespesaId').value = id;
+            document.getElementById('editMotivo').value = motivo;
+            document.getElementById('editValor').value = valor;
+            document.getElementById('editData').value = data;
+            
+            // Abrir modal
+            const modalEditar = new bootstrap.Modal(document.getElementById('modalEditar'));
+            modalEditar.show();
+        });
+      }
+    )
+    // Funcionalidade de exclusão de despesas
+    const botoesExcluir = document.querySelectorAll('.btn-excluir');
+    botoesExcluir.forEach(function(botao) {
+        botao.addEventListener('click', function() {
+            const id = this.dataset.id;
+            const motivo = this.dataset.motivo;
+            
+            // Preencher campos do modal de exclusão
+            document.getElementById('despesaIdExcluir').value = id;
+            document.getElementById('motivoExcluir').textContent = motivo;
+            
+            // Abrir modal
+            const modalExcluir = new bootstrap.Modal(document.getElementById('modalExcluir'));
+            modalExcluir.show();
+        });
+    });
+    // Validação do formulário de edição
+    const formEditar = document.getElementById('formEditarDespesa');
+    if (formEditar) {
+        formEditar.addEventListener('submit', function(e) {
+            const motivo = document.getElementById('editMotivo').value.trim();
+            const valor = parseFloat(document.getElementById('editValor').value);
+            const data = document.getElementById('editData').value;
+            
+            let errors = [];
+            
+            if (!motivo) {
+                errors.push('O motivo da despesa é obrigatório');
+            }
+            
+            if (!valor || valor <= 0) {
+                errors.push('O valor deve ser maior que zero');
+            }
+            
+            if (!data) {
+                errors.push('A data da despesa é obrigatória');
+            }
+            
+            if (errors.length > 0) {
+                e.preventDefault();
+                alert('Erros encontrados:\n' + errors.join('\n'));
+                return false;
+            }
+        });
+    }
+  })
+</script>
+{% endblock scripts %}

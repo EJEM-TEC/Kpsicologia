@@ -2,260 +2,192 @@
 {% load static %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <!-- Botão Voltar com ícone -->
+<div class="container-fluid mt-4">
+    
+    <!-- Header -->
     <div class="row mb-4">
         <div class="col-12">
-            <a href="{% url 'consultar_financeiro' %}" class="btn bg-gradient-primary">
-                <i class="fas fa-arrow-left me-2"></i> Voltar
-            </a>
+            <div class="d-flex justify-content-between align-items-center">
+                <a href="{% url 'index' %}" class="btn bg-gradient-primary">
+                    <i class="bi bi-arrow-left me-2"></i> Voltar
+                </a>
+                <h3 class="mb-0 text-dark font-weight-bold">
+                    <i class="bi bi-chart-line me-2 text-success"></i>
+                    Relatório Financeiro - {{ mes }}/{{ ano }}
+                </h3> 
+                <div></div>
+            </div>
         </div>
     </div>
 
-    <!-- Cabeçalho da página com filtros e período -->
+    <!-- Cards de Estatísticas -->
     <div class="row mb-4">
-        <div class="col-md-8">
-            <h3 class="font-weight-bold mb-0">Financeiro - {% if mes %}{{ mes }}/{% endif %}{{ ano }}</h3>
-            <p class="text-muted">Relatório financeiro completo com métricas e registros detalhados</p>
+        <div class="col-xl-2 col-md-4 col-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-3 text-center">
+                    <h6 class="text-uppercase text-muted mb-0 font-weight-bold">Total Consultas</h6>
+                    <h4 class="font-weight-bolder text-info mb-0">{{ total_consultas }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-3 text-center">
+                    <h6 class="text-uppercase text-muted mb-0 font-weight-bold">Pacientes</h6>
+                    <h4 class="font-weight-bolder text-warning mb-0">{{ total_pacientes }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-3 text-center">
+                    <h6 class="text-uppercase text-muted mb-0 font-weight-bold">Receita Bruta</h6>
+                    <h4 class="font-weight-bolder text-success mb-0">R$ {{ total_receita_bruta|floatformat:2 }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-3 text-center">
+                    <h6 class="text-uppercase text-muted mb-0 font-weight-bold">Valor Momento</h6>
+                    <h4 class="font-weight-bolder text-primary mb-0">R$ {{ total_valor_momento|floatformat:2 }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-3 text-center">
+                    <h6 class="text-uppercase text-muted mb-0 font-weight-bold">Valor Recebido</h6>
+                    <h4 class="font-weight-bolder text-success mb-0">R$ {{ total_valor_recebido|floatformat:2 }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-3 text-center">
+                    <h6 class="text-uppercase text-muted mb-0 font-weight-bold">A Receber</h6>
+                    <h4 class="font-weight-bolder text-danger mb-0">R$ {{ total_valor_a_receber|floatformat:2 }}</h4>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Cards de resumo -->
+    <!-- Filtros -->
     <div class="row mb-4">
-        <div class="col-xl-3 col-md-6 mb-xl-0 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-body p-3">
-                    <div class="row">
-                        <div class="col-8">
-                            <div class="numbers">
-                                <p class="text-sm mb-0 text-capitalize font-weight-bold">Valor Teórico Bruto</p>
-                                <h5 class="font-weight-bolder mb-0">
-                                    R$ {{ valor_total_atendimentos|floatformat:2 }}
-                                </h5>
-                            </div>
-                        </div>
-                        <div class="col-4 text-end">
-                            <div class="icon icon-shape bg-gradient-primary shadow text-center border-radius-md">
-                                <i class="fas fa-money-bill-wave text-lg opacity-10" aria-hidden="true"></i>
-                            </div>
-                        </div>
-                    </div>
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="bi bi-filter me-2"></i>
+                        Filtros Avançados
+                    </h6>
                 </div>
-            </div>
-        </div>
-        
-        <div class="col-xl-3 col-md-6 mb-xl-0 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-body p-3">
-                    <div class="row">
-                        <div class="col-8">
-                            <div class="numbers">
-                                <p class="text-sm mb-0 text-capitalize font-weight-bold">Valor de Momento</p>
-                                <h5 class="font-weight-bolder mb-0">
-                                    R$ {{ total_valor_momento|floatformat:2 }}
-                                </h5>
-                            </div>
-                        </div>
-                        <div class="col-4 text-end">
-                            <div class="icon icon-shape bg-gradient-success shadow text-center border-radius-md">
-                                <i class="fas fa-chart-line text-lg opacity-10" aria-hidden="true"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-xl-3 col-md-6 mb-xl-0 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-body p-3">
-                    <div class="row">
-                        <div class="col-8">
-                            <div class="numbers">
-                                <p class="text-sm mb-0 text-capitalize font-weight-bold">Recebido KPsicologia</p>
-                                <h5 class="font-weight-bolder mb-0">
-                                    R$ {{ total_valor_recebido|floatformat:2 }}
-                                </h5>
-                            </div>
-                        </div>
-                        <div class="col-4 text-end">
-                            <div class="icon icon-shape bg-gradient-info shadow text-center border-radius-md">
-                                <i class="fas fa-hand-holding-usd text-lg opacity-10" aria-hidden="true"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-xl-3 col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-body p-3">
-                    <div class="row">
-                        <div class="col-8">
-                            <div class="numbers">
-                                <p class="text-sm mb-0 text-capitalize font-weight-bold">A Receber KPsicologia</p>
-                                <h5 class="font-weight-bolder mb-0 {% if total_valor_a_receber > 0 %}text-success{% elif total_valor_a_receber == 0 %}text-warning{% else %}text-danger{% endif %}">
-                                    R$ {{ total_valor_a_receber|floatformat:2 }}
-                                </h5>
-                            </div>
-                        </div>
-                        <div class="col-4 text-end">
-                            <div class="icon icon-shape bg-gradient-warning shadow text-center border-radius-md">
-                                <i class="fas fa-hourglass-half text-lg opacity-10" aria-hidden="true"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Informações detalhadas em cards dobráveis -->
-    <div class="accordion mb-4" id="financialAccordion">
-        <!-- Relatório detalhado -->
-        <div class="card shadow-sm">
-            <div class="card-header p-0" id="headingResumoDetalhado">
-                <h2 class="mb-0">
-                    <button class="btn btn-link btn-block text-left p-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseResumoDetalhado" aria-expanded="true" aria-controls="collapseResumoDetalhado">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <i class="fas fa-chart-pie me-2"></i>
-                                <span class="font-weight-bold">Resumo Financeiro Detalhado</span>
-                            </div>
-                            <i class="fas fa-chevron-down text-xs"></i>
-                        </div>
-                    </button>
-                </h2>
-            </div>
-        
-            <div id="collapseResumoDetalhado" class="collapse show" aria-labelledby="headingResumoDetalhado" data-parent="#financialAccordion">
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="card border-0 mb-4">
-                                <div class="card-body bg-light rounded p-3">
-                                    <h6 class="card-title text-uppercase text-primary font-weight-bolder mb-3">Receitas</h6>
-                                    
-                                    <div class="mb-3">
-                                        <div class="d-flex justify-content-between">
-                                            <h6 class="text-muted mb-1">Valor Teórico Bruto</h6>
-                                            <p class="card-text font-weight-bold mb-0">
-                                                R$ {{ valor_total_atendimentos|floatformat:2 }}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="mb-3">
-                                        <div class="d-flex justify-content-between">
-                                            <h6 class="text-muted mb-1">Valor Líquido Real</h6>
-                                            <p class="card-text font-weight-bold mb-0">
-                                                R$ {{ valor_total_atendimentos|floatformat:2 }}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                    <form method="get" class="row g-3">
+                        <div class="col-md-3">
+                            <label for="busca_paciente" class="form-label">Buscar Paciente</label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="busca_paciente" 
+                                   name="busca_paciente" 
+                                   value="{{ filtro_busca_paciente }}"
+                                   placeholder="Nome do paciente...">
                         </div>
                         
-                        <div class="col-md-6">
-                            <div class="card border-0 mb-4">
-                                <div class="card-body bg-light rounded p-3">
-                                    <h6 class="card-title text-uppercase text-primary font-weight-bolder mb-3">Previsões e Status</h6>
-                                    
-                                    <div class="mb-3">
-                                        <div class="d-flex justify-content-between">
-                                            <h6 class="text-muted mb-1">Valor de Momento KPsicologia</h6>
-                                            <p class="card-text font-weight-bold mb-0">
-                                                R$ {{ total_valor_momento|floatformat:2 }}
-                                            </p>
-                                        </div>
-                                       
-                                    </div>
-                                    
-                                    <div class="mb-3">
-                                        <div class="d-flex justify-content-between">
-                                            <h6 class="text-muted mb-1">Valor Previsto até Final do Mês</h6>
-                                            <p class="card-text font-weight-bold mb-0">
-                                                R$ {{ total_valor_previsto|floatformat:2 }}
-                                            </p>
-                                        </div>
-                                        
-                                    </div>
-                                    
-                                    <div class="mb-3">
-                                        <div class="d-flex justify-content-between">
-                                            <h6 class="text-muted mb-1">Valor a Receber KPsicologia</h6>
-                                            <p class="card-text font-weight-bold mb-0 
-                                                {% if total_valor_a_receber > 0 %}
-                                                    text-success
-                                                {% elif total_valor_a_receber == 0 %}
-                                                    text-warning
-                                                {% else %}
-                                                    text-danger
-                                                {% endif %}
-                                            ">
-                                                R$ {{ total_valor_a_receber|floatformat:2 }}
-                                            </p>
-                                        </div>
-                                       
-                                    </div>
-                                    
-                                    <div class="mb-0">
-                                        <div class="d-flex justify-content-between">
-                                            <h6 class="text-muted mb-1">Valor Recebido por KPsicologia</h6>
-                                            <p class="card-text font-weight-bold mb-0">
-                                                R$ {{ total_valor_recebido|floatformat:2 }}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="col-md-2">
+                            <label for="psicologa_id" class="form-label">Psicóloga</label>
+                            <select class="form-control" id="psicologa_id" name="psicologa_id">
+                                <option value="">Todas</option>
+                                {% for psicologa in psicologas %}
+                                <option value="{{ psicologa.id }}" 
+                                        {% if filtro_psicologa_id == psicologa.id|stringformat:'s' %}selected{% endif %}>
+                                    {{ psicologa.nome }}
+                                </option>
+                                {% endfor %}
+                            </select>
                         </div>
-                    </div>
+                        
+                        <div class="col-md-2">
+                            <label for="status_pagamento" class="form-label">Status Pagamento</label>
+                            <select class="form-control" id="status_pagamento" name="status_pagamento">
+                                <option value="">Todos</option>
+                                <option value="pago" {% if filtro_status_pagamento == 'pago' %}selected{% endif %}>Pago</option>
+                                <option value="nao_pago" {% if filtro_status_pagamento == 'nao_pago' %}selected{% endif %}>Não Pago</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-2">
+                            <label for="valor_min" class="form-label">Valor Mín. (R$)</label>
+                            <input type="number" 
+                                   class="form-control" 
+                                   id="valor_min" 
+                                   name="valor_min" 
+                                   value="{{ filtro_valor_min }}"
+                                   step="0.01"
+                                   min="0"
+                                   placeholder="0,00">
+                        </div>
+                        
+                        <div class="col-md-2">
+                            <label for="valor_max" class="form-label">Valor Máx. (R$)</label>
+                            <input type="number" 
+                                   class="form-control" 
+                                   id="valor_max" 
+                                   name="valor_max" 
+                                   value="{{ filtro_valor_max }}"
+                                   step="0.01"
+                                   min="0"
+                                   placeholder="0,00">
+                        </div>
+                        
+                        <div class="col-md-1 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
-        
-        <!-- Listagem por paciente -->
-        <div class="card shadow-sm my-4">
-            <div class="card-header p-0" id="headingPacientes">
-                <h2 class="mb-0">
-                    <button class="btn btn-link btn-block text-left p-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePacientes" aria-expanded="true" aria-controls="collapsePacientes">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <i class="fas fa-users me-2"></i>
-                                <span class="font-weight-bold">Registros por Paciente</span>
-                                <span class="badge bg-primary ms-2">{{ receita_por_paciente|length }}</span>
-                            </div>
-                            <i class="fas fa-chevron-down text-xs"></i>
-                        </div>
-                    </button>
-                </h2>
-            </div>
-        
-            <div id="collapsePacientes" class="collapse show my-4" aria-labelledby="headingPacientes" data-parent="#financialAccordion">
-                <div class="card-body">
-                    <!-- Filtro e exportação -->
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div class="input-group w-25">
-                            <span class="input-group-text"><i class="fas fa-search"></i></span>
-                            <input type="text" class="form-control" id="searchPacientes" placeholder="Buscar paciente">
-                        </div>
+    </div>
+
+    <!-- Resumo por Paciente -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">
+                        <i class="bi bi-users me-2"></i>
+                        Resumo por Paciente
+                    </h6>
+                    <div class="d-flex align-items-center">
+                        <label for="items_per_page_pacientes" class="form-label me-2 mb-0">Itens:</label>
+                        <select class="form-control form-control-sm" 
+                                id="items_per_page_pacientes" 
+                                name="items_per_page_pacientes"
+                                onchange="this.form.submit()"
+                                style="width: auto;">
+                            {% for option in items_per_page_pacientes_options %}
+                            <option value="{{ option }}" 
+                                    {% if option == items_per_page_pacientes %}selected{% endif %}>
+                                {{ option }}
+                            </option>
+                            {% endfor %}
+                        </select>
                     </div>
-                
-                    <!-- Tabela com design aprimorado -->
+                </div>
+                <div class="card-body px-0">
+                    {% if receita_por_paciente %}
                     <div class="table-responsive">
                         <table class="table align-items-center mb-0">
                             <thead>
                                 <tr>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Paciente</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Valor Bruto</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Valor Líquido</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Momento KP</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Previsto (Mês)</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">A Receber KP</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Recebido KP</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Receita Bruta</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor Momento</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor Recebido</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor a Receber</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor Previsto</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -264,140 +196,504 @@
                                     <td>
                                         <div class="d-flex px-2 py-1">
                                             <div class="d-flex flex-column justify-content-center">
-                                                <a href="#" class="text-dark font-weight-bold mb-0">
-                                                    {{ paciente.paciente__nome }}
-                                                </a>
+                                                <h6 class="mb-0 text-sm">{{ paciente.paciente__nome }}</h6>
                                             </div>
                                         </div>
                                     </td>
                                     <td>
-                                        <p class="text-sm font-weight-bold mb-0">R$ {{ paciente.receita_bruta|floatformat:2 }}</p>
+                                        <span class="badge bg-gradient-info">
+                                            R$ {{ paciente.receita_bruta|floatformat:2 }}
+                                        </span>
                                     </td>
                                     <td>
-                                        <p class="text-sm font-weight-bold mb-0">R$ {{ paciente.receita_bruta|floatformat:2 }}</p>
+                                        <span class="badge bg-gradient-primary">
+                                            R$ {{ paciente.valor_momento|floatformat:2 }}
+                                        </span>
                                     </td>
                                     <td>
-                                        <p class="text-sm font-weight-bold mb-0">R$ {{ paciente.valor_momento|floatformat:2 }}</p>
+                                        <span class="badge bg-gradient-success">
+                                            R$ {{ paciente.valor_recebido|floatformat:2 }}
+                                        </span>
                                     </td>
                                     <td>
-                                        <p class="text-sm font-weight-bold mb-0">R$ {{ paciente.valor_previsto|floatformat:2 }}</p>
-                                    </td>
-                                    <td>
-                                        <p class="text-sm font-weight-bold mb-0 
-                                        {% if paciente.valor_a_receber > 0 %}
-                                        text-success
-                                        {% elif paciente.valor_a_receber == 0 %}
-                                            text-warning
-                                        {% else %}
-                                            text-danger
-                                        {% endif %}">
+                                        <span class="badge bg-gradient-warning">
                                             R$ {{ paciente.valor_a_receber|floatformat:2 }}
-                                        </p>
+                                        </span>
                                     </td>
                                     <td>
-                                        <p class="text-sm font-weight-bold mb-0">R$ {{ paciente.valor_recebido|floatformat:2 }}</p>
+                                        <span class="badge bg-gradient-secondary">
+                                            R$ {{ paciente.valor_previsto|floatformat:2 }}
+                                        </span>
                                     </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Paginação Pacientes -->
+                    {% if receita_por_paciente.has_other_pages %}
+                    <div class="card-footer d-flex justify-content-between align-items-center">
+                        <div class="text-muted">
+                            Mostrando {{ receita_por_paciente.start_index }} a {{ receita_por_paciente.end_index }} 
+                            de {{ receita_por_paciente.paginator.count }} pacientes
+                        </div>
+                        
+                        <nav aria-label="Paginação de pacientes">
+                            <ul class="pagination pagination-sm mb-0">
+                                {% if receita_por_paciente.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page_pacientes=1{% if request.GET.busca_paciente %}&busca_paciente={{ request.GET.busca_paciente }}{% endif %}{% if request.GET.psicologa_id %}&psicologa_id={{ request.GET.psicologa_id }}{% endif %}{% if request.GET.status_pagamento %}&status_pagamento={{ request.GET.status_pagamento }}{% endif %}{% if request.GET.valor_min %}&valor_min={{ request.GET.valor_min }}{% endif %}{% if request.GET.valor_max %}&valor_max={{ request.GET.valor_max }}{% endif %}&items_per_page_pacientes={{ items_per_page_pacientes }}">
+                                        <i class="bi bi-angle-double-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page_pacientes={{ receita_por_paciente.previous_page_number }}{% if request.GET.busca_paciente %}&busca_paciente={{ request.GET.busca_paciente }}{% endif %}{% if request.GET.psicologa_id %}&psicologa_id={{ request.GET.psicologa_id }}{% endif %}{% if request.GET.status_pagamento %}&status_pagamento={{ request.GET.status_pagamento }}{% endif %}{% if request.GET.valor_min %}&valor_min={{ request.GET.valor_min }}{% endif %}{% if request.GET.valor_max %}&valor_max={{ request.GET.valor_max }}{% endif %}&items_per_page_pacientes={{ items_per_page_pacientes }}">
+                                        <i class="bi bi-angle-left"></i>
+                                    </a>
+                                </li>
+                                {% endif %}
+                                
+                                {% for num in receita_por_paciente.paginator.page_range %}
+                                    {% if receita_por_paciente.number|add:'-3' <= num <= receita_por_paciente.number|add:'3' %}
+                                        {% if num == receita_por_paciente.number %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ num }}</span>
+                                        </li>
+                                        {% else %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page_pacientes={{ num }}{% if request.GET.busca_paciente %}&busca_paciente={{ request.GET.busca_paciente }}{% endif %}{% if request.GET.psicologa_id %}&psicologa_id={{ request.GET.psicologa_id }}{% endif %}{% if request.GET.status_pagamento %}&status_pagamento={{ request.GET.status_pagamento }}{% endif %}{% if request.GET.valor_min %}&valor_min={{ request.GET.valor_min }}{% endif %}{% if request.GET.valor_max %}&valor_max={{ request.GET.valor_max }}{% endif %}&items_per_page_pacientes={{ items_per_page_pacientes }}">
+                                                {{ num }}
+                                            </a>
+                                        </li>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if receita_por_paciente.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page_pacientes={{ receita_por_paciente.next_page_number }}{% if request.GET.busca_paciente %}&busca_paciente={{ request.GET.busca_paciente }}{% endif %}{% if request.GET.psicologa_id %}&psicologa_id={{ request.GET.psicologa_id }}{% endif %}{% if request.GET.status_pagamento %}&status_pagamento={{ request.GET.status_pagamento }}{% endif %}{% if request.GET.valor_min %}&valor_min={{ request.GET.valor_min }}{% endif %}{% if request.GET.valor_max %}&valor_max={{ request.GET.valor_max }}{% endif %}&items_per_page_pacientes={{ items_per_page_pacientes }}">
+                                        <i class="bi bi-angle-right"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page_pacientes={{ receita_por_paciente.paginator.num_pages }}{% if request.GET.busca_paciente %}&busca_paciente={{ request.GET.busca_paciente }}{% endif %}{% if request.GET.psicologa_id %}&psicologa_id={{ request.GET.psicologa_id }}{% endif %}{% if request.GET.status_pagamento %}&status_pagamento={{ request.GET.status_pagamento }}{% endif %}{% if request.GET.valor_min %}&valor_min={{ request.GET.valor_min }}{% endif %}{% if request.GET.valor_max %}&valor_max={{ request.GET.valor_max }}{% endif %}&items_per_page_pacientes={{ items_per_page_pacientes }}">
+                                        <i class="bi bi-angle-double-right"></i>
+                                    </a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                    {% endif %}
+                    {% else %}
+                    <div class="text-center py-5">
+                        <h5 class="text-muted">Nenhum paciente encontrado</h5>
+                        <p class="text-sm text-muted">Tente ajustar os filtros ou selecionar outro período.</p>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Histórico detalhado -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-header p-3">
-            <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">
-                    <i class="fas fa-history me-2"></i>
-                    Histórico de Registros Financeiros
-                </h5>
-            </div>
-        </div>
-        <div class="card-body px-0 pb-2">
-            <div class="table-responsive p-0">
-                <table class="table align-items-center mb-0">
-                    <thead>
-                        <tr>
-                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Paciente</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Plano</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Semana</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Pagamento</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Data Pagamento</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for financeiro in financeiros %}
-                        <tr>
-                            <td>
-                                <div class="d-flex px-2 py-1">
-                                    <div class="d-flex flex-column justify-content-center">
-                                        <h6 class="mb-0 text-sm">{{ financeiro.paciente.nome }}</h6>
-                                        <p class="text-xs text-secondary mb-0">{{ financeiro.modalidade|default:"Presencial" }}</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="align-middle text-center">
-                                <span class="badge badge-sm bg-gradient-info">{{ financeiro.paciente.periodo }}</span>
-                            </td>
-                            <td class="align-middle text-center">
-                                <span class="text-secondary text-sm font-weight-bold">R$ {{ financeiro.paciente.valor }}</span>
-                            </td>
-                            <td class="align-middle text-center">
-                                <span class="badge badge-sm bg-gradient-dark">Semana {{ financeiro.semana }}</span>
-                            </td>
-                            <td class="align-middle text-center">
-                                {% if financeiro.presenca == 'Sim' %}
-                                <span class="badge badge-sm bg-gradient-success">Presente</span>
-                                {% elif financeiro.presenca == 'Falta Injustificada' %}
-                                <span class="badge badge-sm bg-gradient-warning">Falta Injustificada</span>
-                                {% else %}
-                                <span class="badge badge-sm bg-gradient-danger">Ausente</span>
+    <!-- Detalhes das Consultas -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">
+                        <i class="bi bi-calendar-check me-2"></i>
+                        Detalhes das Consultas
+                    </h6>
+                    <div class="d-flex align-items-center">
+                        <label for="items_per_page" class="form-label me-2 mb-0">Itens:</label>
+                        <select class="form-control form-control-sm" 
+                                id="items_per_page" 
+                                name="items_per_page"
+                                onchange="this.form.submit()"
+                                style="width: auto;">
+                            {% for option in items_per_page_options %}
+                            <option value="{{ option }}" 
+                                    {% if option == items_per_page %}selected{% endif %}>
+                                {{ option }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="card-body px-0">
+                    {% if financeiros %}
+                    <div class="table-responsive">
+                        <table class="table align-items-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Data</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Paciente</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Psicóloga</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor Pago</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Presença</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for financeiro in financeiros %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex px-2 py-1">
+                                            <div class="d-flex flex-column justify-content-center">
+                                                <h6 class="mb-0 text-sm">{{ financeiro.data|date:"d/m/Y" }}</h6>
+                                                <p class="text-xs text-secondary mb-0">{{ financeiro.horario }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex px-2 py-1">
+                                            <div class="d-flex flex-column justify-content-center">
+                                                <h6 class="mb-0 text-sm">{{ financeiro.paciente.nome }}</h6>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex px-2 py-1">
+                                            <div class="d-flex flex-column justify-content-center">
+                                                <h6 class="mb-0 text-sm">{{ financeiro.psicologa.nome }}</h6>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-gradient-primary">
+                                            R$ {{ financeiro.valor|floatformat:2 }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if financeiro.valor_pagamento %}
+                                        <span class="badge bg-gradient-success">
+                                            R$ {{ financeiro.valor_pagamento|floatformat:2 }}
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-gradient-secondary">
+                                            R$ 0,00
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if financeiro.valor_pagamento and financeiro.valor_pagamento > 0 %}
+                                            {% if financeiro.valor_pagamento >= financeiro.valor %}
+                                            <span class="badge bg-gradient-success">
+                                                <i class="bi bi-check me-1"></i> Pago
+                                            </span>
+                                            {% else %}
+                                            <span class="badge bg-gradient-warning">
+                                                <i class="bi bi-clock me-1"></i> Parcial
+                                            </span>
+                                            {% endif %}
+                                        {% else %}
+                                        <span class="badge bg-gradient-danger">
+                                            <i class="bi bi-times me-1"></i> Pendente
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if financeiro.presenca == 'Sim' %}
+                                        <span class="badge bg-gradient-success">
+                                            <i class="bi bi-user-check me-1"></i> Presente
+                                        </span>
+                                        {% elif financeiro.presenca == 'bilta Inj' %}
+                                        <span class="badge bg-gradient-warning">
+                                            <i class="bi bi-user-times me-1"></i> bilta Inj.
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-gradient-danger">
+                                            <i class="bi bi-user-slash me-1"></i> Ausente
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginação Consultas -->
+                    {% if financeiros.has_other_pages %}
+                    <div class="card-footer d-flex justify-content-between align-items-center">
+                        <div class="text-muted">
+                            Mostrando {{ financeiros.start_index }} a {{ financeiros.end_index }} 
+                            de {{ financeiros.paginator.count }} consultas
+                        </div>
+                        
+                        <nav aria-label="Paginação de consultas">
+                            <ul class="pagination pagination-sm mb-0">
+                                {% if financeiros.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% if request.GET.busca_paciente %}&busca_paciente={{ request.GET.busca_paciente }}{% endif %}{% if request.GET.psicologa_id %}&psicologa_id={{ request.GET.psicologa_id }}{% endif %}{% if request.GET.status_pagamento %}&status_pagamento={{ request.GET.status_pagamento }}{% endif %}{% if request.GET.valor_min %}&valor_min={{ request.GET.valor_min }}{% endif %}{% if request.GET.valor_max %}&valor_max={{ request.GET.valor_max }}{% endif %}&items_per_page={{ items_per_page }}">
+                                        <i class="bi bi-angle-double-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ financeiros.previous_page_number }}{% if request.GET.busca_paciente %}&busca_paciente={{ request.GET.busca_paciente }}{% endif %}{% if request.GET.psicologa_id %}&psicologa_id={{ request.GET.psicologa_id }}{% endif %}{% if request.GET.status_pagamento %}&status_pagamento={{ request.GET.status_pagamento }}{% endif %}{% if request.GET.valor_min %}&valor_min={{ request.GET.valor_min }}{% endif %}{% if request.GET.valor_max %}&valor_max={{ request.GET.valor_max }}{% endif %}&items_per_page={{ items_per_page }}">
+                                        <i class="bi bi-angle-left"></i>
+                                    </a>
+                                </li>
                                 {% endif %}
-                            </td>
-                            <td class="align-middle text-center">
-                                <span class="text-secondary text-sm font-weight-bold">
-                                    {% if financeiro.valor_pagamento %}
-                                    R$ {{ financeiro.valor_pagamento }}
-                                    {% else %}
-                                    -
+                                
+                                {% for num in financeiros.paginator.page_range %}
+                                    {% if financeiros.number|add:'-4' <= num <= financeiros.number|add:'4' %}
+                                        {% if num == financeiros.number %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ num }}</span>
+                                        </li>
+                                        {% else %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ num }}{% if request.GET.busca_paciente %}&busca_paciente={{ request.GET.busca_paciente }}{% endif %}{% if request.GET.psicologa_id %}&psicologa_id={{ request.GET.psicologa_id }}{% endif %}{% if request.GET.status_pagamento %}&status_pagamento={{ request.GET.status_pagamento }}{% endif %}{% if request.GET.valor_min %}&valor_min={{ request.GET.valor_min }}{% endif %}{% if request.GET.valor_max %}&valor_max={{ request.GET.valor_max }}{% endif %}&items_per_page={{ items_per_page }}">
+                                                {{ num }}
+                                            </a>
+                                        </li>
+                                        {% endif %}
                                     {% endif %}
-                                </span>
-                            </td>
-                            <td class="align-middle text-center">
-                                <span class="text-secondary text-xs font-weight-bold">
-                                    {% if financeiro.data_pagamento %}
-                                    {{ financeiro.data_pagamento|date:"d/m/Y" }}
-                                    {% else %}
-                                    -
-                                    {% endif %}
-                                </span>
-                            </td>
-                            <td class="align-middle text-center">
-                                <a href="{% url 'editar_financeiro' id_financeiro=financeiro.id %}" class="btn btn-link text-warning text-gradient px-3 mb-0">
-                                    <i class="fas fa-edit me-2"></i>Editar
-                                </a>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="8" class="text-center py-4">
-                                <p class="text-secondary font-weight-bold mb-0">Nenhum registro financeiro para o período selecionado.</p>
-                                <small class="text-muted">Tente selecionar outro período ou adicionar novos registros.</small>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                                {% endfor %}
+                                
+                                {% if financeiros.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ financeiros.next_page_number }}{% if request.GET.busca_paciente %}&busca_paciente={{ request.GET.busca_paciente }}{% endif %}{% if request.GET.psicologa_id %}&psicologa_id={{ request.GET.psicologa_id }}{% endif %}{% if request.GET.status_pagamento %}&status_pagamento={{ request.GET.status_pagamento }}{% endif %}{% if request.GET.valor_min %}&valor_min={{ request.GET.valor_min }}{% endif %}{% if request.GET.valor_max %}&valor_max={{ request.GET.valor_max }}{% endif %}&items_per_page={{ items_per_page }}">
+                                        <i class="bi bi-angle-right"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ financeiros.paginator.num_pages }}{% if request.GET.busca_paciente %}&busca_paciente={{ request.GET.busca_paciente }}{% endif %}{% if request.GET.psicologa_id %}&psicologa_id={{ request.GET.psicologa_id }}{% endif %}{% if request.GET.status_pagamento %}&status_pagamento={{ request.GET.status_pagamento }}{% endif %}{% if request.GET.valor_min %}&valor_min={{ request.GET.valor_min }}{% endif %}{% if request.GET.valor_max %}&valor_max={{ request.GET.valor_max }}{% endif %}&items_per_page={{ items_per_page }}">
+                                        <i class="bi bi-angle-double-right"></i>
+                                    </a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- Modal de Exportação (Opcional) -->
+    <div class="modal bide" id="modalExportar" tabindex="-1" aria-labelledby="modalExportarLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-gradient-success">
+                    <h5 class="modal-title text-white" id="modalExportarLabel">
+                        <i class="bi bi-download me-2"></i>
+                        Exportar Relatório
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-3">Escolha o formato para exportar o relatório:</p>
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-outline-success">
+                            <i class="bi bi-file-excel me-2"></i> Exportar para Excel
+                        </button>
+                        <button type="button" class="btn btn-outline-danger">
+                            <i class="bi bi-file-pdf me-2"></i> Exportar para PDF
+                        </button>
+                        <button type="button" class="btn btn-outline-info">
+                            <i class="bi bi-file-csv me-2"></i> Exportar para CSV
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-times me-1"></i> Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botão Flutuante para Exportar -->
+    
 </div>
 
 {% endblock content %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit para mudança de itens por página
+    const selectItemsPerPage = document.getElementById('items_per_page');
+    const selectItemsPerPagePacientes = document.getElementById('items_per_page_pacientes');
+    
+    if (selectItemsPerPage) {
+        selectItemsPerPage.addEventListener('change', function() {
+            // Preservar outros parâmetros GET
+            const form = document.createElement('form');
+            form.method = 'GET';
+            form.style.display = 'none';
+            
+            // Adicionar todos os parâmetros GET existentes
+            const urlParams = new URLSearchParams(window.location.search);
+            urlParams.set('items_per_page', this.value);
+            urlParams.delete('page'); // Reset página para 1
+            
+            // Criar inputs hidden para cada parâmetro
+            urlParams.forEach((value, key) => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = value;
+                form.appendChild(input);
+            });
+            
+            document.body.appendChild(form);
+            form.submit();
+        });
+    }
+    
+    if (selectItemsPerPagePacientes) {
+        selectItemsPerPagePacientes.addEventListener('change', function() {
+            const form = document.createElement('form');
+            form.method = 'GET';
+            form.style.display = 'none';
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            urlParams.set('items_per_page_pacientes', this.value);
+            urlParams.delete('page_pacientes'); // Reset página para 1
+            
+            urlParams.forEach((value, key) => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = value;
+                form.appendChild(input);
+            });
+            
+            document.body.appendChild(form);
+            form.submit();
+        });
+    }
+    
+    // Destacar linhas da tabela ao hover
+    const linhasTabela = document.querySelectorAll('tbody tr');
+    linhasTabela.forEach(function(linha) {
+        linha.addEventListener('mouseenter', function() {
+            this.style.backgroundColor = '#f8f9bi';
+        });
+        linha.addEventListener('mouseleave', function() {
+            this.style.backgroundColor = '';
+        });
+    });
+    
+    // Loading state para formulários
+    const formularios = document.querySelectorAll('form');
+    formularios.forEach(function(form) {
+        form.addEventListener('submit', function() {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.innerHTML = '<i class="bi bi-spinner bi-spin me-1"></i> Carregando...';
+                submitBtn.disabled = true;
+            }
+        });
+    });
+});
+
+// Função para limpar filtros
+function limparFiltros() {
+    // Redirect apenas com mês e ano
+    const mes = '{{ mes }}';
+    const ano = '{{ ano }}';
+    window.location.href = `{% url 'consultar_financeiro' %}`;
+}
+
+// Função para destacar valores negativos
+function destacarValoresNegativos() {
+    const badges = document.querySelectorAll('.badge');
+    badges.forEach(function(badge) {
+        const texto = badge.textContent;
+        if (texto.includes('-') || texto.includes('0,00')) {
+            badge.classList.add('bg-gradient-danger');
+            badge.classList.remove('bg-gradient-success', 'bg-gradient-warning');
+        }
+    });
+}
+
+// Executar ao carregar
+destacarValoresNegativos();
+</script>
+
+<style>
+/* Melhorias visuais */
+.card {
+    border-radius: 15px;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 25px 0 rgba(0, 0, 0, 0.1);
+}
+
+.table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.badge {
+    border-radius: 6px;
+    font-size: 0.75rem;
+    padding: 0.4em 0.6em;
+    transition: all 0.2s ease;
+}
+
+.badge:hover {
+    transform: scale(1.05);
+}
+
+.page-link {
+    border-radius: 6px;
+    margin: 0 2px;
+    border: 1px solid #dee2e6;
+    transition: all 0.2s ease;
+}
+
+.page-link:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.page-item.active .page-link {
+    background-color: #5e72e4;
+    border-color: #5e72e4;
+    box-shadow: 0 4px 15px rgba(94, 114, 228, 0.4);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .card-footer {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .pagination {
+        justify-content: center;
+    }
+}
+
+/* Botão flutuante */
+.position-fixed .btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.position-fixed .btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+}
+</style>
+{% endblock scripts %}

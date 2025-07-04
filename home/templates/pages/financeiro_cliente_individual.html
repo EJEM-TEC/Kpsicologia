@@ -32,6 +32,11 @@
               {% if resumo.valor_a_receber > 0 %}
                 <span class="badge bg-gradient-danger">PENDÊNCIA</span>
               {% endif %}
+              <!-- Estatísticas rápidas -->
+              <span class="badge bg-gradient-info">{{ total_registros }} registro{{ total_registros|pluralize }}</span>
+              {% if registros_filtrados != total_registros %}
+              <span class="badge bg-gradient-warning">{{ registros_filtrados }} filtrado{{ registros_filtrados|pluralize }}</span>
+              {% endif %}
             </div>
           </div>
         </div>
@@ -81,11 +86,11 @@
                     <span class="text-xs text-uppercase text-secondary">Valor a Receber</span>
                     <span class="text-lg font-weight-bold 
                       {% if resumo.valor_a_receber > 0 %}
-                        text-success
-                      {% elif resumo.valor_a_receber == 0 %}
-                        text-secondary
-                      {% else %}
                         text-danger
+                      {% elif resumo.valor_a_receber == 0 %}
+                        text-success
+                      {% else %}
+                        text-secondary
                       {% endif %}">
                       R$ {{ resumo.valor_a_receber|floatformat:2 }}
                     </span>
@@ -203,7 +208,7 @@
                   <label for="data_inicio" class="form-control-label text-xs text-uppercase">Data de Início</label>
                   <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-calendar"></i></span>
-                    <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ filtros.data_inicio|date:'Y-m-d' }}">
+                    <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ filtros.data_inicio }}">
                   </div>
                 </div>
               </div>
@@ -212,7 +217,7 @@
                   <label for="data_fim" class="form-control-label text-xs text-uppercase">Data de Fim</label>
                   <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-calendar"></i></span>
-                    <input type="date" class="form-control" id="data_fim" name="data_fim" value="{{ filtros.data_fim|date:'Y-m-d' }}">
+                    <input type="date" class="form-control" id="data_fim" name="data_fim" value="{{ filtros.data_fim }}">
                   </div>
                 </div>
               </div>
@@ -292,17 +297,33 @@
               <h6 class="mb-0">Registros Financeiros</h6>
             </div>
             <div class="col-md-6 text-end">
-              <span class="badge bg-gradient-info">{{ financeiros|length }} registros encontrados</span>
+              <div class="d-flex align-items-center justify-content-end">
+                <span class="badge bg-gradient-info me-3">{{ registros_filtrados }} de {{ total_registros }} registros</span>
+                <label for="items_per_page" class="form-label me-2 mb-0 text-sm">Itens:</label>
+                <select class="form-control form-control-sm" 
+                        id="items_per_page" 
+                        name="items_per_page"
+                        onchange="changeItemsPerPage(this.value)"
+                        style="width: auto;">
+                  {% for option in items_per_page_options %}
+                  <option value="{{ option }}" 
+                          {% if option == items_per_page %}selected{% endif %}>
+                      {{ option }}
+                  </option>
+                  {% endfor %}
+                </select>
+              </div>
             </div>
           </div>
         </div>
         <div class="card-body px-0 pt-0 pb-2">
+          {% if financeiros %}
           <div class="table-responsive p-0">
             <table class="table align-items-center mb-0">
               <thead>
                 <tr>
-                  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Data</th>
                   <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Dia</th>
+                  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Dia Semana</th>
                   <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Horário</th>
                   <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Psicóloga</th>
                   <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Modalidade</th>
@@ -312,7 +333,6 @@
                   <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Data Pag.</th>
                   <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Forma</th>
                   <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Obs.</th>
-                  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -397,39 +417,293 @@
                       <span class="text-secondary">-</span>
                     {% endif %}
                   </td>
-                  <td class="align-middle text-center">
-                    <a href="{% url 'editar_financeiro' id_financeiro=financeiro.id %}" class="btn btn-link text-secondary mb-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar registro">
-                      <i class="fas fa-pencil-alt"></i>
-                    </a>
-                  </td>
-                </tr>
-                {% empty %}
-                <tr>
-                  <td colspan="12" class="text-center py-4">
-                    <div class="d-flex flex-column align-items-center">
-                      <i class="fas fa-folder-open fa-3x text-secondary mb-3"></i>
-                      <h6 class="text-secondary">Nenhum registro financeiro encontrado</h6>
-                      <p class="text-xs text-secondary">Tente ajustar seus critérios de filtro</p>
-                    </div>
-                  </td>
                 </tr>
                 {% endfor %}
               </tbody>
             </table>
           </div>
+
+          <!-- Paginação -->
+          {% if financeiros.has_other_pages %}
+          <div class="card-footer d-flex justify-content-between align-items-center">
+            <div class="text-muted">
+              Mostrando {{ financeiros.start_index }} a {{ financeiros.end_index }} 
+              de {{ financeiros.paginator.count }} registros
+            </div>
+            
+            <nav aria-label="Paginação de registros financeiros">
+              <ul class="pagination pagination-sm mb-0">
+                {% if financeiros.has_previous %}
+                <li class="page-item">
+                  <a class="page-link" href="?page=1{% if filtros_url.data_inicio %}&data_inicio={{ filtros_url.data_inicio }}{% endif %}{% if filtros_url.data_fim %}&data_fim={{ filtros_url.data_fim }}{% endif %}{% if filtros_url.psicologa_id %}&psicologa_id={{ filtros_url.psicologa_id }}{% endif %}{% if filtros_url.presenca %}&presenca={{ filtros_url.presenca }}{% endif %}{% if filtros_url.pagamento %}&pagamento={{ filtros_url.pagamento }}{% endif %}{% if filtros_url.modalidade %}&modalidade={{ filtros_url.modalidade }}{% endif %}&items_per_page={{ items_per_page }}">
+                    <i class="fas fa-angle-double-left"></i>
+                  </a>
+                </li>
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ financeiros.previous_page_number }}{% if filtros_url.data_inicio %}&data_inicio={{ filtros_url.data_inicio }}{% endif %}{% if filtros_url.data_fim %}&data_fim={{ filtros_url.data_fim }}{% endif %}{% if filtros_url.psicologa_id %}&psicologa_id={{ filtros_url.psicologa_id }}{% endif %}{% if filtros_url.presenca %}&presenca={{ filtros_url.presenca }}{% endif %}{% if filtros_url.pagamento %}&pagamento={{ filtros_url.pagamento }}{% endif %}{% if filtros_url.modalidade %}&modalidade={{ filtros_url.modalidade }}{% endif %}&items_per_page={{ items_per_page }}">
+                    <i class="fas fa-angle-left"></i>
+                  </a>
+                </li>
+                {% endif %}
+                
+                {% for num in financeiros.paginator.page_range %}
+                    {% if financeiros.number|add:'-4' <= num <= financeiros.number|add:'4' %}
+                        {% if num == financeiros.number %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                        {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if filtros_url.data_inicio %}&data_inicio={{ filtros_url.data_inicio }}{% endif %}{% if filtros_url.data_fim %}&data_fim={{ filtros_url.data_fim }}{% endif %}{% if filtros_url.psicologa_id %}&psicologa_id={{ filtros_url.psicologa_id }}{% endif %}{% if filtros_url.presenca %}&presenca={{ filtros_url.presenca }}{% endif %}{% if filtros_url.pagamento %}&pagamento={{ filtros_url.pagamento }}{% endif %}{% if filtros_url.modalidade %}&modalidade={{ filtros_url.modalidade }}{% endif %}&items_per_page={{ items_per_page }}">
+                                {{ num }}
+                            </a>
+                        </li>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+                
+                {% if financeiros.has_next %}
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ financeiros.next_page_number }}{% if filtros_url.data_inicio %}&data_inicio={{ filtros_url.data_inicio }}{% endif %}{% if filtros_url.data_fim %}&data_fim={{ filtros_url.data_fim }}{% endif %}{% if filtros_url.psicologa_id %}&psicologa_id={{ filtros_url.psicologa_id }}{% endif %}{% if filtros_url.presenca %}&presenca={{ filtros_url.presenca }}{% endif %}{% if filtros_url.pagamento %}&pagamento={{ filtros_url.pagamento }}{% endif %}{% if filtros_url.modalidade %}&modalidade={{ filtros_url.modalidade }}{% endif %}&items_per_page={{ items_per_page }}">
+                    <i class="fas fa-angle-right"></i>
+                  </a>
+                </li>
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ financeiros.paginator.num_pages }}{% if filtros_url.data_inicio %}&data_inicio={{ filtros_url.data_inicio }}{% endif %}{% if filtros_url.data_fim %}&data_fim={{ filtros_url.data_fim }}{% endif %}{% if filtros_url.psicologa_id %}&psicologa_id={{ filtros_url.psicologa_id }}{% endif %}{% if filtros_url.presenca %}&presenca={{ filtros_url.presenca }}{% endif %}{% if filtros_url.pagamento %}&pagamento={{ filtros_url.pagamento }}{% endif %}{% if filtros_url.modalidade %}&modalidade={{ filtros_url.modalidade }}{% endif %}&items_per_page={{ items_per_page }}">
+                    <i class="fas fa-angle-double-right"></i>
+                  </a>
+                </li>
+                {% endif %}
+              </ul>
+            </nav>
+          </div>
+          {% endif %}
+          {% else %}
+          <div class="text-center py-5">
+            <div class="d-flex flex-column align-items-center">
+              <i class="fas fa-folder-open fa-3x text-secondary mb-3"></i>
+              <h6 class="text-secondary">Nenhum registro financeiro encontrado</h6>
+              <p class="text-xs text-secondary mb-4">
+                {% if filtros.data_inicio or filtros.data_fim or filtros.psicologa_id or filtros.presenca or filtros.pagamento or filtros.modalidade %}
+                  Tente ajustar seus critérios de filtro ou 
+                  <a href="{% url 'financeiro_cliente_individual' id_paciente=paciente.id %}" class="text-primary">limpar os filtros</a>
+                {% else %}
+                  Este paciente ainda não possui registros financeiros
+                {% endif %}
+              </p>
+            </div>
+          </div>
+          {% endif %}
         </div>
       </div>
     </div>
   </div>
 </div>
 
+{% endblock content %}
+
+{% block scripts %}
 <!-- Initialize tooltips -->
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
-      return new bootstrap.Tooltip(tooltipTriggerEl);
+document.addEventListener('DOMContentLoaded', function() {
+  // Inicializar tooltips
+  var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl);
+  });
+  
+  // Destacar linhas da tabela ao hover
+  const linhasTabela = document.querySelectorAll('tbody tr');
+  linhasTabela.forEach(function(linha) {
+    linha.addEventListener('mouseenter', function() {
+      this.style.backgroundColor = '#f8f9fa';
+    });
+    linha.addEventListener('mouseleave', function() {
+      this.style.backgroundColor = '';
     });
   });
+});
+
+// Função para mudar itens por página
+function changeItemsPerPage(value) {
+  const urlParams = new URLSearchParams(window.location.search);
+  urlParams.set('items_per_page', value);
+  urlParams.delete('page'); // Reset página para 1
+  
+  // Redirecionar com novos parâmetros
+  window.location.search = urlParams.toString();
+}
+
+// Função para exportar relatório
+function exportarRelatorio(formato) {
+  // Implementar exportação
+  const pacienteId = {{ paciente.id }};
+  const filtros = {
+    data_inicio: '{{ filtros_url.data_inicio }}',
+    data_fim: '{{ filtros_url.data_fim }}',
+    psicologa_id: '{{ filtros_url.psicologa_id }}',
+    presenca: '{{ filtros_url.presenca }}',
+    pagamento: '{{ filtros_url.pagamento }}',
+    modalidade: '{{ filtros_url.modalidade }}'
+  };
+  
+  console.log(`Exportando relatório em ${formato} para paciente ${pacienteId}`, filtros);
+  
+  // Aqui você pode implementar a lógica de exportação
+  // Por exemplo, fazer uma requisição para uma view que gera o arquivo
+  
+  // Feedback visual
+  const btn = event.target.closest('button');
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Exportando...';
+  btn.disabled = true;
+  
+  setTimeout(() => {
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+  }, 2000);
+}
+
+// Função para imprimir relatório
+function imprimirRelatorio() {
+  window.print();
+}
+
+// Loading state para formulários
+const formularios = document.querySelectorAll('form');
+formularios.forEach(function(form) {
+  form.addEventListener('submit', function() {
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (submitBtn) {
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Filtrando...';
+      submitBtn.disabled = true;
+    }
+  });
+});
 </script>
-{% endblock content %}
+
+<style>
+/* Melhorias visuais */
+.card {
+  border-radius: 15px;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 25px 0 rgba(0, 0, 0, 0.1);
+}
+
+.table tbody tr {
+  transition: all 0.2s ease;
+}
+
+.badge {
+  border-radius: 6px;
+  font-size: 0.75rem;
+  padding: 0.4em 0.6em;
+  transition: all 0.2s ease;
+}
+
+.badge:hover {
+  transform: scale(1.05);
+}
+
+.page-link {
+  border-radius: 6px;
+  margin: 0 2px;
+  border: 1px solid #dee2e6;
+  transition: all 0.2s ease;
+}
+
+.page-link:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.page-item.active .page-link {
+  background-color: #5e72e4;
+  border-color: #5e72e4;
+  box-shadow: 0 4px 15px rgba(94, 114, 228, 0.4);
+}
+
+.progress {
+  height: 8px;
+  border-radius: 10px;
+}
+
+.progress-bar {
+  border-radius: 10px;
+  transition: width 0.6s ease;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .table-responsive {
+    font-size: 0.875rem;
+  }
+  
+  .card-footer {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .pagination {
+    justify-content: center;
+  }
+  
+  .btn-group {
+    flex-direction: column;
+  }
+  
+  .btn-group .btn {
+    margin-bottom: 5px;
+    border-radius: 6px !important;
+  }
+}
+
+/* Estados de foco melhorados */
+.form-control:focus,
+.form-select:focus,
+.btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(94, 114, 228, 0.25);
+}
+
+/* Animações suaves */
+@keyframes fadeIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+.card {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Cursor pointer para elementos interativos */
+.cursor-pointer {
+  cursor: pointer;
+}
+
+/* Melhoria nos botões de ação rápida */
+.btn-group .btn {
+  border-radius: 0;
+}
+
+.btn-group .btn:first-child {
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+}
+
+.btn-group .btn:last-child {
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+</style>
+{% endblock scripts %}

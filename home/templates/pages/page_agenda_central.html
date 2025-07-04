@@ -195,12 +195,24 @@
                           {% for consulta in consultas %}
                             {% if consulta.sala == sala and consulta.dia_semana == dia and consulta.horario == horario_linha %}
                               {% if consulta.psicologo %}
-                                <td class="patient-cell" style="background-color: {{ consulta.psicologo.cor }}20;">
-                                  <span class="patient-name">{{ consulta.semanal|default:"-" }}</span>
-                                </td>
-                                <td class="patient-cell" style="background-color: {{ consulta.psicologo.cor }}20;">
-                                  <span class="patient-name">{{ consulta.quinzenal|default:"-" }}</span>
-                                </td>
+                                  {% if consulta.semanal != "Semanal" %}
+                                  <td class="patient-cell" style="background-color: {{ consulta.psicologo.cor }}20;">
+                                    <span class="patient-name">{{ consulta.semanal }}</span>
+                                  </td>
+                                  {% else %}
+                                  <td class="patient-cell" style="background-color: {{ consulta.psicologo.cor }}20;">
+                                    <span class="patient-name"></span>
+                                  </td>
+                                  {% endif %}
+                                  {% if consulta.quinzenal != "Quinzenal" %}
+                                  <td class="patient-cell" style="background-color: {{ consulta.psicologo.cor }}20;">
+                                    <span class="patient-name">{{ consulta.quinzenal }}</span>
+                                  </td>
+                                  {% else %}
+                                  <td class="patient-cell" style="background-color: {{ consulta.psicologo.cor }}20;">
+                                    <span class="patient-name"></span>
+                                  </td>
+                                  {% endif %}
                               {% else %}
                                 <td class="patient-cell">-</td>
                                 <td class="patient-cell">-</td>
@@ -274,12 +286,24 @@
                         {% with encontrado=False %}
                           {% for consulta in consultas_online %}
                             {% if consulta.psicologo == psicologa and consulta.dia_semana == dia and consulta.horario == horario_linha %}
-                              <td class="patient-cell" style="background-color: {{ consulta.psicologo.cor }}20;">
-                                <span class="patient-name">{{ consulta.semanal|default:"-" }}</span>
-                              </td>
-                              <td class="patient-cell" style="background-color: {{ consulta.psicologo.cor }}20;">
-                                <span class="patient-name">{{ consulta.quinzenal|default:"-" }}</span>
-                              </td>
+                              {% if consulta.semanal != "Semanal" %}
+                                  <td class="patient-cell" style="background-color: {{ consulta.psicologo.cor }}20;">
+                                    <span class="patient-name">{{ consulta.semanal }}</span>
+                                  </td>
+                                  {% else %}
+                                  <td class="patient-cell" style="background-color: {{ consulta.psicologo.cor }}20;">
+                                    <span class="patient-name"></span>
+                                  </td>
+                                  {% endif %}
+                                  {% if consulta.quinzenal != "Quinzenal" %}
+                                  <td class="patient-cell" style="background-color: {{ consulta.psicologo.cor }}20;">
+                                    <span class="patient-name">{{ consulta.quinzenal }}</span>
+                                  </td>
+                                  {% else %}
+                                  <td class="patient-cell" style="background-color: {{ consulta.psicologo.cor }}20;">
+                                    <span class="patient-name"></span>
+                                  </td>
+                                  {% endif %}
                               {% with encontrado=True %}{% endwith %}
                             {% endif %}
                           {% endfor %}

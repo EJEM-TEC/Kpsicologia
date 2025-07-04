@@ -5,42 +5,13 @@
 
 <div class="container mt-5">
 
-      <div class="row mb-4">
+    <div class="row mb-4">
         <div class="col-12">
             <a href="{% url 'index' %}" class="btn bg-gradient-primary">
                 <i class="fas fa-arrow-left me-2"></i> Voltar
             </a>
         </div>
     </div>
-    <!-- Filtro por período -->
-    <!-- <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Filtrar por Período</h5>
-                    <form method="GET" action="{% url 'apuracao_financeira_kpsicologia' %}">
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="data_inicio">Data Inicial</label>
-                                    <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ data_inicio|date:'Y-m-d' }}">
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="data_fim">Data Final</label>
-                                    <input type="date" class="form-control" id="data_fim" name="data_fim" value="{{ data_fim|date:'Y-m-d' }}">
-                                </div>
-                            </div>
-                            <div class="col-md-4 d-flex align-items-end">
-                                <button type="submit" class="btn btn-primary">Filtrar</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div> -->
 
     <!-- Resumo Geral e Gráficos -->
     <div class="row mb-4">
@@ -197,15 +168,18 @@
         <div class="col-md-6 mt-4">
             <div class="card card-frame">
                 <div class="card-body">
-                    <h5 class="card-title">{{ unidade.nome_unidade }}</h5>
+                    <h5 class="card-title">{{ unidade.sala__id_unidade__nome_unidade }}</h5>
                     <p class="card-text"><strong>Salas:</strong> {{ unidade.num_salas }}</p>
                     <p class="card-text"><strong>Pacientes Atendidos:</strong> {{ unidade.num_pacientes }}</p>
                     <p class="card-text"><strong>Faturamento:</strong> R$ {{ unidade.faturamento|floatformat:2 }}</p>
                     <p class="card-text"><strong>Atendimentos Realizados:</strong> {{ unidade.atendimentos_realizados }}</p>
                     {% if unidade.num_salas > 0 %}
                     <p class="card-text"><strong>Média de Atendimentos por Sala:</strong> 
-                        {{ unidade.atendimentos_realizados|floatformat:1 }}
-                    </p>
+
+                            <p class="card-text"><strong>Média de Atendimentos por Sala:</strong> 
+                                {{ unidade.media_atendimentos_por_sala }}
+                            </p>
+                        
                     {% endif %}
                 </div>
             </div>
@@ -219,14 +193,14 @@
         {% for sala in salas_data %}
         <div class="col-md-4 mt-4">
             <div class="card card-frame">
-                <div class="card-header" style="background-color: {{ sala.cor }}; color: white;">
-                    <h5 class="mb-0">Sala {{ sala.numero_sala }}</h5>
+                <div class="card-header" style="background-color: {{ sala.sala__cor_sala }}; color: white;">
+                    <h5 class="mb-0">Sala {{ sala.sala__numero_sala }}</h5>
                 </div>
                 <div class="card-body">
                     <p class="card-text"><strong>Faturamento:</strong> R$ {{ sala.faturamento|floatformat:2 }}</p>
                     <p class="card-text"><strong>Atendimentos Realizados:</strong> {{ sala.atendimentos_realizados }}</p>
                     <p class="card-text"><strong>Tempo de Utilização:</strong> {{ sala.tempo_total_horas }} horas</p>
-                    <p class="card-text"><strong>Unidade:</strong> {{ sala.unidade }}</p>
+                    <p class="card-text"><strong>Unidade:</strong> {{ sala.sala__id_unidade__nome_unidade }}</p>
                 </div>
             </div>
         </div>
@@ -239,8 +213,8 @@
         {% for psicologa in psicologas_data %}
         <div class="col-md-4 mt-4">
             <div class="card card-frame">
-                <div class="card-header" style="background-color: {{ psicologa.cor }}; color: white;">
-                    <h5 class="mb-0">{{ psicologa.nome }}</h5>
+                <div class="card-header" style="background-color: {{ psicologa.psicologa__cor }}; color: white;">
+                    <h5 class="mb-0">{{ psicologa.psicologa__nome }}</h5>
                 </div>
                 <div class="card-body">
                     <p class="card-text"><strong>Consultas Realizadas:</strong> {{ psicologa.consultas_realizadas }}</p>
@@ -248,11 +222,12 @@
                     <p class="card-text"><strong>Pacientes Atendidos:</strong> {{ psicologa.pacientes_atendidos }}</p>
                     {% if psicologa.consultas_realizadas > 0 %}
                     <p class="card-text"><strong>Valor Médio por Consulta:</strong> 
-                     {% if psicologa.consultas_realizadas > 0 %}
+
+                    <!-- PSICÓLOGAS - ao invés de usar filtro div -->
                         <p class="card-text"><strong>Valor Médio por Consulta:</strong> 
-                            R$ {{ psicologa.valor_recebido|floatformat:2 }}
+                            R$ {{ psicologa.valor_medio_por_consulta|floatformat:2 }}
                         </p>
-                        {% endif %}
+                        
                     </p>
                     {% endif %}
                 </div>
