@@ -13,13 +13,6 @@
                             <h2 class="text-white mb-1">Olá, {{ user.username }}! 👋</h2>
                             <p class="text-white opacity-8 mb-0">Bem-vinda ao seu painel de controle</p>
                         </div>
-                        <div class="col-md-4 text-end">
-                            <div class="avatar avatar-xl border border-white border-2 shadow">
-                                <div class="avatar-content bg-white text-primary d-flex align-items-center justify-content-center">
-                                    <i class="fas fa-user-md fa-2x"></i>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -40,11 +33,6 @@
                                 </h5>
                             </div>
                         </div>
-                        <div class="col-4 text-end">
-                            <div class="icon icon-shape bg-white shadow text-center border-radius-md">
-                                <i class="fas fa-calendar-check text-success text-lg"></i>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -59,30 +47,6 @@
                                 <h5 class="text-white font-weight-bolder mb-0">Atualizada</h5>
                             </div>
                         </div>
-                        <div class="col-4 text-end">
-                            <div class="icon icon-shape bg-white shadow text-center border-radius-md">
-                                <i class="fas fa-clipboard-list text-info text-lg"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card bg-gradient-warning shadow-sm">
-                <div class="card-body p-3">
-                    <div class="row align-items-center">
-                        <div class="col-8">
-                            <div class="numbers">
-                                <p class="text-white text-sm mb-0 text-capitalize font-weight-bold">Acesso Rápido</p>
-                                <h5 class="text-white font-weight-bolder mb-0">Menu Principal</h5>
-                            </div>
-                        </div>
-                        <div class="col-4 text-end">
-                            <div class="icon icon-shape bg-white shadow text-center border-radius-md">
-                                <i class="fas fa-tachometer-alt text-warning text-lg"></i>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -92,7 +56,7 @@
     <!-- Main Functions Section -->
     <div class="row mb-4">
         <div class="col-12">
-            <h4 class="mb-3"><i class="fas fa-calendar-alt me-2"></i>Gerenciamento de Agenda</h4>
+            <h4 class="mb-3"><i class="bi bi-calendar-alt me-2"></i>Gerenciamento de Agenda</h4>
         </div>
     </div>
 
@@ -102,17 +66,15 @@
             <div class="card h-100 shadow-sm hover-lift">
                 <div class="card-header bg-gradient-primary p-3">
                     <div class="d-flex align-items-center">
-                        <div class="icon icon-shape icon-sm bg-white text-primary me-3">
-                            <i class="fas fa-calendar-week"></i>
-                        </div>
+                       
                         <h6 class="text-white mb-0">Agenda Principal</h6>
                     </div>
                 </div>
                 <div class="card-body d-flex flex-column">
                     <p class="text-sm text-muted mb-3">Gerencie seus horários de atendimento presencial e organize sua agenda semanal.</p>
                     <div class="mt-auto">
-                        <a href="{% url 'psico_agenda' psicologo.id %}" class="btn btn-primary w-100">
-                            <i class="fas fa-calendar-week me-2"></i>Acessar Agenda
+                        <a href="{% url 'agenda_unificada' psicologo.id %}" class="btn btn-primary w-100">
+                            <i class="bi bi-calendar-week me-2"></i>Acessar Agenda
                         </a>
                     </div>
                 </div>
@@ -124,9 +86,7 @@
             <div class="card h-100 shadow-sm hover-lift">
                 <div class="card-header bg-gradient-success p-3">
                     <div class="d-flex align-items-center">
-                        <div class="icon icon-shape icon-sm bg-white text-success me-3">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
+                        
                         <h6 class="text-white mb-0">Confirmação</h6>
                     </div>
                 </div>
@@ -134,7 +94,7 @@
                     <p class="text-sm text-muted mb-3">Confirme presença dos pacientes e registre informações das consultas realizadas.</p>
                     <div class="mt-auto">
                         <a href="{% url 'confirma_consulta' psicologo.id %}" class="btn btn-success w-100">
-                            <i class="fas fa-check-circle me-2"></i>Confirmar Consultas
+                            <i class="bi bi-check-circle me-2"></i>Confirmar Consultas
                         </a>
                     </div>
                 </div>
@@ -146,92 +106,14 @@
             <div class="card h-100 shadow-sm hover-lift">
                 <div class="card-header bg-gradient-info p-3">
                     <div class="d-flex align-items-center">
-                        <div class="icon icon-shape icon-sm bg-white text-info me-3">
-                            <i class="fas fa-clock"></i>
-                        </div>
                         <h6 class="text-white mb-0">Disponibilidade</h6>
                     </div>
                 </div>
                 <div class="card-body d-flex flex-column">
                     <p class="text-sm text-muted mb-3">Configure seus horários disponíveis para novos agendamentos de pacientes.</p>
                     <div class="mt-auto">
-                        <a href="{% url 'psico_disponibilidade' psicologo.id %}" class="btn btn-info w-100">
-                            <i class="fas fa-clock me-2"></i>Definir Horários
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Secondary Functions Section -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <h4 class="mb-3"><i class="fas fa-cog me-2"></i>Funcionalidades Extras</h4>
-        </div>
-    </div>
-
-    <div class="row g-4 mb-5">
-        <!-- Disponibilidade Extra -->
-        <div class="col-lg-4 col-md-6">
-            <div class="card h-100 shadow-sm hover-lift">
-                <div class="card-header bg-gradient-warning p-3">
-                    <div class="d-flex align-items-center">
-                        <div class="icon icon-shape icon-sm bg-white text-warning me-3">
-                            <i class="fas fa-plus-circle"></i>
-                        </div>
-                        <h6 class="text-white mb-0">Horários Extras</h6>
-                    </div>
-                </div>
-                <div class="card-body d-flex flex-column">
-                    <p class="text-sm text-muted mb-3">Configure horários extras para atendimentos especiais e emergenciais.</p>
-                    <div class="mt-auto">
-                        <a href="{% url 'psico_disponibilidade_online' psicologo.id %}" class="btn btn-warning w-100">
-                            <i class="fas fa-plus-circle me-2"></i>Configurar Extras
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Agenda Extra -->
-        <div class="col-lg-4 col-md-6">
-            <div class="card h-100 shadow-sm hover-lift">
-                <div class="card-header bg-gradient-dark p-3">
-                    <div class="d-flex align-items-center">
-                        <div class="icon icon-shape icon-sm bg-white text-dark me-3">
-                            <i class="fas fa-calendar-plus"></i>
-                        </div>
-                        <h6 class="text-white mb-0">Agenda Extra</h6>
-                    </div>
-                </div>
-                <div class="card-body d-flex flex-column">
-                    <p class="text-sm text-muted mb-3">Gerencie atendimentos extras, online e horários especiais fora da agenda regular.</p>
-                    <div class="mt-auto">
-                        <a href="{% url 'psico_agenda_online' psicologo.id %}" class="btn btn-dark w-100">
-                            <i class="fas fa-calendar-plus me-2"></i>Agenda Extra
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Edição de Perfil -->
-        <div class="col-lg-4 col-md-6">
-            <div class="card h-100 shadow-sm hover-lift">
-                <div class="card-header bg-gradient-secondary p-3">
-                    <div class="d-flex align-items-center">
-                        <div class="icon icon-shape icon-sm bg-white text-secondary me-3">
-                            <i class="fas fa-user-edit"></i>
-                        </div>
-                        <h6 class="text-white mb-0">Editar Perfil</h6>
-                    </div>
-                </div>
-                <div class="card-body d-flex flex-column">
-                    <p class="text-sm text-muted mb-3">Atualize suas informações pessoais, senha e configurações da conta.</p>
-                    <div class="mt-auto">
-                        <a href="{% url 'editar_psicologo' psicologo.id %}" class="btn btn-secondary w-100">
-                            <i class="fas fa-user-edit me-2"></i>Editar Dados
+                        <a href="{% url 'disponibilidade_unificada' psicologo.id %}" class="btn btn-info w-100">
+                            <i class="bi bi-clock me-2"></i>Definir Horários
                         </a>
                     </div>
                 </div>
@@ -242,7 +124,7 @@
     <!-- Profile Section -->
     <div class="row mb-4">
         <div class="col-12">
-            <h4 class="mb-3"><i class="fas fa-user me-2"></i>Meu Perfil</h4>
+            <h4 class="mb-3"><i class="bi bi-user me-2"></i>Meu Perfil</h4>
         </div>
     </div>
 
@@ -251,9 +133,7 @@
             <div class="card h-100 shadow-sm">
                 <div class="card-header bg-gradient-light p-3">
                     <div class="d-flex align-items-center">
-                        <div class="icon icon-shape icon-sm bg-primary text-white me-3">
-                            <i class="fas fa-id-badge"></i>
-                        </div>
+            
                         <h6 class="mb-0">Perfil do Usuário</h6>
                     </div>
                 </div>
@@ -261,26 +141,7 @@
                     <p class="text-sm text-muted mb-3">Visualize e gerencie suas informações de perfil e configurações pessoais.</p>
                     <div class="mt-auto">
                         <a href="{% url 'perfil_usuario' %}" class="btn btn-outline-primary w-100">
-                            <i class="fas fa-id-badge me-2"></i>Ver Perfil
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-6">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body p-4">
-                    <h6 class="mb-3">Atalhos Rápidos</h6>
-                    <div class="d-grid gap-2">
-                        <a href="{% url 'psico_agenda' psicologo.id %}" class="btn btn-sm btn-outline-primary">
-                            <i class="fas fa-calendar-week me-2"></i>Ir para Agenda
-                        </a>
-                        <a href="{% url 'confirma_consulta' psicologo.id %}" class="btn btn-sm btn-outline-success">
-                            <i class="fas fa-check-circle me-2"></i>Confirmar Consultas
-                        </a>
-                        <a href="{% url 'psico_disponibilidade' psicologo.id %}" class="btn btn-sm btn-outline-info">
-                            <i class="fas fa-clock me-2"></i>Definir Disponibilidade
+                            <i class="bi bi-id-badge me-2"></i>Ver Perfil
                         </a>
                     </div>
                 </div>

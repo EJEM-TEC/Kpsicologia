@@ -27,7 +27,7 @@ from django.shortcuts import render
 from datetime import datetime
 from django.db.models import F, ExpressionWrapper, DecimalField, Sum
 from django.db.models.functions import Coalesce  # Import correto para Coalesce
-from django.db.models import Sum, Count, F, Q, DecimalField, ExpressionWrapper, Case, When, Value, Prefetch
+from django.db.models import Sum, Count, F, Q, DecimalField, ExpressionWrapper, Case, When, Value, Prefetch, Max
 from django.db.models.functions import Coalesce
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.shortcuts import render, get_object_or_404
@@ -625,6 +625,25 @@ def agenda_central(request):
                 consultas_online = consultas_online.filter(horario__lte=horario_fim_obj)
                 filtros_aplicados['horario_fim'] = horario_fim
             except ValueError:
+                pass
+
+        especialidade_id = request.POST.get('especialidade_id')
+        if especialidade_id and especialidade_id != 'todas':
+            try:
+                especialidade_id = int(especialidade_id)
+                consultas = consultas.filter(psicologo__especialidadepsico__especialidade_id=especialidade_id)
+                consultas_online = consultas_online.filter(psicologo__especialidadepsico__especialidade_id=especialidade_id)
+                filtros_aplicados['especialidade_id'] = str(especialidade_id)
+            except (ValueError, TypeError):
+                pass
+        publico_id = request.POST.get('publico_id')
+        if publico_id and publico_id != 'todos':
+            try:
+                publico_id = int(publico_id)
+                consultas = consultas.filter(psicologo__publicopsico__publico_id=publico_id)
+                consultas_online = consultas_online.filter(psicologo__publicopsico__publico_id=publico_id)
+                filtros_aplicados['publico_id'] = str(publico_id)
+            except (ValueError, TypeError):
                 pass
 
     # ==================== PRESERVAR FILTROS NA PAGINAÇÃO ==================== #
@@ -2373,7 +2392,10 @@ def AdicionarConfirma_consulta(request, psicologo_id):
                     data=data_consulta,
                     semana=semana_mes,
                     sala=consulta.sala,
-                    bloqueada=False
+                    bloqueada=False,
+                    forma="Sem Valor",
+                    presenca="Em Aberto"
+
                 )
 
         # Processar consultas online
@@ -2418,7 +2440,9 @@ def AdicionarConfirma_consulta(request, psicologo_id):
                     valor=consulta.Paciente.valor,
                     data=data_consulta,
                     semana=semana_mes,
-                    bloqueada=False
+                    bloqueada=False,
+                    forma="Sem Valor",
+                    presenca="Em Aberto"
                 )
 
         return redirect('confirma_consulta', psicologo_id=psicologa.id)
@@ -3155,25 +3179,43 @@ def consulta_financeira_pacientes(request):
         psicologa_id = request.POST.get('psicologa_id', '')
 
     # Base da consulta para receita por paciente
-    receita_query = financeiros.values('paciente__nome', 'paciente__id')
+    receita_query = financeiros.values('paciente__nome', 'paciente__id', 'paciente__deletado')
 
     # Primeiro, obtenha as agregações básicas
     receita_por_paciente = receita_query.annotate(
-        receita_bruta=Sum('valor', output_field=DecimalField(max_digits=10, decimal_places=2)),
-        valor_recebido=Sum(
-            Coalesce('valor_pagamento', 0),
-            output_field=DecimalField(max_digits=10, decimal_places=2)
+        # Apenas consultas que geram cobrança (presenca in ['Sim', 'Não', 'Falta Inj'])
+        receita_bruta=Sum(
+            Case(
+                When(presenca__in=['Sim', 'Nao', 'Falta', 'Falta Inj'], then='valor'),
+                default=Value(0),
+                output_field=DecimalField(max_digits=10, decimal_places=2)
+            )
         ),
-        # Total de consultas
-        n_consultas=Count('id'),
+        valor_recebido=Sum(
+            Case(
+                When(presenca__in=['Sim', 'Nao', 'Falta', 'Falta Inj'], then=Coalesce('valor_pagamento', 0)),
+                default=Value(0),
+                output_field=DecimalField(max_digits=10, decimal_places=2)
+            )
+        ),
+        # Total de consultas que geram cobrança
+        n_consultas=Count(
+            Case(
+                When(presenca__in=['Sim', 'Nao', 'Falta', 'Falta Inj'], then='id'),
+                default=None
+            )
+        ),
         # Lista de psicólogas distintas para o paciente
-        psicologas=ArrayAgg('psicologa__nome', distinct=True)
+        psicologas=ArrayAgg('psicologa__nome', distinct=True),
     ).order_by('paciente__nome')
 
     # Para cada paciente, calcule os valores e contagens de consultas manualmente
     for paciente_data in receita_por_paciente:
         paciente_id = paciente_data['paciente__id']
         financeiros_paciente = financeiros.filter(paciente__id=paciente_id)
+        
+        # Adicionar flag de desativado
+        paciente_data['deletado'] = paciente_data['paciente__deletado']
         
         # Calcular valor a receber e crédito
         receita_bruta = paciente_data['receita_bruta'] or Decimal('0.00')
@@ -3186,30 +3228,27 @@ def consulta_financeira_pacientes(request):
             paciente_data['valor_a_receber'] = receita_bruta - valor_recebido
             paciente_data['valor_credito'] = Decimal('0.00')
         
-        # Contar consultas pagas e não pagas
+        # Contar consultas pagas e não pagas com a lógica correta
         consultas_pagas = 0
         consultas_nao_pagas = 0
         
-        for f in financeiros_paciente:
+        # Filtrar apenas consultas que geram cobrança
+        consultas_cobraveis = financeiros_paciente.filter(
+            presenca__in=['Sim', 'Nao', 'Falta', 'Falta Inj']
+        )
+        
+        for f in consultas_cobraveis:
             # Valor da consulta
             valor = f.valor or Decimal('0.00')
             # Valor pago
             valor_pagamento = f.valor_pagamento or Decimal('0.00')
-            # Verifica se a presença é relevante (Sim ou Falta Injustificada)
-            presenca_relevante = f.presenca in ['Sim', 'Falta Inj']
             
-            # Se a presença é relevante para pagamento
-            if presenca_relevante:
-                # Se pagou o valor integral
-                if valor_pagamento >= valor:
-                    consultas_pagas += 1
-                else:
-                    # Se não pagou integralmente, é uma consulta não paga
-                    consultas_nao_pagas += 1
+            # Se pagou o valor integral ou mais
+            if valor_pagamento >= valor:
+                consultas_pagas += 1
             else:
-                # Faltas justificadas não contam como não pagas
-                if f.presenca == 'Nao':
-                    consultas_pagas += 1
+                # Se não pagou integralmente, é uma consulta não paga
+                consultas_nao_pagas += 1
         
         # Atualiza as contagens no objeto do paciente
         paciente_data['n_consultas_pagas'] = consultas_pagas
@@ -3226,12 +3265,11 @@ def consulta_financeira_pacientes(request):
         # Para cada psicóloga, verificar se existe dívida específica
         for psicologa in todas_psicologas:
             # Consultas relevantes desta psicóloga com este paciente
+            # Apenas consultas que geram cobrança
             consultas_relevantes = Financeiro.objects.filter(
                 paciente__id=paciente_id,
-                psicologa=psicologa
-            ).filter(
-                # Consultas que geram cobrança: presença ou falta injustificada
-                Q(presenca='Sim') | Q(presenca='FALTA') | Q(presenca='Falta Inj')
+                psicologa=psicologa,
+                presenca__in=['Sim', 'Nao', 'Falta', 'Falta Inj']  # Apenas consultas que geram cobrança
             )
             
             # Calcular o total que deveria ser pago
@@ -3310,18 +3348,6 @@ def consulta_financeira_pacientes(request):
         # Formatar valores das dívidas
         for divida in paciente['dividas_por_psicologa']:
             divida['valor'] = round(divida['valor'], 2)
-        
-        # Verificações de consistência
-        if paciente['valor_a_receber'] > 0 and paciente['n_consultas_nao_pagas'] == 0:
-            paciente['n_consultas_nao_pagas'] = max(1, paciente['n_consultas_nao_pagas'])
-        
-        if paciente['n_consultas_nao_pagas'] == 0 and paciente['valor_a_receber'] > 0:
-            paciente['valor_a_receber'] = Decimal('0.00')
-        
-        if paciente['valor_a_receber'] > 0 and paciente['n_consultas_nao_pagas'] == 0:
-            paciente['n_consultas_nao_pagas'] = 1
-            if paciente['n_consultas_pagas'] + paciente['n_consultas_nao_pagas'] > paciente['n_consultas']:
-                paciente['n_consultas_pagas'] = paciente['n_consultas'] - paciente['n_consultas_nao_pagas']
 
     # CONFIGURAÇÃO DA PAGINAÇÃO
     # Permitir que o usuário escolha quantos itens por página
@@ -3343,17 +3369,19 @@ def consulta_financeira_pacientes(request):
         # Se a página estiver fora do range, mostrar a última página
         receita_paginada = paginator.page(paginator.num_pages)
 
-    # Calcular totais gerais (usando todos os dados, não apenas a página atual)
-    total_bruto = financeiros.aggregate(Sum('valor'))['valor__sum'] or Decimal('0.00')
-    total_recebido = financeiros.aggregate(Sum('valor_pagamento'))['valor_pagamento__sum'] or Decimal('0.00')
+    # Calcular totais gerais (usando apenas consultas que geram cobrança)
+    consultas_cobraveis = financeiros.filter(presenca__in=['Sim', 'Nao', 'Falta', 'Falta Inj'])
+    
+    total_bruto = consultas_cobraveis.aggregate(Sum('valor'))['valor__sum'] or Decimal('0.00')
+    total_recebido = consultas_cobraveis.aggregate(Sum('valor_pagamento'))['valor_pagamento__sum'] or Decimal('0.00')
     valor_a_receber = max(Decimal('0.00'), total_bruto - total_recebido)
 
     # Pacientes Ativos
-    pacientes_ativos = pacientes.count()
+    pacientes_ativos = pacientes.filter(deletado=False).count()
 
-    # Valor recebido no mês atual
+    # Valor recebido no mês atual (apenas consultas que geram cobrança)
     hoje = datetime.now()
-    valor_recebido_mes = financeiros.filter(
+    valor_recebido_mes = consultas_cobraveis.filter(
         data_pagamento__year=hoje.year,
         data_pagamento__month=hoje.month
     ).aggregate(Sum('valor_pagamento'))['valor_pagamento__sum'] or Decimal('0.00')
@@ -3532,9 +3560,10 @@ def financeiro_cliente_individual(request, id_paciente):
     
     # ===== CÁLCULOS FINANCEIROS CORRIGIDOS =====
     
-    # Apenas consultas com presença 'Sim' ou 'Falta Inj' geram cobrança
+    # APLICAR A MESMA LÓGICA DA PÁGINA DE PACIENTES:
+    # Apenas consultas com presença 'Sim', 'Não' ou 'Falta Inj' geram cobrança
     consultas_cobraveis = financeiros_base.filter(
-        presenca__in=['Sim', 'Falta Inj']
+        presenca__in=['Sim', 'Nao', 'Falta', 'Falta Inj']
     )
 
     # Receita bruta = soma do valor das consultas cobráveis
@@ -3555,8 +3584,8 @@ def financeiro_cliente_individual(request, id_paciente):
         valor_a_receber = receita_bruta - valor_recebido
         credito = Decimal('0.00')
 
-    # Total de consultas (todas, independente de presença)
-    n_consultas = financeiros_base.count()
+    # Total de consultas cobráveis (não todas as consultas)
+    n_consultas = consultas_cobraveis.count()
 
     # CONTAGEM CORRIGIDA: Consultas pagas e não pagas
     consultas_pagas = 0
@@ -3568,7 +3597,7 @@ def financeiro_cliente_individual(request, id_paciente):
         valor_pagamento = f.valor_pagamento or Decimal('0.00')
         
         # Se pagou o valor integral ou mais
-        if valor_pagamento >= valor and valor_pagamento > 0:
+        if valor_pagamento >= valor:
             consultas_pagas += 1
         else:
             # Não pagou integralmente = consulta não paga

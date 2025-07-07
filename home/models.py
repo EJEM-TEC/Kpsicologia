@@ -86,7 +86,7 @@ class Consulta(models.Model):
     metodo = models.CharField(
         max_length=20,
         choices=METODO_CHOICES,
-        default='livre',
+        default='padrao',
         help_text='Método de agendamento para este horário'
     )
 

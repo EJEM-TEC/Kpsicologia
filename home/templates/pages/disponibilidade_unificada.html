@@ -6,11 +6,19 @@
 
 {% block content %}
 <div class="container-fluid py-4">
+     {% if user.is_superuser %}
     <div class="col-12">
         <button type="button" class="btn bg-gradient-primary mb-3">
           <a class="text-white" href="{% url 'visualizar_psicologas' %}">Voltar</a>
         </button>
       </div>
+    {% else %}
+       <div class="col-12">
+        <button type="button" class="btn bg-gradient-primary mb-3">
+          <a class="text-white" href="{% url 'index' %}">Voltar</a>
+        </button>
+      </div>
+    {% endif %}
     </div>
     <!-- Header -->
     <div class="row mb-4">

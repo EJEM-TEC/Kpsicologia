@@ -82,6 +82,37 @@
                 </div>
               </div>
             </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="especialidade_id" class="form-control-label text-xs text-uppercase">Especialização</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="fas fa-brain"></i></span>
+                      <select class="form-select" id="especialidade_id" name="especialidade_id">
+                        <option value="todos">Todos</option>
+                        {% for especialidade in especialidades %}
+                        <option value="{{especialidade.id}}">{{especialidade.especialidade}}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="publico_id" class="form-control-label text-xs text-uppercase">Público</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="fas fa-users"></i></span>
+                      <select class="form-select" id="publico_id" name="publico">
+                        <option value="todos">Todos</option>
+                        {% for publico in publicos %}
+                        <option value="{{ publico.id }}">{{ publico.publico }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+            </div>
           </form>
         </div>
         <div class="modal-footer">
