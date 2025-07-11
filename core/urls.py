@@ -59,9 +59,11 @@ urlpatterns = [
 
     #PACIENTES   
     path('pacientes/', views.pacientes, name='pacientes'),
+    path('pacientes_deletados/', views.pacientes_deletados, name='pacientes_deletados'),
     path('pacientes/<int:id_paciente>/editar', views.editar_paciente, name='update_paciente'),
     path('pacientes/<int:id_paciente>/deletar', views.deletar_paciente, name='delete_paciente'),
     path('pacientes/<int:id_paciente>/restaurar', views.restaurar_paciente, name='restaurar_paciente'),
+    path('editar_inspecao_paciente/<int:id_paciente>/', views.editar_inspecao_paciente, name='editar_inspecao_paciente'),
 
     #PSICÓLOGOS
     path('psicologas/', views.psicologa, name='psicologa'),

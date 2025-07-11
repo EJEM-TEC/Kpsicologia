@@ -1,0 +1,437 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <button type="button" class="btn bg-gradient-primary"><a class="text-white" href="{% url 'pacientes' %}">
+            Voltar para Pacientes
+        </a></button>
+    </div>
+</div>
+
+<!-- Pacientes Deletados -->
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+                <h6>Pacientes Deletados - Informações Completas</h6>
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-danger me-2">{{ total_pacientes_deletados }} paciente{{ total_pacientes_deletados|pluralize }}</span>
+                    <!-- Controle de itens por página -->
+                    <form method="get" class="d-flex align-items-center">
+                        <label for="items_per_page" class="form-label me-2 mb-0 text-sm">Por página:</label>
+                        <select name="items_per_page" id="items_per_page" class="form-select form-select-sm" style="width: auto;" onchange="this.form.submit()">
+                            <option value="10" {% if request.GET.items_per_page == '10' %}selected{% endif %}>10</option>
+                            <option value="15" {% if request.GET.items_per_page == '15' or not request.GET.items_per_page %}selected{% endif %}>15</option>
+                            <option value="25" {% if request.GET.items_per_page == '25' %}selected{% endif %}>25</option>
+                            <option value="50" {% if request.GET.items_per_page == '50' %}selected{% endif %}>50</option>
+                        </select>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Informações de paginação -->
+            <div class="card-body py-2">
+                <p class="mb-0 text-sm text-muted">
+                    Mostrando {{ pacientes_deletados.start_index }} - {{ pacientes_deletados.end_index }} 
+                    de {{ total_pacientes_deletados }} paciente{{ total_pacientes_deletados|pluralize }} deletado{{ total_pacientes_deletados|pluralize }}
+                    (Página {{ pacientes_deletados.number }} de {{ pacientes_deletados.paginator.num_pages }})
+                </p>
+            </div>
+            
+            <div class="card-body px-0 pt-0 pb-2">
+                <div class="table-responsive p-0">
+                    <table class="table align-items-center mb-0">
+                        <thead>
+                            <tr>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nome</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Idade</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Valor ( R$ )</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Período de Atendimento</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nome Responsável</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Telefone</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Data Inativação Psicóloga</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Motivo Inativação Psicóloga</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Data Inspeção Admin</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Observação Admin</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for paciente in pacientes_deletados %}
+                            <tr class="table-secondary">
+                                <td class="align-middle text-center">
+                                    <span class="text-dark font-weight-bold">{{ paciente.nome }}</span>
+                                </td>
+                                <td class="align-middle text-center">
+                                    <span class="badge bg-secondary">{{ paciente.idade }}</span>
+                                </td>
+                                <td class="align-middle text-center">
+                                    <span class="text-dark font-weight-bold">R$ {{ paciente.valor|floatformat:2 }}</span>
+                                </td>
+                                <td class="align-middle text-center">
+                                    <span class="badge bg-secondary">{{ paciente.periodo }}</span>
+                                </td>
+                                <td class="align-middle text-center">
+                                    <span class="text-dark">{{ paciente.nome_responsavel|default:"-" }}</span>
+                                </td>
+                                <td class="align-middle text-center">
+                                    <span class="text-dark">{{ paciente.telefone }}</span>
+                                </td>
+                                <td class="align-middle text-center">
+                                    {% if paciente.data_deletado_psico %}
+                                        <span class="badge bg-warning text-dark">{{ paciente.data_deletado_psico|date:"d/m/Y" }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="align-middle text-center">
+                                    {% if paciente.motivo_deletado_psico %}
+                                        <span class="text-dark text-xs">{{ paciente.motivo_deletado_psico }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="align-middle text-center">
+                                    {% if paciente.data_inspec_admin %}
+                                        <span class="badge bg-info">{{ paciente.data_inspec_admin|date:"d/m/Y" }}</span>
+                                    {% else %}
+                                        <span class="text-warning">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                            Pendente
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="align-middle text-center">
+                                    {% if paciente.obs_admin %}
+                                        <span class="text-dark text-xs">{{ paciente.obs_admin }}</span>
+                                    {% else %}
+                                        <span class="text-warning">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                            Pendente
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="align-middle">
+                                    <a href="{% url 'restaurar_paciente' id_paciente=paciente.id %}" class="text-success font-weight-bold text-xs me-2" data-toggle="tooltip" data-original-title="Restaurar paciente">
+                                        <i class="fas fa-undo"></i> Restaurar
+                                    </a>
+                                    <a href="#" onclick="abrirModalEditarInspecao({{ paciente.id }}, '{{ paciente.data_inspec_admin|date:"Y-m-d" }}', '{{ paciente.obs_admin|default:"" }}')" class="text-primary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Editar inspeção do admin">
+                                        <i class="fas fa-edit"></i> Editar Inspeção
+                                    </a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="11" class="text-center">
+                                    <p class="text-secondary font-weight-bold text-xs py-3">Nenhum paciente deletado.</p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Paginação -->
+            {% if pacientes_deletados.has_other_pages %}
+            <div class="card-footer">
+                <nav aria-label="Navegação de páginas - Pacientes Deletados">
+                    <ul class="pagination justify-content-center mb-0">
+                        
+                        <!-- Botão Primeira Página -->
+                        {% if pacientes_deletados.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if request.GET.items_per_page %}&items_per_page={{ request.GET.items_per_page }}{% endif %}" aria-label="Primeira página">
+                                    <span aria-hidden="true">&laquo;&laquo;</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link" aria-hidden="true">&laquo;&laquo;</span>
+                            </li>
+                        {% endif %}
+
+                        <!-- Botão Página Anterior -->
+                        {% if pacientes_deletados.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ pacientes_deletados.previous_page_number }}{% if request.GET.items_per_page %}&items_per_page={{ request.GET.items_per_page }}{% endif %}" aria-label="Página anterior">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link" aria-hidden="true">&laquo;</span>
+                            </li>
+                        {% endif %}
+
+                        <!-- Números das páginas -->
+                        {% for num in pacientes_deletados.paginator.page_range %}
+                            {% if pacientes_deletados.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > pacientes_deletados.number|add:'-3' and num < pacientes_deletados.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}{% if request.GET.items_per_page %}&items_per_page={{ request.GET.items_per_page }}{% endif %}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        <!-- Botão Próxima Página -->
+                        {% if pacientes_deletados.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ pacientes_deletados.next_page_number }}{% if request.GET.items_per_page %}&items_per_page={{ request.GET.items_per_page }}{% endif %}" aria-label="Próxima página">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link" aria-hidden="true">&raquo;</span>
+                            </li>
+                        {% endif %}
+
+                        <!-- Botão Última Página -->
+                        {% if pacientes_deletados.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ pacientes_deletados.paginator.num_pages }}{% if request.GET.items_per_page %}&items_per_page={{ request.GET.items_per_page }}{% endif %}" aria-label="Última página">
+                                    <span aria-hidden="true">&raquo;&raquo;</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link" aria-hidden="true">&raquo;&raquo;</span>
+                            </li>
+                        {% endif %}
+
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Editar Inspeção do Admin -->
+<div class="modal fade" id="modalEditarInspecao" tabindex="-1" aria-labelledby="modalEditarInspecaoLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEditarInspecaoLabel">Editar Inspeção do Administrador</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="formEditarInspecao" method="POST" action="">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="form-group mb-3">
+                        <label for="data_inspec_admin">Data de Inspeção do Admin</label>
+                        <input type="date" class="form-control" id="data_inspec_admin" name="data_inspec_admin" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="obs_admin">Observação do Administrador</label>
+                        <textarea class="form-control" id="obs_admin" name="obs_admin" rows="3" required placeholder="Digite a observação do administrador..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Estilos customizados para a paginação */
+.pagination .page-link {
+    color: #495057;
+    border: 1px solid #dee2e6;
+    padding: 0.5rem 0.75rem;
+    margin: 0 0.1rem;
+    border-radius: 0.25rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.pagination .page-link:hover {
+    color: #007bff;
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+
+.pagination .page-item.disabled .page-link {
+    color: #6c757d;
+    background-color: #fff;
+    border-color: #dee2e6;
+    cursor: not-allowed;
+}
+
+/* Melhorias visuais para badges */
+.badge {
+    font-size: 0.75em;
+    padding: 0.35em 0.65em;
+}
+
+/* Hover effect para as linhas da tabela */
+.table tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+/* Estilo especial para pacientes deletados */
+.table-secondary {
+    background-color: rgba(108, 117, 125, 0.1) !important;
+}
+
+.table-secondary:hover {
+    background-color: rgba(108, 117, 125, 0.2) !important;
+}
+
+/* Colunas mais estreitas para melhor visualização */
+.table th, .table td {
+    font-size: 0.85rem;
+    padding: 0.75rem 0.5rem;
+    vertical-align: middle;
+}
+
+/* Responsividade */
+@media (max-width: 1200px) {
+    .table {
+        font-size: 0.8rem;
+    }
+    
+    .table th, .table td {
+        padding: 0.5rem 0.25rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .pagination {
+        font-size: 0.875rem;
+    }
+    
+    .pagination .page-link {
+        padding: 0.25rem 0.5rem;
+    }
+    
+    /* Ocultar alguns botões em telas pequenas */
+    .pagination .page-item:first-child,
+    .pagination .page-item:last-child {
+        display: none;
+    }
+    
+    .table-responsive {
+        font-size: 0.75rem;
+    }
+    
+    .form-select-sm {
+        font-size: 0.875rem;
+    }
+}
+
+/* Animações suaves */
+.card {
+    transition: box-shadow 0.15s ease-in-out;
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.btn {
+    transition: all 0.15s ease-in-out;
+}
+
+/* Estilos para os ícones das ações */
+.fas {
+    font-size: 0.875rem;
+}
+
+/* Melhorar o espaçamento dos badges de contagem */
+.badge.bg-danger {
+    font-weight: 600;
+}
+
+/* Destaque para campos pendentes */
+.text-warning {
+    font-weight: 600;
+}
+</style>
+
+<script>
+function abrirModalEditarInspecao(pacienteId, dataInspecao, obsAdmin) {
+    // Definir o action do formulário
+    const form = document.getElementById('formEditarInspecao');
+    form.action = `/editar_inspecao_paciente/${pacienteId}/`;
+    
+    // Preencher os campos
+    document.getElementById('data_inspec_admin').value = dataInspecao || '';
+    document.getElementById('obs_admin').value = obsAdmin || '';
+    
+    // Abrir o modal
+    const modal = new bootstrap.Modal(document.getElementById('modalEditarInspecao'));
+    modal.show();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Tooltip initialization (se estiver usando Bootstrap tooltips)
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Confirmação antes de restaurar paciente
+    const restoreLinks = document.querySelectorAll('a[href*="restaurar_paciente"]');
+    restoreLinks.forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const pacienteName = this.closest('tr').querySelector('td:first-child span').textContent.trim();
+            
+            if (confirm(`Tem certeza que deseja restaurar o paciente "${pacienteName}"?`)) {
+                window.location.href = this.href;
+            }
+        });
+    });
+    
+    // Função para smooth scroll até o topo quando mudar de página
+    const pageLinks = document.querySelectorAll('.pagination .page-link');
+    pageLinks.forEach(function(link) {
+        link.addEventListener('click', function() {
+            setTimeout(function() {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            }, 100);
+        });
+    });
+    
+    // Validação do formulário de edição
+    const editForm = document.getElementById('formEditarInspecao');
+    if (editForm) {
+        editForm.addEventListener('submit', function(e) {
+            const dataInspecao = document.getElementById('data_inspec_admin').value;
+            const obsAdmin = document.getElementById('obs_admin').value.trim();
+            
+            if (!dataInspecao) {
+                alert('Por favor, selecione a data de inspeção.');
+                e.preventDefault();
+                return;
+            }
+            
+            if (!obsAdmin) {
+                alert('Por favor, insira a observação do administrador.');
+                e.preventDefault();
+                return;
+            }
+        });
+    }
+});
+</script>
+
+{% endblock content %}

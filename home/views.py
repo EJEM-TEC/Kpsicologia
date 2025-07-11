@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.views import PasswordResetView, PasswordChangeView, PasswordResetConfirmView
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.urls import reverse
+from django.utils import timezone
 from home.forms import UserPasswordResetForm, UserSetPasswordForm, UserPasswordChangeForm
 from django.contrib.auth import logout, authenticate, login as login_django
 from django.contrib.auth.decorators import login_required
@@ -19,7 +20,7 @@ from rolepermissions.roles import assign_role
 from django.contrib.auth.models import Group
 from django.contrib.auth import authenticate, login as login_django
 from django.contrib.auth.decorators import login_required
-from datetime import timedelta, timezone
+from datetime import timedelta
 from django.db.models import Sum
 from django.shortcuts import render, get_object_or_404, redirect
 from decimal import Decimal, InvalidOperation
@@ -1046,35 +1047,161 @@ def editar_multiplas_agendas(request, psicologo_id):
     
     if request.method == 'POST':
         try:
+            # Debug: Imprimir todos os dados POST
+            print("=== DEBUG: Dados POST recebidos ===")
+            for key, value in request.POST.items():
+                print(f"{key}: {value}")
+            print("=" * 40)
+            
             alteracoes_realizadas = 0
-            agendas_removidas = 0
+            agendas_fechadas = 0
             pacientes_alterados = 0
             horarios_liberados = 0
+            pacientes_inativados = 0
             alteracoes_log = []
             
             # Processar cada agenda
             for agenda in agendas:
                 agenda_id = str(agenda.id)
                 
+                print(f"\n=== Processando agenda {agenda_id} ===")
+                
                 # Obter valores dos formulários
-                metodo = request.POST.get(f'metodo_{agenda_id}', 'padrao')
+                metodo = request.POST.get(f'metodo_{agenda_id}', 'padrao').strip()
                 semanal_novo = request.POST.get(f'semanal_{agenda_id}', '').strip()
                 quinzenal_novo = request.POST.get(f'quinzenal_{agenda_id}', '').strip()
+                
+                # Normalizar strings vazias e "None" literal para None
+                if not semanal_novo or semanal_novo.lower() in ['none', 'null']:
+                    semanal_novo = None
+                if not quinzenal_novo or quinzenal_novo.lower() in ['none', 'null']:
+                    quinzenal_novo = None
+                
+                print(f"Método: {metodo}")
+                print(f"Semanal novo: '{semanal_novo}'")
+                print(f"Quinzenal novo: '{quinzenal_novo}'")
                 
                 # Valores originais
                 semanal_original = agenda.semanal or ''
                 quinzenal_original = agenda.quinzenal or ''
                 metodo_original = getattr(agenda, 'metodo', 'padrao')
                 
-                # Processar método "fechado" - remover agenda
+                print(f"Semanal original: '{semanal_original}'")
+                print(f"Quinzenal original: '{quinzenal_original}'")
+                print(f"Método original: '{metodo_original}'")
+                
+                # Processar método "fechado" - fechar agenda sem deletar
                 if metodo == 'fechado':
-                    agenda.delete()
-                    agendas_removidas += 1
+                    # Processar inativação de pacientes se fornecidos
+                    pacientes_para_inativar = []
+                    
+                    # Verificar se semanal é um paciente real (não "Semanal")
+                    if agenda.semanal and agenda.semanal.strip() and agenda.semanal.lower() not in ['semanal', '']:
+                        pacientes_para_inativar.append(agenda.semanal.strip())
+                    
+                    # Verificar se quinzenal é um paciente real (não "Quinzenal")
+                    if agenda.quinzenal and agenda.quinzenal.strip() and agenda.quinzenal.lower() not in ['quinzenal', '']:
+                        pacientes_para_inativar.append(agenda.quinzenal.strip())
+                    
+                    print(f"Pacientes para inativar: {pacientes_para_inativar}")
+                    
+                    for paciente_nome in pacientes_para_inativar:
+                        # Normalizar o nome do paciente para a chave
+                        paciente_key_safe = paciente_nome.replace(' ', '_').replace('.', '').replace(',', '')
+                        
+                        # Tentar diferentes variações da chave
+                        possible_keys = [
+                            f'patient_inactivation_{paciente_nome}_reason',
+                            f'patient_inactivation_{paciente_key_safe}_reason'
+                        ]
+                        
+                        motivo_key = None
+                        observacoes_key = None
+                        
+                        for key in possible_keys:
+                            if key in request.POST:
+                                motivo_key = key
+                                observacoes_key = key.replace('_reason', '_notes')
+                                break
+                        
+                        print(f"Buscando chaves para {paciente_nome}: {possible_keys}")
+                        print(f"Chave encontrada: {motivo_key}")
+                        
+                        if motivo_key and request.POST.get(motivo_key):
+                            try:
+                                print(f"Tentando inativar paciente: {paciente_nome}")
+                                paciente = Paciente.objects.get(nome=paciente_nome, deletado=False)
+                                print(f"Paciente encontrado: ID {paciente.id}, Nome: {paciente.nome}")
+                                
+                                # Valores antes da alteração
+                                print(f"Estado antes: deletado={paciente.deletado}, motivo={paciente.motivo_deletado_psico}")
+                                
+                                paciente.deletado = True
+                                paciente.data_deletado_psico = timezone.now().date()
+                                paciente.motivo_deletado_psico = request.POST.get(motivo_key)
+                                
+                                observacoes = request.POST.get(observacoes_key, '').strip()
+                                if observacoes:
+                                    paciente.obs_admin = observacoes
+                                
+                                paciente.save()
+                                print(f"Paciente {paciente_nome} salvo no banco de dados")
+                                
+                                # Verificar se foi salvo corretamente
+                                paciente.refresh_from_db()
+                                print(f"Verificação pós-save: deletado={paciente.deletado}, motivo={paciente.motivo_deletado_psico}, data={paciente.data_deletado_psico}")
+                                
+                                pacientes_inativados += 1
+                                
+                                alteracoes_log.append({
+                                    'tipo': 'paciente_inativado',
+                                    'paciente': paciente_nome,
+                                    'motivo': request.POST.get(motivo_key),
+                                    'observacoes': observacoes
+                                })
+                                
+                                print(f"Paciente {paciente_nome} inativado com sucesso com motivo: {request.POST.get(motivo_key)}")
+                                
+                            except Paciente.DoesNotExist:
+                                print(f"Paciente {paciente_nome} não encontrado para inativação")
+                                messages.warning(request, f"Paciente '{paciente_nome}' não encontrado no sistema.")
+                            except Exception as e:
+                                print(f"Erro ao inativar paciente {paciente_nome}: {e}")
+                                messages.error(request, f"Erro ao inativar paciente '{paciente_nome}': {e}")
+                        else:
+                            print(f"Dados de inativação não encontrados para {paciente_nome}")
+                            print(f"Motivo key: {motivo_key}, Valor: {request.POST.get(motivo_key) if motivo_key else 'N/A'}")
+                            messages.warning(request, f"Dados de inativação não fornecidos para o paciente '{paciente_nome}'.")
+                    
+                    # Limpar pacientes da agenda e definir como fechado
+                    agenda.Paciente = None
+                    agenda.semanal = None
+                    agenda.quinzenal = None
+                    
+                    # Definir método como fechado
+                    agenda.metodo = 'fechado'
+                    
+                    # Forçar o salvamento
+                    try:
+                        agenda.save()
+                        print(f"Agenda {agenda.id} salva como fechada")
+                        
+                        # Verificar se foi salva corretamente
+                        agenda.refresh_from_db()
+                        print(f"Verificação pós-save - Método: {agenda.metodo}, Semanal: {agenda.semanal}, Quinzenal: {agenda.quinzenal}")
+                        
+                    except Exception as save_error:
+                        print(f"Erro ao salvar agenda {agenda.id}: {save_error}")
+                        messages.error(request, f"Erro ao fechar agenda {agenda.dia_semana} às {agenda.horario}: {save_error}")
+                        continue
+                    
+                    agendas_fechadas += 1
                     alteracoes_log.append({
-                        'tipo': 'agenda_removida',
+                        'tipo': 'agenda_fechada',
                         'dia': agenda.dia_semana,
                         'horario': agenda.horario.strftime('%H:%M'),
-                        'sala': agenda.sala.numero_sala
+                        'sala': agenda.sala.numero_sala,
+                        'pacientes_removidos': [p for p in [semanal_original, quinzenal_original] if p]
                     })
                     continue
                 
@@ -1107,9 +1234,18 @@ def editar_multiplas_agendas(request, psicologo_id):
                     continue
                 
                 # Verificar se houve mudanças nos pacientes ou método
-                mudou_semanal = semanal_novo != semanal_original
-                mudou_quinzenal = quinzenal_novo != quinzenal_original
+                # Normalizar valores para comparação
+                semanal_original_norm = semanal_original.strip() if semanal_original else None
+                quinzenal_original_norm = quinzenal_original.strip() if quinzenal_original else None
+                
+                mudou_semanal = semanal_novo != semanal_original_norm
+                mudou_quinzenal = quinzenal_novo != quinzenal_original_norm
                 mudou_metodo = metodo != metodo_original
+                
+                print(f"Comparações:")
+                print(f"  Semanal: '{semanal_novo}' != '{semanal_original_norm}' = {mudou_semanal}")
+                print(f"  Quinzenal: '{quinzenal_novo}' != '{quinzenal_original_norm}' = {mudou_quinzenal}")
+                print(f"  Método: '{metodo}' != '{metodo_original}' = {mudou_metodo}")
                 
                 if mudou_semanal or mudou_quinzenal or mudou_metodo:
                     # Processar paciente semanal
@@ -1170,7 +1306,7 @@ def editar_multiplas_agendas(request, psicologo_id):
                     
                     # Validar que não é o mesmo paciente nos dois campos (apenas para método padrão)
                     if (metodo == 'padrao' and semanal_novo and quinzenal_novo and 
-                        semanal_novo == quinzenal_novo):
+                        semanal_novo.strip() == quinzenal_novo.strip()):
                         messages.error(
                             request,
                             f"O mesmo paciente não pode ser semanal e quinzenal no mesmo horário: {agenda.dia_semana} às {agenda.horario.strftime('%H:%M')}"
@@ -1202,27 +1338,40 @@ def editar_multiplas_agendas(request, psicologo_id):
                         agenda.Paciente = None
                     
                     if agenda_alterada:
-                        agenda.save()
-                        alteracoes_realizadas += 1
-                        
-                        # Log da alteração
-                        alteracao_info = {
-                            'tipo': 'agenda_atualizada',
-                            'agenda_id': agenda.id,
-                            'dia': agenda.dia_semana,
-                            'horario': agenda.horario.strftime('%H:%M'),
-                            'sala': agenda.sala.numero_sala,
-                            'metodo_anterior': metodo_original,
-                            'metodo_novo': metodo,
-                            'semanal_anterior': semanal_original,
-                            'semanal_novo': semanal_novo,
-                            'quinzenal_anterior': quinzenal_original,
-                            'quinzenal_novo': quinzenal_novo,
-                        }
-                        alteracoes_log.append(alteracao_info)
+                        try:
+                            agenda.save()
+                            print(f"Agenda {agenda.id} salva com sucesso")
+                            
+                            # Verificar se foi salva corretamente
+                            agenda.refresh_from_db()
+                            print(f"Verificação pós-save agenda {agenda.id} - Método: {agenda.metodo}, Semanal: '{agenda.semanal}', Quinzenal: '{agenda.quinzenal}'")
+                            
+                            alteracoes_realizadas += 1
+                            
+                            # Log da alteração
+                            alteracao_info = {
+                                'tipo': 'agenda_atualizada',
+                                'agenda_id': agenda.id,
+                                'dia': agenda.dia_semana,
+                                'horario': agenda.horario.strftime('%H:%M'),
+                                'sala': agenda.sala.numero_sala,
+                                'metodo_anterior': metodo_original,
+                                'metodo_novo': metodo,
+                                'semanal_anterior': semanal_original,
+                                'semanal_novo': semanal_novo,
+                                'quinzenal_anterior': quinzenal_original,
+                                'quinzenal_novo': quinzenal_novo,
+                            }
+                            alteracoes_log.append(alteracao_info)
+                            
+                        except Exception as save_error:
+                            print(f"Erro ao salvar agenda {agenda.id}: {save_error}")
+                            messages.error(request, f"Erro ao salvar alterações na agenda {agenda.dia_semana} às {agenda.horario}: {save_error}")
+                            continue
             
             # Atualizar data de última atualização da agenda
-            if alteracoes_realizadas > 0 or agendas_removidas > 0 or horarios_liberados > 0:
+            total_alteracoes = alteracoes_realizadas + agendas_fechadas + horarios_liberados
+            if total_alteracoes > 0:
                 psicologa.ultima_atualizacao_agenda = timezone.now().date()
                 psicologa.save()
                 
@@ -1233,14 +1382,17 @@ def editar_multiplas_agendas(request, psicologo_id):
                 if alteracoes_realizadas > 0:
                     detalhes.append(f"{alteracoes_realizadas} agenda(s) atualizada(s)")
                 
-                if agendas_removidas > 0:
-                    detalhes.append(f"{agendas_removidas} agenda(s) removida(s)")
+                if agendas_fechadas > 0:
+                    detalhes.append(f"{agendas_fechadas} agenda(s) fechada(s)")
                 
                 if horarios_liberados > 0:
                     detalhes.append(f"{horarios_liberados} horário(s) liberado(s)")
                 
                 if pacientes_alterados > 0:
                     detalhes.append(f"{pacientes_alterados} paciente(s) com período alterado")
+                
+                if pacientes_inativados > 0:
+                    detalhes.append(f"{pacientes_inativados} paciente(s) inativado(s)")
                 
                 if detalhes:
                     mensagem_sucesso += f" ({', '.join(detalhes)})"
@@ -1861,6 +2013,66 @@ def pacientes(request):
         'idade_filtro': idade_filtro,
         'periodo_filtro': periodo_filtro,
     })
+
+@login_required(login_url='login1')
+def pacientes_deletados(request):
+    
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+    
+    # Query para pacientes deletados com todos os campos
+    pacientes_deletados_query = Paciente.objects.filter(deletado=True).order_by('-data_deletado_psico', 'nome')
+    
+    # Paginação
+    itens_por_pagina = int(request.GET.get('items_per_page', 15))
+    itens_por_pagina = max(10, min(50, itens_por_pagina))
+    
+    paginator = Paginator(pacientes_deletados_query, itens_por_pagina)
+    page_number = request.GET.get('page', 1)
+    
+    try:
+        pacientes_paginados = paginator.page(page_number)
+    except PageNotAnInteger:
+        pacientes_paginados = paginator.page(1)
+    except EmptyPage:
+        pacientes_paginados = paginator.page(paginator.num_pages)
+    
+    # Contagem total
+    total_pacientes_deletados = pacientes_deletados_query.count()
+    
+    return render(request, 'pages/pacientes_deletados.html', {
+        'pacientes_deletados': pacientes_paginados,
+        'total_pacientes_deletados': total_pacientes_deletados,
+    })
+
+@login_required(login_url='login1')
+def editar_inspecao_paciente(request, id_paciente):
+    
+    if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
+        return render(request, 'pages/error_permission.html')
+    
+    paciente = get_object_or_404(Paciente, id=id_paciente, deletado=True)
+    
+    if request.method == 'POST':
+        data_inspec_admin = request.POST.get('data_inspec_admin')
+        obs_admin = request.POST.get('obs_admin')
+        
+        # Converter string de data para objeto date
+        if data_inspec_admin:
+            try:
+                data_inspec_admin = datetime.strptime(data_inspec_admin, '%Y-%m-%d').date()
+            except ValueError:
+                data_inspec_admin = None
+        
+        # Atualizar os campos
+        paciente.data_inspec_admin = data_inspec_admin
+        paciente.obs_admin = obs_admin
+        paciente.save()
+        
+        messages.success(request, f'Inspeção do paciente {paciente.nome} atualizada com sucesso!')
+        return redirect('pacientes_deletados')
+    
+    return redirect('pacientes_deletados')
 
 @login_required(login_url='login1')
 def editar_paciente(request, id_paciente):
@@ -3722,13 +3934,19 @@ def apuracao_financeira(request):
     if not request.user.groups.filter(name='administrador').exists() and not request.user.is_superuser:
         return render(request, 'pages/error_permission.html')
 
-    # Criar chave de cache baseada no usuário
-    cache_key = f"apuracao_financeira_geral_{hash(str(request.user.id))}"
+    # Obter parâmetros de filtro de data
+    data_inicio = request.GET.get('data_inicio', '')
+    data_fim = request.GET.get('data_fim', '')
     
-    # Tentar obter dados do cache primeiro
-    cached_data = cache.get(cache_key)
-    if cached_data:
-        return render(request, 'pages/apuracao_financeira_kpsicologia.html', cached_data)
+    # Criar chave de cache baseada no usuário e filtros
+    cache_key = f"apuracao_financeira_{hash(str(request.user.id))}_{data_inicio}_{data_fim}"
+    
+    # Para filtros de data, desabilitar cache temporariamente para ver resultados atualizados
+    cached_data = None
+    if not data_inicio and not data_fim:
+        cached_data = cache.get(cache_key)
+        if cached_data:
+            return render(request, 'pages/apuracao_financeira_kpsicologia.html', cached_data)
     
     # ===== CONTAGENS BÁSICAS COM CACHE SEPARADO =====
     contagens_cache_key = "contagens_basicas_apuracao"
@@ -3743,9 +3961,27 @@ def apuracao_financeira(request):
         }
         cache.set(contagens_cache_key, contagens, 3600)  # Cache por 1 hora
     
+    # ===== APLICAR FILTROS DE DATA =====
+    financeiro_queryset = Financeiro.objects.all()
+    
+    # Aplicar filtros de data se fornecidos
+    if data_inicio:
+        try:
+            data_inicio_obj = datetime.strptime(data_inicio, '%Y-%m-%d').date()
+            financeiro_queryset = financeiro_queryset.filter(data__gte=data_inicio_obj)
+        except ValueError:
+            pass  # Ignorar data inválida
+    
+    if data_fim:
+        try:
+            data_fim_obj = datetime.strptime(data_fim, '%Y-%m-%d').date()
+            financeiro_queryset = financeiro_queryset.filter(data__lte=data_fim_obj)
+        except ValueError:
+            pass  # Ignorar data inválida
+    
     # ===== CONSULTA PRINCIPAL OTIMIZADA =====
     # Uma única consulta com todas as agregações necessárias
-    financeiros_stats = Financeiro.objects.aggregate(
+    financeiros_stats = financeiro_queryset.aggregate(
         # Contagens
         total_atendimentos_realizados=Count('id', filter=Q(presenca='Sim')),
         total_atendimentos_presencial=Count('id', filter=Q(modalidade='Presencial', presenca='Sim')),
@@ -3783,7 +4019,7 @@ def apuracao_financeira(request):
     total_atendimentos_realizados = financeiros_stats['total_atendimentos_realizados']
     
     # ===== ANÁLISE POR SALAS OTIMIZADA =====
-    salas_stats = Financeiro.objects.filter(
+    salas_stats = financeiro_queryset.filter(
         presenca='Sim',
         sala__isnull=False
     ).values(
@@ -3807,7 +4043,7 @@ def apuracao_financeira(request):
     salas_utilizadas = len([s for s in salas_data if s['atendimentos_realizados'] > 0])
     
     # ===== ANÁLISE POR UNIDADE OTIMIZADA =====
-    unidades_stats = Financeiro.objects.filter(
+    unidades_stats = financeiro_queryset.filter(
         presenca='Sim',
         sala__isnull=False
     ).values(
@@ -3829,7 +4065,7 @@ def apuracao_financeira(request):
     unidades_data = list(unidades_stats)
     
     # ===== ANÁLISE POR PSICÓLOGA OTIMIZADA =====
-    psicologas_stats = Financeiro.objects.filter(
+    psicologas_stats = financeiro_queryset.filter(
         presenca='Sim'
     ).values(
         'psicologa__id',
@@ -3851,7 +4087,7 @@ def apuracao_financeira(request):
     
     # ===== CONSULTAS POR DIA DA SEMANA OTIMIZADA =====
     dias_semana = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo']
-    consultas_por_dia_stats = Financeiro.objects.filter(
+    consultas_por_dia_stats = financeiro_queryset.filter(
         presenca='Sim'
     ).values('dia_semana').annotate(
         total=Count('id')
@@ -3983,7 +4219,11 @@ def apuracao_financeira(request):
         'salas_ocupacao_valores': salas_ocupacao_valores,
         'salas_ocupacao_cores': salas_ocupacao_cores,
         'financeiro_categorias': financeiro_categorias,
-        'financeiro_valores': financeiro_valores
+        'financeiro_valores': financeiro_valores,
+        
+        # Filtros de data
+        'data_inicio': data_inicio,
+        'data_fim': data_fim,
     }
     
     # Cache do resultado por 15 minutos
@@ -5028,7 +5268,8 @@ def agenda_unificada(request, psicologo_id):
     # Consultas presenciais agrupadas por dia
     consultas_presencial = Consulta.objects.filter(psicologo=psicologa).order_by('dia_semana', 'horario')
     consultas_presencial_agendadas = consultas_presencial.filter(Paciente__isnull=False)
-    consultas_presencial_disponiveis = consultas_presencial.filter(Paciente__isnull=True)
+    consultas_presencial_disponiveis = consultas_presencial.filter(Paciente__isnull=True, metodo__in=['padrao', 'livre'])
+    consultas_presencial_fechadas = consultas_presencial.filter(metodo='fechado')
     
     # Consultas online agrupadas por dia
     consultas_online = Consulta_Online.objects.filter(psicologo=psicologa).order_by('dia_semana', 'horario')
@@ -5039,14 +5280,16 @@ def agenda_unificada(request, psicologo_id):
     agenda_presencial_por_dia = agrupar_consultas_por_dia(consultas_presencial, dias_da_semana)
     agenda_online_por_dia = agrupar_consultas_por_dia(consultas_online, dias_da_semana)
 
-    # Estatísticas
+    # Estatísticas detalhadas
     stats = {
         'total_presencial': consultas_presencial.count(),
         'agendadas_presencial': consultas_presencial_agendadas.count(),
         'disponiveis_presencial': consultas_presencial_disponiveis.count(),
+        'fechadas_presencial': consultas_presencial_fechadas.count(),
         'total_online': consultas_online.count(),
         'agendadas_online': consultas_online_agendadas.count(),
         'disponiveis_online': consultas_online_disponiveis.count(),
+        'fechadas_online': 0,  # Online não tem fechadas por enquanto
     }
 
     context = {

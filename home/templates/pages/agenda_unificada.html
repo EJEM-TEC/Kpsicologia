@@ -92,7 +92,8 @@
                                 <p class="text-sm mb-0 text-uppercase font-weight-bold">Presencial</p>
                                 <h5 class="font-weight-bolder">{{ stats.agendadas_presencial }}/{{ stats.total_presencial }}</h5>
                                 <p class="mb-0">
-                                    <span class="text-success text-sm font-weight-bolder">{{ stats.disponiveis_presencial }}</span> disponíveis
+                                    <span class="text-success text-sm font-weight-bolder">{{ stats.disponiveis_presencial }}</span> livres
+                                    <span class="text-danger text-sm font-weight-bolder ms-1">{{ stats.fechadas_presencial }}</span> fechados
                                 </p>
                             </div>
                         </div>
@@ -115,7 +116,8 @@
                                 <p class="text-sm mb-0 text-uppercase font-weight-bold">Online</p>
                                 <h5 class="font-weight-bolder">{{ stats.agendadas_online }}/{{ stats.total_online }}</h5>
                                 <p class="mb-0">
-                                    <span class="text-success text-sm font-weight-bolder">{{ stats.disponiveis_online }}</span> disponíveis
+                                    <span class="text-success text-sm font-weight-bolder">{{ stats.disponiveis_online }}</span> livres
+                                    <span class="text-danger text-sm font-weight-bolder ms-1">{{ stats.fechadas_online }}</span> fechados
                                 </p>
                             </div>
                         </div>
@@ -163,13 +165,66 @@
                                     {% widthratio stats.agendadas_presencial|add:stats.agendadas_online stats.total_presencial|add:stats.total_online 100 %}%
                                 </h5>
                                 <p class="mb-0">
-                                    <span class="text-secondary text-sm font-weight-bolder">Esta semana</span>
+                                    <span class="text-secondary text-sm font-weight-bolder">Com pacientes</span>
                                 </p>
                             </div>
                         </div>
                         <div class="col-4 text-end">
                             <div class="icon icon-shape bg-gradient-warning shadow-warning text-center rounded-circle">
                                 <i class="fas fa-percentage text-lg opacity-10"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resumo Detalhado -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-gradient-dark p-3">
+                    <h6 class="text-white mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Resumo Detalhado dos Horários
+                    </h6>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row text-center">
+                        <div class="col-md-2">
+                            <div class="d-flex flex-column">
+                                <span class="text-success font-weight-bold h4">{{ stats.agendadas_presencial|add:stats.agendadas_online }}</span>
+                                <span class="text-sm text-uppercase">Com Pacientes</span>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="d-flex flex-column">
+                                <span class="text-info font-weight-bold h4">{{ stats.disponiveis_presencial|add:stats.disponiveis_online }}</span>
+                                <span class="text-sm text-uppercase">Livres</span>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="d-flex flex-column">
+                                <span class="text-danger font-weight-bold h4">{{ stats.fechadas_presencial|add:stats.fechadas_online }}</span>
+                                <span class="text-sm text-uppercase">Fechados</span>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="d-flex flex-column">
+                                <span class="text-dark font-weight-bold h4">{{ stats.total_presencial|add:stats.total_online }}</span>
+                                <span class="text-sm text-uppercase">Total</span>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="d-flex flex-column">
+                                <span class="text-primary font-weight-bold h4">{{ stats.total_presencial }}</span>
+                                <span class="text-sm text-uppercase">Presencial</span>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="d-flex flex-column">
+                                <span class="text-success font-weight-bold h4">{{ stats.total_online }}</span>
+                                <span class="text-sm text-uppercase">Online</span>
                             </div>
                         </div>
                     </div>
@@ -348,6 +403,7 @@
                                             <thead class="bg-light">
                                                 <tr>
                                                     <th class="text-center text-uppercase text-xs fw-bold" style="color: #cb0c9f;">HORÁRIO</th>
+                                                    <th class="text-center text-uppercase text-xs fw-bold" style="color: #cb0c9f;">STATUS</th>
                                                     <th class="text-center text-uppercase text-xs fw-bold" style="color: #cb0c9f;">SEMANAL</th>
                                                     <th class="text-center text-uppercase text-xs fw-bold" style="color: #cb0c9f;">QUINZENAL</th>
                                                     <th class="text-center text-uppercase text-xs fw-bold" style="color: #cb0c9f;">AÇÕES</th>
@@ -355,41 +411,69 @@
                                             </thead>
                                             <tbody>
                                                 {% for consulta in dia_info.todas %}
-                                                <tr class="border-0">
-                                                    <td style="background-color: {{consulta.psicologo.cor}}80;" class="align-middle text-center py-3">
+                                                <tr class="border-0 {% if consulta.metodo == 'fechado' %}table-danger bg-danger bg-opacity-10{% endif %}">
+                                                    <td {% if consulta.metodo == 'fechado' %}style="background-color: #dc354580;"{% else %}style="background-color: {{consulta.psicologo.cor}}80;"{% endif %} class="align-middle text-center py-3">
                                                         <span class="badge bg-dark fs-6 px-3 py-2">{{ consulta.horario|time:"H:i" }}</span>
                                                     </td>
-                                                    {% if consulta.semanal %}
-                                                        {% if consulta.semanal != "Semanal" %}
-                                                        <td style="background-color: {{consulta.psicologo.cor}}80;" class="align-middle text-center py-3">
-                                                            <span class="badge bg-success fs-6 px-3 py-2">{{ consulta.semanal }}</span>
-                                                        </td>
+                                                    <td {% if consulta.metodo == 'fechado' %}style="background-color: #dc354580;"{% else %}style="background-color: {{consulta.psicologo.cor}}80;"{% endif %} class="align-middle text-center py-3">
+                                                        {% if consulta.metodo == 'fechado' %}
+                                                            <span class="badge bg-danger fs-6 px-3 py-2">
+                                                                <i class="fas fa-lock me-1"></i>FECHADO
+                                                            </span>
+                                                        {% elif consulta.semanal or consulta.quinzenal %}
+                                                            <span class="badge bg-success fs-6 px-3 py-2">
+                                                                <i class="fas fa-user-check me-1"></i>OCUPADO
+                                                            </span>
                                                         {% else %}
-                                                        <td style="background-color: {{consulta.psicologo.cor}}80;" class="align-middle text-center py-3">
-                                                            <span class="badge bg-success fs-6 px-3 py-2"></span>
+                                                            <span class="badge bg-info fs-6 px-3 py-2">
+                                                                <i class="fas fa-calendar-plus me-1"></i>LIVRE
+                                                            </span>
+                                                        {% endif %}
+                                                    </td>
+                                                    {% if consulta.metodo == 'fechado' %}
+                                                        <td style="background-color: #dc354580;" class="align-middle text-center py-3">
+                                                            <span class="badge bg-secondary fs-6 px-3 py-2">
+                                                                <i class="fas fa-ban me-1"></i>Bloqueado
+                                                            </span>
+                                                        </td>
+                                                        <td style="background-color: #dc354580;" class="align-middle text-center py-3">
+                                                            <span class="badge bg-secondary fs-6 px-3 py-2">
+                                                                <i class="fas fa-ban me-1"></i>Bloqueado
+                                                            </span>
+                                                        </td>
+                                                    {% else %}
+                                                        {% if consulta.semanal %}
+                                                            {% if consulta.semanal != "Semanal" %}
+                                                            <td style="background-color: {{consulta.psicologo.cor}}80;" class="align-middle text-center py-3">
+                                                                <span class="badge bg-success fs-6 px-3 py-2">{{ consulta.semanal }}</span>
+                                                            </td>
+                                                            {% else %}
+                                                            <td style="background-color: {{consulta.psicologo.cor}}80;" class="align-middle text-center py-3">
+                                                                <span class="badge bg-success fs-6 px-3 py-2"></span>
+                                                            </td>
+                                                            {% endif %}
+                                                        {% else %}
+                                                        <td style="background-color: {{consulta.psicologo.cor}}20;" class="align-middle text-center py-3">
+                                                            <span class="badge bg-secondary fs-6 px-3 py-2">Não agendado</span>
                                                         </td>
                                                         {% endif %}
-                                                    {% else %}
-                                                    <td style="background-color: {{consulta.psicologo.cor}}20;" class="align-middle text-center py-3">
-                                                        <span class="badge bg-secondary fs-6 px-3 py-2">Não agendado</span>
-                                                    </td>
+                                                        {% if consulta.quinzenal %}
+                                                            {% if consulta.quinzenal != "Quinzenal" %}
+                                                                <td style="background-color: {{consulta.psicologo.cor}}80;" class="align-middle text-center py-3">
+                                                                    <span class="badge bg-info fs-6 px-3 py-2">{{ consulta.quinzenal }}</span>
+                                                                </td>
+                                                            {% else %}
+                                                                <td style="background-color: {{consulta.psicologo.cor}}80;" class="align-middle text-center py-3">
+                                                                    <span class="badge bg-info fs-6 px-3 py-2"></span>
+                                                                </td>
+                                                            {% endif %}
+                                                        {% else %}
+                                                        <td style="background-color: {{consulta.psicologo.cor}}20;" class="align-middle text-center py-3">
+                                                            <span class="badge bg-secondary fs-6 px-3 py-2">Não agendado</span>
+                                                        </td>
+                                                        {% endif %}
                                                     {% endif %}
-                                                    {% if consulta.quinzenal %}
-                                                        {% if consulta.quinzenal != "Quinzenal" %}
-                                                            <td style="background-color: {{consulta.psicologo.cor}}80;" class="align-middle text-center py-3">
-                                                                <span class="badge bg-info fs-6 px-3 py-2">{{ consulta.quinzenal }}</span>
-                                                            </td>
-                                                        {% else %}
-                                                            <td style="background-color: {{consulta.psicologo.cor}}80;" class="align-middle text-center py-3">
-                                                                <span class="badge bg-info fs-6 px-3 py-2"></span>
-                                                            </td>
-                                                        {% endif %}
-                                                    {% else %}
-                                                    <td style="background-color: {{consulta.psicologo.cor}}20;" class="align-middle text-center py-3">
-                                                        <span class="badge bg-secondary fs-6 px-3 py-2">Não agendado</span>
-                                                    </td>
-                                                    {% endif %} 
-                                                    <td style="background-color: {{consulta.psicologo.cor}}80;" class="align-middle text-center py-3">
+                                                    <td {% if consulta.metodo == 'fechado' %}style="background-color: #dc354580;"{% else %}style="background-color: {{consulta.psicologo.cor}}80;"{% endif %} class="align-middle text-center py-3">
                                                         <a href="{% url 'delete_consulta' id_consulta=consulta.id psicologo_id=consulta.psicologo.id %}" 
                                                            class="btn btn-sm btn-danger px-3 py-2" 
                                                            data-bs-toggle="tooltip" 
@@ -581,6 +665,64 @@
             </div>
         </div>
       </div>
+
+    <!-- Legenda dos Estados -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-gradient-secondary p-3">
+                    <h6 class="text-white mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Legenda dos Estados dos Horários
+                    </h6>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-success me-2">
+                                    <i class="fas fa-user-check me-1"></i>OCUPADO
+                                </span>
+                                <span class="text-sm">Horário com paciente agendado</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-info me-2">
+                                    <i class="fas fa-calendar-plus me-1"></i>LIVRE
+                                </span>
+                                <span class="text-sm">Horário disponível para agendamento</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-danger me-2">
+                                    <i class="fas fa-lock me-1"></i>FECHADO
+                                </span>
+                                <span class="text-sm">Horário bloqueado/indisponível</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-secondary me-2">
+                                    <i class="fas fa-ban me-1"></i>Bloqueado
+                                </span>
+                                <span class="text-sm">Não pode ser agendado</span>
+                            </div>
+                        </div>
+                    </div>
+                    <hr class="my-3">
+                    <div class="row text-center">
+                        <div class="col-md-12">
+                            <p class="text-sm text-muted mb-0">
+                                <strong>Dica:</strong> Horários fechados aparecem com fundo vermelho claro e não podem receber novos agendamentos. 
+                                Use esta função para bloquear horários que não estarão disponíveis temporariamente.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Scripts específicos da página -->

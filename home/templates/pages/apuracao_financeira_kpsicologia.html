@@ -2,100 +2,410 @@
 {% load static %}
 
 {% block content %}
-
-<div class="container mt-5">
-
+<div class="container-fluid py-4">
+    <!-- Header -->
     <div class="row mb-4">
         <div class="col-12">
-            <a href="{% url 'index' %}" class="btn bg-gradient-primary">
-                <i class="fas fa-arrow-left me-2"></i> Voltar
-            </a>
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <div class="icon icon-shape bg-gradient-success shadow text-center border-radius-md me-3">
+                                <i class="fas fa-chart-line text-white text-lg"></i>
+                            </div>
+                            <div>
+                                <h4 class="mb-0">Financeiro Institucional - KPsicologia</h4>
+                                <p class="text-sm text-muted mb-0">Apuração financeira e análise de indicadores</p>
+                            </div>
+                        </div>
+                        <a href="{% url 'index' %}" class="btn bg-gradient-primary">
+                            <i class="fas fa-arrow-left me-2"></i> Voltar
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Resumo Geral e Gráficos -->
+    <!-- Filtros de Data -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-gradient-primary p-3">
+                    <h6 class="text-white mb-0">
+                        <i class="fas fa-filter me-2"></i>Filtros de Período
+                    </h6>
+                </div>
+                <div class="card-body p-4">
+                    <form method="get" id="filterForm">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="data_inicio" class="form-label">Data Início</label>
+                                <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ data_inicio }}">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="data_fim" class="form-label">Data Fim</label>
+                                <input type="date" class="form-control" id="data_fim" name="data_fim" value="{{ data_fim }}">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label d-block">&nbsp;</label>
+                                <button type="submit" class="btn bg-gradient-success me-2">
+                                    <i class="fas fa-search me-2"></i>Filtrar
+                                </button>
+                                <a href="{% url 'apuracao_financeira_kpsicologia' %}" class="btn bg-gradient-secondary">
+                                    <i class="fas fa-times me-2"></i>Limpar
+                                </a>
+                            </div>
+                        </div>
+                        {% if data_inicio or data_fim %}
+                        <div class="alert alert-info d-flex align-items-center mb-0" role="alert">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <div>
+                                <strong>Filtro Ativo:</strong>
+                                {% if data_inicio and data_fim %}
+                                    Período de {{ data_inicio|date:"d/m/Y" }} até {{ data_fim|date:"d/m/Y" }}
+                                {% elif data_inicio %}
+                                    A partir de {{ data_inicio|date:"d/m/Y" }}
+                                {% elif data_fim %}
+                                    Até {{ data_fim|date:"d/m/Y" }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estatísticas Principais -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-sm-6 mb-3">
+            <div class="card">
+                <div class="card-body p-3">
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="numbers">
+                                <p class="text-sm mb-0 text-uppercase font-weight-bold">Faturamento Total</p>
+                                <h5 class="font-weight-bolder">R$ {{ total_faturamento|floatformat:2 }}</h5>
+                                <p class="mb-0">
+                                    <span class="text-success text-sm font-weight-bolder">{{ total_atendimentos_realizados }}</span> consultas
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="icon icon-shape bg-gradient-primary shadow-primary text-center rounded-circle">
+                                <i class="fas fa-money-bill-wave text-lg opacity-10"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-sm-6 mb-3">
+            <div class="card">
+                <div class="card-body p-3">
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="numbers">
+                                <p class="text-sm mb-0 text-uppercase font-weight-bold">Consultas Realizadas</p>
+                                <h5 class="font-weight-bolder">{{ total_atendimentos_realizados }}</h5>
+                                <p class="mb-0">
+                                    <span class="text-info text-sm font-weight-bolder">{{ total_atendimentos_presencial }}</span> presencial
+                                    <span class="text-success text-sm font-weight-bolder ms-2">{{ total_atendimentos_online }}</span> online
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="icon icon-shape bg-gradient-success shadow-success text-center rounded-circle">
+                                <i class="fas fa-calendar-check text-lg opacity-10"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-sm-6 mb-3">
+            <div class="card">
+                <div class="card-body p-3">
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="numbers">
+                                <p class="text-sm mb-0 text-uppercase font-weight-bold">Ticket Médio</p>
+                                <h5 class="font-weight-bolder">R$ {{ ticket_medio_atendimento|floatformat:2 }}</h5>
+                                <p class="mb-0">
+                                    <span class="text-secondary text-sm font-weight-bolder">Por consulta</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="icon icon-shape bg-gradient-info shadow-info text-center rounded-circle">
+                                <i class="fas fa-receipt text-lg opacity-10"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-sm-6 mb-3">
+            <div class="card">
+                <div class="card-body p-3">
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="numbers">
+                                <p class="text-sm mb-0 text-uppercase font-weight-bold">Margem de Lucro</p>
+                                <h5 class="font-weight-bolder">{{ margem_lucro|floatformat:1 }}%</h5>
+                                <p class="mb-0">
+                                    <span class="text-{% if lucro_liquido > 0 %}success{% else %}danger{% endif %} text-sm font-weight-bolder">
+                                        R$ {{ lucro_liquido|floatformat:2 }}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="icon icon-shape bg-gradient-warning shadow-warning text-center rounded-circle">
+                                <i class="fas fa-chart-line text-lg opacity-10"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos -->
     <div class="row mb-4">
         <div class="col-md-6">
-            <div class="card shadow h-100">
-                <div class="card-header pb-0">
-                    <h5 class="mb-0">Resumo Financeiro</h5>
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-gradient-primary p-3">
+                    <h6 class="text-white mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>Resumo Financeiro
+                    </h6>
                 </div>
                 <div class="card-body">
                     <div class="chart-container">
                         <canvas id="financeiro-chart" height="200"></canvas>
                     </div>
                     <div class="mt-4">
-                        <p><strong>Faturamento Total:</strong> R$ {{ total_faturamento|floatformat:2 }}</p>
-                        <p><strong>Custos Fixos:</strong> R$ {{ custo_fixo_total|floatformat:2 }}</p>
-                        <p><strong>Lucro Líquido:</strong> R$ {{ lucro_liquido|floatformat:2 }}</p>
-                        <p><strong>Margem de Lucro:</strong> {{ margem_lucro|floatformat:1 }}%</p>
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="border-end">
+                                    <h6 class="text-primary mb-0">R$ {{ total_faturamento_fisico|floatformat:2 }}</h6>
+                                    <span class="text-sm text-muted">Presencial</span>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <h6 class="text-success mb-0">R$ {{ total_faturamento_online|floatformat:2 }}</h6>
+                                <span class="text-sm text-muted">Online</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-6">
-            <div class="card shadow h-100">
-                <div class="card-header pb-0">
-                    <h5 class="mb-0">Consultas por Dia da Semana</h5>
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-gradient-success p-3">
+                    <h6 class="text-white mb-0">
+                        <i class="fas fa-calendar-alt me-2"></i>Consultas por Dia da Semana
+                    </h6>
                 </div>
                 <div class="card-body">
                     <div class="chart-container">
                         <canvas id="dias-chart" height="200"></canvas>
                     </div>
                     <div class="mt-4">
-                        <p><strong>Total de Consultas Realizadas:</strong> {{ total_atendimentos_realizados }}</p>
-                        <p><strong>Ticket Médio:</strong> R$ {{ ticket_medio_atendimento|floatformat:2 }}</p>
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <h6 class="text-success mb-0">{{ total_atendimentos_realizados }}</h6>
+                                <span class="text-sm text-muted">Total</span>
+                            </div>
+                            <div class="col-4">
+                                <h6 class="text-info mb-0">{{ salas_utilizadas }}</h6>
+                                <span class="text-sm text-muted">Salas Ativas</span>
+                            </div>
+                            <div class="col-4">
+                                <h6 class="text-warning mb-0">{{ total_psicologas }}</h6>
+                                <span class="text-sm text-muted">Psicólogas</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Apuração Geral -->
-    <h2 class="mb-4">Apuração Financeira - Geral</h2>
+    <!-- Informações Detalhadas -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-gradient-dark p-3">
+                    <h6 class="text-white mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Informações Detalhadas
+                    </h6>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <div class="row">
+    <div class="row mb-4">
         <!-- Card 1: Informações Gerais -->
-        <div class="col-md-6 mb-4">
-            <div class="card card-frame">
-                <div class="card-body">
-                    <h5 class="card-title">Informações Gerais</h5>
-                    <p><strong>Total de Salas:</strong> {{ total_salas }}</p>
-                    <p><strong>Total de Unidades:</strong> {{ total_unidades }}</p>
-                    <p><strong>Total de Pacientes:</strong> {{ total_pacientes }}</p>
-                    <p><strong>Total de Psicólogas:</strong> {{ total_psicologas }}</p>
-                    <p><strong>Total de Atendimentos Realizados:</strong> {{ total_atendimentos_realizados }}</p>
-                    <p><strong>Salas Utilizadas:</strong> {{ salas_utilizadas }} ({{ taxa_ocupacao_salas|floatformat:1 }}%)</p>
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-gradient-info p-3">
+                    <h6 class="text-white mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Informações Gerais
+                    </h6>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <div class="text-center">
+                                <h5 class="text-info mb-0">{{ total_salas }}</h5>
+                                <span class="text-sm text-muted">Salas</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center">
+                                <h5 class="text-info mb-0">{{ total_unidades }}</h5>
+                                <span class="text-sm text-muted">Unidades</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <div class="text-center">
+                                <h5 class="text-primary mb-0">{{ total_pacientes }}</h5>
+                                <span class="text-sm text-muted">Pacientes</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center">
+                                <h5 class="text-primary mb-0">{{ total_psicologas }}</h5>
+                                <span class="text-sm text-muted">Psicólogas</span>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="text-center">
+                        <h4 class="text-success mb-0">{{ total_atendimentos_realizados }}</h4>
+                        <span class="text-sm text-muted">Atendimentos Realizados</span>
+                        <div class="mt-2">
+                            <span class="badge bg-info">{{ salas_utilizadas }} salas ativas</span>
+                            <span class="badge bg-success ms-1">{{ taxa_ocupacao_salas|floatformat:1 }}% ocupação</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Card 2: Faturamento -->
-        <div class="col-md-6 mb-4">
-            <div class="card card-frame">
-                <div class="card-body">
-                    <h5 class="card-title">Faturamento</h5>
-                    <p><strong>Total de Faturamento Presencial:</strong> R$ {{ total_faturamento_fisico|floatformat:2 }}</p>
-                    <p><strong>Total de Faturamento Online:</strong> R$ {{ total_faturamento_online|floatformat:2 }}</p>
-                    <p><strong>Total de Faturamento:</strong> R$ {{ total_faturamento|floatformat:2 }}</p>
-                    <p><strong>Faturamento Médio por Sala:</strong> R$ {{ faturamento_medio_sala|floatformat:2 }}</p>
-                    <p><strong>Faturamento Médio por Paciente:</strong> R$ {{ faturamento_medio_paciente|floatformat:2 }}</p>
-                    <p><strong>Faturamento Médio por Psicóloga:</strong> R$ {{ faturamento_medio_psicologa|floatformat:2 }}</p>
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-gradient-success p-3">
+                    <h6 class="text-white mb-0">
+                        <i class="fas fa-dollar-sign me-2"></i>Análise de Faturamento
+                    </h6>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <h4 class="text-success mb-0">R$ {{ total_faturamento|floatformat:2 }}</h4>
+                        <span class="text-sm text-muted">Faturamento Total</span>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <div class="text-center border-end">
+                                <h6 class="text-primary mb-0">R$ {{ total_faturamento_fisico|floatformat:2 }}</h6>
+                                <span class="text-xs text-muted">Presencial</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center">
+                                <h6 class="text-success mb-0">R$ {{ total_faturamento_online|floatformat:2 }}</h6>
+                                <span class="text-xs text-muted">Online</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="row text-center">
+                        <div class="col-12 mb-2">
+                            <span class="text-sm text-muted d-block">Faturamento Médio</span>
+                        </div>
+                        <div class="col-4">
+                            <h6 class="text-info mb-0">R$ {{ faturamento_medio_sala|floatformat:0 }}</h6>
+                            <span class="text-xs text-muted">Por Sala</span>
+                        </div>
+                        <div class="col-4">
+                            <h6 class="text-warning mb-0">R$ {{ faturamento_medio_paciente|floatformat:0 }}</h6>
+                            <span class="text-xs text-muted">Por Paciente</span>
+                        </div>
+                        <div class="col-4">
+                            <h6 class="text-danger mb-0">R$ {{ faturamento_medio_psicologa|floatformat:0 }}</h6>
+                            <span class="text-xs text-muted">Por Psicóloga</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Card 3: Indicadores de Utilização -->
-        <div class="col-md-6 mb-4">
-            <div class="card card-frame">
-                <div class="card-body">
-                    <h5 class="card-title">Indicadores de Utilização</h5>
-                    <p><strong>Taxa de Ocupação das Salas:</strong> {{ taxa_ocupacao_salas|floatformat:2 }}%</p>
-                    <p><strong>Taxa de Ocupação por Paciente:</strong> {{ taxa_ocupacao_pacientes|floatformat:2 }}%</p>
-                    <p><strong>Sessões por Paciente:</strong> {{ sessoes_por_paciente|floatformat:2 }}</p>
-                    <p><strong>Sessões por Psicóloga:</strong> {{ sessoes_por_psicologa|floatformat:2 }}</p>
-                    <p><strong>Pacientes por Psicóloga:</strong> {{ pacientes_por_psicologa|floatformat:2 }}</p>
-                    <p><strong>Taxa de Retenção de Pacientes:</strong> {{ taxa_retencao_pacientes|floatformat:2 }}%</p>
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-gradient-warning p-3">
+                    <h6 class="text-white mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>Indicadores de Performance
+                    </h6>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <div class="text-center">
+                                <h5 class="text-warning mb-0">{{ taxa_ocupacao_salas|floatformat:1 }}%</h5>
+                                <span class="text-sm text-muted">Ocupação Salas</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center">
+                                <h5 class="text-info mb-0">{{ taxa_ocupacao_pacientes|floatformat:1 }}%</h5>
+                                <span class="text-sm text-muted">Taxa Pacientes</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <div class="text-center">
+                                <h5 class="text-primary mb-0">{{ sessoes_por_paciente|floatformat:1 }}</h5>
+                                <span class="text-sm text-muted">Sessões/Paciente</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center">
+                                <h5 class="text-success mb-0">{{ sessoes_por_psicologa|floatformat:1 }}</h5>
+                                <span class="text-sm text-muted">Sessões/Psicóloga</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="text-center">
+                        <h4 class="text-danger mb-0">{{ pacientes_por_psicologa|floatformat:1 }}</h4>
+                        <span class="text-sm text-muted">Pacientes por Psicóloga</span>
+                        <div class="mt-2">
+                            <span class="badge bg-{% if taxa_retencao_pacientes > 80 %}success{% elif taxa_retencao_pacientes > 60 %}warning{% else %}danger{% endif %}">
+                                {{ taxa_retencao_pacientes|floatformat:1 }}% retenção
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -391,4 +701,126 @@
         }
     });
 </script>
+
+<!-- Scripts para Filtros e Interatividade -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit quando as datas mudarem
+    const dataInicio = document.getElementById('data_inicio');
+    const dataFim = document.getElementById('data_fim');
+    
+    if (dataInicio && dataFim) {
+        // Validação de data
+        dataInicio.addEventListener('change', function() {
+            if (dataFim.value && this.value > dataFim.value) {
+                alert('A data de início não pode ser maior que a data fim.');
+                this.value = '';
+            }
+        });
+        
+        dataFim.addEventListener('change', function() {
+            if (dataInicio.value && this.value < dataInicio.value) {
+                alert('A data fim não pode ser menor que a data de início.');
+                this.value = '';
+            }
+        });
+    }
+    
+    // Animação dos cards de estatísticas
+    const cards = document.querySelectorAll('.card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'all 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+    
+    // Tooltips para indicadores
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Filtros rápidos
+    function adicionarFiltroRapido() {
+        const hoje = new Date();
+        const umMesAtras = new Date(hoje.getFullYear(), hoje.getMonth() - 1, hoje.getDate());
+        const tresMesesAtras = new Date(hoje.getFullYear(), hoje.getMonth() - 3, hoje.getDate());
+        
+        // Criar botões de filtro rápido
+        const filtrosContainer = document.querySelector('#filterForm .row');
+        if (filtrosContainer) {
+            const botoesFiltro = document.createElement('div');
+            botoesFiltro.className = 'col-12 mt-3';
+            botoesFiltro.innerHTML = `
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="aplicarFiltroRapido('hoje')">
+                        <i class="fas fa-calendar-day me-1"></i>Hoje
+                    </button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="aplicarFiltroRapido('mes')">
+                        <i class="fas fa-calendar-alt me-1"></i>Último Mês
+                    </button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="aplicarFiltroRapido('trimestre')">
+                        <i class="fas fa-calendar me-1"></i>Últimos 3 Meses
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="aplicarFiltroRapido('limpar')">
+                        <i class="fas fa-eraser me-1"></i>Limpar
+                    </button>
+                </div>
+            `;
+            filtrosContainer.appendChild(botoesFiltro);
+        }
+    }
+    
+    // Chamar função para adicionar filtros rápidos
+    adicionarFiltroRapido();
+});
+
+// Função para aplicar filtros rápidos
+function aplicarFiltroRapido(tipo) {
+    const dataInicio = document.getElementById('data_inicio');
+    const dataFim = document.getElementById('data_fim');
+    const hoje = new Date();
+    
+    switch(tipo) {
+        case 'hoje':
+            const hojeStr = hoje.toISOString().split('T')[0];
+            dataInicio.value = hojeStr;
+            dataFim.value = hojeStr;
+            break;
+        case 'mes':
+            const umMesAtras = new Date(hoje.getFullYear(), hoje.getMonth() - 1, hoje.getDate());
+            dataInicio.value = umMesAtras.toISOString().split('T')[0];
+            dataFim.value = hoje.toISOString().split('T')[0];
+            break;
+        case 'trimestre':
+            const tresMesesAtras = new Date(hoje.getFullYear(), hoje.getMonth() - 3, hoje.getDate());
+            dataInicio.value = tresMesesAtras.toISOString().split('T')[0];
+            dataFim.value = hoje.toISOString().split('T')[0];
+            break;
+        case 'limpar':
+            dataInicio.value = '';
+            dataFim.value = '';
+            break;
+    }
+    
+    // Auto-submit o formulário
+    if (tipo !== 'limpar') {
+        document.getElementById('filterForm').submit();
+    } else {
+        window.location.href = window.location.pathname;
+    }
+}
+
+// Função para exportar dados (futura implementação)
+function exportarDados(formato) {
+    // Implementar exportação em PDF/Excel
+    console.log('Exportando dados em formato:', formato);
+}
+</script>
+
 {% endblock scripts %}

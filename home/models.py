@@ -56,6 +56,10 @@ class Paciente(models.Model):
     valor = models.DecimalField(max_digits=10, decimal_places=3)
     periodo = models.CharField(max_length=100, default="semanal")
     deletado = models.BooleanField(default=False)
+    data_deletado_psico = models.DateField(null=True, blank=True)
+    motivo_deletado_psico = models.CharField(max_length=100, null=True, blank=True)
+    data_inspec_admin = models.DateField(auto_now_add=True)
+    obs_admin = models.CharField(max_length=100, null=True, blank=True)
 
 
 class Especialidade(models.Model):
@@ -89,7 +93,6 @@ class Consulta(models.Model):
         default='padrao',
         help_text='Método de agendamento para este horário'
     )
-
 
 class Despesas(models.Model):
     motivo = models.CharField(max_length=100, null=True, blank=True)

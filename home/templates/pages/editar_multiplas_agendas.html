@@ -97,6 +97,12 @@
         box-shadow: 0 0 0 3px rgba(203, 12, 159, 0.1);
     }
 
+    .form-control:disabled {
+        background-color: var(--gray-100);
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
     .btn {
         border-radius: 0.75rem;
         padding: 0.75rem 1.5rem;
@@ -144,6 +150,11 @@
         color: white;
     }
 
+    .btn-danger {
+        background: linear-gradient(135deg, var(--danger-color), #DC2626);
+        color: white;
+    }
+
     .btn-secondary {
         background: linear-gradient(135deg, var(--gray-500), var(--gray-700));
         color: white;
@@ -179,16 +190,6 @@
     .day-sex { background-color: #8B5CF6; }
     .day-sab { background-color: #EC4899; }
 
-    .week-badge {
-        background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
-        color: white;
-        padding: 0.5rem 1rem;
-        border-radius: 9999px;
-        font-weight: 600;
-        font-size: 0.85rem;
-        white-space: nowrap;
-    }
-
     .table-wrapper {
         border-radius: 1rem;
         overflow: hidden;
@@ -216,8 +217,8 @@
         100% { transform: rotate(360deg); }
     }
 
-    /* Modal de Resumo */
-    .summary-modal {
+    /* Modal Styles */
+    .modal-overlay {
         display: none;
         position: fixed;
         z-index: 1000;
@@ -229,31 +230,39 @@
         animation: fadeIn 0.3s;
     }
 
-    .summary-content {
+    .modal-content {
         background-color: white;
         margin: 5% auto;
         padding: 0;
         border-radius: 1rem;
         width: 80%;
-        max-width: 800px;
+        max-width: 600px;
         box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
         animation: slideIn 0.3s;
     }
 
-    .summary-header {
+    .modal-header {
         background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
         color: white;
         padding: 1.5rem;
         border-radius: 1rem 1rem 0 0;
     }
 
-    .summary-body {
+    .modal-header.warning {
+        background: linear-gradient(135deg, var(--warning-color), #D97706);
+    }
+
+    .modal-header.danger {
+        background: linear-gradient(135deg, var(--danger-color), #DC2626);
+    }
+
+    .modal-body {
         padding: 2rem;
         max-height: 60vh;
         overflow-y: auto;
     }
 
-    .summary-footer {
+    .modal-footer {
         padding: 1.5rem;
         border-top: 1px solid var(--gray-200);
         display: flex;
@@ -261,39 +270,44 @@
         gap: 1rem;
     }
 
-    .change-item {
-        background: var(--gray-50);
+    .alert {
         padding: 1rem;
         border-radius: 0.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid;
+    }
+
+    .alert-warning {
+        background-color: #FEF3C7;
+        border-color: #F59E0B;
+        color: #92400E;
+    }
+
+    .alert-info {
+        background-color: #DBEAFE;
+        border-color: #3B82F6;
+        color: #1E40AF;
+    }
+
+    .form-group {
         margin-bottom: 1rem;
-        border-left: 4px solid var(--primary-color);
     }
 
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
-        margin-bottom: 2rem;
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--gray-700);
     }
 
-    .stat-card {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 0.75rem;
-        text-align: center;
-        border: 1px solid var(--gray-200);
+    .agenda-row-disabled {
+        opacity: 0.6;
+        background-color: var(--gray-50) !important;
     }
 
-    .stat-number {
-        font-size: 2rem;
-        font-weight: 700;
-        color: var(--primary-color);
-    }
-
-    .stat-label {
-        color: var(--gray-600);
-        font-size: 0.9rem;
-        margin-top: 0.5rem;
+    .agenda-row-disabled .form-control {
+        background-color: var(--gray-100);
+        color: var(--gray-500);
     }
 
     @keyframes fadeIn {
@@ -306,8 +320,14 @@
         to { transform: translateY(0); opacity: 1; }
     }
 
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+
     @media (max-width: 768px) {
-        .summary-content {
+        .modal-content {
             width: 95%;
             margin: 10% auto;
         }
@@ -330,11 +350,6 @@
             flex-direction: column;
             align-items: flex-start;
             gap: 0.5rem;
-        }
-
-        .week-badge {
-            font-size: 0.75rem;
-            padding: 0.4rem 0.8rem;
         }
     }
 </style>
@@ -364,7 +379,7 @@
                 </h2>
             </div>
             <div class="card-body px-0 pt-0 pb-2">
-                <form method="POST" action="#" id="agenda-form">
+                <form method="POST" action="{% url 'editar_multiplas_agendas' psicologa.id %}" id="agenda-form">
                     {% csrf_token %}
                     <div class="table-wrapper">
                         <div class="table-responsive">
@@ -382,7 +397,7 @@
                                 </thead>
                                 <tbody>
                                     {% for agenda in agendas %}
-                                        <tr data-agenda-id="{{ agenda.id }}">
+                                        <tr data-agenda-id="{{ agenda.id }}" id="row_{{ agenda.id }}">
                                             <td class="align-middle text-center">
                                                 {% if agenda.dia_semana == 'Segunda' %}
                                                     <span class="day-abbreviation day-seg">SEG</span>
@@ -409,7 +424,9 @@
                                                         id="metodo_{{ agenda.id }}" 
                                                         name="metodo_{{ agenda.id }}"
                                                         data-agenda-id="{{ agenda.id }}"
-                                                        data-original-value="{{ agenda.metodo|default:'padrao' }}">
+                                                        data-original-value="{{ agenda.metodo|default:'padrao' }}"
+                                                        data-original-semanal="{{ agenda.semanal|default:'' }}"
+                                                        data-original-quinzenal="{{ agenda.quinzenal|default:'' }}">
                                                     <option value="padrao" {% if agenda.metodo == 'padrao' or not agenda.metodo %}selected{% endif %}>📋 Padrão</option>
                                                     <option value="livre" {% if agenda.metodo == 'livre' %}selected{% endif %}>🔓 Livre</option>
                                                     <option value="fechado" {% if agenda.metodo == 'fechado' %}selected{% endif %}>🔒 Fechado</option>
@@ -427,7 +444,6 @@
                                                            data-agenda-id="{{ agenda.id }}"
                                                            data-type="semanal"
                                                            autocomplete="off" />
-                                                    <div class="autocomplete-suggestions" id="suggestions_semanal_{{ agenda.id }}"></div>
                                                 </div>
                                             </td>
                                             <td class="align-middle text-center position-relative">
@@ -442,12 +458,13 @@
                                                            data-agenda-id="{{ agenda.id }}"
                                                            data-type="quinzenal"
                                                            autocomplete="off" />
-                                                    <div class="autocomplete-suggestions" id="suggestions_quinzenal_{{ agenda.id }}"></div>
                                                 </div>
                                             </td>
                                             <td class="align-middle text-center">
                                                 <span class="status-indicator" id="status_{{ agenda.id }}">
-                                                    {% if agenda.semanal and agenda.quinzenal %}
+                                                    {% if agenda.metodo == 'fechado' %}
+                                                        <span class="badge bg-danger">Fechado</span>
+                                                    {% elif agenda.semanal and agenda.quinzenal %}
                                                         <span class="badge bg-success">Completo</span>
                                                     {% elif agenda.semanal or agenda.quinzenal %}
                                                         <span class="badge bg-warning">Parcial</span>
@@ -499,10 +516,95 @@
     </div>
 </div>
 
+<!-- Modal de Confirmação de Fechamento Imediato -->
+<div id="immediate-close-modal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header warning">
+            <h3 style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                <svg style="width: 24px; height: 24px; fill: currentColor;" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h2v2h-2v-2zm0-12h2v8h-2V5z"/>
+                </svg>
+                Confirmar Fechamento de Horário
+            </h3>
+        </div>
+        <div class="modal-body">
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Atenção!</strong> Este horário possui pacientes alocados que serão removidos.
+            </div>
+            <div id="immediate-close-details">
+                <!-- Detalhes do horário a ser fechado serão inseridos aqui -->
+            </div>
+            <p><strong>Deseja realmente fechar este horário?</strong></p>
+            <p><small class="text-muted">Os pacientes alocados precisarão ter seus motivos de inativação informados.</small></p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="cancel-immediate-close">
+                Cancelar
+            </button>
+            <button type="button" class="btn btn-warning" id="confirm-immediate-close">
+                <svg style="width: 16px; height: 16px; margin-right: 0.5rem; fill: currentColor;" viewBox="0 0 24 24">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+                Sim, Fechar Horário
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Inativação de Paciente Individual -->
+<div id="patient-inactivation-modal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header danger">
+            <h3 style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                <svg style="width: 24px; height: 24px; fill: currentColor;" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h2v2h-2v-2zm0-12h2v8h-2V5z"/>
+                </svg>
+                Inativação de Paciente
+            </h3>
+        </div>
+        <div class="modal-body">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Paciente:</strong> <span id="patient-name-display"></span><br>
+                <strong>Horário:</strong> <span id="patient-schedule-display"></span>
+            </div>
+            <div class="form-group">
+                <label for="inactivation-reason" class="form-label">
+                    <strong>Motivo da inativação:</strong> <span style="color: red;">*</span>
+                </label>
+                <select id="inactivation-reason" class="form-control" required>
+                    <option value="">Selecione o motivo</option>
+                    <option value="desistiu">Paciente desistiu</option>
+                    <option value="alta">Recebeu alta</option>
+                    <option value="nunca_veio">Nunca compareceu</option>
+                </select>
+            </div>
+            <div class="form-group mt-3">
+                <label for="inactivation-notes" class="form-label">
+                    Observações (opcional):
+                </label>
+                <textarea id="inactivation-notes" class="form-control" rows="3" placeholder="Digite observações adicionais sobre a inativação..."></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="cancel-patient-inactivation">
+                Cancelar
+            </button>
+            <button type="button" class="btn btn-danger" id="confirm-patient-inactivation">
+                <svg style="width: 16px; height: 16px; margin-right: 0.5rem; fill: currentColor;" viewBox="0 0 24 24">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+                Confirmar Inativação
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- Modal de Resumo das Alterações -->
-<div id="summary-modal" class="summary-modal">
-    <div class="summary-content">
-        <div class="summary-header">
+<div id="summary-modal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 800px;">
+        <div class="modal-header">
             <h3 style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
                 <svg style="width: 24px; height: 24px; fill: currentColor;" viewBox="0 0 24 24">
                     <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
@@ -510,15 +612,15 @@
                 Resumo das Alterações
             </h3>
         </div>
-        <div class="summary-body">
-            <div class="stats-grid" id="summary-stats">
+        <div class="modal-body">
+            <div id="summary-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
                 <!-- Estatísticas serão inseridas aqui pelo JavaScript -->
             </div>
             <div id="changes-list">
                 <!-- Lista de alterações será inserida aqui pelo JavaScript -->
             </div>
         </div>
-        <div class="summary-footer">
+        <div class="modal-footer">
             <button type="button" class="btn btn-secondary" id="cancel-changes">
                 Cancelar
             </button>
@@ -540,66 +642,146 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM carregado, inicializando JavaScript...'); // Debug
+    console.log('Sistema de edição de agendas carregado');
     
     let changes = {};
-    let pacienteStats = {};
+    let pendingCloseData = null;
+    let patientInactivationQueue = [];
+    let currentPatientIndex = 0;
     
-    // CORRIGIDO: Monitorar mudanças nos inputs de pacientes (não selects)
+    // Lista de pacientes disponíveis (do Django)
+    const pacientesSemanais = [
+        {% for paciente in pacientes_semanais %}
+            "{{ paciente.nome|escapejs }}",
+        {% endfor %}
+    ];
+    
+    const pacientesQuinzenais = [
+        {% for paciente in pacientes_quinzenais %}
+            "{{ paciente.nome|escapejs }}",
+        {% endfor %}
+    ];
+    
+    // Monitorar mudanças nos inputs de pacientes
     document.querySelectorAll('.paciente-input').forEach(input => {
-        console.log('Input encontrado:', input.id); // Debug
-        
         input.addEventListener('input', function() {
-            console.log('Input alterado:', this.id, this.value); // Debug
             trackChange(this);
             updateStatus(this.dataset.agendaId);
             updatePreviewButton();
-        });
-        
-        input.addEventListener('blur', function() {
-            validateSelection(this);
         });
     });
     
     // Monitorar mudanças nos selects de método
     document.querySelectorAll('.metodo-select').forEach(select => {
-        console.log('Select encontrado:', select.id); // Debug
-        
         select.addEventListener('change', function() {
-            console.log('Select alterado:', this.id, this.value); // Debug
-            trackChange(this);
-            updateStatus(this.dataset.agendaId);
-            updatePreviewButton();
-            
-            // Controlar se os inputs devem ser desabilitados
             const agendaId = this.dataset.agendaId;
-            const semanalInput = document.getElementById(`semanal_${agendaId}`);
-            const quinzenalInput = document.getElementById(`quinzenal_${agendaId}`);
-            const row = this.closest('tr');
+            const newValue = this.value;
+            const originalSemanal = this.dataset.originalSemanal;
+            const originalQuinzenal = this.dataset.originalQuinzenal;
             
-            if (this.value === 'fechado') {
-                semanalInput.disabled = true;
-                quinzenalInput.disabled = true;
-                semanalInput.value = '';
-                quinzenalInput.value = '';
-                row.classList.add('agenda-row-disabled');
-            } else {
-                semanalInput.disabled = false;
-                quinzenalInput.disabled = false;
-                row.classList.remove('agenda-row-disabled');
+            // Se está tentando fechar um horário com pacientes, mostrar modal de confirmação
+            if (newValue === 'fechado' && (originalSemanal || originalQuinzenal)) {
+                // Reverter a seleção temporariamente
+                this.value = this.dataset.originalValue;
+                
+                // Mostrar modal de confirmação
+                showImmediateCloseModal(agendaId, originalSemanal, originalQuinzenal);
+                return;
             }
+            
+            // Processar mudança normal
+            trackChange(this);
+            updateStatus(agendaId);
+            updatePreviewButton();
+            handleMethodChange(agendaId, newValue);
         });
     });
     
-    function trackChange(element) {
-        console.log('Tracking change for:', element.id); // Debug
+    function showImmediateCloseModal(agendaId, semanal, quinzenal) {
+        const row = document.querySelector(`tr[data-agenda-id="${agendaId}"]`);
+        const dia = row.querySelector('.day-abbreviation').textContent;
+        const horario = row.querySelectorAll('strong')[0].textContent;
+        const sala = row.querySelectorAll('strong')[1].textContent;
         
+        // Filtrar apenas pacientes reais (não "Semanal" ou "Quinzenal")
+        const pacientesReais = [];
+        if (semanal && semanal.toLowerCase() !== 'semanal' && semanal.trim() !== '') {
+            pacientesReais.push({ nome: semanal, tipo: 'Semanal' });
+        }
+        if (quinzenal && quinzenal.toLowerCase() !== 'quinzenal' && quinzenal.trim() !== '') {
+            pacientesReais.push({ nome: quinzenal, tipo: 'Quinzenal' });
+        }
+        
+        // Se não há pacientes reais, aplicar fechamento direto
+        if (pacientesReais.length === 0) {
+            applyDirectClose(agendaId);
+            return;
+        }
+        
+        let detailsHtml = `
+            <div style="background: var(--gray-50); padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
+                <strong>${dia} - ${horario} - Sala ${sala}</strong><br>
+        `;
+        
+        pacientesReais.forEach(paciente => {
+            detailsHtml += `<small>• Paciente ${paciente.tipo}: ${paciente.nome}</small><br>`;
+        });
+        
+        detailsHtml += '</div>';
+        
+        document.getElementById('immediate-close-details').innerHTML = detailsHtml;
+        
+        // Armazenar dados para processamento posterior
+        pendingCloseData = {
+            agendaId: agendaId,
+            pacientesReais: pacientesReais,
+            dia: dia,
+            horario: horario,
+            sala: sala
+        };
+        
+        document.getElementById('immediate-close-modal').style.display = 'block';
+    }
+    
+    function applyDirectClose(agendaId) {
+        // Aplicar fechamento direto quando não há pacientes reais
+        const metodoSelect = document.getElementById(`metodo_${agendaId}`);
+        metodoSelect.value = 'fechado';
+        trackChange(metodoSelect);
+        handleMethodChange(agendaId, 'fechado');
+        updateStatus(agendaId);
+        updatePreviewButton();
+    }
+    
+    function handleMethodChange(agendaId, method) {
+        const semanalInput = document.getElementById(`semanal_${agendaId}`);
+        const quinzenalInput = document.getElementById(`quinzenal_${agendaId}`);
+        const row = document.getElementById(`row_${agendaId}`);
+        
+        if (method === 'fechado') {
+            semanalInput.disabled = true;
+            quinzenalInput.disabled = true;
+            semanalInput.value = '';
+            quinzenalInput.value = '';
+            row.classList.add('agenda-row-disabled');
+            
+            // Registrar as mudanças para os campos limpos
+            trackChange(semanalInput);
+            trackChange(quinzenalInput);
+        } else {
+            semanalInput.disabled = false;
+            quinzenalInput.disabled = false;
+            row.classList.remove('agenda-row-disabled');
+        }
+    }
+    
+    function trackChange(element) {
         const agendaId = element.dataset.agendaId;
         const type = element.dataset.type || 'metodo';
         const originalValue = element.dataset.originalValue || '';
-        const currentValue = element.value;
+        const currentValue = element.value || '';
         
-        console.log('Change details:', { agendaId, type, originalValue, currentValue }); // Debug
+        console.log(`trackChange: ${type} para agenda ${agendaId} - Original: "${originalValue}" -> Atual: "${currentValue}"`);
         
         if (!changes[agendaId]) {
             const row = element.closest('tr');
@@ -623,10 +805,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
-        console.log('Current changes:', changes); // Debug
-        
-        // Atualizar estatísticas de pacientes
-        updatePacienteStats();
+        console.log(`Changes atualizadas para agenda ${agendaId}:`, changes[agendaId]);
     }
     
     function updateStatus(agendaId) {
@@ -646,7 +825,6 @@ document.addEventListener('DOMContentLoaded', function() {
             badgeClass = 'bg-success';
             text = 'Livre';
         } else {
-            // Método padrão - verificar ocupação
             const hasSemanal = semanalInput && semanalInput.value !== '';
             const hasQuinzenal = quinzenalInput && quinzenalInput.value !== '';
             
@@ -668,32 +846,9 @@ document.addEventListener('DOMContentLoaded', function() {
         statusSpan.innerHTML = `<span class="badge ${badgeClass}">${text}</span>`;
     }
     
-    function updatePacienteStats() {
-        pacienteStats = {};
-        
-        // Contar agendas por paciente
-        document.querySelectorAll('.paciente-input').forEach(input => {
-            if (input.value && !input.disabled) {
-                const pacienteName = input.value;
-                const type = input.dataset.type;
-                
-                if (!pacienteStats[pacienteName]) {
-                    pacienteStats[pacienteName] = { semanal: 0, quinzenal: 0, total: 0 };
-                }
-                
-                pacienteStats[pacienteName][type]++;
-                pacienteStats[pacienteName].total++;
-            }
-        });
-        
-        console.log('Paciente stats updated:', pacienteStats); // Debug
-    }
-    
     function updatePreviewButton() {
         const previewBtn = document.getElementById('preview-changes');
         const hasChanges = Object.keys(changes).length > 0;
-        
-        console.log('Updating preview button, hasChanges:', hasChanges); // Debug
         
         if (hasChanges) {
             previewBtn.style.animation = 'pulse 2s infinite';
@@ -714,71 +869,42 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    function showPatientInactivationModal(patientName, scheduleInfo) {
+        document.getElementById('patient-name-display').textContent = patientName;
+        document.getElementById('patient-schedule-display').textContent = scheduleInfo;
+        document.getElementById('inactivation-reason').value = '';
+        document.getElementById('inactivation-notes').value = '';
+        document.getElementById('patient-inactivation-modal').style.display = 'block';
+    }
+    
     function generateSummary() {
-        updatePacienteStats();
-        
-        console.log('Gerando resumo...', { changes, pacienteStats }); // Debug
-        
-        // Gerar estatísticas
         const totalChanges = Object.keys(changes).length;
-        const totalPacientes = Object.keys(pacienteStats).length;
-        const totalSlots = calculateTotalSlots();
         
         const statsHtml = `
-            <div class="stat-card">
-                <div class="stat-number">${totalChanges}</div>
-                <div class="stat-label">Agendas Alteradas</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">${totalPacientes}</div>
-                <div class="stat-label">Pacientes Envolvidos</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">${totalSlots}</div>
-                <div class="stat-label">Total de Horários</div>
+            <div style="background: white; padding: 1rem; border-radius: 0.5rem; text-align: center; border: 1px solid var(--gray-200);">
+                <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-color);">${totalChanges}</div>
+                <div style="color: var(--gray-600); font-size: 0.9rem; margin-top: 0.25rem;">Alterações</div>
             </div>
         `;
         
         document.getElementById('summary-stats').innerHTML = statsHtml;
         
-        // Gerar lista de alterações
-        let changesHtml = '<h5>Alterações por Agenda:</h5>';
+        let changesHtml = '<h5>Alterações Pendentes:</h5>';
         
         Object.entries(changes).forEach(([agendaId, change]) => {
             changesHtml += `
-                <div class="change-item">
+                <div style="background: var(--gray-50); padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; border-left: 4px solid var(--primary-color);">
                     <strong>${change.dia} - ${change.horario} - Sala ${change.sala}</strong><br>
                     ${generateChangeDescription(change)}
                 </div>
             `;
         });
         
-        if (Object.keys(pacienteStats).length > 0) {
-            changesHtml += '<h5 style="margin-top: 2rem;">Resumo por Paciente:</h5>';
-            
-            Object.entries(pacienteStats).forEach(([paciente, stats]) => {
-                changesHtml += `
-                    <div class="change-item">
-                        <strong>${paciente}</strong><br>
-                        <small>
-                            Semanal: ${stats.semanal} horário(s) | 
-                            Quinzenal: ${stats.quinzenal} horário(s) | 
-                            Total: ${stats.total} horário(s)
-                        </small>
-                    </div>
-                `;
-            });
-        }
-        
         document.getElementById('changes-list').innerHTML = changesHtml;
-        
-        console.log('Resumo gerado:', { statsHtml, changesHtml }); // Debug
     }
     
     function generateChangeDescription(change) {
         let description = '';
-        
-        console.log('Gerando descrição para:', change); // Debug
         
         ['semanal', 'quinzenal', 'metodo'].forEach(type => {
             if (change.current[type] !== undefined) {
@@ -807,202 +933,324 @@ document.addEventListener('DOMContentLoaded', function() {
         return description || '<small>Nenhuma alteração detectada</small>';
     }
     
-    function calculateTotalSlots() {
-        let total = 0;
-        Object.values(pacienteStats).forEach(stats => {
-            total += stats.total;
-        });
-        return total;
+    function submitForm() {
+        document.getElementById('loadingSpinner').style.display = 'block';
+        document.getElementById('agenda-form').submit();
     }
     
-    function validateSelection(element) {
-        // Função de validação básica
-        console.log('Validating selection for:', element.id, element.value);
-    }
+    // Event Listeners dos Modais
     
-    function showTestModal() {
-        console.log('Showing test modal...'); // Debug
+    // Modal de fechamento imediato
+    document.getElementById('cancel-immediate-close').addEventListener('click', function() {
+        document.getElementById('immediate-close-modal').style.display = 'none';
+        pendingCloseData = null;
+    });
+    
+    document.getElementById('confirm-immediate-close').addEventListener('click', function() {
+        if (!pendingCloseData) return;
         
-        // Criar dados de teste
-        const testData = {
-            stats: {
-                totalChanges: 3,
-                totalPacientes: 2,
-                totalSlots: 5
-            },
-            changes: [
-                { agenda: 'Segunda - 08:00 - Sala 1', change: 'Semanal: Vazio → João Silva' },
-                { agenda: 'Terça - 10:00 - Sala 2', change: 'Quinzenal: Maria Santos → Vazio' },
-                { agenda: 'Quarta - 14:00 - Sala 1', change: 'Método: Aberto → Fechado' }
-            ],
-            pacientes: [
-                { nome: 'João Silva', semanal: 2, quinzenal: 0, total: 2 },
-                { nome: 'Maria Santos', semanal: 0, quinzenal: 3, total: 3 }
-            ]
-        };
+        document.getElementById('immediate-close-modal').style.display = 'none';
         
-        // Preencher modal com dados de teste
-        const statsContainer = document.getElementById('summary-stats');
-        const changesContainer = document.getElementById('changes-list');
+        // Preparar lista de pacientes para inativação (apenas pacientes reais)
+        patientInactivationQueue = [];
         
-        if (statsContainer) {
-            statsContainer.innerHTML = `
-                <div class="stat-card">
-                    <div class="stat-number">${testData.stats.totalChanges}</div>
-                    <div class="stat-label">Agendas Alteradas (TESTE)</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">${testData.stats.totalPacientes}</div>
-                    <div class="stat-label">Pacientes Envolvidos (TESTE)</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">${testData.stats.totalSlots}</div>
-                    <div class="stat-label">Total de Horários (TESTE)</div>
-                </div>
-            `;
+        if (pendingCloseData.pacientesReais && pendingCloseData.pacientesReais.length > 0) {
+            pendingCloseData.pacientesReais.forEach(paciente => {
+                patientInactivationQueue.push({
+                    name: paciente.nome,
+                    schedule: `${pendingCloseData.dia} - ${pendingCloseData.horario} - Sala ${pendingCloseData.sala} (${paciente.tipo})`
+                });
+            });
         }
         
-        if (changesContainer) {
-            let changesHtml = '<h5>Alterações por Agenda (TESTE):</h5>';
-            testData.changes.forEach(item => {
-                changesHtml += `
-                    <div class="change-item">
-                        <strong>${item.agenda}</strong><br>
-                        <small>${item.change}</small>
-                    </div>
-                `;
-            });
-            
-            changesHtml += '<h5 style="margin-top: 2rem;">Resumo por Paciente (TESTE):</h5>';
-            testData.pacientes.forEach(paciente => {
-                changesHtml += `
-                    <div class="change-item">
-                        <strong>${paciente.nome}</strong><br>
-                        <small>
-                            Semanal: ${paciente.semanal} horário(s) | 
-                            Quinzenal: ${paciente.quinzenal} horário(s) | 
-                            Total: ${paciente.total} horário(s)
-                        </small>
-                    </div>
-                `;
-            });
-            
-            changesContainer.innerHTML = changesHtml;
-        }
+        currentPatientIndex = 0;
         
-        // Mostrar modal
-        const modal = document.getElementById('summary-modal');
-        if (modal) {
-            modal.style.display = 'block';
-            console.log('Modal deveria estar visível agora'); // Debug
+        // Processar inativações se houver pacientes reais
+        if (patientInactivationQueue.length > 0) {
+            processNextPatientInactivation();
         } else {
-            console.error('Modal summary-modal não encontrado!');
+            applyCloseChanges();
+        }
+    });
+    
+    // Modal de inativação de paciente
+    document.getElementById('cancel-patient-inactivation').addEventListener('click', function() {
+        document.getElementById('patient-inactivation-modal').style.display = 'none';
+        // Reverter mudanças e cancelar processo
+        resetPendingChanges();
+    });
+    
+    document.getElementById('confirm-patient-inactivation').addEventListener('click', function() {
+        const reason = document.getElementById('inactivation-reason').value;
+        const notes = document.getElementById('inactivation-notes').value;
+        
+        if (!reason) {
+            alert('Por favor, selecione um motivo para a inativação.');
+            return;
+        }
+        
+        // Adicionar dados de inativação ao formulário
+        const patient = patientInactivationQueue[currentPatientIndex];
+        const form = document.getElementById('agenda-form');
+        
+        // Normalizar o nome do paciente para evitar problemas com caracteres especiais
+        const safePatientName = patient.name.replace(/\s/g, '_').replace(/[.,]/g, '');
+        
+        // Remover qualquer campo anterior com o mesmo nome
+        const existingReasonInput = form.querySelector(`input[name="patient_inactivation_${patient.name}_reason"]`) || 
+                                  form.querySelector(`input[name="patient_inactivation_${safePatientName}_reason"]`);
+        if (existingReasonInput) {
+            existingReasonInput.remove();
+        }
+        
+        const existingNotesInput = form.querySelector(`input[name="patient_inactivation_${patient.name}_notes"]`) ||
+                                 form.querySelector(`input[name="patient_inactivation_${safePatientName}_notes"]`);
+        if (existingNotesInput) {
+            existingNotesInput.remove();
+        }
+        
+        // Criar novos campos
+        const reasonInput = document.createElement('input');
+        reasonInput.type = 'hidden';
+        reasonInput.name = `patient_inactivation_${patient.name}_reason`;
+        reasonInput.value = reason;
+        form.appendChild(reasonInput);
+        
+        const notesInput = document.createElement('input');
+        notesInput.type = 'hidden';
+        notesInput.name = `patient_inactivation_${patient.name}_notes`;
+        notesInput.value = notes;
+        form.appendChild(notesInput);
+        
+        console.log(`Adicionados campos de inativação para ${patient.name}:`);
+        console.log(`  - ${reasonInput.name}: ${reasonInput.value}`);
+        console.log(`  - ${notesInput.name}: ${notesInput.value}`);
+        
+        currentPatientIndex++;
+        document.getElementById('patient-inactivation-modal').style.display = 'none';
+        
+        // Próximo paciente ou finalizar
+        if (currentPatientIndex < patientInactivationQueue.length) {
+            processNextPatientInactivation();
+        } else {
+            applyCloseChanges();
+        }
+    });
+    
+    function processNextPatientInactivation() {
+        if (currentPatientIndex < patientInactivationQueue.length) {
+            const patient = patientInactivationQueue[currentPatientIndex];
+            showPatientInactivationModal(patient.name, patient.schedule);
+        } else {
+            // Todos os pacientes foram processados
+            applyCloseChanges();
         }
     }
     
-    // EVENT LISTENERS DOS BOTÕES - CORRIGIDO
-    const previewButton = document.getElementById('preview-changes');
-    const testButton = document.getElementById('test-modal');
-    const loadStatsButton = document.getElementById('load-stats');
-    
-    console.log('Botões encontrados:', { previewButton, testButton, loadStatsButton }); // Debug
-    
-    if (previewButton) {
-        previewButton.addEventListener('click', function() {
-            console.log('Botão Visualizar Alterações clicado!'); // Debug
-            console.log('Changes atuais:', changes); // Debug
-            
-            if (Object.keys(changes).length === 0) {
-                alert('Nenhuma alteração foi feita.');
-                return;
-            }
-            
-            generateSummary();
-            document.getElementById('summary-modal').style.display = 'block';
-        });
-    } else {
-        console.error('Botão preview-changes não encontrado!');
+    function applyCloseChanges() {
+        if (!pendingCloseData) {
+            console.log('applyCloseChanges: Nenhum pendingCloseData encontrado');
+            return;
+        }
+        
+        console.log('=== Aplicando mudanças de fechamento ===');
+        console.log('Pending close data:', pendingCloseData);
+        
+        // Aplicar mudanças na interface
+        const agendaId = pendingCloseData.agendaId;
+        const metodoSelect = document.getElementById(`metodo_${agendaId}`);
+        const semanalInput = document.getElementById(`semanal_${agendaId}`);
+        const quinzenalInput = document.getElementById(`quinzenal_${agendaId}`);
+        
+        if (!metodoSelect) {
+            console.error(`Select de método não encontrado para agenda ${agendaId}`);
+            return;
+        }
+        
+        console.log(`Definindo método como fechado para agenda ${agendaId}`);
+        metodoSelect.value = 'fechado';
+        
+        // Limpar campos de pacientes
+        if (semanalInput) {
+            semanalInput.value = '';
+            trackChange(semanalInput);
+            console.log(`Campo semanal limpo para agenda ${agendaId}`);
+        }
+        
+        if (quinzenalInput) {
+            quinzenalInput.value = '';
+            trackChange(quinzenalInput);
+            console.log(`Campo quinzenal limpo para agenda ${agendaId}`);
+        }
+        
+        trackChange(metodoSelect);
+        handleMethodChange(agendaId, 'fechado');
+        updateStatus(agendaId);
+        updatePreviewButton();
+        
+        console.log(`Agenda ${agendaId} marcada como fechada na interface`);
+        console.log(`Alterações registradas:`, changes);
+        
+        pendingCloseData = null;
+        patientInactivationQueue = [];
+        currentPatientIndex = 0;
     }
     
-    if (testButton) {
-        testButton.addEventListener('click', function() {
-            console.log('Botão Testar Modal clicado!'); // Debug
-            showTestModal();
-        });
-    } else {
-        console.error('Botão test-modal não encontrado!');
+    function resetPendingChanges() {
+        pendingCloseData = null;
+        patientInactivationQueue = [];
+        currentPatientIndex = 0;
     }
     
-    if (loadStatsButton) {
-        loadStatsButton.addEventListener('click', function() {
-            console.log('Botão Ver Estatísticas clicado!'); // Debug
-            alert('Funcionalidade de estatísticas será implementada aqui!');
-        });
-    }
+    // Modal de resumo
+    document.getElementById('preview-changes').addEventListener('click', function() {
+        if (Object.keys(changes).length === 0) {
+            alert('Nenhuma alteração foi feita.');
+            return;
+        }
+        
+        generateSummary();
+        document.getElementById('summary-modal').style.display = 'block';
+    });
     
-    // Eventos do modal
-    const cancelButton = document.getElementById('cancel-changes');
-    const confirmButton = document.getElementById('confirm-changes');
+    document.getElementById('cancel-changes').addEventListener('click', function() {
+        document.getElementById('summary-modal').style.display = 'none';
+    });
     
-    if (cancelButton) {
-        cancelButton.addEventListener('click', function() {
-            console.log('Cancelar clicado');
-            document.getElementById('summary-modal').style.display = 'none';
-        });
-    }
+    document.getElementById('confirm-changes').addEventListener('click', function() {
+        if (Object.keys(changes).length === 0) {
+            alert('Nenhuma alteração para salvar.');
+            return;
+        }
+        
+        console.log('Confirmando alterações:', changes);
+        document.getElementById('summary-modal').style.display = 'none';
+        submitFormWithChanges();
+    });
     
-    if (confirmButton) {
-        confirmButton.addEventListener('click', function() {
-            console.log('Confirmar clicado');
-            if (Object.keys(changes).length === 0) {
-                alert('Nenhuma alteração para salvar.');
-                return;
-            }
+    function submitFormWithChanges() {
+        // Mostrar loading
+        document.getElementById('loadingSpinner').style.display = 'block';
+        
+        const form = document.getElementById('agenda-form');
+        
+        console.log('=== Iniciando submit das alterações ===');
+        console.log('Alterações pendentes:', changes);
+        
+        // Garantir que todos os campos estão com os valores corretos antes do submit
+        Object.entries(changes).forEach(([agendaId, change]) => {
+            console.log(`Aplicando mudanças para agenda ${agendaId}:`, change);
             
-            // Mostrar loading
-            document.getElementById('loadingSpinner').style.display = 'block';
-            document.getElementById('summary-modal').style.display = 'none';
-            
-            // Submeter formulário
-            const form = document.getElementById('agenda-form');
-            
-            // Adicionar dados das alterações como campos hidden
-            Object.entries(changes).forEach(([agendaId, change]) => {
-                const hiddenInput = document.createElement('input');
-                hiddenInput.type = 'hidden';
-                hiddenInput.name = `change_${agendaId}`;
-                hiddenInput.value = JSON.stringify(change);
-                form.appendChild(hiddenInput);
+            // Aplicar mudanças nos campos do formulário
+            Object.entries(change.current).forEach(([type, value]) => {
+                let fieldName;
+                if (type === 'metodo') {
+                    fieldName = `metodo_${agendaId}`;
+                } else {
+                    fieldName = `${type}_${agendaId}`;
+                }
+                
+                const field = document.getElementsByName(fieldName)[0];
+                if (field) {
+                    // Garantir que não enviamos string "None"
+                    const cleanValue = (value === null || value === undefined || value === 'None') ? '' : value;
+                    field.value = cleanValue;
+                    console.log(`Campo ${fieldName} definido para: "${field.value}"`);
+                } else {
+                    console.error(`Campo ${fieldName} não encontrado!`);
+                }
             });
-            
-            form.submit();
         });
+        
+        // Verificar se há campos de inativação de pacientes
+        const inactivationFields = form.querySelectorAll('input[name*="patient_inactivation_"]');
+        if (inactivationFields.length > 0) {
+            console.log('=== Campos de inativação encontrados ===');
+            inactivationFields.forEach(field => {
+                console.log(`${field.name}: ${field.value}`);
+            });
+        }
+        
+        // Debug: Verificar valores finais dos campos
+        console.log('=== Valores finais dos campos do formulário ===');
+        const formData = new FormData(form);
+        for (let [key, value] of formData.entries()) {
+            if (key.includes('metodo_') || key.includes('semanal_') || key.includes('quinzenal_') || key.includes('patient_inactivation_')) {
+                console.log(`${key}: "${value}"`);
+            }
+        }
+        
+        // Verificar especificamente os campos que estão causando problema
+        console.log('=== Verificação específica dos campos ===');
+        const allInputs = form.querySelectorAll('input, select');
+        allInputs.forEach(input => {
+            if (input.name && (input.name.includes('semanal_') || input.name.includes('quinzenal_') || input.name.includes('metodo_'))) {
+                console.log(`Campo ${input.name}: valor="${input.value}" tipo="${input.type}"`);
+            }
+        });
+        
+        // Salvar indicador de que as alterações estão sendo enviadas
+        hasUnsavedChanges = false;
+        
+        console.log('=== Enviando formulário ===');
+        form.submit();
     }
     
-    // Fechar modal clicando fora
+    // Fechar modais clicando fora
     window.addEventListener('click', function(event) {
-        const modal = document.getElementById('summary-modal');
-        if (event.target === modal) {
-            modal.style.display = 'none';
-        }
+        const modals = [
+            'immediate-close-modal',
+            'patient-inactivation-modal',
+            'summary-modal'
+        ];
+        
+        modals.forEach(modalId => {
+            const modal = document.getElementById(modalId);
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
     });
     
     // Atalhos de teclado
     document.addEventListener('keydown', function(e) {
-        // Ctrl + S para salvar
+        // Ctrl + S para visualizar alterações
         if (e.ctrlKey && e.key === 's') {
             e.preventDefault();
-            previewButton.click();
+            document.getElementById('preview-changes').click();
         }
         
-        // Escape para cancelar modal
+        // Escape para fechar modais
         if (e.key === 'Escape') {
-            const modal = document.getElementById('summary-modal');
-            if (modal.style.display === 'block') {
-                modal.style.display = 'none';
-            }
+            const modals = document.querySelectorAll('.modal-overlay');
+            modals.forEach(modal => {
+                if (modal.style.display === 'block') {
+                    modal.style.display = 'none';
+                }
+            });
         }
     });
+    
+    // Autocomplete básico para pacientes
+    function setupAutocomplete() {
+        document.querySelectorAll('.paciente-input').forEach(input => {
+            input.addEventListener('input', function() {
+                const type = this.dataset.type;
+                const value = this.value.toLowerCase();
+                const pacientes = type === 'semanal' ? pacientesSemanais : pacientesQuinzenais;
+                
+                // Filtrar pacientes
+                const filtered = pacientes.filter(p => 
+                    p.toLowerCase().includes(value)
+                ).slice(0, 5);
+                
+                // Mostrar sugestões (implementação básica)
+                if (value.length > 0 && filtered.length > 0) {
+                    console.log(`Sugestões para ${type}:`, filtered);
+                }
+            });
+        });
+    }
     
     // Indicador de mudanças não salvas
     let hasUnsavedChanges = false;
@@ -1023,35 +1271,63 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Reset do indicador quando as alterações são confirmadas
-    if (confirmButton) {
-        confirmButton.addEventListener('click', function() {
-            hasUnsavedChanges = false;
+    // Resetar indicador quando confirmar alterações
+    document.getElementById('confirm-changes').addEventListener('click', function() {
+        hasUnsavedChanges = false;
+    });
+    
+    // Validação de duplicação de pacientes
+    function validatePatientDuplication() {
+        const pacienteInputs = document.querySelectorAll('.paciente-input');
+        const usedPatients = new Map();
+        
+        pacienteInputs.forEach(input => {
+            const value = input.value.trim();
+            if (value) {
+                const agendaId = input.dataset.agendaId;
+                const type = input.dataset.type;
+                
+                if (!usedPatients.has(value)) {
+                    usedPatients.set(value, []);
+                }
+                usedPatients.get(value).push({ agendaId, type });
+            }
         });
+        
+        // Verificar duplicações
+        let hasDuplication = false;
+        usedPatients.forEach((locations, patient) => {
+            if (locations.length > 1) {
+                console.warn(`Paciente ${patient} está alocado em múltiplos horários:`, locations);
+                hasDuplication = true;
+            }
+        });
+        
+        return !hasDuplication;
     }
     
-    // Inicializar
-    updatePacienteStats();
+    // Inicialização
+    setupAutocomplete();
     updatePreviewButton();
     
-    console.log('JavaScript inicializado com sucesso!'); // Debug
+    // Inicializar status de todas as agendas
+    document.querySelectorAll('[data-agenda-id]').forEach(row => {
+        const agendaId = row.dataset.agendaId;
+        updateStatus(agendaId);
+        
+        // Aplicar estado inicial se for fechado
+        const metodoSelect = document.getElementById(`metodo_${agendaId}`);
+        if (metodoSelect && metodoSelect.value === 'fechado') {
+            handleMethodChange(agendaId, 'fechado');
+        }
+    });
+    
+    console.log('Sistema de edição de agendas inicializado com sucesso!');
 });
 
-// Adicionar estilos de animação
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes pulse {
-        0% {
-            transform: scale(1);
-        }
-        50% {
-            transform: scale(1.05);
-        }
-        100% {
-            transform: scale(1);
-        }
-    }
-    
+// Adicionar estilos de animação via JavaScript
+const styleSheet = document.createElement('style');
+styleSheet.textContent = `
     .highlight-change {
         animation: highlightChange 0.5s ease-in-out;
     }
@@ -1061,7 +1337,16 @@ style.textContent = `
         50% { background-color: rgba(203, 12, 159, 0.1); }
         100% { background-color: transparent; }
     }
+    
+    .fade-in {
+        animation: fadeIn 0.3s ease-in-out;
+    }
+    
+    .slide-in {
+        animation: slideIn 0.3s ease-in-out;
+    }
 `;
-document.head.appendChild(style);
+document.head.appendChild(styleSheet);
 </script>
+
 {% endblock content %}
