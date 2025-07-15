@@ -27,7 +27,7 @@ from decimal import Decimal, InvalidOperation
 from django.shortcuts import render
 from datetime import datetime
 from django.db.models import F, ExpressionWrapper, DecimalField, Sum
-from django.db.models.functions import Coalesce  # Import correto para Coalesce
+from django.db.models.functions import Coalesce  
 from django.db.models import Sum, Count, F, Q, DecimalField, ExpressionWrapper, Case, When, Value, Prefetch, Max
 from django.db.models.functions import Coalesce
 from django.contrib.postgres.aggregates import ArrayAgg
@@ -1071,20 +1071,26 @@ def editar_multiplas_agendas(request, psicologo_id):
                 semanal_novo = request.POST.get(f'semanal_{agenda_id}', '').strip()
                 quinzenal_novo = request.POST.get(f'quinzenal_{agenda_id}', '').strip()
                 
-                # Normalizar strings vazias e "None" literal para None
-                if not semanal_novo or semanal_novo.lower() in ['none', 'null']:
+                # Normalizar strings vazias, "None" literal e placeholders para None
+                if not semanal_novo or semanal_novo.lower() in ['none', 'null', 'semanal']:
                     semanal_novo = None
-                if not quinzenal_novo or quinzenal_novo.lower() in ['none', 'null']:
+                if not quinzenal_novo or quinzenal_novo.lower() in ['none', 'null', 'quinzenal']:
                     quinzenal_novo = None
                 
                 print(f"Método: {metodo}")
                 print(f"Semanal novo: '{semanal_novo}'")
                 print(f"Quinzenal novo: '{quinzenal_novo}'")
                 
-                # Valores originais
+                # Valores originais (normalizando placeholders antigos)
                 semanal_original = agenda.semanal or ''
                 quinzenal_original = agenda.quinzenal or ''
                 metodo_original = getattr(agenda, 'metodo', 'padrao')
+                
+                # Normalizar valores originais que podem ser placeholders antigos
+                if semanal_original.lower() in ['semanal', 'none', 'null']:
+                    semanal_original = ''
+                if quinzenal_original.lower() in ['quinzenal', 'none', 'null']:
+                    quinzenal_original = ''
                 
                 print(f"Semanal original: '{semanal_original}'")
                 print(f"Quinzenal original: '{quinzenal_original}'")
@@ -1207,39 +1213,60 @@ def editar_multiplas_agendas(request, psicologo_id):
                 
                 # Processar método "livre" - limpar todos os pacientes
                 elif metodo == 'livre':
-                    # Limpar todos os pacientes do horário
-                    if agenda.semanal or agenda.quinzenal or agenda.Paciente:
-                        agenda.Paciente = None
-                        agenda.semanal = None
-                        agenda.quinzenal = None
-                        
-                        # Salvar método se o campo existir
-                        if hasattr(agenda, 'metodo'):
-                            agenda.metodo = metodo
-                            
-                        agenda.save()
-                        
+                    # Sempre limpar pacientes e definir método como livre
+                    agenda.Paciente = None
+                    agenda.semanal = None
+                    agenda.quinzenal = None
+                    
+                    # Salvar método se o campo existir
+                    if hasattr(agenda, 'metodo'):
+                        agenda.metodo = metodo
+                    
+                    agenda.save()
+                    
+                    # Log apenas se havia pacientes para remover
+                    if semanal_original or quinzenal_original:
                         horarios_liberados += 1
                         alteracoes_log.append({
                             'tipo': 'horario_liberado',
                             'dia': agenda.dia_semana,
                             'horario': agenda.horario.strftime('%H:%M'),
                             'sala': agenda.sala.numero_sala,
-                            'pacientes_removidos': [p for p in [semanal_original, quinzenal_original] if p]
+                            'pacientes_removidos': [p for p in [semanal_original, quinzenal_original] if p and p not in ['Semanal', 'Quinzenal']]
+                        })
+                    else:
+                        # Log para mudança de fechado para livre
+                        alteracoes_realizadas += 1
+                        alteracoes_log.append({
+                            'tipo': 'metodo_alterado',
+                            'dia': agenda.dia_semana,
+                            'horario': agenda.horario.strftime('%H:%M'),
+                            'sala': agenda.sala.numero_sala,
+                            'metodo_anterior': metodo_original,
+                            'metodo_novo': metodo
                         })
                     
+                    print(f"Agenda {agenda.id} definida como livre - Método salvo: {agenda.metodo}")
+                    
                     # Forçar limpeza dos campos de entrada (ignora o que veio do form)
-                    semanal_novo = ''
-                    quinzenal_novo = ''
+                    semanal_novo = None
+                    quinzenal_novo = None
                     continue
                 
+                # Verificar se estamos mudando DE livre PARA outro método
+                elif metodo_original == 'livre' and metodo != 'livre':
+                    print(f"Transição detectada: de 'livre' para '{metodo}'")
+                    # Permitir que o processamento normal continue com os valores do formulário
+                    # Não fazer continue aqui para permitir processamento normal
+                
                 # Verificar se houve mudanças nos pacientes ou método
-                # Normalizar valores para comparação
+                # Normalizar valores para comparação (tratar empty string como None)
                 semanal_original_norm = semanal_original.strip() if semanal_original else None
                 quinzenal_original_norm = quinzenal_original.strip() if quinzenal_original else None
                 
-                mudou_semanal = semanal_novo != semanal_original_norm
-                mudou_quinzenal = quinzenal_novo != quinzenal_original_norm
+                # Comparar tratando None e empty string como equivalentes
+                mudou_semanal = (semanal_novo or None) != (semanal_original_norm or None)
+                mudou_quinzenal = (quinzenal_novo or None) != (quinzenal_original_norm or None)
                 mudou_metodo = metodo != metodo_original
                 
                 print(f"Comparações:")

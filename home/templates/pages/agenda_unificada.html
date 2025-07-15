@@ -420,13 +420,13 @@
                                                             <span class="badge bg-danger fs-6 px-3 py-2">
                                                                 <i class="fas fa-lock me-1"></i>FECHADO
                                                             </span>
-                                                        {% elif consulta.semanal or consulta.quinzenal %}
-                                                            <span class="badge bg-success fs-6 px-3 py-2">
-                                                                <i class="fas fa-user-check me-1"></i>OCUPADO
+                                                        {% elif consulta.semanal == "Semanal" and consulta.quinzenal == "Quinzenal" %}
+                                                            <span class="badge bg-info fs-6 px-3 py-2">
+                                                                <i class="fas fa-user-check me-1"></i>LIVRE
                                                             </span>
                                                         {% else %}
-                                                            <span class="badge bg-info fs-6 px-3 py-2">
-                                                                <i class="fas fa-calendar-plus me-1"></i>LIVRE
+                                                            <span class="badge bg-success fs-6 px-3 py-2">
+                                                                <i class="fas fa-calendar-plus me-1"></i>OCUPADO
                                                             </span>
                                                         {% endif %}
                                                     </td>
@@ -525,28 +525,28 @@
                                     <table class="table table-hover mb-0">
                                         <thead class="bg-light">
                                             <tr>
-                                                <th class="text-xs">Horário</th>
-                                                <th class="text-xs">Paciente</th>
-                                                <th class="text-xs">Status</th>
+                                                <th class="text-xs text-center">Horário</th>
+                                                <th class="text-xs text-center">Paciente</th>
+                                                <th class="text-xs text-center">Status</th>
                                                 <th class="text-xs text-center">Ações</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {% for consulta in dia_info.todas %}
                                             <tr>
-                                                <td class="text-sm">{{ consulta.horario|time:"H:i" }}</td>
-                                                <td class="text-sm">
+                                                <td class="text-sm text-center">{{ consulta.horario|time:"H:i" }}</td>
+                                                <td class="text-sm text-center">
                                                     {% if consulta.Paciente %}
                                                         <strong>{{ consulta.Paciente.nome }}</strong>
                                                     {% else %}
                                                         <em class="text-muted">Disponível</em>
                                                     {% endif %}
                                                 </td>
-                                                <td>
+                                                <td class="text-center">
                                                     {% if consulta.Paciente %}
-                                                        <span class="badge bg-success">Agendado</span>
+                                                        <span class="badge bg-success text-center">Agendado</span>
                                                     {% else %}
-                                                        <span class="badge bg-secondary">Livre</span>
+                                                        <span class="badge bg-secondary text-center">Livre</span>
                                                     {% endif %}
                                                 </td>
                                                 <td class="text-center">
@@ -555,20 +555,20 @@
                                                            class="btn btn-sm btn-outline-warning" 
                                                            data-bs-toggle="tooltip" 
                                                            title="Cancelar agendamento">
-                                                            <i class="fas fa-times"></i>
+                                                            Cancelar
                                                         </a>
                                                         <a href="{% url 'deletar_consulta_online' consulta_id=consulta.id psicologo_id=psicologo.id %}" 
                                                            class="btn btn-sm btn-outline-danger ms-1" 
                                                            data-bs-toggle="tooltip" 
                                                            title="Remover horário">
-                                                            <i class="fas fa-trash"></i>
+                                                            Remover
                                                         </a>
                                                     {% else %}
                                                         <a href="{% url 'deletar_consulta_online' consulta_id=consulta.id psicologo_id=psicologo.id %}" 
                                                            class="btn btn-sm btn-outline-danger" 
                                                            data-bs-toggle="tooltip" 
                                                            title="Remover horário">
-                                                            <i class="fas fa-trash"></i>
+                                                            Remover
                                                         </a>
                                                     {% endif %}
                                                 </td>

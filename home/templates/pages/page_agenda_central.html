@@ -226,22 +226,30 @@
                           {% for consulta in consultas %}
                             {% if consulta.sala == sala and consulta.dia_semana == dia and consulta.horario == horario_linha %}
                               {% if consulta.psicologo %}
-                                  {% if consulta.semanal != "Semanal" %}
+                                  {% if consulta.semanal != "Semanal" and consulta.semanal %}
                                   <td class="patient-cell" style="background-color: {{ consulta.psicologo.cor }}20;">
                                     <span class="patient-name">{{ consulta.semanal }}</span>
                                   </td>
                                   {% else %}
                                   <td class="patient-cell" style="background-color: {{ consulta.psicologo.cor }}20;">
-                                    <span class="patient-name"></span>
+                                    {% if consulta.semanal %}
+                                      <span class="patient-name"></span>
+                                    {% else %}
+                                      <span class="patient-name">Fechado</span>
+                                    {% endif %}
                                   </td>
                                   {% endif %}
-                                  {% if consulta.quinzenal != "Quinzenal" %}
+                                  {% if consulta.quinzenal != "Quinzenal" and consulta.quinzenal %}
                                   <td class="patient-cell" style="background-color: {{ consulta.psicologo.cor }}20;">
                                     <span class="patient-name">{{ consulta.quinzenal }}</span>
                                   </td>
                                   {% else %}
                                   <td class="patient-cell" style="background-color: {{ consulta.psicologo.cor }}20;">
-                                    <span class="patient-name"></span>
+                                    {% if consulta.quinzenal %}
+                                      <span class="patient-name"></span>
+                                    {% else %}
+                                      <span class="patient-name">Fechado</span>
+                                    {% endif %}
                                   </td>
                                   {% endif %}
                               {% else %}
@@ -317,23 +325,35 @@
                         {% with encontrado=False %}
                           {% for consulta in consultas_online %}
                             {% if consulta.psicologo == psicologa and consulta.dia_semana == dia and consulta.horario == horario_linha %}
-                              {% if consulta.semanal != "Semanal" %}
+                              {% if consulta.semanal != "Semanal" and consulta.quinzenal %}
                                   <td class="patient-cell" style="background-color: {{ consulta.psicologo.cor }}20;">
                                     <span class="patient-name">{{ consulta.semanal }}</span>
                                   </td>
                                   {% else %}
-                                  <td class="patient-cell" style="background-color: {{ consulta.psicologo.cor }}20;">
-                                    <span class="patient-name"></span>
-                                  </td>
+                                    {% if consulta.semanal %}
+                                      <td class="patient-cell" style="background-color: {{ consulta.psicologo.cor }}20;">
+                                        <span class="patient-name"></span>
+                                      </td>
+                                    {% else %}
+                                      <td class="patient-cell" style="background-color: {{ consulta.psicologo.cor }}20;">
+                                        <span class="patient-name">Fechado</span>
+                                      </td>
+                                    {% endif %}
                                   {% endif %}
-                                  {% if consulta.quinzenal != "Quinzenal" %}
+                                  {% if consulta.quinzenal != "Quinzenal" and consulta.quinzenal %}
                                   <td class="patient-cell" style="background-color: {{ consulta.psicologo.cor }}20;">
                                     <span class="patient-name">{{ consulta.quinzenal }}</span>
                                   </td>
                                   {% else %}
-                                  <td class="patient-cell" style="background-color: {{ consulta.psicologo.cor }}20;">
-                                    <span class="patient-name"></span>
-                                  </td>
+                                    {% if consulta.quinzenal %}
+                                    <td class="patient-cell" style="background-color: {{ consulta.psicologo.cor }}20;">
+                                      <span class="patient-name"></span>
+                                    </td>
+                                    {% else %}
+                                      <td class="patient-cell" style="background-color: {{ consulta.psicologo.cor }}20;">
+                                        <span class="patient-name">Fechado</span>
+                                      </td>
+                                    {% endif %}
                                   {% endif %}
                               {% with encontrado=True %}{% endwith %}
                             {% endif %}

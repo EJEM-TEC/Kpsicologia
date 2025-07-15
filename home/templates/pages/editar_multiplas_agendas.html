@@ -310,6 +310,80 @@
         color: var(--gray-500);
     }
 
+    /* Autocomplete Styles */
+    .autocomplete-container {
+        position: relative;
+    }
+
+    .autocomplete-suggestions {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 2px solid var(--gray-200);
+        border-top: none;
+        border-radius: 0 0 0.75rem 0.75rem;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 1000;
+        display: none;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    }
+
+    .autocomplete-suggestions.active {
+        display: block;
+    }
+
+    .suggestion-item {
+        padding: 0.75rem;
+        cursor: pointer;
+        border-bottom: 1px solid var(--gray-100);
+        transition: background-color 0.2s;
+        font-size: 0.9rem;
+    }
+
+    .suggestion-item:last-child {
+        border-bottom: none;
+    }
+
+    .suggestion-item:hover,
+    .suggestion-item.highlighted {
+        background-color: var(--gray-50);
+    }
+
+    .suggestion-item.selected {
+        background-color: var(--primary-color);
+        color: white;
+    }
+
+    .suggestion-item .patient-name {
+        font-weight: 600;
+        color: var(--gray-900);
+    }
+
+    .suggestion-item.selected .patient-name {
+        color: white;
+    }
+
+    .suggestion-item .patient-period {
+        font-size: 0.8rem;
+        color: var(--gray-500);
+        margin-left: 0.5rem;
+    }
+
+    .suggestion-item.selected .patient-period {
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .no-suggestions {
+        padding: 0.75rem;
+        text-align: center;
+        color: var(--gray-500);
+        font-style: italic;
+        font-size: 0.85rem;
+    }
+
     @keyframes fadeIn {
         from { opacity: 0; }
         to { opacity: 1; }
@@ -350,6 +424,22 @@
             flex-direction: column;
             align-items: flex-start;
             gap: 0.5rem;
+        }
+        
+        /* Autocomplete adjustments for mobile */
+        .autocomplete-suggestions {
+            max-height: 150px;
+            font-size: 0.85rem;
+        }
+        
+        .suggestion-item {
+            padding: 0.5rem;
+        }
+        
+        .suggestion-item .patient-period {
+            display: block;
+            margin-left: 0;
+            margin-top: 0.2rem;
         }
     }
 </style>
@@ -438,12 +528,13 @@
                                                            class="form-control paciente-input" 
                                                            id="semanal_{{ agenda.id }}" 
                                                            name="semanal_{{ agenda.id }}"
-                                                           value="{{ agenda.semanal|default:'' }}"
+                                                           value="{% if agenda.semanal and agenda.semanal != 'Semanal' %}{{ agenda.semanal }}{% endif %}"
                                                            placeholder="Digite o nome do paciente..."
-                                                           data-original-value="{{ agenda.semanal|default:'' }}"
+                                                           data-original-value="{% if agenda.semanal and agenda.semanal != 'Semanal' %}{{ agenda.semanal }}{% endif %}"
                                                            data-agenda-id="{{ agenda.id }}"
                                                            data-type="semanal"
                                                            autocomplete="off" />
+                                                    <div class="autocomplete-suggestions" id="suggestions_semanal_{{ agenda.id }}"></div>
                                                 </div>
                                             </td>
                                             <td class="align-middle text-center position-relative">
@@ -452,12 +543,13 @@
                                                            class="form-control paciente-input" 
                                                            id="quinzenal_{{ agenda.id }}" 
                                                            name="quinzenal_{{ agenda.id }}"
-                                                           value="{{ agenda.quinzenal|default:'' }}"
+                                                           value="{% if agenda.quinzenal and agenda.quinzenal != 'Quinzenal' %}{{ agenda.quinzenal }}{% endif %}"
                                                            placeholder="Digite o nome do paciente..."
-                                                           data-original-value="{{ agenda.quinzenal|default:'' }}"
+                                                           data-original-value="{% if agenda.quinzenal and agenda.quinzenal != 'Quinzenal' %}{{ agenda.quinzenal }}{% endif %}"
                                                            data-agenda-id="{{ agenda.id }}"
                                                            data-type="quinzenal"
                                                            autocomplete="off" />
+                                                    <div class="autocomplete-suggestions" id="suggestions_quinzenal_{{ agenda.id }}"></div>
                                                 </div>
                                             </td>
                                             <td class="align-middle text-center">
@@ -512,6 +604,42 @@
                     </div>
                 </form>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmação de Abertura de Horário Fechado -->
+<div id="open-schedule-modal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                <svg style="width: 24px; height: 24px; fill: currentColor;" viewBox="0 0 24 24">
+                    <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6z"/>
+                </svg>
+                Confirmar Abertura de Horário
+            </h3>
+        </div>
+        <div class="modal-body">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Atenção!</strong> Você está prestes a abrir um horário que estava fechado.
+            </div>
+            <div id="open-schedule-details">
+                <!-- Detalhes do horário a ser aberto serão inseridos aqui -->
+            </div>
+            <p><strong>Deseja realmente abrir este horário para agendamentos?</strong></p>
+            <p><small class="text-muted">O horário ficará disponível para novos pacientes.</small></p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="cancel-open-schedule">
+                Cancelar
+            </button>
+            <button type="button" class="btn btn-success" id="confirm-open-schedule">
+                <svg style="width: 16px; height: 16px; margin-right: 0.5rem; fill: currentColor;" viewBox="0 0 24 24">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+                Sim, Abrir Horário
+            </button>
         </div>
     </div>
 </div>
@@ -646,6 +774,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     let changes = {};
     let pendingCloseData = null;
+    let pendingOpenData = null;
     let patientInactivationQueue = [];
     let currentPatientIndex = 0;
     
@@ -689,6 +818,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
+            // Se está mudando de fechado para livre, mostrar confirmação
+            if (this.dataset.originalValue === 'fechado' && newValue === 'livre') {
+                // Reverter a seleção temporariamente
+                this.value = this.dataset.originalValue;
+                
+                // Mostrar modal de confirmação para abertura
+                showOpenScheduleModal(agendaId);
+                return;
+            }
+            
             // Processar mudança normal
             trackChange(this);
             updateStatus(agendaId);
@@ -696,6 +835,32 @@ document.addEventListener('DOMContentLoaded', function() {
             handleMethodChange(agendaId, newValue);
         });
     });
+    
+    function showOpenScheduleModal(agendaId) {
+        const row = document.querySelector(`tr[data-agenda-id="${agendaId}"]`);
+        const dia = row.querySelector('.day-abbreviation').textContent;
+        const horario = row.querySelectorAll('strong')[0].textContent;
+        const sala = row.querySelectorAll('strong')[1].textContent;
+        
+        let detailsHtml = `
+            <div style="background: var(--gray-50); padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
+                <strong>${dia} - ${horario} - Sala ${sala}</strong><br>
+                <small>Status atual: Fechado</small>
+            </div>
+        `;
+        
+        document.getElementById('open-schedule-details').innerHTML = detailsHtml;
+        
+        // Armazenar dados para processamento posterior
+        pendingOpenData = {
+            agendaId: agendaId,
+            dia: dia,
+            horario: horario,
+            sala: sala
+        };
+        
+        document.getElementById('open-schedule-modal').style.display = 'block';
+    }
     
     function showImmediateCloseModal(agendaId, semanal, quinzenal) {
         const row = document.querySelector(`tr[data-agenda-id="${agendaId}"]`);
@@ -759,6 +924,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const row = document.getElementById(`row_${agendaId}`);
         
         if (method === 'fechado') {
+            // Método fechado: desabilitar campos e limpar
             semanalInput.disabled = true;
             quinzenalInput.disabled = true;
             semanalInput.value = '';
@@ -768,11 +934,41 @@ document.addEventListener('DOMContentLoaded', function() {
             // Registrar as mudanças para os campos limpos
             trackChange(semanalInput);
             trackChange(quinzenalInput);
+        } else if (method === 'livre') {
+            // Método livre: habilitar campos mas manter vazios
+            semanalInput.disabled = false;
+            quinzenalInput.disabled = false;
+            
+            // Limpar apenas se não são valores de pacientes reais
+            if (!semanalInput.value || semanalInput.value.toLowerCase() === 'semanal') {
+                semanalInput.value = '';
+            }
+            if (!quinzenalInput.value || quinzenalInput.value.toLowerCase() === 'quinzenal') {
+                quinzenalInput.value = '';
+            }
+            
+            row.classList.remove('agenda-row-disabled');
+            
+            // Registrar as mudanças para os campos limpos
+            trackChange(semanalInput);
+            trackChange(quinzenalInput);
+        } else if (method === 'padrao') {
+            // Método padrão: habilitar campos e manter valores existentes
+            semanalInput.disabled = false;
+            quinzenalInput.disabled = false;
+            row.classList.remove('agenda-row-disabled');
+            
+            // NÃO limpar os campos - manter valores que o usuário pode ter digitado
+            // Os campos serão processados normalmente pelo sistema de tracking
         } else {
+            // Outros métodos: comportamento padrão
             semanalInput.disabled = false;
             quinzenalInput.disabled = false;
             row.classList.remove('agenda-row-disabled');
         }
+        
+        console.log(`handleMethodChange: Agenda ${agendaId} mudou para método '${method}'`);
+        console.log(`  Semanal: ${semanalInput.value}, Quinzenal: ${quinzenalInput.value}`);
     }
     
     function trackChange(element) {
@@ -816,34 +1012,51 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (!statusSpan) return;
         
-        let badgeClass, text;
+        let badgeClass, text, icon = '';
         
         if (metodoSelect && metodoSelect.value === 'fechado') {
             badgeClass = 'bg-danger';
             text = 'Fechado';
+            icon = '🔒';
         } else if (metodoSelect && metodoSelect.value === 'livre') {
             badgeClass = 'bg-success';
             text = 'Livre';
+            icon = '🔓';
         } else {
-            const hasSemanal = semanalInput && semanalInput.value !== '';
-            const hasQuinzenal = quinzenalInput && quinzenalInput.value !== '';
+            // Verificar se tem pacientes válidos (não vazios e não strings padrão)
+            const semanalValue = semanalInput ? semanalInput.value.trim() : '';
+            const quinzenalValue = quinzenalInput ? quinzenalInput.value.trim() : '';
+            
+            const hasSemanal = semanalValue && 
+                              semanalValue !== '' && 
+                              semanalValue.toLowerCase() !== 'semanal' &&
+                              semanalValue.toLowerCase() !== 'none';
+                              
+            const hasQuinzenal = quinzenalValue && 
+                                quinzenalValue !== '' && 
+                                quinzenalValue.toLowerCase() !== 'quinzenal' &&
+                                quinzenalValue.toLowerCase() !== 'none';
             
             if (hasSemanal && hasQuinzenal) {
                 badgeClass = 'bg-primary';
                 text = 'Completo';
+                icon = '✅';
             } else if (hasSemanal) {
                 badgeClass = 'bg-info';
                 text = 'Semanal';
+                icon = '📅';
             } else if (hasQuinzenal) {
                 badgeClass = 'bg-warning';
                 text = 'Quinzenal';
+                icon = '📆';
             } else {
                 badgeClass = 'bg-secondary';
                 text = 'Disponível';
+                icon = '⚪';
             }
         }
         
-        statusSpan.innerHTML = `<span class="badge ${badgeClass}">${text}</span>`;
+        statusSpan.innerHTML = `<span class="badge ${badgeClass}">${icon} ${text}</span>`;
     }
     
     function updatePreviewButton() {
@@ -939,6 +1152,53 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Event Listeners dos Modais
+    
+    // Modal de abertura de horário
+    document.getElementById('cancel-open-schedule').addEventListener('click', function() {
+        document.getElementById('open-schedule-modal').style.display = 'none';
+        pendingOpenData = null;
+    });
+    
+    document.getElementById('confirm-open-schedule').addEventListener('click', function() {
+        if (!pendingOpenData) return;
+        
+        document.getElementById('open-schedule-modal').style.display = 'none';
+        
+        // Aplicar mudanças na interface
+        const agendaId = pendingOpenData.agendaId;
+        const metodoSelect = document.getElementById(`metodo_${agendaId}`);
+        const semanalInput = document.getElementById(`semanal_${agendaId}`);
+        const quinzenalInput = document.getElementById(`quinzenal_${agendaId}`);
+        const row = document.getElementById(`row_${agendaId}`);
+        
+        if (metodoSelect) {
+            metodoSelect.value = 'livre';
+            trackChange(metodoSelect);
+        }
+        
+        // Habilitar campos de pacientes
+        if (semanalInput) {
+            semanalInput.disabled = false;
+            semanalInput.value = '';
+        }
+        
+        if (quinzenalInput) {
+            quinzenalInput.disabled = false;
+            quinzenalInput.value = '';
+        }
+        
+        if (row) {
+            row.classList.remove('agenda-row-disabled');
+        }
+        
+        handleMethodChange(agendaId, 'livre');
+        updateStatus(agendaId);
+        updatePreviewButton();
+        
+        console.log(`Horário ${pendingOpenData.dia} - ${pendingOpenData.horario} aberto com sucesso`);
+        
+        pendingOpenData = null;
+    });
     
     // Modal de fechamento imediato
     document.getElementById('cancel-immediate-close').addEventListener('click', function() {
@@ -1137,6 +1397,14 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('=== Iniciando submit das alterações ===');
         console.log('Alterações pendentes:', changes);
         
+        // Limpar placeholders antes do submit
+        document.querySelectorAll('.paciente-input').forEach(input => {
+            if (input.value && (input.value.toLowerCase() === 'semanal' || input.value.toLowerCase() === 'quinzenal')) {
+                input.value = '';
+                console.log(`Limpando placeholder em ${input.id}: era "${input.value}", agora vazio`);
+            }
+        });
+        
         // Garantir que todos os campos estão com os valores corretos antes do submit
         Object.entries(changes).forEach(([agendaId, change]) => {
             console.log(`Aplicando mudanças para agenda ${agendaId}:`, change);
@@ -1199,6 +1467,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fechar modais clicando fora
     window.addEventListener('click', function(event) {
         const modals = [
+            'open-schedule-modal',
             'immediate-close-modal',
             'patient-inactivation-modal',
             'summary-modal'
@@ -1231,24 +1500,188 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Autocomplete básico para pacientes
+    // Sistema de autocomplete avançado para pacientes
+    let currentHighlightedIndex = -1;
+    let currentActiveSuggestions = null;
+    
     function setupAutocomplete() {
         document.querySelectorAll('.paciente-input').forEach(input => {
+            const agendaId = input.dataset.agendaId;
+            const type = input.dataset.type;
+            const suggestionsContainer = document.getElementById(`suggestions_${type}_${agendaId}`);
+            
+            // Evento de digitação
             input.addEventListener('input', function() {
-                const type = this.dataset.type;
-                const value = this.value.toLowerCase();
-                const pacientes = type === 'semanal' ? pacientesSemanais : pacientesQuinzenais;
-                
-                // Filtrar pacientes
-                const filtered = pacientes.filter(p => 
-                    p.toLowerCase().includes(value)
-                ).slice(0, 5);
-                
-                // Mostrar sugestões (implementação básica)
-                if (value.length > 0 && filtered.length > 0) {
-                    console.log(`Sugestões para ${type}:`, filtered);
+                const value = this.value.trim();
+                showSuggestions(input, suggestionsContainer, value, type);
+            });
+            
+            // Evento de foco
+            input.addEventListener('focus', function() {
+                const value = this.value.trim();
+                if (value.length > 0) {
+                    showSuggestions(input, suggestionsContainer, value, type);
                 }
             });
+            
+            // Evento de perda de foco (com delay para permitir clique nas sugestões)
+            input.addEventListener('blur', function() {
+                setTimeout(() => {
+                    hideSuggestions(suggestionsContainer);
+                }, 150);
+            });
+            
+            // Navegação por teclado
+            input.addEventListener('keydown', function(e) {
+                handleKeyNavigation(e, input, suggestionsContainer);
+            });
+        });
+        
+        // Fechar sugestões ao clicar fora
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.autocomplete-container')) {
+                hideAllSuggestions();
+            }
+        });
+    }
+    
+    function showSuggestions(input, suggestionsContainer, value, type) {
+        if (value.length < 1) {
+            hideSuggestions(suggestionsContainer);
+            return;
+        }
+        
+        const pacientes = type === 'semanal' ? pacientesSemanais : pacientesQuinzenais;
+        
+        // Filtrar pacientes que correspondem ao texto digitado
+        const filtered = pacientes.filter(p => 
+            p.toLowerCase().includes(value.toLowerCase())
+        ).slice(0, 8); // Mostrar até 8 sugestões
+        
+        if (filtered.length === 0) {
+            showNoSuggestions(suggestionsContainer);
+            return;
+        }
+        
+        // Criar HTML das sugestões
+        let suggestionsHTML = '';
+        filtered.forEach((paciente, index) => {
+            const highlightedName = highlightMatch(paciente, value);
+            const periodLabel = type === 'semanal' ? 'Semanal' : 'Quinzenal';
+            
+            suggestionsHTML += `
+                <div class="suggestion-item" data-value="${paciente}" data-index="${index}">
+                    <span class="patient-name">${highlightedName}</span>
+                    <span class="patient-period">(${periodLabel})</span>
+                </div>
+            `;
+        });
+        
+        suggestionsContainer.innerHTML = suggestionsHTML;
+        suggestionsContainer.classList.add('active');
+        currentActiveSuggestions = suggestionsContainer;
+        currentHighlightedIndex = -1;
+        
+        // Adicionar event listeners para os itens de sugestão
+        suggestionsContainer.querySelectorAll('.suggestion-item').forEach(item => {
+            item.addEventListener('click', function() {
+                selectSuggestion(input, this.dataset.value, suggestionsContainer);
+            });
+            
+            item.addEventListener('mouseenter', function() {
+                // Remove highlight de outros itens
+                suggestionsContainer.querySelectorAll('.suggestion-item').forEach(i => 
+                    i.classList.remove('highlighted')
+                );
+                this.classList.add('highlighted');
+                currentHighlightedIndex = parseInt(this.dataset.index);
+            });
+        });
+    }
+    
+    function showNoSuggestions(suggestionsContainer) {
+        suggestionsContainer.innerHTML = '<div class="no-suggestions">Nenhum paciente encontrado</div>';
+        suggestionsContainer.classList.add('active');
+        currentActiveSuggestions = suggestionsContainer;
+    }
+    
+    function hideSuggestions(suggestionsContainer) {
+        if (suggestionsContainer) {
+            suggestionsContainer.classList.remove('active');
+            suggestionsContainer.innerHTML = '';
+        }
+        currentActiveSuggestions = null;
+        currentHighlightedIndex = -1;
+    }
+    
+    function hideAllSuggestions() {
+        document.querySelectorAll('.autocomplete-suggestions').forEach(container => {
+            hideSuggestions(container);
+        });
+    }
+    
+    function selectSuggestion(input, value, suggestionsContainer) {
+        input.value = value;
+        hideSuggestions(suggestionsContainer);
+        
+        // Triggering change events para atualizar o sistema de tracking
+        trackChange(input);
+        updateStatus(input.dataset.agendaId);
+        updatePreviewButton();
+        
+        // Mover foco para o próximo campo ou remover foco
+        input.blur();
+    }
+    
+    function highlightMatch(text, query) {
+        if (!query) return text;
+        
+        const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+        return text.replace(regex, '<strong style="background: var(--primary-color); color: white; padding: 0.1rem 0.2rem; border-radius: 0.2rem;">$1</strong>');
+    }
+    
+    function handleKeyNavigation(e, input, suggestionsContainer) {
+        if (!suggestionsContainer.classList.contains('active')) return;
+        
+        const items = suggestionsContainer.querySelectorAll('.suggestion-item');
+        if (items.length === 0) return;
+        
+        switch (e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                currentHighlightedIndex = Math.min(currentHighlightedIndex + 1, items.length - 1);
+                updateHighlight(items);
+                break;
+                
+            case 'ArrowUp':
+                e.preventDefault();
+                currentHighlightedIndex = Math.max(currentHighlightedIndex - 1, -1);
+                updateHighlight(items);
+                break;
+                
+            case 'Enter':
+                e.preventDefault();
+                if (currentHighlightedIndex >= 0 && items[currentHighlightedIndex]) {
+                    const selectedValue = items[currentHighlightedIndex].dataset.value;
+                    selectSuggestion(input, selectedValue, suggestionsContainer);
+                }
+                break;
+                
+            case 'Escape':
+                e.preventDefault();
+                hideSuggestions(suggestionsContainer);
+                input.blur();
+                break;
+        }
+    }
+    
+    function updateHighlight(items) {
+        items.forEach((item, index) => {
+            item.classList.remove('highlighted', 'selected');
+            if (index === currentHighlightedIndex) {
+                item.classList.add('selected');
+                item.scrollIntoView({ block: 'nearest' });
+            }
         });
     }
     
