@@ -60,6 +60,7 @@
                         </thead>
                         <tbody>
                         {% for paciente in pacientes_deletados %}
+                        {% if paciente.data_inspec_admin and paciente.obs_admin %}
                             <tr class="table-secondary">
                                 <td class="align-middle text-center">
                                     <span class="text-dark font-weight-bold">{{ paciente.nome }}</span>
@@ -122,6 +123,70 @@
                                     </a>
                                 </td>
                             </tr>
+                        {% else %}
+                            <tr class="table-secondary">
+                                <td class="align-middle text-center" style="background-color: #e7eb9e">
+                                    <span class="text-dark font-weight-bold">{{ paciente.nome }}</span>
+                                </td>
+                                <td class="align-middle text-center" style="background-color: #e7eb9e">
+                                    <span class="badge bg-secondary">{{ paciente.idade }}</span>
+                                </td>
+                                <td class="align-middle text-center" style="background-color: #e7eb9e">
+                                    <span class="text-dark font-weight-bold">R$ {{ paciente.valor|floatformat:2 }}</span>
+                                </td>
+                                <td class="align-middle text-center" style="background-color: #e7eb9e">
+                                    <span class="badge bg-secondary">{{ paciente.periodo }}</span>
+                                </td>
+                                <td class="align-middle text-center" style="background-color: #e7eb9e">
+                                    <span class="text-dark">{{ paciente.nome_responsavel|default:"-" }}</span>
+                                </td>
+                                <td class="align-middle text-center" style="background-color: #e7eb9e">
+                                    <span class="text-dark">{{ paciente.telefone }}</span>
+                                </td>
+                                <td class="align-middle text-center" style="background-color: #e7eb9e">
+                                    {% if paciente.data_deletado_psico %}
+                                        <span class="badge bg-warning text-dark">{{ paciente.data_deletado_psico|date:"d/m/Y" }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="align-middle text-center" style="background-color: #e7eb9e">
+                                    {% if paciente.motivo_deletado_psico %}
+                                        <span class="text-dark text-xs">{{ paciente.motivo_deletado_psico }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="align-middle text-center" style="background-color: #e7eb9e">
+                                    {% if paciente.data_inspec_admin %}
+                                        <span class="badge bg-info">{{ paciente.data_inspec_admin|date:"d/m/Y" }}</span>
+                                    {% else %}
+                                        <span class="text-warning">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                            Pendente
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="align-middle text-center" style="background-color: #e7eb9e">
+                                    {% if paciente.obs_admin %}
+                                        <span class="text-dark text-xs">{{ paciente.obs_admin }}</span>
+                                    {% else %}
+                                        <span class="text-warning">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                            Pendente
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="align-middle" style="background-color: #e7eb9e">
+                                    <a href="{% url 'restaurar_paciente' id_paciente=paciente.id %}" class="text-success font-weight-bold text-xs me-2" data-toggle="tooltip" data-original-title="Restaurar paciente">
+                                        <i class="fas fa-undo"></i> Restaurar
+                                    </a>
+                                    <a href="#" onclick="abrirModalEditarInspecao({{ paciente.id }}, '{{ paciente.data_inspec_admin|date:"Y-m-d" }}', '{{ paciente.obs_admin|default:"" }}')" class="text-primary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Editar inspeção do admin">
+                                        <i class="fas fa-edit"></i> Editar Inspeção
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endif %}
                         {% empty %}
                             <tr>
                                 <td colspan="11" class="text-center">

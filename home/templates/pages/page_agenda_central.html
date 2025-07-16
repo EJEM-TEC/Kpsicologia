@@ -206,7 +206,7 @@
             {% for dia, cor in dias_cores %}
             <div class="col-md-6 col-lg-4 col-xl-2">
               <div class="card day-card">
-                <div class="card-header {{ cor }} text-white text-center py-1">
+                <div class="card-header text-white text-center py-1" style="background: linear-gradient(45deg, {{ sala.cor_sala }}, {{ sala.cor_sala }}dd);">
                   <h6 class="mb-0 fw-bold">{{ dia|upper }}</h6>
                 </div>
                 <div class="card-body p-0">
@@ -330,30 +330,21 @@
                                     <span class="patient-name">{{ consulta.semanal }}</span>
                                   </td>
                                   {% else %}
-                                    {% if consulta.semanal %}
+                                    
                                       <td class="patient-cell" style="background-color: {{ consulta.psicologo.cor }}20;">
                                         <span class="patient-name"></span>
                                       </td>
-                                    {% else %}
-                                      <td class="patient-cell" style="background-color: {{ consulta.psicologo.cor }}20;">
-                                        <span class="patient-name">Fechado</span>
-                                      </td>
-                                    {% endif %}
+                              
                                   {% endif %}
                                   {% if consulta.quinzenal != "Quinzenal" and consulta.quinzenal %}
                                   <td class="patient-cell" style="background-color: {{ consulta.psicologo.cor }}20;">
                                     <span class="patient-name">{{ consulta.quinzenal }}</span>
                                   </td>
                                   {% else %}
-                                    {% if consulta.quinzenal %}
                                     <td class="patient-cell" style="background-color: {{ consulta.psicologo.cor }}20;">
                                       <span class="patient-name"></span>
                                     </td>
-                                    {% else %}
-                                      <td class="patient-cell" style="background-color: {{ consulta.psicologo.cor }}20;">
-                                        <span class="patient-name">Fechado</span>
-                                      </td>
-                                    {% endif %}
+                          
                                   {% endif %}
                               {% with encontrado=True %}{% endwith %}
                             {% endif %}

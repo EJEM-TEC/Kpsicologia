@@ -4112,6 +4112,77 @@ def apuracao_financeira(request):
     
     psicologas_data = list(psicologas_stats)
     
+    # ===== ESTATÍSTICAS DETALHADAS POR PSICÓLOGA =====
+    # Enriquecer dados das psicólogas com estatísticas detalhadas
+    for psicologa_data in psicologas_data:
+        psicologa_id = psicologa_data['psicologa__id']
+        
+        # Filtrar financeiros desta psicóloga
+        financeiro_psicologa = financeiro_queryset.filter(psicologa_id=psicologa_id)
+        
+        # Consultas presenciais vs online
+        consultas_presencial = financeiro_psicologa.filter(
+            modalidade='Presencial', presenca='Sim'
+        ).count()
+        consultas_online = financeiro_psicologa.filter(
+            modalidade='Online', presenca='Sim'
+        ).count()
+        
+        # Pacientes que nunca vieram (agendados mas sem presença)
+        pacientes_nunca_vieram = financeiro_psicologa.filter(
+            presenca='Não'
+        ).values('paciente').distinct().count()
+        
+        # Pacientes com alta (assumindo que são aqueles que não têm consultas recentes)
+        data_limite_alta = datetime.now().date() - timedelta(days=60)  # 60 dias sem consulta = alta
+        
+        # Pacientes ativos (com consultas nos últimos 60 dias)
+        pacientes_ativos = financeiro_psicologa.filter(
+            data__gte=data_limite_alta,
+            presenca='Sim'
+        ).values('paciente').distinct().count()
+        
+        # Pacientes inativos (sem consultas nos últimos 60 dias mas já tiveram consultas)
+        pacientes_com_historico = financeiro_psicologa.filter(
+            presenca='Sim'
+        ).values('paciente').distinct()
+        
+        pacientes_inativos = 0
+        for paciente_data in pacientes_com_historico:
+            paciente_id = paciente_data['paciente']
+            ultima_consulta = financeiro_psicologa.filter(
+                paciente_id=paciente_id,
+                presenca='Sim'
+            ).order_by('-data').first()
+            
+            if ultima_consulta and ultima_consulta.data < data_limite_alta:
+                pacientes_inativos += 1
+        
+        # Consultas com presença vs falta
+        consultas_com_presenca = financeiro_psicologa.filter(presenca='Sim').count()
+        consultas_com_falta = financeiro_psicologa.filter(presenca__in=['Não', 'Falta']).count()
+        
+        # Taxa de comparecimento
+        total_consultas_agendadas = consultas_com_presenca + consultas_com_falta
+        taxa_comparecimento = (consultas_com_presenca / total_consultas_agendadas * 100) if total_consultas_agendadas > 0 else 0
+        
+        # Faturamento médio por consulta
+        faturamento_medio = psicologa_data['valor_recebido'] / consultas_com_presenca if consultas_com_presenca > 0 else Decimal('0.00')
+        
+        # Adicionar dados detalhados ao objeto da psicóloga
+        psicologa_data.update({
+            'consultas_presencial': consultas_presencial,
+            'consultas_online': consultas_online,
+            'consultas_com_presenca': consultas_com_presenca,
+            'consultas_com_falta': consultas_com_falta,
+            'pacientes_nunca_vieram': pacientes_nunca_vieram,
+            'pacientes_ativos': pacientes_ativos,
+            'pacientes_inativos': pacientes_inativos,
+            'taxa_comparecimento': round(taxa_comparecimento, 1),
+            'faturamento_medio_consulta': faturamento_medio,
+            'total_consultas_agendadas': total_consultas_agendadas,
+        })
+    
     # ===== CONSULTAS POR DIA DA SEMANA OTIMIZADA =====
     dias_semana = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo']
     consultas_por_dia_stats = financeiro_queryset.filter(
@@ -4579,12 +4650,10 @@ def vizualizar_disponibilidade(request):
         especialidade_id = request.POST.get('especialidade_id')
         publico_id = request.POST.get('publico')
         dia_da_semana = request.POST.get("dia_semana")
-        periodo_dia = request.POST.get("periodo_dia")  # NOVO: Substitui horario_inicio e horario_fim
         unidade_id = request.POST.get("unidade_id")
         modalidade = request.POST.get("modalidade", "todos")
 
         print(f"Modalidade: '{modalidade}'")
-        print(f"Período do dia: '{periodo_dia}'")
 
         # FILTRO POR MODALIDADE
         if modalidade == "presencial":
@@ -4650,50 +4719,53 @@ def vizualizar_disponibilidade(request):
             print(f"Horários presenciais após filtro dia: {horarios_presencial.count()}")
             print(f"Horários online após filtro dia: {horarios_online.count()}")
 
-        # NOVO FILTRO POR PERÍODO DO DIA
-        if periodo_dia and periodo_dia != "todos":
+        # NOVO FILTRO POR PERÍODO DO DIA (Seleção Múltipla)
+        periodos_selecionados = request.POST.getlist('periodo_dia')  # Usar getlist para múltiplos valores
+        todos_periodos_checked = request.POST.get('todos_periodos') == 'on'
+        
+        print(f"Períodos selecionados: {periodos_selecionados}")
+        print(f"Todos períodos marcado: {todos_periodos_checked}")
+        
+        if periodos_selecionados and not todos_periodos_checked:
             try:
-                print(f"Filtrando por período: {periodo_dia}")
+                print(f"Aplicando filtro de múltiplos períodos: {periodos_selecionados}")
                 
-                # Definir faixas de horário para cada período
-                if periodo_dia == "manha":
-                    horario_inicio = "06:00"
-                    horario_fim = "11:59"
-                    periodo_nome = "Manhã"
-                elif periodo_dia == "tarde":
-                    horario_inicio = "12:00"
-                    horario_fim = "17:59"
-                    periodo_nome = "Tarde"
-                elif periodo_dia == "noite":
-                    horario_inicio = "18:00"
-                    horario_fim = "23:59"
-                    periodo_nome = "Noite"
-                else:
-                    horario_inicio = None
-                    horario_fim = None
-                    periodo_nome = None
+                # Definir faixas de horário para cada período selecionado
+                horarios_permitidos = []
+                periodos_nomes = []
                 
-                if horario_inicio and horario_fim:
-                    # Converter strings para objetos time para comparação
+                for periodo in periodos_selecionados:
+                    if periodo == "manha":
+                        horarios_permitidos.extend([("06:00", "11:59")])
+                        periodos_nomes.append("Manhã")
+                    elif periodo == "tarde":
+                        horarios_permitidos.extend([("12:00", "17:59")])
+                        periodos_nomes.append("Tarde")
+                    elif periodo == "noite":
+                        horarios_permitidos.extend([("18:00", "23:59")])
+                        periodos_nomes.append("Noite")
+                
+                if horarios_permitidos:
+                    # Converter strings para objetos time e criar filtros OR
                     from datetime import time
-                    hora_inicio = time.fromisoformat(horario_inicio)
-                    hora_fim = time.fromisoformat(horario_fim)
+                    from django.db.models import Q
                     
-                    horarios_presencial = horarios_presencial.filter(
-                        horario__gte=hora_inicio, 
-                        horario__lte=hora_fim
-                    )
-                    horarios_online = horarios_online.filter(
-                        horario__gte=hora_inicio, 
-                        horario__lte=hora_fim
-                    )
+                    filtro_horarios = Q()
+                    for horario_inicio, horario_fim in horarios_permitidos:
+                        hora_inicio = time.fromisoformat(horario_inicio)
+                        hora_fim = time.fromisoformat(horario_fim)
+                        
+                        filtro_horarios |= Q(horario__gte=hora_inicio, horario__lte=hora_fim)
                     
-                    filtros_aplicados.append(f"Período: {periodo_nome} ({horario_inicio}-{horario_fim})")
-                    print(f"Horários presenciais após filtro período: {horarios_presencial.count()}")
-                    print(f"Horários online após filtro período: {horarios_online.count()}")
+                    horarios_presencial = horarios_presencial.filter(filtro_horarios)
+                    horarios_online = horarios_online.filter(filtro_horarios)
+                    
+                    filtros_aplicados.append(f"Períodos: {', '.join(periodos_nomes)}")
+                    print(f"Horários presenciais após filtro período múltiplo: {horarios_presencial.count()}")
+                    print(f"Horários online após filtro período múltiplo: {horarios_online.count()}")
                     
             except Exception as e:
-                print(f"Erro no filtro período: {e}")
+                print(f"Erro no filtro período múltiplo: {e}")
 
         # FILTRO POR UNIDADE (só para presenciais)
         if unidade_id and unidade_id != 'todos':

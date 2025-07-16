@@ -518,32 +518,181 @@
     </div>
 
     <!-- Apuração por Psicóloga -->
-    <h2 class="mt-5">Apuração Financeira - Por Psicóloga</h2>
-    <div class="row">
-        {% for psicologa in psicologas_data %}
-        <div class="col-md-4 mt-4">
-            <div class="card card-frame">
-                <div class="card-header" style="background-color: {{ psicologa.psicologa__cor }}; color: white;">
-                    <h5 class="mb-0">{{ psicologa.psicologa__nome }}</h5>
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-gradient-info p-3">
+                    <h5 class="text-white mb-0">
+                        <i class="fas fa-user-md me-2"></i>Desempenho Detalhado por Psicóloga
+                    </h5>
                 </div>
-                <div class="card-body">
-                    <p class="card-text"><strong>Consultas Realizadas:</strong> {{ psicologa.consultas_realizadas }}</p>
-                    <p class="card-text"><strong>Valor Recebido:</strong> R$ {{ psicologa.valor_recebido|floatformat:2 }}</p>
-                    <p class="card-text"><strong>Pacientes Atendidos:</strong> {{ psicologa.pacientes_atendidos }}</p>
-                    {% if psicologa.consultas_realizadas > 0 %}
-                    <p class="card-text"><strong>Valor Médio por Consulta:</strong> 
-
-                    <!-- PSICÓLOGAS - ao invés de usar filtro div -->
-                        <p class="card-text"><strong>Valor Médio por Consulta:</strong> 
-                            R$ {{ psicologa.valor_medio_por_consulta|floatformat:2 }}
-                        </p>
-                        
-                    </p>
-                    {% endif %}
+                <div class="card-body p-4">
+                    <div class="row">
+                        {% for psicologa in psicologas_data %}
+                        <div class="col-lg-6 col-xl-4 mb-4">
+                            <div class="card border-0 shadow-sm h-100 psicologa-card">
+                                <!-- Header da Psicóloga -->
+                                <div class="card-header p-3" style="background: linear-gradient(45deg, {{ psicologa.psicologa__cor }}, {{ psicologa.psicologa__cor }}dd); color: white;">
+                                    <div class="d-flex align-items-center">
+                                        <div class="icon icon-shape bg-white shadow text-center border-radius-md me-3" style="width: 40px; height: 40px;">
+                                            <i class="fas fa-user-md text-dark text-lg"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0 text-white font-weight-bold">{{ psicologa.psicologa__nome }}</h6>
+                                            <span class="text-xs opacity-8">{{ psicologa.consultas_realizadas }} consultas realizadas</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Estatísticas Principais -->
+                                <div class="card-body p-3">
+                                    <!-- Valores Financeiros -->
+                                    <div class="row mb-3">
+                                        <div class="col-6">
+                                            <div class="text-center border-end">
+                                                <h6 class="text-success mb-0 font-weight-bold">R$ {{ psicologa.valor_recebido|floatformat:2 }}</h6>
+                                                <span class="text-xs text-muted">Faturamento Total</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="text-center">
+                                                <h6 class="text-primary mb-0 font-weight-bold">R$ {{ psicologa.faturamento_medio_consulta|floatformat:2 }}</h6>
+                                                <span class="text-xs text-muted">Média/Consulta</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Modalidades de Atendimento -->
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="text-sm font-weight-bold text-dark">Modalidades</span>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="badge bg-gradient-primary me-2" style="width: 10px; height: 10px; border-radius: 50%;"></div>
+                                                    <span class="text-xs">Presencial: <strong>{{ psicologa.consultas_presencial }}</strong></span>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="badge bg-gradient-success me-2" style="width: 10px; height: 10px; border-radius: 50%;"></div>
+                                                    <span class="text-xs">Online: <strong>{{ psicologa.consultas_online }}</strong></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Status dos Pacientes -->
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="text-sm font-weight-bold text-dark">Status dos Pacientes</span>
+                                            <span class="badge bg-gradient-secondary text-xs">{{ psicologa.pacientes_atendidos }} total</span>
+                                        </div>
+                                        <div class="row text-center">
+                                            <div class="col-4">
+                                                <div class="mb-2">
+                                                    <div class="icon icon-shape bg-gradient-success shadow text-center border-radius-md mx-auto" style="width: 30px; height: 30px;">
+                                                        <i class="fas fa-check text-white text-sm"></i>
+                                                    </div>
+                                                    <div class="text-xs text-muted mt-1">Ativos</div>
+                                                    <div class="font-weight-bold text-success">{{ psicologa.pacientes_ativos }}</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="mb-2">
+                                                    <div class="icon icon-shape bg-gradient-warning shadow text-center border-radius-md mx-auto" style="width: 30px; height: 30px;">
+                                                        <i class="fas fa-pause text-white text-sm"></i>
+                                                    </div>
+                                                    <div class="text-xs text-muted mt-1">Inativos</div>
+                                                    <div class="font-weight-bold text-warning">{{ psicologa.pacientes_inativos }}</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="mb-2">
+                                                    <div class="icon icon-shape bg-gradient-danger shadow text-center border-radius-md mx-auto" style="width: 30px; height: 30px;">
+                                                        <i class="fas fa-times text-white text-sm"></i>
+                                                    </div>
+                                                    <div class="text-xs text-muted mt-1">Nunca vieram</div>
+                                                    <div class="font-weight-bold text-danger">{{ psicologa.pacientes_nunca_vieram }}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Taxa de Comparecimento -->
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="text-sm font-weight-bold text-dark">Taxa de Comparecimento</span>
+                                            <span class="badge bg-gradient-{% if psicologa.taxa_comparecimento >= 80 %}success{% elif psicologa.taxa_comparecimento >= 60 %}warning{% else %}danger{% endif %} text-xs">
+                                                {{ psicologa.taxa_comparecimento }}%
+                                            </span>
+                                        </div>
+                                        
+                                        <!-- Barra de Progresso -->
+                                        <div class="progress progress-thin" style="height: 6px;">
+                                            <div class="progress-bar bg-gradient-{% if psicologa.taxa_comparecimento >= 80 %}success{% elif psicologa.taxa_comparecimento >= 60 %}warning{% else %}danger{% endif %}" 
+                                                 role="progressbar" 
+                                                 style="width: {{ psicologa.taxa_comparecimento }}%" 
+                                                 aria-valuenow="{{ psicologa.taxa_comparecimento }}" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="100">
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row mt-2">
+                                            <div class="col-6">
+                                                <span class="text-xs text-success">
+                                                    <i class="fas fa-check-circle me-1"></i>
+                                                    {{ psicologa.consultas_com_presenca }} presentes
+                                                </span>
+                                            </div>
+                                            <div class="col-6">
+                                                <span class="text-xs text-danger">
+                                                    <i class="fas fa-times-circle me-1"></i>
+                                                    {{ psicologa.consultas_com_falta }} faltas
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Resumo Rápido -->
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <div class="alert alert-light p-2 mb-0">
+                                                <div class="row text-center">
+                                                    <div class="col-4">
+                                                        <div class="text-xs text-muted">Total Agendadas</div>
+                                                        <div class="font-weight-bold text-dark">{{ psicologa.total_consultas_agendadas }}</div>
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <div class="text-xs text-muted">Realizadas</div>
+                                                        <div class="font-weight-bold text-success">{{ psicologa.consultas_com_presenca }}</div>
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <div class="text-xs text-muted">Pacientes</div>
+                                                        <div class="font-weight-bold text-primary">{{ psicologa.pacientes_atendidos }}</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="col-12">
+                            <div class="alert alert-info text-center" role="alert">
+                                <i class="fas fa-info-circle fa-2x mb-3"></i>
+                                <h6>Nenhuma psicóloga encontrada</h6>
+                                <p class="mb-0">Não existem dados de psicólogas para o período selecionado.</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
         </div>
-        {% endfor %}
     </div>
 </div>
 
@@ -822,5 +971,81 @@ function exportarDados(formato) {
     console.log('Exportando dados em formato:', formato);
 }
 </script>
+
+<!-- CSS Customizado para Cards das Psicólogas -->
+<style>
+.psicologa-card {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.psicologa-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+}
+
+.status-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+}
+
+.progress-thin {
+    height: 4px;
+    border-radius: 2px;
+}
+
+.icon-status {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin: 0 auto;
+}
+
+.metric-box {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 8px;
+    padding: 0.75rem;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.metric-box:hover {
+    background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+    transition: all 0.2s ease;
+}
+
+.chart-mini {
+    height: 60px;
+    width: 100%;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.pulse-animation {
+    animation: pulse 2s infinite;
+}
+
+.comparecimento-excelente { color: #28a745 !important; }
+.comparecimento-bom { color: #ffc107 !important; }
+.comparecimento-ruim { color: #dc3545 !important; }
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .psicologa-card {
+        margin-bottom: 1rem;
+    }
+    
+    .metric-box {
+        padding: 0.5rem;
+    }
+}
+</style>
 
 {% endblock scripts %}

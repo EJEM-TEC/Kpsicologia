@@ -106,18 +106,37 @@
                   </div>
                 </div>
                 
-                <!-- NOVO FILTRO: Período do Dia -->
+                <!-- NOVO FILTRO: Período do Dia (Seleção Múltipla) -->
                 <div class="col-md-6">
                   <div class="form-group">
-                    <label for="periodo_dia" class="form-control-label text-xs text-uppercase">Período do Dia</label>
-                    <div class="input-group">
-                      <span class="input-group-text"><i class="fas fa-sun"></i></span>
-                      <select class="form-select" id="periodo_dia" name="periodo_dia">
-                        <option value="todos">Todos os Períodos</option>
-                        <option value="manha">Manhã (06:00 - 11:59)</option>
-                        <option value="tarde">Tarde (12:00 - 17:59)</option>
-                        <option value="noite">Noite (18:00 - 23:59)</option>
-                      </select>
+                    <label class="form-control-label text-xs text-uppercase">
+                      <i class="fas fa-sun me-1"></i>Período do Dia (Múltipla Seleção)
+                    </label>
+                    <div class="border rounded p-3 bg-light">
+                      <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="todos_periodos" checked>
+                        <label class="form-check-label" for="todos_periodos">
+                          <i class="fas fa-clock me-1"></i>Todos os Períodos
+                        </label>
+                      </div>
+                      <div class="form-check mb-2">
+                        <input class="form-check-input periodo-checkbox" type="checkbox" name="periodo_dia" value="manha" id="periodo_manha">
+                        <label class="form-check-label" for="periodo_manha">
+                          <i class="fas fa-sun me-1 text-warning"></i>Manhã (06:00 - 11:59)
+                        </label>
+                      </div>
+                      <div class="form-check mb-2">
+                        <input class="form-check-input periodo-checkbox" type="checkbox" name="periodo_dia" value="tarde" id="periodo_tarde">
+                        <label class="form-check-label" for="periodo_tarde">
+                          <i class="fas fa-sun-o me-1 text-primary"></i>Tarde (12:00 - 17:59)
+                        </label>
+                      </div>
+                      <div class="form-check">
+                        <input class="form-check-input periodo-checkbox" type="checkbox" name="periodo_dia" value="noite" id="periodo_noite">
+                        <label class="form-check-label" for="periodo_noite">
+                          <i class="fas fa-moon me-1 text-dark"></i>Noite (18:00 - 23:59)
+                        </label>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -429,19 +448,50 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Botão limpar filtros
-    const limparBtn = document.getElementById('limparFiltros');
-    if (limparBtn) {
-        limparBtn.addEventListener('click', function() {
-            // Resetar todos os selects para "todos"
-            const selects = document.querySelectorAll('select');
-            selects.forEach(select => {
-                if (select.querySelector('option[value="todos"]')) {
-                    select.value = 'todos';
-                }
-            });
+    // Funcionalidade para seleção múltipla de período
+    const todosPeridosCheckbox = document.getElementById('todos_periodos');
+    const periodoCheckboxes = document.querySelectorAll('.periodo-checkbox');
+    
+    // Função para atualizar estado dos checkboxes
+    function atualizarCheckboxesPeriodo() {
+        const checkedPeriodos = document.querySelectorAll('.periodo-checkbox:checked');
+        
+        if (checkedPeriodos.length === 0) {
+            // Se nenhum período específico está selecionado, marcar "todos"
+            todosPeridosCheckbox.checked = true;
+        } else if (checkedPeriodos.length === periodoCheckboxes.length) {
+            // Se todos os períodos específicos estão selecionados, marcar "todos"
+            todosPeridosCheckbox.checked = true;
+        } else {
+            // Se alguns períodos específicos estão selecionados, desmarcar "todos"
+            todosPeridosCheckbox.checked = false;
+        }
+    }
+    
+    // Event listener para "Todos os Períodos"
+    if (todosPeridosCheckbox) {
+        todosPeridosCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                // Se "todos" for marcado, desmarcar períodos específicos
+                periodoCheckboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+            }
         });
     }
+    
+    // Event listeners para períodos específicos
+    periodoCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            if (this.checked) {
+                // Se um período específico for marcado, desmarcar "todos"
+                todosPeridosCheckbox.checked = false;
+            }
+            
+            // Atualizar estado geral
+            atualizarCheckboxesPeriodo();
+        });
+    });
 
     // Funcionalidade especial para filtro de modalidade
     const modalidadeSelect = document.getElementById('modalidade');
@@ -462,28 +512,23 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Adicionar ícones dinâmicos para o filtro de período
-    const periodoSelect = document.getElementById('periodo_dia');
-    const periodoIcon = periodoSelect.previousElementSibling.querySelector('i');
-    
-    if (periodoSelect && periodoIcon) {
-        periodoSelect.addEventListener('change', function() {
-            // Resetar classes
-            periodoIcon.className = 'fas';
+    // Botão limpar filtros (atualizado para checkboxes)
+    const limparBtn = document.getElementById('limparFiltros');
+    if (limparBtn) {
+        limparBtn.addEventListener('click', function() {
+            // Resetar todos os selects para "todos"
+            const selects = document.querySelectorAll('select');
+            selects.forEach(select => {
+                if (select.querySelector('option[value="todos"]')) {
+                    select.value = 'todos';
+                }
+            });
             
-            switch(this.value) {
-                case 'manha':
-                    periodoIcon.classList.add('fa-sun');
-                    break;
-                case 'tarde':
-                    periodoIcon.classList.add('fa-sun-o');
-                    break;
-                case 'noite':
-                    periodoIcon.classList.add('fa-moon');
-                    break;
-                default:
-                    periodoIcon.classList.add('fa-sun');
-            }
+            // Resetar checkboxes de período
+            todosPeridosCheckbox.checked = true;
+            periodoCheckboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
         });
     }
 });
@@ -570,17 +615,48 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 }
 
-/* Estilo especial para o filtro de período */
-#periodo_dia option[value="manha"] {
-  background-color: #fff3cd;
+/* Estilos para seleção múltipla de período */
+.form-check {
+  padding-left: 1.5rem;
 }
 
-#periodo_dia option[value="tarde"] {
-  background-color: #d1ecf1;
+.form-check-input:checked {
+  background-color: #5e72e4;
+  border-color: #5e72e4;
 }
 
-#periodo_dia option[value="noite"] {
-  background-color: #d4d4d8;
+.form-check-input:focus {
+  border-color: #5e72e4;
+  box-shadow: 0 0 0 0.2rem rgba(94, 114, 228, 0.25);
 }
+
+.form-check-label {
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.form-check-label:hover {
+  color: #5e72e4;
+}
+
+/* Destaque para "Todos os Períodos" */
+#todos_periodos:checked + label {
+  font-weight: 600;
+  color: #5e72e4;
+}
+
+/* Container dos checkboxes */
+.border.rounded.p-3.bg-light {
+  background-color: #f8f9fa !important;
+  border: 1px solid #e9ecef !important;
+  transition: all 0.3s ease;
+}
+
+.border.rounded.p-3.bg-light:hover {
+  border-color: #5e72e4 !important;
+  box-shadow: 0 0 0 0.1rem rgba(94, 114, 228, 0.15);
+}
+
+/* Estilo especial para o filtro de período (removido pois não usa mais select) */
 </style>
 {% endblock content %}
